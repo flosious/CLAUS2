@@ -31,45 +31,16 @@ using namespace std;
 class unit_t
 {
 private:
-// 	const string name_p;
-	///the "^m" in cm^2 or at in at%
-	string base_p;
-	///the "c" in cm^2
-// 	string prefix_p;
-	///the "%" in at%
-	string suffix_p;
-	///the "2" in cm^2
-// 	int exponent_p;
-	class prefix_t 
-	{
-	private:
-		///minimizes the prefix, appying a prefix unit
-		int minimize_prefix_exponent(int factor) ;
-		string name_p="";
-	public:
-		bool operator==(const prefix_t& obj) const;
-		bool operator!=(const prefix_t& obj) const;
-		double operator /(const prefix_t& obj) ;
-		double operator *(const prefix_t& obj) ;
-		static const map<string,int> prefix_to_exponent;
-		string name() const;
-		prefix_t(string name_s);
-	} prefix_p;
+	string name_p;
+	static const map<string,map<string,double>> current_unit_to_new_unit;
 public:
-	
-	string base() const;
-	string prefix() const;
-	string suffix() const;
-// 	int exponent() const;
-	
-// 	unit_t(string name_s="");
-	unit_t(string prefix_s, string base_s, string suffix_s="");
+	unit_t(string name_s="");
 	string name() const;
-	
+	double change_unit(unit_t new_unit);
 	bool operator==(const unit_t& obj) const;
 	bool operator!=(const unit_t& obj) const;
-	
-	
+	unit_t operator*(const unit_t& obj) const;
+	unit_t operator/(const unit_t& obj) const;
 };
 
 

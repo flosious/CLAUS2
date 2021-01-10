@@ -66,7 +66,6 @@ protected:
 	int chip_y_p=-1;
 	int olcdb_p=-1;
 	
-// 	sample_t sample_p;
 public:
 	file_t(string filename_with_path_s);
 	vector<string> not_parseable_filename_parts() const;
@@ -86,7 +85,7 @@ public:
 	int wafer() const;
 	
 	void to_screen(string prefix="") const;
-	string to_string() const;
+
 	bool operator< (const file_t& fname) const;
 	bool operator== (const file_t& fname) const;
 	
@@ -100,12 +99,12 @@ protected:
 	bool parse_crater_depth(string filename_part);
 	bool parse_sputter_energy_element(string filename_part);
 	element_t sputter_element_p;
-	quantity_t sputter_energy_p=quantity_t::sputter_energy();
+	sputter_energy_t sputter_energy_p;
 	vector<total_sputter_depth_t> total_sputter_depths_p;
 public:
 	string filename_without_crater_depths();
 	element_t sputter_element();
-	quantity_t sputter_energy();
+	sputter_energy_t sputter_energy();
 	///crater depths
 	total_sputter_depth_t total_sputter_depths();
 };

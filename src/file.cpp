@@ -285,14 +285,9 @@ void files::file_t::to_screen(string prefix) const
 	cout << prefix<< "group=\t"<< group()<<endl;
 	cout << prefix<< "repetition=\t"<< repetition()<<endl;
 	
-// 	cout << prefix<< "polarity=\t"<< polarity<<endl;
-// 	cout << prefix<< "sputter_element=\t"<< sputter_element<<endl;
-	
-// 	if (sputter_energy.is_set()) sputter_energy.to_screen(prefix);
-// 	if (total_sputter_depths.is_set()) total_sputter_depths.to_screen(prefix);
 	
 	cout << prefix<< "not_parseable_filename_parts:" << endl;
-// 	print(not_parseable_filename_parts);
+	print(not_parseable_filename_parts());
 }
 
 bool files::file_t::operator<(const files::file_t& fname) const
@@ -308,30 +303,22 @@ bool files::file_t::operator==(const files::file_t& fname) const
 	return false;
 }
 
-
-// set< files::file_t > files::file_t::filenames(std::vector< std::__cxx11::string > filenames_with_path)
-// {
-// 	set<files::file_t> filenames;
-// 	for (auto& fname:filenames_with_path)
-// 		filenames.insert(files::file_t(fname));
-// 	return filenames;
-// }
-
+std::__cxx11::string files::file_t::load_contents() const
+{
+	return tools::file::load_file_to_string(filename_with_path());
+}
 
 
 
 /*******************************/
-
+/** SIMS ***/
 
 
 total_sputter_depth_t files::sims_t::total_sputter_depths()
 {
-	total_sputter_depth_t tspd{unit_t{"n","m"}};
+	total_sputter_depth_t tspd;
 	for (auto& t : total_sputter_depths_p)
-	{
-// 		tspd.data.push_back(*t.change_unit(unit_t{"n","m"}).data.begin());
-		tspd += t;
-	}
+		tspd << t;
 	return tspd;
 }
 
@@ -343,13 +330,8 @@ bool files::sims_t::parse_crater_depth(string filename_part)
 	{
 		string value = match[1];
 		string unit = match[2];
-// 		sputter_depth_t total_sputter_depth{unit_t{"","unit"}};
-// 		if (unit=="nm")  total_sputter_depth = sputter_depth_t{unit_t{"n","m"}};
-// 		total_sputter_depth.data.push_back(tools::str::str_to_double(value));
-		
-		
-// 		if (unit=="nm") total_sputter_depths_p.data.push_back(tools::str::str_to_double(value));
-// 		else if (unit=="A") total_sputter_depths_p.data.push_back(tools::str::str_to_double(value)/10); // A in nm
+		sputter_depth_t total_sputter_depth{unit};
+		total_sputter_depth.data.push_back(tools::str::str_to_double(value));
 		return true;
 	}
 	return false;
@@ -369,3 +351,15 @@ string files::sims_t::filename_without_crater_depths()
 	}
 	return filename_wo_crater_depths;
 }
+
+/***********************/
+/** D SIMS**/
+
+
+
+/***********************/
+/** TOF SIMS**/
+
+
+
+
