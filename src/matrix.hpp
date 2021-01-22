@@ -32,9 +32,9 @@ class matrix_t
 {
 private:
 public:
-	string to_string(string prefix="");
+	string to_string();
 	set<element_t> elements;
-	set<isotope_t> isotopes;
+	set<element_t> isotopes;
 	bool operator==(const matrix_t& obj) const;
 	bool operator!=(const matrix_t& obj) const;
 };

@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2020 Florian Bärwolf
+	Copyright (C) 2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -18,60 +18,91 @@
 
 #include "file.hpp"
 
-const string files::file_t::delimiter="_";
 
-int files::file_t::chip_x() const
+int files::file_t::chip_x()
 {
+	parse_filename_parts();
+// 	if (chip_x_p<0)
+// 		logger::info("files::file_t::chip_x() " ,chip_x_p);
 	return chip_x_p;
 }
-int files::file_t::chip_y() const
+int files::file_t::chip_y()
 {
+	parse_filename_parts();
+// 	if (chip_y_p<0)
+// 		logger::info("files::file_t::chip_y() " +filename(), chip_y_p);
 	return chip_y_p;
 }
-std::__cxx11::string files::file_t::group() const
+std::__cxx11::string files::file_t::group()
 {
+	parse_filename_parts();
+	if (group_p=="")
+		logger::info("files::file_t::group() " +filename(),group_p);
 	return group_p;
 }
-std::__cxx11::string files::file_t::lot() const
+std::__cxx11::string files::file_t::lot()
 {
+	parse_filename_parts();
+	if (lot_p=="")
+		logger::warning("files::file_t::lot() " +filename(), lot_p);
 	return lot_p;
 }
-std::__cxx11::string files::file_t::lot_split() const
+std::__cxx11::string files::file_t::lot_split()
 {
+	parse_filename_parts();
+// 	if (lot_split_p=="")
+// 		logger::info("files::file_t::lot_split() " +filename(), lot_split_p);
 	return lot_split_p;
 }
-std::__cxx11::string files::file_t::monitor() const
+std::__cxx11::string files::file_t::monitor()
 {
+	parse_filename_parts();
+// 	if (monitor_p=="")
+// 		logger::info("files::file_t::monitor() " +filename(),monitor_p);
 	return monitor_p;
 }
-int files::file_t::olcdb() const
+int files::file_t::olcdb()
 {
+	parse_filename_parts();
+	if (olcdb_p<0)
+		logger::warning("files::file_t::olcdb() ",olcdb_p);
 	return olcdb_p;
 }
-vector<std::__cxx11::string> files::file_t::not_parseable_filename_parts() const
+vector<std::__cxx11::string> files::file_t::not_parseable_filename_parts()
 {
+	parse_filename_parts();
 	return not_parseable_filename_parts_p;
 }
-int files::file_t::wafer() const
+int files::file_t::wafer()
 {
+	parse_filename_parts();
+	if (wafer_p<0)
+		logger::warning("files::file_t::wafer() ",wafer_p);
 	return wafer_p;
 }
-std::__cxx11::string files::file_t::repetition() const
+std::__cxx11::string files::file_t::repetition()
 {
+	parse_filename_parts();
 	return repetition_p;
 }
 
-
-
-files::file_t::file_t(string filename_with_path_s)
+files::file_t files::file_t::file() const
 {
-	filename_with_path_p = filename_with_path_s;
-	parse_filename_parts();
+	return *this;
 }
 
-std::__cxx11::string files::file_t::type_ending() const
+files::file_t::file_t(string filename_with_path_s) : name(filename_with_path_s)
 {
-	return tools::file::extract_filetype_ending(filename_with_path_p,delimiter);
+	logger::info("files::file_t::file_t",filename_with_path_s);
+	filename_with_path_p = filename_with_path_s;
+}
+
+std::__cxx11::string files::file_t::filename_type_ending() const
+{
+	string filename_type_ending_p =tools::file::extract_filetype_ending(filename_with_path_p,".");
+	if (filename_type_ending_p=="")
+		logger::error("files::file_t::filename_type_ending() ",filename_type_ending_p);
+	return filename_type_ending_p;
 }
 
 std::__cxx11::string files::file_t::filename_with_path() const
@@ -89,11 +120,43 @@ string files::file_t::directory() const
 	return tools::file::extract_directory_from_filename(filename_with_path_p);
 }
 
+const bool files::file_t::is_correct_file_type(/*const set<std::__cxx11::string>& filename_type_ids, const set<std::__cxx11::string>& file_content_ids*/)
+{
+	if (correct_file_type) return true;
+	for (auto& fti : filename_type_ids_p)
+	{
+		if (fti==filename_type_ending()) 
+		{
+			correct_file_type = true;
+			break;
+		}
+	}
+	if (!correct_file_type) 
+	{
+		logger::info("files::file_t::is_correct_file_type(): !correct_file_type");
+		return false;
+	}
+	if (file_content_ids_p.size()==0) return true;
+	
+	string contents = load_contents();
+	for (auto& fci : file_content_ids_p)
+	{
+		if (contents.find(fci)==string::npos)
+		{
+			logger::info("files::file_t::is_correct_file_type(): contents.find(fci)==string::npos");
+			return false;
+		}
+	}
+	correct_file_type=true;
+	return true;
+}
+
+
 bool files::file_t::parse_all_parts_at_once()
 {
 	smatch match;
 	regex reg ("^([0-9]{4,})_([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)_[wW]?([0-9]{1,2})(_.*)_([0-9]+?)([a-z]*?)$"); 
-	string f = filename_with_path();
+	string f = filename();
 	if (regex_search(f,match,reg)) 
 	{
 		olcdb_p = 	tools::str::str_to_int(match[1]);
@@ -102,14 +165,12 @@ bool files::file_t::parse_all_parts_at_once()
 		wafer_p = 	tools::str::str_to_int(match[4]);
 		group_p = 	tools::str::str_to_int(match[6]);
 		repetition_p=	match[7];
-#ifdef DEBUG
-		std::cout << "!!!parsed all parts!!!\n";
-		to_screen();
-#endif
 	}
 	else
+	{
+		logger::warning("files::file_t::parse_all_parts_at_once()",false);
 		return false;
-	
+	}
 	return true;
 }
 
@@ -140,7 +201,6 @@ bool files::file_t::parse_filename_parts()
 
 bool files::file_t::parse_monitor(string filename_part) 
 {
-// 	string x,y;
 	smatch match;
 	regex reg1 ("^m-*([a-zA-Z0-9]+)$"); 
 	regex reg2 ("^monitor-([a-zA-Z0-9]+)$"); 
@@ -180,37 +240,6 @@ bool files::file_t::parse_olcdb(string filename_part)
 	return false;
 }
 
-// bool sims_files::file_t::parse_sputter_energy_element(string filename_part)
-// {
-// 	smatch match;
-// 	
-// 	regex reg; 
-// 	
-// 	sputter_energy_p.name = "sputter_energy";
-// 	sputter_energy_p.unit = unit_t("eV");
-// 	sputter_energy_p.dimension="energy";
-// 	
-// 	reg = ("^([0-9]{1,2})(kV|keV)(O|Cs)(\\+|-)$"); 
-// 	if (regex_search(filename_part,match,reg)) 
-// 	{
-// 		sputter_energy.data.push_back(tools::str::str_to_double(match[1])*1000);
-// 		sputter_element = match[3];
-// 		polarity = match[4];
-// 		return true;
-// 	}
-// 	
-// 	reg = ("^([0-9]{2,5})(V|eV)(O|Cs)(\\+|-)$"); 
-// 	if (regex_search(filename_part,match,reg)) 
-// 	{
-// 		sputter_energy.data.push_back(tools::str::str_to_double(match[1]));
-// 		sputter_element = match[3];
-// 		polarity = match[4];
-// 		return true;
-// 	}
-// 	
-// 	return false;
-// }
-
 bool files::file_t::parse_lot(string filename_part)
 {
 	smatch match;
@@ -239,7 +268,6 @@ bool files::file_t::parse_wafer(string filename_part)
 bool files::file_t::parse_group(string filename_part)
 {
 	smatch match;
-
 	regex reg1 ("^g-?*([0-9]+?)([a-z]*?)$"); 
 	regex reg2 ("^group-*([0-9]+?)([a-z]*?)$"); 
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
@@ -254,7 +282,6 @@ bool files::file_t::parse_group(string filename_part)
 bool files::file_t::parse_repetitor(string filename_part)
 {
 	smatch match;
-
 	regex reg1 ("^r-?*([0-9]+?)$"); 
 	regex reg2 ("^[rep|repetitor|repetition|repeat]-*([0-9]+?)$"); 
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
@@ -267,7 +294,7 @@ bool files::file_t::parse_repetitor(string filename_part)
 
 
 
-void files::file_t::to_screen(string prefix) const
+void files::file_t::to_screen(string prefix)
 {
 	
 	cout<< prefix << "filename=\t"<< filename()<<endl;
@@ -303,63 +330,242 @@ bool files::file_t::operator==(const files::file_t& fname) const
 	return false;
 }
 
-std::__cxx11::string files::file_t::load_contents() const
+std::__cxx11::string files::file_t::load_contents()
 {
 	return tools::file::load_file_to_string(filename_with_path());
+// 	if (contents_p.size()==0)
+// 		contents_p = tools::file::load_file_to_string(filename_with_path());
+// 	return contents_p;
+}
+
+bool files::file_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
+{
+	if (!is_correct_file_type()) return false;
+	raw_data_tensor->clear();
+	raw_header_tensor->clear();
+	vector<vector<string>> raw_mat = tools::mat::format_string_to_matrix(load_contents(),LINE_DELIMITER,delimiter);
+	tools::mat::remove_empty_lines_from_matrix(&raw_mat);
+	vector<vector<string> > header_temp, data_temp;
+	bool data_scanned=false;
+	bool header_scanned=false;
+	if (raw_mat.size()<1) return false;
+	int check_number;
+	for (int i=0;i<raw_mat.size();i++) {
+		check_number=1;
+		for (int j=0;j<(raw_mat.at(i)).size();j++) {
+		  if ((raw_mat.at(i)[j].size()>0) && tools::str::is_number((raw_mat).at(i)[j])!=1) {
+			check_number=0;
+		  }
+		}
+		if (check_number==0 || ((raw_mat.at(i).size())==2 && ((raw_mat.at(i)[1].size())==0) )) { // no number, so its a header-part
+			header_temp.push_back((raw_mat).at(i));
+			header_scanned=true;
+			if (data_scanned ) { 
+				raw_data_tensor->push_back(data_temp);
+				data_temp.clear();
+				data_scanned=false;
+			}
+		} else { // it's a number, so its a data-part
+			data_temp.push_back((raw_mat).at(i));
+			data_scanned=true;
+			if (header_scanned) {
+				raw_header_tensor->push_back(header_temp);
+				header_temp.clear();
+				header_scanned=false;
+			}
+		}
+	}
+	if (data_scanned ) { 
+		raw_data_tensor->push_back(data_temp);
+		data_temp.clear();
+		data_scanned=false;
+	}
+	if (header_scanned) {
+		raw_header_tensor->push_back(header_temp);
+		header_temp.clear();
+		header_scanned=false;
+	}
+	return true;
+}
+vector<vector<vector<std::__cxx11::string> > > files::file_t::raw_header_tensor()
+{
+// 	vector<vector<vector<std::__cxx11::string> > > raw_header_tensor_p, raw_data_tensor_p;
+// 	parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p);
+// 	return raw_header_tensor_p;
+	if (raw_header_tensor_p.size()>0) return raw_header_tensor_p;
+	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
+	{
+		logger::debug("files::file_t::raw_header_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+		return {};
+	}
+	return raw_header_tensor_p;
+}
+vector<vector<vector<std::__cxx11::string> > > files::file_t::raw_data_tensor()
+{
+// 	vector<vector<vector<std::__cxx11::string> > > raw_header_tensor_p, raw_data_tensor_p;
+// 	parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p);
+// 	return raw_data_tensor_p;
+	if (raw_data_tensor_p.size()>0) return raw_data_tensor_p;
+	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
+	{
+		logger::debug("files::file_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+		return {};
+	}
+	return raw_data_tensor_p;
 }
 
 
+
+/***************************/
+/** file_t::name_t **/
+
+files::file_t::name_t::name_t(string& name_with_path_s) : name_with_path_p(name_with_path_s)
+{
+	
+}
+
+string files::file_t::name_t::name()
+{
+	return "files::file_t::name_t::name()";
+}
+
+string files::file_t::name_t::name_with_path()
+{
+	return "files::file_t::name_t::name_with_path()";
+}
+
+/***************************/
+/** sims_t::name_t **/
+
+files::sims_t::name_t::name_t(string& name_with_path_s) : file_t::name_t(name_with_path_s)
+{
+	
+}
+
+string files::sims_t::name_t::test()
+{
+	cout << "in test:" << endl;
+	cout << name() << endl;
+	cout << name_with_path() << endl;
+	return "";
+}
 
 /*******************************/
 /** SIMS ***/
 
 
-total_sputter_depth_t files::sims_t::total_sputter_depths()
+
+
+
+files::sims_t::sims_t(std::__cxx11::string filename_with_path_s) : file_t(filename_with_path_s)
 {
+}
+
+const total_sputter_depth_t files::sims_t::total_sputter_depths()
+{
+	if (total_sputter_depths_p.size()==0)
+	{
+		for (auto& filename_part : not_parseable_filename_parts())
+		{
+			smatch match;
+			regex reg ("^([0-9]{2,})(nm|A)$"); 
+			if (regex_search(filename_part,match,reg)) 
+			{
+				string value = match[1];
+				string unit = match[2];
+				total_sputter_depths_p.push_back({{tools::str::str_to_double(value)},unit});
+			}
+		}
+	}
 	total_sputter_depth_t tspd;
-	for (auto& t : total_sputter_depths_p)
+	for (total_sputter_depth_t& t : total_sputter_depths_p)
 		tspd << t;
 	return tspd;
 }
 
-bool files::sims_t::parse_crater_depth(string filename_part)
-{
-	smatch match;
-	regex reg ("^([0-9]{2,})(nm|A)$"); 
-	if (regex_search(filename_part,match,reg)) 
-	{
-		string value = match[1];
-		string unit = match[2];
-		sputter_depth_t total_sputter_depth{unit};
-		total_sputter_depth.data.push_back(tools::str::str_to_double(value));
-		return true;
-	}
-	return false;
-}
-
-string files::sims_t::filename_without_crater_depths()
+const string files::sims_t::filename_without_crater_depths()
 {
 	string filename_wo_crater_depths  = tools::file::extract_filename(filename_with_path_p);
-	string unit = total_sputter_depths().unit().name();
 	stringstream remove;
-	for (double& total_sputter_depth:total_sputter_depths().data)
+	for (double total_sputter_depth:total_sputter_depths().data())
 	{
 		remove.str("");
-		remove << total_sputter_depth << unit;
+		remove << total_sputter_depth << total_sputter_depths().unit().name();
 		tools::str::remove_substring_from_mainstring(&filename_wo_crater_depths ,remove.str() + delimiter);
 		tools::str::remove_substring_from_mainstring(&filename_wo_crater_depths ,delimiter+ remove.str());
 	}
 	return filename_wo_crater_depths;
 }
 
-/***********************/
-/** D SIMS**/
+const bool files::sims_t::parse_sputter_energy_element_polarity()
+{
+	smatch match;
+	regex reg;
+	for (auto& filename_part : not_parseable_filename_parts())
+	{
+		reg = ("^([0-9]{1,2})(kV|keV)(O|Cs)(\\+|-)$"); 
+		if (regex_search(filename_part,match,reg)) 
+		{	
+			sputter_energy_p = sputter_energy_t{{tools::str::str_to_double(match[1])*1000},{"eV"}};
+			sputter_element_p = element_t(match[3]);
+			polarity_p = match[4];
+			return true;
+		}
+	
+		reg = ("^([0-9]{2,5})(V|eV)(O|Cs)(\\+|-)$"); 
+		if (regex_search(filename_part,match,reg)) 
+		{
+			sputter_energy_p = sputter_energy_t{{tools::str::str_to_double(match[1])},{"eV"}};
+			sputter_element_p = element_t(match[3]);
+			polarity_p = match[4];
+			return true;
+		}
+	}
+	
+	return false;
+}
 
+const sputter_energy_t files::sims_t::sputter_energy()
+{
+	if (!sputter_energy_p.is_set()) 
+		parse_sputter_energy_element_polarity();
+	return sputter_energy_p;
+}
+
+const element_t files::sims_t::sputter_element()
+{
+	if (!sputter_element_p.is_set()) 
+		parse_sputter_energy_element_polarity();
+	return sputter_element_p;
+}
+
+const string files::sims_t::polarity()
+{
+	if (polarity_p=="") 
+		parse_sputter_energy_element_polarity();
+	return polarity_p;
+}
 
 
 /***********************/
 /** TOF SIMS**/
 
+files::tofsims_t::tofsims_t(std::__cxx11::string filename_with_path_s) : sims_t(filename_with_path_s) 
+{
+	tool_name = "tofsims";
+	delimiter = "\t";
+	filename_type_ids_p = {"TXT"};
+	file_content_ids_p = {"###"};
+}
 
 
+/************************/
+/** PROFILER **/
 
+files::profiler_t::profiler_t(std::__cxx11::string filename_with_path_s) : file_t(filename_with_path_s) 
+{
+	tool_name = "profilometer";
+	delimiter = "\t";
+	filename_type_ids_p = {"jpg"};
+	file_content_ids_p = {"*** DATA FILES ***"};
+}

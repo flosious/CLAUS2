@@ -68,32 +68,33 @@ void tools::vec::remove(vector<double> *result_vec,vector<double> subtractors)
 	}
 }
 
-void tools::vec::split_map_to_vecs(map<double,double>* XY_mat, vector<double> *X, vector<double>* Y)
+void tools::vec::split_map_to_vecs(const map<double,double>& XY_mat, vector<double> *X, vector<double>* Y)
 {
-	int i;
-	map<double,double>::iterator it;
-	if (X!=nullptr)
+	if (X!=nullptr && Y!=nullptr)
 	{
 		X->clear();
-		X->resize(XY_mat->size());
-		i=0;
-		for (it=XY_mat->begin();it!=XY_mat->end();it++)
-		{
-			X->at(i)=it->first;
-			i++;
-		}
-	}
-	if (Y!=nullptr)
-	{
 		Y->clear();
-		Y->resize(XY_mat->size());
-		i=0;
-		for (it=XY_mat->begin();it!=XY_mat->end();it++)
+		X->resize(XY_mat.size());
+		Y->resize(XY_mat.size());
+		int i=0;
+		for (auto& XY : XY_mat)
 		{
-			Y->at(i)=it->second;
+			Y->at(i)=XY.second;
+			X->at(i)=XY.first;
 			i++;
 		}
 	}
+// 	if (Y!=nullptr)
+// 	{
+// 		Y->clear();
+// 		Y->resize(XY_mat.size());
+// 		i=0;
+// 		for (it=XY_mat.begin();it!=XY_mat.end();it++)
+// 		{
+// 			Y->at(i)=it->second;
+// 			i++;
+// 		}
+// 	}
 	
 	/*
 	for (it=XY_mat->begin();it!=XY_mat->end();it++)

@@ -158,7 +158,7 @@ public:
 		static void add(vector<double> *result_vec,vector<double> adder);
 		static void remove(vector<double> *result_vec,vector<double> subtractors);
 		
-		static void split_map_to_vecs(map<double,double>* XY_mat, vector<double> *X, vector<double>* Y);
+		static void split_map_to_vecs(const map<double,double>& XY_mat, vector<double> *X, vector<double>* Y);
 		static void combine_vecs_to_map(vector<double> *X, vector<double>* Y, map<double,double>* XY_mat);
 		static void combine_vecs_to_map(vector<double> *X, vector<double> Y, map<double,double>* XY_mat);
 		static void combine_vecs_to_map(vector<double> X, vector<double> *Y, map<double,double>* XY_mat);
@@ -171,9 +171,11 @@ public:
     public:
 		static int is_in_vec(vector<string>* vec, string find_this);
 		static int find_in_vec(vector<string>* vec, string find_this);
+		static int find_in_vec(vector<string> vec, string find_this);
 		static void cut_matrix(vector<vector<string>>* mat);
         static bool find_str_in_mat(vector<vector<string>>* matrix, string find_this);
 		static bool find_str_in_mat(vector<string>* vec, string find_this);
+		static bool find_str_in_mat(vector<string> vec, string find_this);
 		/// returns -1 if not found, otherwise returns the column
         static int find_in_matrix_xy_return_y(vector<vector<string>>* matrix, string find_this);
         static vector<vector<vector<double>>> matrix_XYXY_to_tensor(vector<vector<double>> matrix_XYXY);
@@ -198,6 +200,7 @@ public:
         static vector<vector<double> > transpose_matrix(vector<vector<double> > matrix);
         static void fillup_matrix(vector<vector<string> > *matrix);
         static vector<vector <string> > format_string_to_matrix(string *mainstring, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");  
+		static vector<vector <string> > format_string_to_matrix(string mainstring, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");  
         static string format_matrix_to_string(vector<vector<string> > *matrix, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");
         static vector<vector<string> > add_vector_to_matrix(vector<vector<string > > matrix_summand, vector<string > vec);
     };
@@ -205,9 +208,9 @@ public:
 	{
 	public:
 		/*=values * factor*/
-		static vector<double> multiply(vector<double>* values, double factor);
+		static vector<double> multiply(vector<double>& values, double factor);
 		/*=values + summand*/
-		static vector<double> add(vector<double>* values, double summand);
+		static vector<double> add(vector<double>& values, double summand);
 	};
 
 

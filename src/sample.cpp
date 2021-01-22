@@ -41,6 +41,38 @@ bool sample_t::definition_t::simple_name=true;
 
 /***********************/
 
+sample_t::sample_t(std::__cxx11::string lot_s, int wafer_number_s, std::__cxx11::string lot_split_s, std::__cxx11::string monitor_s, int chip_x_s, int chip_y_s, std::__cxx11::string simple_name_s)
+{
+	lot_p = lot_s;
+	lot_split_p = lot_split_s;
+	wafer_number_p = wafer_number_s;
+	monitor_p = monitor_s;
+	chip.x_p = chip_x_s;
+	chip.y_p = chip_y_s;
+	simple_name_p = simple_name_s;
+}
+
+
+sample_t::sample_t(files::file_t file_s)
+{	
+	if ((file_s.lot()=="") && file_s.not_parseable_filename_parts().size()>0) simple_name_p=tools::vec::combine_vec_to_string(file_s.not_parseable_filename_parts(), "_");
+	else if ((file_s.wafer()<0)) simple_name_p=file_s.lot() +file_s.lot_split() + tools::vec::combine_vec_to_string(file_s.not_parseable_filename_parts(), "_");
+	else simple_name_p="";
+	*this = sample_t{file_s.lot(),file_s.wafer(),file_s.lot_split(),file_s.monitor(),file_s.chip_x(),file_s.chip_y(),simple_name_p};
+}
+
+sample_t::sample_t(files::dsims_dp_rpc_asc_t file_s)
+{
+	*this = sample_t{file_s.file()};
+}
+
+sample_t::sample_t(files::tofsims_t file_s)
+{
+	*this = sample_t{file_s.file()};
+}
+
+
+
 
 
 std::__cxx11::string sample_t::lot() const
@@ -69,20 +101,7 @@ matrix_t sample_t::matrix() const
 }
 
 
-// sample_t::sample_t(file_t& file)
-// {
-// 	lot_p = file.lot();
-// 	lot_split_p = file.lot_split();
-// 	wafer_number_p = file.wafer();
-// 	monitor_p = file.monitor();
-// 	chip.x_p = file.chip_x();
-// 	chip.y_p = file.chip_y();
-// 	
-// // 	if (lot_p=="" && filename.not_parseable_filename_parts.size()>0) simple_name_p=filename.not_parseable_filename_parts[0];
-// 	if ((lot_p=="") && file.not_parseable_filename_parts().size()>0) simple_name_p=tools::vec::combine_vec_to_string(file.not_parseable_filename_parts(), "_");
-// 	else if ((wafer_number_p<0)) simple_name_p=lot_p +lot_split_p + tools::vec::combine_vec_to_string(file.not_parseable_filename_parts(), "_");
-// 	else simple_name_p="";
-// }
+
 
 void sample_t::to_screen(std::__cxx11::string prefix) const
 {
@@ -91,7 +110,8 @@ void sample_t::to_screen(std::__cxx11::string prefix) const
 	cout << prefix << "wafer\t" << wafer_number() << endl;
 	cout << prefix << "chip\t" << chip.x() << " " << chip.y() << endl;
 	cout << prefix << "monitor\t" << monitor() << endl;
-	cout << prefix << "matrix\t" << matrix().to_string(prefix) << endl;
+	cout << prefix << "matrix\t" << matrix().to_string() << endl;
+	cout << prefix << "simple_name\t" << simple_name() << endl;
 }
 
 

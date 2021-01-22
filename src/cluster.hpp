@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2020 Florian Bärwolf
+	Copyright (C) 2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -16,35 +16,37 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef CRATER_HPP
-#define CRATER_HPP
 
-#include <vector>
+#ifndef CLUSTER_T_HPP
+#define CLUSTER_T_HPP
+
 #include <string>
-#include "quantity.hpp"
+#include "element.hpp"
+#include <vector>
+#include "log.hpp"
 
 using namespace std;
 
-class lineprofile_t
-{
-	
-};
-
-class crater_t
+class cluster_t
 {
 private:
-	vector<lineprofile_t> lineprofiles;
-	
-	sputter_current_t sputter_current_p;
+	string clustername_p;
+	///each element contains the number of atoms
+	vector<element_t> elements_p;
+	concentration_t concentration_p;
+	intensity_t intensity_p;
 	sputter_time_t sputter_time_p;
 	sputter_depth_t sputter_depth_p;
 public:
-	///multiple crater depths
-	sputter_depth_t depths();
-	/// sputter_depth to sputter_time vector
-	const sputter_depth_t sputter_depth();
-	
+	bool is_set() const;
+	const concentration_t concentration() const;
+	const intensity_t intensity() const;
+	const sputter_time_t sputter_time() const;
+	const sputter_depth_t sputter_depth() const;
+	const vector<element_t> elements();
+	cluster_t(string clustername);
+	cluster_t(string clustername, sputter_time_t sputter_time_s,intensity_t intensity_s,sputter_depth_t sputter_depth_s={},concentration_t concentration_s={});
+	cluster_t(vector<element_t> elements);
 };
 
-
-#endif // CRATER_HPP
+#endif // CLUSTER_T_HPP

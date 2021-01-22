@@ -19,6 +19,7 @@
 #ifndef QUANTITY_HPP
 #define QUANTITY_HPP
 
+#include "statistics.hpp"
 #include "tools.hpp"
 #include <iostream>
 #include <vector>
@@ -37,19 +38,30 @@ class quantity_t
 protected:
 	string name_p="";
 	unit_t unit_p{""};
-	
+	double resolution_p=-1;
+	vector<double> data_p;
 public:
+// 	///maps the data vecs to < X, *this>
+// 	const map<double,double> to_X(const quantity_t& X) const;
+// 	///maps the data vecs to < *this, Y>
+// 	const map<double,double> to_Y(const quantity_t& Y) const;
+	
 	bool is_set() const;
 	quantity_t();
 	quantity_t(string name_s,unit_t unit_s);
-	quantity_t(string name_s,unit_t unit_s,vector<double> data_s);
+	quantity_t(vector<double> data_s,unit_t unit_s);
+	quantity_t(string name_s,vector<double> data_s,unit_t unit_s);
 	///tries to change the current unit to its target unit
-	quantity_t change_unit(unit_t target_unit) const;
+	const quantity_t change_unit(unit_t target_unit) const;
+	/// resolution <= 0 will use raw data, no interpolation
+	void change_resolution(double resolution_s);
+	void reset_resolution();
+	const quantity_t resolution() const;
 	unit_t unit() const;
-	
-	string name() const;
+	const string to_string() const;
+	const string name() const;
 
-	vector<double> data;
+	const vector<double> data() const;
 
 	quantity_t mean() const;
 	quantity_t median() const;
@@ -81,100 +93,120 @@ public:
 // 	static quantity_t dose();
 };
 
+	class mass_t : public quantity_t
+	{
+	public:;
+		mass_t(vector<double> data_s={},unit_t unit_s={"amu"}); // atomic mass units
+		mass_t(quantity_t quantity_s);
+	}; 
+	class abundance_t : public quantity_t
+	{
+	public:;
+		abundance_t(vector<double> data_s={},unit_t unit_s={""});
+		abundance_t(quantity_t quantity_s);
+	}; 
+	
 	class sputter_energy_t : public quantity_t
 	{
 	public:;
-		sputter_energy_t(unit_t unit_s={"eV"},vector<double> data_s={});
+		sputter_energy_t(vector<double> data_s={},unit_t unit_s={"eV"});
 		sputter_energy_t(quantity_t quantity_s);
 	}; 
 	
 	class sputter_rastersize_t : public quantity_t
 	{
 	public:
-		sputter_rastersize_t(unit_t unit_s={"um"},vector<double> data_s={});
+		sputter_rastersize_t(vector<double> data_s={},unit_t unit_s={"um"});
 		sputter_rastersize_t(quantity_t quantity_s);
 	};
 	
 	class sputter_depth_t : public quantity_t
 	{
 	public:
-		sputter_depth_t(unit_t unit_s={"nm"},vector<double> data_s={});
+		sputter_depth_t(vector<double> data_s={},unit_t unit_s={"nm"});
 		sputter_depth_t(quantity_t quantity_s);
 	};
 	class total_sputter_depth_t : public quantity_t
 	{
 	public:
-		total_sputter_depth_t(unit_t unit_s={"nm"},vector<double> data_s={});
+		total_sputter_depth_t(vector<double> data_s={},unit_t unit_s={"nm"});
 		total_sputter_depth_t(quantity_t quantity_s);
 	};
 	
 	class sputter_time_t : public quantity_t
 	{
 	public:
-		sputter_time_t(unit_t unit_s={"s"},vector<double> data_s={});
+		sputter_time_t(vector<double> data_s={},unit_t unit_s={"s"});
 		sputter_time_t(quantity_t quantity_s);
 	};
 	
 	class total_sputter_time_t : public quantity_t
 	{
 	public:
-		total_sputter_time_t(unit_t unit_s={"s"},vector<double> data_s={});
+		total_sputter_time_t(vector<double> data_s={},unit_t unit_s={"s"});
 		total_sputter_time_t(quantity_t quantity_s);
 	};
 	
 	class analysis_energy_t : public quantity_t
 	{
 	public:
-		analysis_energy_t(unit_t unit_s={"eV"},vector<double> data_s={});
+		analysis_energy_t(vector<double> data_s={},unit_t unit_s={"eV"});
 		analysis_energy_t(quantity_t quantity_s);
 	};
 	
 	class analysis_rastersize_t : public quantity_t
 	{
 	public:
-		analysis_rastersize_t(unit_t unit_s={"m"},vector<double> data_s={});
+		analysis_rastersize_t(vector<double> data_s={},unit_t unit_s={"m"});
 		analysis_rastersize_t(quantity_t quantity_s);
 	};
 	
 	class concentration_t : public quantity_t
 	{
 	public:
-		concentration_t(unit_t unit_s={"at/cm^3"},vector<double> data_s={});
+		concentration_t(vector<double> data_s={},unit_t unit_s={"at/cm^3"});
 		concentration_t(quantity_t quantity_s);
 	};
 	
 	class intensity_t : public quantity_t
 	{
 	public:
-		intensity_t(unit_t unit_s={"c/s"},vector<double> data_s={});
+		intensity_t(vector<double> data_s={},unit_t unit_s={"c/s"});
 		intensity_t(quantity_t quantity_s);
+	};
+	
+	class sputter_current_t : public quantity_t
+	{
+	public:
+		sputter_current_t(vector<double> data_s={},unit_t unit_s={"nA"});
+		sputter_current_t(quantity_t quantity_s);
 	};
 	
 	class dose_t : public quantity_t
 	{
 	public:;
-		dose_t(unit_t unit_s={"at/cm^2"},vector<double> data_s={});
+		dose_t(vector<double> data_s={},unit_t unit_s={"at/cm^2"});
 		dose_t(quantity_t quantity_s);
 	}; 
 	
 	class SF_t : public quantity_t
 	{
 	public:;
-		SF_t(unit_t unit_s={"at/cm^3 / (c/s)"},vector<double> data_s={});
+		SF_t(vector<double> data_s={},unit_t unit_s={"at/cm^3 / (c/s)"});
 		SF_t(quantity_t quantity_s);
 	}; 
 	
 	class RSF_t : public quantity_t
 	{
 	public:;
-		RSF_t(unit_t unit_s={"at/cm^3"},vector<double> data_s={});
+		RSF_t(vector<double> data_s={},unit_t unit_s={"at/cm^3"});
 		RSF_t(quantity_t quantity_s);
 	}; 
 	
 	class SR_t : public quantity_t
 	{
 	public:;
-		SR_t(unit_t unit_s={"nm/s"},vector<double> data_s={});
+		SR_t(vector<double> data_s={},unit_t unit_s={"nm/s"});
 		SR_t(quantity_t quantity_s);
 	}; 
 		

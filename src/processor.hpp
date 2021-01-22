@@ -19,6 +19,7 @@
 #ifndef PROCESSOR_HPP
 #define PROCESSOR_HPP
 
+#include <chrono>
 #include "hash_functions.hpp"
 #include <list>
 #include <string>
@@ -41,7 +42,7 @@ private:
 // 	set<file_t> files;
 // 	std::set<dsims_measurement_group_t> dsims_measurement_groups;
 // 	std::set<dsims_measurement_t> dsims_measurements;
-	std::set<sample_t> samples;
+// 	std::set<sample_t> samples;
 public:
 // 	std::list<dsims_filename_t> dsims_filenames;
 	

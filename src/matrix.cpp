@@ -18,18 +18,16 @@ bool matrix_t::operator!=(const matrix_t& obj) const
 {
 	return !(operator==(obj));
 }
-string matrix_t::to_string(std::__cxx11::string prefix)
+string matrix_t::to_string()
 {
 	stringstream out;
-	out << prefix << "elements:" << LINE_DELIMITER;
-	out << prefix;
+	out << "elements:" << LINE_DELIMITER;
 	for (auto& element:elements)
-		out << element.to_string(prefix) << "\t";
+		out << element.name() << "\t";
 	out << endl;
-	out << prefix << "isotopes:" << LINE_DELIMITER;
-	out << prefix;
+	out << "isotopes:" << LINE_DELIMITER;
 	for (auto& isotope:isotopes)
-		out << isotope.to_string(prefix) << "\t";
+		out << isotope.name() << "\t";
 	return out.str();
 }
 

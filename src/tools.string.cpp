@@ -84,7 +84,9 @@ string tools::str::get_string_between_string_A_and_last_B(string *mainstring,str
 	return mainstring->substr(posA+1,mainstring->size());;
 }
 
-vector<string> tools::str::get_strings_between_delimiter(string mainstring, string delimiter, bool empty) {
+vector<string> tools::str::get_strings_between_delimiter(string mainstring, string delimiter, bool empty) 
+{
+	if (delimiter.size()==0) return {};
 	vector<string> results;
 	string temp;
 	temp.clear();

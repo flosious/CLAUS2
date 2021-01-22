@@ -23,6 +23,7 @@
 #include <string>
 #include "quantity.hpp"
 #include "element.hpp"
+// #include "file.hpp"
 
 using namespace std;
 
@@ -45,15 +46,14 @@ public:
 class sims_t : measurement_settings_t
 {
 protected:
-    sputter_energy_t sputter_energy_p;
-	sputter_rastersize_t sputter_raster_size_p;
-    element_t sputter_element_p;
-    
+//     sputter_energy_t sputter_energy_p;
+// 	sputter_rastersize_t sputter_raster_size_p;
+//     element_t sputter_element_p;
 public:
-    sputter_energy_t sputter_energy() const;
-	sputter_rastersize_t sputter_raster_size() const;
-    element_t sputter_element() const;
-	
+    const sputter_energy_t sputter_energy() const;
+	const sputter_rastersize_t sputter_raster_size() const;
+    const element_t sputter_element() const;
+	sims_t(sputter_energy_t sputter_energy_s, sputter_rastersize_t sputter_raster_size_s, element_t sputter_element_s);
 };
 
 
@@ -64,18 +64,21 @@ class dsims_t : public sims_t
 private:
     
 public:
+	dsims_t(sputter_energy_t sputter_energy_s, sputter_rastersize_t sputter_raster_size_s, element_t sputter_element_s);
 };
 
 class tofsims_t : public sims_t
 {
 private:
-    analysis_energy_t analysis_energy_p;
-	analysis_rastersize_t analysis_raster_size_p;
-    element_t analysis_element_p;
+//     analysis_energy_t analysis_energy_p;
+// 	analysis_rastersize_t analysis_raster_size_p;
+//     element_t analysis_element_p;
 public:
-    analysis_energy_t analysis_energy() const;
-	analysis_rastersize_t analysis_raster_size() const;
-    element_t analysis_element() const;
+    const analysis_energy_t analysis_energy() const;
+	const analysis_rastersize_t analysis_raster_size() const;
+    const element_t analysis_element() const;
+	tofsims_t(sputter_energy_t sputter_energy_s, sputter_rastersize_t sputter_raster_size_s, element_t sputter_element_s, 
+			  sputter_energy_t analysis_energy_s, sputter_rastersize_t analysis_rastersize_s, element_t analysis_element_s);
 };
 }
 #endif // MEASUREMENT_SETTINGS_T_HPP

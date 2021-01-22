@@ -19,7 +19,7 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-
+#include "log.hpp"
 #include <unordered_set>
 #include <string>
 #include <iostream>
