@@ -23,46 +23,22 @@ processor::processor(vector<string> args_p)
 {	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	set<string> input_strings(args_p.begin(),args_p.end()); // eliminate same entries
-	set<files::dsims_dp_rpc_asc_t> files = load_files<files::dsims_dp_rpc_asc_t>(input_strings);
+// 	set<files::dsims_dp_rpc_asc_t> files = load_files<files::dsims_dp_rpc_asc_t>(input_strings);
 	
-	for (auto f:files)
-	{
-		f.name.to_screen();
-	}
-
-// 	files::dsims_dp_rpc_asc_t file(*input_strings.begin());
-// 	file.name.chip_x()
-
-
-// 	for (int i=0;i<10;i++)
-// 		file.sputter_time();
-
-
-
+	files::dsims_dp_rpc_asc_t f(*input_strings.begin());
+	f.name.is_correct_type();
+	f.contents.is_correct_type();
+	cout << f.contents.delimiter.size() << "|" << f.contents.delimiter  << "|"<< endl;
+	cout << f.name.delimiter.size() << "|" << f.name.delimiter << "|" << endl;
+	cout << f.name.lot() << endl;
+// 	for (auto f:files)
+// 	{
+// 		cout << *f.name.identifiers.begin() << endl;
+// 		f.contents.infos_and_settings();
+// 	}
 
 	
-// 	files::file_t file_ = file.file();
-// 	sample_t sample{file_};
-// 	sample.to_screen();
-	
-// 	sputter_energy_t sputter_energy2 = sputter_energy.change_unit(unit_t{"","success"});
-// 	cout << sputter_energy.change_unit(unit_t{"","success"}).unit().base() << endl;
-// 	files = file_t::files(input_strings);
-	
-	
-	
-// 	for (auto& input_string:input_strings)
-// 		cout << input_string << endl;
-	// works till here
-// 	files_t files;
-// 	if (!files.filter(input_strings)) cout << "processor::processor !files.filter(input_strings)" << endl;
-// 	filenames = files.filenames();
 
-	
-// 	for (auto& sample:samples)
-// 		sample.to_screen();
-	
-// 	dsims_measurements = dsims_measurement_t::measurements(&filenames);
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
 }

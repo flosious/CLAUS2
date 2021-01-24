@@ -46,27 +46,27 @@ public:
 	static void fatal(string message,string variable={});
 	static void fatal(string message,int variable);
 	static void fatal(string message,double variable);
-	static void fatal(string message,bool variable);
+// 	static void fatal(string message,bool variable);
 	/// Any error which is fatal to the operation, but not the service or application (can't open a required file, missing data, etc.). These errors will force user (administrator, or direct user) intervention.
 	static void error(string message,string variable={});
 	static void error(string message,int variable);
 	static void error(string message,double variable);
-	static void error(string message,bool variable);
+// 	static void error(string message,bool variable);
 	/// Anything that can potentially cause application oddities, but for which I am automatically recovering.
 	static void warning(string message,string variable={});
 	static void warning(string message,int variable);
 	static void warning(string message,double variable);
-	static void warning(string message,bool variable);
+// 	static void warning(string message,bool variable);
 	/// Generally useful information to log (service start/stop, configuration assumptions, etc).
 	static void info(string message,string variable={});
 	static void info(string message,int variable);
 	static void info(string message,double variable);
-	static void info(string message,bool variable);
+// 	static void info(string message,bool variable);
 	
 	static void debug(string message,string variable={});
 	static void debug(string message,int variable);
 	static void debug(string message,double variable);
-	static void debug(string message,bool variable);
+// 	static void debug(string message,bool variable);
 };
 
 #endif // LOG_T_HPP

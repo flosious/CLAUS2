@@ -54,8 +54,8 @@ private:
 	matrix_t matrix_p;
 public:
 	sample_t(string lot_s, int wafer_number_s ,string lot_split_s="", string monitor_s="", int chip_x_s=-1, int chip_y_s=-1 ,string simple_name_s="");
-	sample_t(files::file_t file_s);
-	sample_t(files::sims_t file_s);
+// 	sample_t(files::file_t file_s);
+// 	sample_t(files::sims_t file_s);
 	sample_t(files::dsims_dp_rpc_asc_t file_s);
 	sample_t(files::tofsims_TXT_t file_s);
 	

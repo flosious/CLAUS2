@@ -4,11 +4,11 @@
 /** D SIMS**/
 
 /***STATICS***/
-
-const set<string> files::dsims_dp_rpc_asc_t::contents_t::identifiers={"*** DATA FILES ***"};
+// const string files::dsims_dp_rpc_asc_t::name_t::test = "dsims_dp_rpc_asc_t-TEST";
+// const set<string> files::dsims_dp_rpc_asc_t::contents_t::identifiers={"*** DATA FILES ***"};
 // const string files::dsims_dp_rpc_asc_t::contents_t::delimiter = "\t";
-
-const set<string> files::dsims_dp_rpc_asc_t::name_t::identifiers={"dp_rpc_asc"};
+// 
+// const set<string> files::dsims_dp_rpc_asc_t::name_t::identifiers={"dp_rpc_asc"};
 // const string files::dsims_dp_rpc_asc_t::name_t::delimiter = "_";
 
 
@@ -20,7 +20,7 @@ files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s
 																										name(filename_with_path_s), 
 																										contents(filename_with_path_s,contents_s)
 {
-	
+// 	name = name_t{filename_with_path_s};
 }
 
 // const sputter_time_t files::dsims_dp_rpc_asc_t::greatest_common_sputter_time()
@@ -31,7 +31,7 @@ files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s
 // 	return st;
 // }
 // 
-// const sputter_depth_t files::dsims_dp_rpc_asc_t::greatest_common_sputter_depth()
+// const sputter_depth_t files::dsims_dprpc__asc_t::greatest_common_sputter_depth()
 // {
 // 	if (sputter_depth_p.is_set()) return sputter_depth_p;
 // 	sputter_depth_t sd(get_quantity_from_dimension_and_clustername("Depth","Ipr"));
@@ -39,19 +39,6 @@ files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s
 // 	return sd;
 // }
 
-
-set<files::dsims_dp_rpc_asc_t> files::dsims_dp_rpc_asc_t::files(set<std::__cxx11::string>& filenames_with_path)
-{
-// 	set<files::dsims_dp_rpc_asc_t> files_s;
-// 	for (auto& filename:filenames_with_path)
-// 	{
-// 		files::dsims_dp_rpc_asc_t file(filename);
-// 		if (file.is_correct_type())
-// 			files_s.insert(file);
-// 	}
-// 	return files_s;
-	return files(filenames_with_path);
-}
 
 const vector<cluster_t> files::dsims_dp_rpc_asc_t::clusters()
 {
@@ -121,7 +108,7 @@ void files::dsims_dp_rpc_asc_t::column_t::to_screen()
 /*****  files::dsims_dp_rpc_asc_t::name_t      ****/
 /**************************************************/
 
-files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : sims_t::name_t(name_with_path_s)
+files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : sims_t::name_t(name_with_path_s,"_",{"dp_rpc_asc"})
 {
 }
 
@@ -130,7 +117,7 @@ files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : sims
 /**************************************************/
 
 
-files::dsims_dp_rpc_asc_t::contents_t::contents_t(const string& filename_with_path_s, string* contents_s) : sims_t::contents_t(filename_with_path_s,contents_s)
+files::dsims_dp_rpc_asc_t::contents_t::contents_t(const string& filename_with_path_s, string* contents_s) : sims_t::contents_t(filename_with_path_s,"\t",{"*** DATA FILES ***"},contents_s)
 {
 	
 }
@@ -177,19 +164,19 @@ const files::dsims_dp_rpc_asc_t::Ipr_t files::dsims_dp_rpc_asc_t::contents_t::Ip
 	return {sputter_current_s,sputter_time_s,sputter_depth_s};
 }
 
-const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::contents_t::dimensions()
+const vector<std::__cxx11::string>& files::dsims_dp_rpc_asc_t::contents_t::dimensions()
 {
 	if (dimensions_p.size()>0) return dimensions_p;
 	parse_units_dimensions_clusternames();
 	return dimensions_p;
 }
-const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::contents_t::units()
+const vector<std::__cxx11::string>& files::dsims_dp_rpc_asc_t::contents_t::units()
 {
 	if (units_p.size()>0) return units_p;
 	parse_units_dimensions_clusternames();
 	return units_p;
 }
-const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::contents_t::cluster_names()
+const vector<std::__cxx11::string>& files::dsims_dp_rpc_asc_t::contents_t::cluster_names()
 {
 	if (cluster_names_p.size()>0) return cluster_names_p;
 	parse_units_dimensions_clusternames();
@@ -358,7 +345,7 @@ const quantity_t files::dsims_dp_rpc_asc_t::contents_t::get_quantity_from_dimens
 {
 	string unit="";
 	vector<vector<double>> data_vecs;
-	for (auto col:columns())
+	for (auto& col:columns())
 	{
 		if (col.dimension!=col_dimension) continue;
 		if (col.cluster_name==ignore_clustername) continue;
@@ -373,5 +360,9 @@ const quantity_t files::dsims_dp_rpc_asc_t::contents_t::get_quantity_from_dimens
 	return quantity_t{statistics::common_vector(data_vecs),unit};
 }
 
-
+map<string,string>& files::dsims_dp_rpc_asc_t::contents_t::infos_and_settings()
+{
+// 	if (infos_and_settings_p.size()>0) return infos_and_settings_p;
+// 	print(raw_header_tensor()[0]);
+}
 

@@ -17,13 +17,13 @@ void logger::debug(std::__cxx11::string message, double variable)
 {
 	debug(message,to_string(variable));
 }
-void logger::debug(std::__cxx11::string message, bool variable)
-{
-	if (variable==true)
-		debug(message,"TRUE");
-	else
-		debug(message,"FALSE");
-}
+// void logger::debug(std::__cxx11::string message, bool variable)
+// {
+// 	if (variable==true)
+// 		debug(message,"TRUE");
+// 	else
+// 		debug(message,"FALSE");
+// }
 
 
 void logger::fatal(std::__cxx11::string message, string variable)
@@ -41,13 +41,13 @@ void logger::fatal(std::__cxx11::string message, double variable)
 {
 	fatal(message,to_string(variable));
 }
-void logger::fatal(std::__cxx11::string message, bool variable)
-{
-	if (variable==true)
-		fatal(message,"TRUE");
-	else
-		fatal(message,"FALSE");
-}
+// void logger::fatal(std::__cxx11::string message, bool variable)
+// {
+// 	if (variable==true)
+// 		fatal(message,"TRUE");
+// 	else
+// 		fatal(message,"FALSE");
+// }
 
 void logger::error(std::__cxx11::string message, string variable)
 {
@@ -65,13 +65,13 @@ void logger::error(std::__cxx11::string message, double variable)
 {
 	error(message,to_string(variable));
 }
-void logger::error(std::__cxx11::string message, bool variable)
-{
-	if (variable==true)
-		error(message,"TRUE");
-	else
-		error(message,"FALSE");
-}
+// void logger::error(std::__cxx11::string message, bool variable)
+// {
+// 	if (variable==true)
+// 		error(message,"TRUE");
+// 	else
+// 		error(message,"FALSE");
+// }
 
 void logger::info(std::__cxx11::string message, string variable)
 {
@@ -89,13 +89,13 @@ void logger::info(std::__cxx11::string message, double variable)
 {
 	info(message,to_string(variable));
 }
-void logger::info(std::__cxx11::string message, bool variable)
-{
-	if (variable==true)
-		info(message,"TRUE");
-	else
-		info(message,"FALSE");
-}
+// void logger::info(std::__cxx11::string message, bool variable)
+// {
+// 	if (variable==true)
+// 		info(message,"TRUE");
+// 	else
+// 		info(message,"FALSE");
+// }
 
 void logger::warning(std::__cxx11::string message, string variable)
 {
@@ -112,10 +112,10 @@ void logger::warning(std::__cxx11::string message, double variable)
 {
 	warning(message,to_string(variable));
 }
-void logger::warning(std::__cxx11::string message, bool variable)
-{
-	if (variable==true)
-		warning(message,"TRUE");
-	else
-		warning(message,"FALSE");
-}
+// void logger::warning(std::__cxx11::string message, bool variable)
+// {
+// 	if (variable==true)
+// 		warning(message,"TRUE");
+// 	else
+// 		warning(message,"FALSE");
+// }

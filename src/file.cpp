@@ -20,49 +20,28 @@
 
 /***STATICS***/
 
-const set<string> files::file_t::contents_t::identifiers={""};
-const string files::file_t::contents_t::delimiter = "\t";
-
-const set<string> files::file_t::name_t::identifiers={""};
-const string files::file_t::name_t::delimiter = "_";
-
+// const set<string> files::file_t::contents_t::identifiers={""};
+// const string files::file_t::contents_t::delimiter = "\t";
+// 
+// const set<string> files::file_t::name_t::identifiers={""};
+// const string files::file_t::name_t::delimiter = "_";
 
 files::file_t files::file_t::file() const
 {
 	return *this;
 }
 
-files::file_t::file_t(const string& filename_with_path_s,string* contents_s) : name(filename_with_path_s),  contents(filename_with_path_s,contents_s)
+files::file_t::file_t(const string& filename_with_path_s,string* contents_s) :name(filename_with_path_s,"",{""}), contents(filename_with_path_s,"",{""},contents_s)
 {
 	logger::info("files::file_t::file_t",filename_with_path_s);
 }
 
+
 const bool files::file_t::is_correct_type()
 {
-	if (correct_file_type) return true;
-	for (auto& fti : name.identifiers)
-	{
-		if (fti==name.filename_type_ending()) 
-		{
-			correct_file_type = true;
-			break;
-		}
-	}
-	if (!correct_file_type) 
-	{
-		logger::info("files::file_t::is_correct_file_type(): !correct_file_type");
-		return false;
-	}
-	if (contents.identifiers.size()==0) return true;
-	
-	for (auto& fci : contents.identifiers)
-	{
-		if (contents.load().find(fci)==string::npos)
-		{
-			logger::info("files::file_t::is_correct_file_type(): contents.find(fci)==string::npos");
-			return false;
-		}
-	}
+	if (correct_file_type) 				return true;
+	if (!name.is_correct_type())		return false;
+	if (!contents.is_correct_type())	return false;
 	correct_file_type=true;
 	return true;
 }
@@ -94,11 +73,29 @@ const string& files::file_t::contents_t::load()
 	return *contents_p;
 }
 
-files::file_t::contents_t::contents_t(const string& filename_with_path_s, string* contents_s) : filename_with_path_p(filename_with_path_s)
+files::file_t::contents_t::contents_t(const string& filename_with_path_s, string delimiter_s, const set< string > identifiers_s, string* contents_s) : 	filename_with_path_p(filename_with_path_s),
+																																						delimiter(delimiter_s), 
+																																						identifiers(identifiers_s)
 {
 	contents_p = contents_s;
 	if (contents_p==nullptr)
 		contents_p = &contents_v;
+}
+
+const bool files::file_t::contents_t::is_correct_type()
+{
+	if (identifiers.size()==0) return true;
+	
+	for (auto& fci : identifiers)
+	{
+		if (load().find(fci)==string::npos)
+		{
+			logger::info("files::file_t::contents_t::is_correct_file_type()","FALSE");
+			return false;
+		}
+	}
+	logger::info("files::file_t::contents_t::is_correct_file_type()","TRUE");
+	return true;
 }
 
 bool files::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
@@ -182,8 +179,27 @@ vector<vector<vector<std::__cxx11::string> > > files::file_t::contents_t::raw_da
 /***************************/
 /** file_t::name_t **/
 
-files::file_t::name_t::name_t(const string& name_with_path_s) : filename_with_path_p(name_with_path_s)
+files::file_t::name_t::name_t(const string& name_with_path_s,string delimiter_s,const set<string> identifiers_s) : 	filename_with_path_p(name_with_path_s),
+																													delimiter(delimiter_s),
+																													identifiers(identifiers_s)
 {
+}
+
+const bool files::file_t::name_t::is_correct_type()
+{
+	print(identifiers);
+	cout << "identifiers.size()|" << identifiers.size() << "|" << *identifiers.begin() << "|" <<endl;
+	for (auto& fti : identifiers)
+	{
+		cout << "fti=" << fti <<"|"<< filename_type_ending() << endl;
+		if (fti==filename_type_ending()) 
+		{
+			logger::info("files::file_t::name_t::is_correct_file_type()","TRUE");
+			return true;
+		}
+	}
+	logger::info("files::file_t::name_t::is_correct_file_type()","FALSE");
+	return false;
 }
 
 int files::file_t::name_t::chip_x()
@@ -440,7 +456,7 @@ const string files::file_t::name_t::directory() const
 /***************************/
 /** sims_t::name_t **/
 
-files::sims_t::name_t::name_t(const std::__cxx11::string& name_with_path_s) : file_t::name_t(name_with_path_s)
+files::sims_t::name_t::name_t(const string& name_with_path_s,string delimiter_s,const set<string> identifiers_s) : 	file_t::name_t(name_with_path_s,delimiter_s,identifiers_s)
 {
 	
 }
@@ -448,7 +464,7 @@ files::sims_t::name_t::name_t(const std::__cxx11::string& name_with_path_s) : fi
 /***************************/
 /** sims_t::contents_t **/
 
-files::sims_t::contents_t::contents_t(const string& filename_with_path_s, string* contents_s) : file_t::contents_t(filename_with_path_s,contents_s)
+files::sims_t::contents_t::contents_t(const string& filename_with_path_s,string delimiter_s,const set<string> identifiers_s, string* contents_s) : file_t::contents_t(filename_with_path_s,delimiter_s,identifiers_s,contents_s)
 {
 	
 }

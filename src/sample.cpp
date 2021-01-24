@@ -53,22 +53,22 @@ sample_t::sample_t(std::__cxx11::string lot_s, int wafer_number_s, std::__cxx11:
 }
 
 
-sample_t::sample_t(files::file_t file_s)
-{	
-	if ((file_s.name.lot()=="") && file_s.name.not_parseable_filename_parts().size()>0) simple_name_p=tools::vec::combine_vec_to_string(file_s.name.not_parseable_filename_parts(), "_");
-	else if ((file_s.name.wafer()<0)) simple_name_p=file_s.name.lot() +file_s.name.lot_split() + tools::vec::combine_vec_to_string(file_s.name.not_parseable_filename_parts(), "_");
-	else simple_name_p="";
-	*this = sample_t{file_s.name.lot(),file_s.name.wafer(),file_s.name.lot_split(),file_s.name.monitor(),file_s.name.chip_x(),file_s.name.chip_y(),simple_name_p};
-}
+// sample_t::sample_t(files::file_t file_s)
+// {	
+// 	if ((file_s.name.lot()=="") && file_s.name.not_parseable_filename_parts().size()>0) simple_name_p=tools::vec::combine_vec_to_string(file_s.name.not_parseable_filename_parts(), "_");
+// 	else if ((file_s.name.wafer()<0)) simple_name_p=file_s.name.lot() +file_s.name.lot_split() + tools::vec::combine_vec_to_string(file_s.name.not_parseable_filename_parts(), "_");
+// 	else simple_name_p="";
+// 	*this = sample_t{file_s.name.lot(),file_s.name.wafer(),file_s.name.lot_split(),file_s.name.monitor(),file_s.name.chip_x(),file_s.name.chip_y(),simple_name_p};
+// }
 
 sample_t::sample_t(files::dsims_dp_rpc_asc_t file_s)
 {
-	*this = sample_t{file_s.file()};
+// 	*this = sample_t{file_s.file()};
 }
 
 sample_t::sample_t(files::tofsims_TXT_t file_s)
 {
-	*this = sample_t{file_s.file()};
+// 	*this = sample_t{file_s.file()};
 }
 
 std::__cxx11::string sample_t::lot() const

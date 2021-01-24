@@ -76,14 +76,14 @@ namespace files
 {
 	
 
+/**********************/
+/****     file_t    ***/
+/**********************/
 
  ///standard IHP olc file template
 class file_t
 {
-	
-	
-	friend class config_t;
-	
+	friend class config_t;	
 protected:
 // public:
 	class contents_t
@@ -94,21 +94,19 @@ protected:
 		///should be freed after parse_data_and_header_tensors, as it has no longer use
 		string* contents_p;
 		const string& filename_with_path_p;
-		
-		
 		///populates raw_data_tensor_p, raw_header_tensor_p, will clear *contents_p
 		bool parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor);
 	protected:
 		vector<vector<vector<string>>> raw_data_tensor_p, raw_header_tensor_p;
-		static const string delimiter;
 		vector<vector<vector<string>>> raw_data_tensor();
 		vector<vector<vector<string>>> raw_header_tensor();
-		
 	public:
+		const string delimiter;
+		const set<string> identifiers;
 		const string& load();
-		static const set<string> identifiers;
+		const bool is_correct_type(); 
 		///give me contents_s if already loaded somewhere
-		contents_t(const string& filename_with_path_s,string* contents_s=nullptr);
+		contents_t(const string& filename_with_path_s,string delimiter_s,const set<string> identifiers_s,string* contents_s=nullptr);
 	};
 	///standard IHP olc filename template
 	class name_t
@@ -138,11 +136,10 @@ protected:
 		bool parse_group(string filename_part);
 		bool parse_repetitor(string filename_part);
 		bool parsed_filename_parts = false;
-	protected:
-		static const string delimiter;
 	public:
-		name_t(const string& name_with_path_s);
-		static const set<string> identifiers;
+		const string delimiter;
+		const set<string> identifiers;
+		name_t(const string& name_with_path_s,string delimiter_s,const set<string> identifiers_s);
 		vector<string> not_parseable_filename_parts();
 		string filename_with_path() const;
 		string filename_type_ending() const;
@@ -160,20 +157,24 @@ protected:
 		int olcdb();
 		int wafer();
 		void to_screen(string prefix="");
+		const bool is_correct_type(); 
 	};
-	bool correct_file_type;
+	bool correct_file_type=false;
 public:
 	///returns the file_t parent
 	file_t file() const;
 	file_t(const string& filename_with_path_s, string* contents_s=nullptr);
 	name_t name;
 	contents_t contents;
+	///this does not work as intended for some reason
 	const bool is_correct_type(); 
 	bool operator< (const file_t& fname) const;
 	bool operator== (const file_t& fname) const;
 };
 
-///parent and child class
+/**********************/
+/****     sims_t    ***/
+/**********************/
 class sims_t : public file_t
 {
 protected:
@@ -197,7 +198,7 @@ protected:
 		sputter_energy_t sputter_energy_p;
 		element_t sputter_element_p;
 	public:
-		name_t(const string& name_with_path_s);
+		name_t(const string& name_with_path_s,string delimiter_s,const set<string> identifiers_s);
 		const sputter_energy_t sputter_energy();
 		const element_t sputter_element();
 		const total_sputter_depth_t total_sputter_depths();
@@ -208,11 +209,15 @@ protected:
 	{
 	public:
 		///give me contents_s if already loaded somewhere
-		contents_t(const string& filename_with_path_s,string* contents_s=nullptr);
+		contents_t(const string& filename_with_path_s,string delimiter_s,const set<string> identifiers_s,string* contents_s=nullptr);
 	};
 public:
 	sims_t(const string& filename_with_path_s, string* contents_s=nullptr);
 };
+
+/**************************/
+/*** dsims_dp_rpc_asc_t ***/
+/**************************/
 
 class dsims_dp_rpc_asc_t : public sims_t
 {
@@ -235,6 +240,8 @@ protected:
 	class contents_t : public sims_t::contents_t
 	{	
 	private:
+// 		const string delimiter;
+		map<string,string> infos_and_settings_p;
 		vector<string> units_p;
 		vector<string> dimensions_p;
 		vector<string> cluster_names_p;
@@ -252,33 +259,39 @@ protected:
 		bool is_Ipr;
 		///e.g. < sputter_time > = get_quantity_from_dimension_and_clustername("Time","Ipr")
 		const quantity_t get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername="");
-		const vector<string> units();
-		const vector<string> dimensions();
+		const vector<string>& units();
+		const vector<string>& dimensions();
 	public:
 		contents_t(const string& filename_with_path_s,string* contents_s=nullptr);
-		static const set<string> identifiers;
-		const vector<string> cluster_names();
+		const set<string> identifiers;
+		const vector<string>& cluster_names();
 		const vector<column_t> columns();
 		const Ipr_t Ipr();
+		
+		map<string,string>& infos_and_settings();
 	};
 	class name_t : public sims_t::name_t
 	{
 	private:
+// 		const string delimiter;
 	public:
 		name_t(const string& name_with_path_s);
-		static const set<string> identifiers;
+		const set<string> identifiers;
 	};
 public:
 	dsims_dp_rpc_asc_t(const string& filename_with_path_s, string* contents_s=nullptr);
 	name_t name;
 	contents_t contents;
 	
-	static std::set< files::dsims_dp_rpc_asc_t > files(std::set< std::__cxx11::string >& filenames_with_path);
+// 	static std::set< files::dsims_dp_rpc_asc_t > files(std::set< std::__cxx11::string >& filenames_with_path);
 	const sputter_time_t greatest_common_sputter_time();
 	const sputter_depth_t greatest_common_sputter_depth();
 	const vector<cluster_t> clusters();
 };
 
+/**************************/
+/*** tofsims_TXT_t      ***/
+/**************************/
 class tofsims_TXT_t : public sims_t
 {
 private:
@@ -288,7 +301,7 @@ private:
 		bool parse_analysis_energy_element(string filename_part);
 	public:
 		contents_t(const string& filename_with_path_s,string* contents_s=nullptr);
-		static const set<string> identifiers;
+		const set<string> identifiers;
 		const element_t analysis_element();
 		const analysis_energy_t analysis_energy();
 	};
@@ -297,13 +310,13 @@ private:
 	private:
 	public:
 		name_t(const string& name_with_path_s);
-		static const set<string> identifiers;
+		const set<string> identifiers;
 	};
 public:
 	tofsims_TXT_t(const string& filename_with_path_s, string* contents_s=nullptr);
 	name_t name;
 	contents_t contents;
-	static set<tofsims_TXT_t> files(set<string>& filenames_with_path);
+// 	static set<tofsims_TXT_t> files(set<string>& filenames_with_path);
 };
 
 class dsims_jpg_t : public file_t
@@ -311,12 +324,15 @@ class dsims_jpg_t : public file_t
 	class name_t : dsims_dp_rpc_asc_t::name_t
 	{
 		name_t(const string& name_with_path_s);
-		static const set<string> identifiers;
+		const set<string> identifiers;
 	};
 	dsims_jpg_t(string filename_with_path_s);
-	static set<dsims_jpg_t> files(set<string>& filenames_with_path);
+// 	static set<dsims_jpg_t> files(set<string>& filenames_with_path);
 };
 
+/**************************/
+/***   profiler_t       ***/
+/**************************/
 class profiler_t : public file_t 
 {
 private:
@@ -326,18 +342,19 @@ private:
 		bool parse_analysis_energy_element(string filename_part);
 	public:
 		contents_t(const string& filename_with_path_s,string* contents_s=nullptr);
-		static const set<string> identifiers;
+		const set<string> identifiers;
 	};
 	class name_t : file_t::name_t
 	{
 	private:
 	public:
 		name_t(const string& name_with_path_s);
-		static const set<string> identifiers;
+		const set<string> identifiers;
+// 		const string delimiter="_";
 	};
 public:
 	profiler_t(string filename_with_path_s);
-	static set<profiler_t> files(set<string>& filenames_with_path);
+// 	static set<profiler_t> files(set<string>& filenames_with_path);
 };
 
 }
