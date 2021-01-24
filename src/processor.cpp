@@ -23,13 +23,15 @@ processor::processor(vector<string> args_p)
 {	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	set<string> input_strings(args_p.begin(),args_p.end()); // eliminate same entries
-	files::dsims_dp_rpc_asc_t file(*input_strings.begin());
-// 	for (auto col: file.columns())
-// 		col.to_screen();
-// 	cout << file.Ipr().sputter_current().to_string() << endl;
-// 	file.test.test();
+	set<files::dsims_dp_rpc_asc_t> files = load_files<files::dsims_dp_rpc_asc_t>(input_strings);
+	
+	for (auto f:files)
+	{
+		f.name.to_screen();
+	}
 
-
+// 	files::dsims_dp_rpc_asc_t file(*input_strings.begin());
+// 	file.name.chip_x()
 
 
 // 	for (int i=0;i<10;i++)

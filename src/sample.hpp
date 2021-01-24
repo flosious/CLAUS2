@@ -57,7 +57,7 @@ public:
 	sample_t(files::file_t file_s);
 	sample_t(files::sims_t file_s);
 	sample_t(files::dsims_dp_rpc_asc_t file_s);
-	sample_t(files::tofsims_t file_s);
+	sample_t(files::tofsims_TXT_t file_s);
 	
 	
 	class chip_t

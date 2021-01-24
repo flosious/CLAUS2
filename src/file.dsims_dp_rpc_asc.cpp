@@ -3,6 +3,86 @@
 /***********************/
 /** D SIMS**/
 
+/***STATICS***/
+
+const set<string> files::dsims_dp_rpc_asc_t::contents_t::identifiers={"*** DATA FILES ***"};
+// const string files::dsims_dp_rpc_asc_t::contents_t::delimiter = "\t";
+
+const set<string> files::dsims_dp_rpc_asc_t::name_t::identifiers={"dp_rpc_asc"};
+// const string files::dsims_dp_rpc_asc_t::name_t::delimiter = "_";
+
+
+/**************************************/
+/*******files::dsims_dp_rpc_asc_t******/
+/**************************************/
+
+files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s,string* contents_s) : 	sims_t(filename_with_path_s, contents_s),
+																										name(filename_with_path_s), 
+																										contents(filename_with_path_s,contents_s)
+{
+	
+}
+
+// const sputter_time_t files::dsims_dp_rpc_asc_t::greatest_common_sputter_time()
+// {
+// 	if (contents.sputter_time_p.is_set()) return sputter_time_p;
+// 	sputter_time_t st(get_quantity_from_dimension_and_clustername("Time","Ipr"));
+// 	sputter_time_p = st;
+// 	return st;
+// }
+// 
+// const sputter_depth_t files::dsims_dp_rpc_asc_t::greatest_common_sputter_depth()
+// {
+// 	if (sputter_depth_p.is_set()) return sputter_depth_p;
+// 	sputter_depth_t sd(get_quantity_from_dimension_and_clustername("Depth","Ipr"));
+// 	sputter_depth_p = sd;
+// 	return sd;
+// }
+
+
+set<files::dsims_dp_rpc_asc_t> files::dsims_dp_rpc_asc_t::files(set<std::__cxx11::string>& filenames_with_path)
+{
+// 	set<files::dsims_dp_rpc_asc_t> files_s;
+// 	for (auto& filename:filenames_with_path)
+// 	{
+// 		files::dsims_dp_rpc_asc_t file(filename);
+// 		if (file.is_correct_type())
+// 			files_s.insert(file);
+// 	}
+// 	return files_s;
+	return files(filenames_with_path);
+}
+
+const vector<cluster_t> files::dsims_dp_rpc_asc_t::clusters()
+{
+	vector<cluster_t> collected_clusters;
+	for (auto& clustername : contents.cluster_names())
+	{
+		if (clustername=="Ipr") continue;
+		sputter_time_t sputter_time_s;
+		sputter_depth_t sputter_depth_s;
+		concentration_t concentration_s;
+		intensity_t intensity_s;
+		for (auto& col:contents.columns())
+		{
+			if (col.cluster_name != clustername) continue;
+			if (col.dimension=="Time") sputter_time_s = sputter_time_t(col.data,col.unit);
+			if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
+			if (col.dimension=="C") concentration_s = concentration_t(col.data,col.unit);
+			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
+		}
+		cluster_t cluster(clustername,sputter_time_s,intensity_s,sputter_depth_s,concentration_s);
+		if (cluster.is_set()) collected_clusters.push_back(cluster);
+		else
+			logger::error("files::dsims_dp_rpc_asc_t::clusters() cluster.is_set()", false);
+	}
+	return collected_clusters;
+}
+
+
+/**************************************************/
+/*****  files::dsims_dp_rpc_asc_t::Ipr_t       ****/
+/**************************************************/
 
 const sputter_depth_t files::dsims_dp_rpc_asc_t::Ipr_t::sputter_depth() const
 {
@@ -28,17 +108,35 @@ files::dsims_dp_rpc_asc_t::Ipr_t::Ipr_t(sputter_current_t sputter_current_s, spu
 
 
 
-/******************************************/
-
+/**************************************************/
+/*****  files::dsims_dp_rpc_asc_t::column_t    ****/
+/**************************************************/
 
 void files::dsims_dp_rpc_asc_t::column_t::to_screen()
 {
 	cout << "unit="<<unit<<"\tcluster_name="<<cluster_name<<"\tdimension="<<dimension<<"\tdata.size()="<<data.size()<<endl;
 }
 
-const vector<files::dsims_dp_rpc_asc_t::column_t> files::dsims_dp_rpc_asc_t::columns()
+/**************************************************/
+/*****  files::dsims_dp_rpc_asc_t::name_t      ****/
+/**************************************************/
+
+files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : sims_t::name_t(name_with_path_s)
 {
-	if (!is_correct_file_type()) return {};
+}
+
+/**************************************************/
+/*****  files::dsims_dp_rpc_asc_t::contents_t  ****/
+/**************************************************/
+
+
+files::dsims_dp_rpc_asc_t::contents_t::contents_t(const string& filename_with_path_s, string* contents_s) : sims_t::contents_t(filename_with_path_s,contents_s)
+{
+	
+}
+
+const vector<files::dsims_dp_rpc_asc_t::column_t> files::dsims_dp_rpc_asc_t::contents_t::columns()
+{
 	if (check_Ipr()) ipr_shift_correction();
 	remove_corrupted_lines();
 	if (cluster_names().size()<1 && !parse_units_dimensions_clusternames())
@@ -49,12 +147,6 @@ const vector<files::dsims_dp_rpc_asc_t::column_t> files::dsims_dp_rpc_asc_t::col
 	
 	vector<dsims_dp_rpc_asc_t::column_t> cols;
 	vector<vector<string>> data_cols_lines = tools::mat::transpose_matrix(raw_data_tensor()[0]);
-// 	print (data_cols_lines);
-// 	print (cluster_names());
-// 	print(dimensions());
-// 	print(units());
-// 	return {};
-	// cols_per_element=3 --> dp_rpc_asc; =2 --> dp_asc
 	const int cols_per_element = dimensions().size()/cluster_names().size();
 	for (int i=0;i<dimensions().size() && i<data_cols_lines.size() ;i++)
 	{
@@ -70,10 +162,7 @@ const vector<files::dsims_dp_rpc_asc_t::column_t> files::dsims_dp_rpc_asc_t::col
 	return cols;
 }
 
-
-/*****************************************/
-
-const files::dsims_dp_rpc_asc_t::Ipr_t files::dsims_dp_rpc_asc_t::Ipr()
+const files::dsims_dp_rpc_asc_t::Ipr_t files::dsims_dp_rpc_asc_t::contents_t::Ipr()
 {
 	sputter_current_t sputter_current_s;
 	sputter_time_t sputter_time_s;
@@ -88,89 +177,26 @@ const files::dsims_dp_rpc_asc_t::Ipr_t files::dsims_dp_rpc_asc_t::Ipr()
 	return {sputter_current_s,sputter_time_s,sputter_depth_s};
 }
 
-files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(std::__cxx11::string filename_with_path_s) : sims_t(filename_with_path_s) 
-{
-	tool_name = "dsims";
-	delimiter = "\t";
-	filename_type_ids_p = {"dp_rpc_asc"};
-	file_content_ids_p = {"*** DATA FILES ***"};
-// 	parse_filename_parts();
-}
-
-const vector<cluster_t> files::dsims_dp_rpc_asc_t::clusters()
-{
-	vector<cluster_t> collected_clusters;
-	for (auto& clustername : cluster_names())
-	{
-		if (clustername=="Ipr") continue;
-		sputter_time_t sputter_time_s;
-		sputter_depth_t sputter_depth_s;
-		concentration_t concentration_s;
-		intensity_t intensity_s;
-		for (auto& col:columns())
-		{
-			if (col.cluster_name != clustername) continue;
-			if (col.dimension=="Time") sputter_time_s = sputter_time_t(col.data,col.unit);
-			if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
-			if (col.dimension=="C") concentration_s = concentration_t(col.data,col.unit);
-			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
-		}
-		cluster_t cluster(clustername,sputter_time_s,intensity_s,sputter_depth_s,concentration_s);
-		if (cluster.is_set()) collected_clusters.push_back(cluster);
-		else
-			logger::error("files::dsims_dp_rpc_asc_t::clusters() cluster.is_set()", false);
-	}
-	return collected_clusters;
-}
-
-// const sputter_current_t files::dsims_dp_rpc_asc_t::sputter_current()
-// {
-// 	if (sputter_current_p.is_set()) return sputter_current_p;
-// 	sputter_time_t sputter_time_s;
-// 	sputter_depth_t sputter_depth_s;
-// 	sputter_current_t sputter_current_s;
-// 	for (auto& clustername : cluster_names())
-// 	{
-// 		if (clustername!="Ipr") continue;
-// 		
-// 		for (auto& col:columns())
-// 		{
-// 			if (col.cluster_name != clustername) continue;
-// 			if (col.dimension=="Time") sputter_time_s = sputter_time_t(col.data,col.unit);
-// 			if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
-// 			if (col.dimension=="I") sputter_current_s = sputter_current_t(col.data,col.unit);
-// 		}
-// 	}
-// 	if (!sputter_current_s.is_set()) return {};
-// 	if (sputter_time_s.is_set() && sputter_time().is_set())
-// 		sputter_current_p = {statistics::interpolate_data_XY_transposed({sputter_time_s.data(),sputter_current_s.data()},sputter_time().data()), sputter_current_s.unit()};
-// 	else if (sputter_depth_s.is_set() && sputter_depth().is_set())
-// 		sputter_current_p =  {statistics::interpolate_data_XY_transposed({sputter_depth_s.data(),sputter_current_s.data()},sputter_depth().data()), sputter_depth_s.unit()};
-// 	return sputter_current_p;
-// }
-
-
-const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::dimensions()
+const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::contents_t::dimensions()
 {
 	if (dimensions_p.size()>0) return dimensions_p;
 	parse_units_dimensions_clusternames();
 	return dimensions_p;
 }
-const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::units()
+const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::contents_t::units()
 {
 	if (units_p.size()>0) return units_p;
 	parse_units_dimensions_clusternames();
 	return units_p;
 }
-const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::cluster_names()
+const vector<std::__cxx11::string> files::dsims_dp_rpc_asc_t::contents_t::cluster_names()
 {
 	if (cluster_names_p.size()>0) return cluster_names_p;
 	parse_units_dimensions_clusternames();
 	return cluster_names_p;
 }
 
-
-bool files::dsims_dp_rpc_asc_t::parse_units_dimensions_clusternames()
+bool files::dsims_dp_rpc_asc_t::contents_t::parse_units_dimensions_clusternames()
 {
 	cluster_names_p.clear();
 	units_p.clear();
@@ -192,7 +218,7 @@ bool files::dsims_dp_rpc_asc_t::parse_units_dimensions_clusternames()
 	}
 	if (samples.size()!=1) 
 	{
-		error=true;
+// 		error=true;
 		logger::debug("files::dsims_dp_rpc_asc_t::parse_raw_header_tensor(): samples.size()!=1");
 		return false;
 	}
@@ -235,20 +261,15 @@ bool files::dsims_dp_rpc_asc_t::parse_units_dimensions_clusternames()
     return true;
 }
 
-
-
-
-bool files::dsims_dp_rpc_asc_t::check_Ipr() 
+bool files::dsims_dp_rpc_asc_t::contents_t::check_Ipr() 
 {
-// 	if (!is_correct_file_type()) return false;
 	is_Ipr=false;
 	is_Ipr = tools::mat::find_str_in_mat(cluster_names(),"Ipr");
 	return is_Ipr;
 }
 
-set<int> files::dsims_dp_rpc_asc_t::corrupted_lines()
+set<int> files::dsims_dp_rpc_asc_t::contents_t::corrupted_lines()
 {
-	if (!is_correct_file_type()) return {};
 	set<int> corrupted_lines_p;
 	vector<vector<string>> cols_lines = tools::mat::transpose_matrix(raw_data_tensor().at(0));
 	vector<double> col;
@@ -280,17 +301,14 @@ set<int> files::dsims_dp_rpc_asc_t::corrupted_lines()
 	return corrupted_lines_p;
 }
 
-void files::dsims_dp_rpc_asc_t::remove_corrupted_lines()
+void files::dsims_dp_rpc_asc_t::contents_t::remove_corrupted_lines()
 {
-	if (!is_correct_file_type()) return;
 	set<int> corrupted_lines_p=corrupted_lines();
 	if (raw_data_tensor().size()==0) return;
 	
-	print(corrupted_lines_p);
 	for (set<int>::reverse_iterator it=corrupted_lines_p.rbegin();it!=corrupted_lines_p.rend();++it)
 	{
 		logger::info("files::dsims_dp_rpc_asc_t::remove_corrupted_lines()", *it);
-		print(*(raw_data_tensor_p.at(0).begin()+*it));
 		raw_data_tensor_p.at(0).erase(raw_data_tensor_p.at(0).begin()+*it);
 	}
 }
@@ -298,7 +316,7 @@ void files::dsims_dp_rpc_asc_t::remove_corrupted_lines()
 /*
  * exported data is bugged, there are to many "\t" in the lines, where there is no cluster data, but Ipr data
  */
-bool files::dsims_dp_rpc_asc_t::ipr_shift_correction() 
+bool files::dsims_dp_rpc_asc_t::contents_t::ipr_shift_correction() 
 {
 	raw_data_tensor();
 	vector<vector<string>>* mat = &raw_data_tensor_p.at(0);
@@ -336,7 +354,7 @@ bool files::dsims_dp_rpc_asc_t::ipr_shift_correction()
     return true;
 }
 
-const quantity_t files::dsims_dp_rpc_asc_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
 {
 	string unit="";
 	vector<vector<double>> data_vecs;
@@ -355,31 +373,5 @@ const quantity_t files::dsims_dp_rpc_asc_t::get_quantity_from_dimension_and_clus
 	return quantity_t{statistics::common_vector(data_vecs),unit};
 }
 
-const sputter_time_t files::dsims_dp_rpc_asc_t::greatest_common_sputter_time()
-{
-	if (sputter_time_p.is_set()) return sputter_time_p;
-	sputter_time_t st(get_quantity_from_dimension_and_clustername("Time","Ipr"));
-	sputter_time_p = st;
-	return st;
-}
 
-const sputter_depth_t files::dsims_dp_rpc_asc_t::greatest_common_sputter_depth()
-{
-	if (sputter_depth_p.is_set()) return sputter_depth_p;
-	sputter_depth_t sd(get_quantity_from_dimension_and_clustername("Depth","Ipr"));
-	sputter_depth_p = sd;
-	return sd;
-}
-
-set<files::dsims_dp_rpc_asc_t> files::dsims_dp_rpc_asc_t::files(set<std::__cxx11::string>& filenames_with_path)
-{
-	set<files::dsims_dp_rpc_asc_t> files_s;
-	for (auto& filename:filenames_with_path)
-	{
-		files::dsims_dp_rpc_asc_t file(filename);
-		if (file.is_correct_file_type())
-			files_s.insert(file);
-	}
-	return files_s;
-}
 

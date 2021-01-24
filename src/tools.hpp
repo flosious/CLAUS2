@@ -199,8 +199,9 @@ public:
         static vector<vector<string> > transpose_matrix(vector<vector<string> > matrix);
         static vector<vector<double> > transpose_matrix(vector<vector<double> > matrix);
         static void fillup_matrix(vector<vector<string> > *matrix);
-        static vector<vector <string> > format_string_to_matrix(string *mainstring, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");  
-		static vector<vector <string> > format_string_to_matrix(string mainstring, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");  
+//         static vector<vector <string> > format_string_to_matrix(string *mainstring, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");  
+// 		static vector<vector <string> > format_string_to_matrix(string mainstring, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");  
+		static vector<vector <string> > format_string_to_matrix(const string& mainstring, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");  
         static string format_matrix_to_string(vector<vector<string> > *matrix, string line_delimiter=LINE_DELIMITER, string column_delimiter="\t");
         static vector<vector<string> > add_vector_to_matrix(vector<vector<string > > matrix_summand, vector<string > vec);
     };

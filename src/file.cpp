@@ -18,114 +18,31 @@
 
 #include "file.hpp"
 
+/***STATICS***/
 
-int files::file_t::chip_x()
-{
-	parse_filename_parts();
-// 	if (chip_x_p<0)
-// 		logger::info("files::file_t::chip_x() " ,chip_x_p);
-	return chip_x_p;
-}
-int files::file_t::chip_y()
-{
-	parse_filename_parts();
-// 	if (chip_y_p<0)
-// 		logger::info("files::file_t::chip_y() " +filename(), chip_y_p);
-	return chip_y_p;
-}
-std::__cxx11::string files::file_t::group()
-{
-	parse_filename_parts();
-	if (group_p=="")
-		logger::info("files::file_t::group() " +filename(),group_p);
-	return group_p;
-}
-std::__cxx11::string files::file_t::lot()
-{
-	parse_filename_parts();
-	if (lot_p=="")
-		logger::warning("files::file_t::lot() " +filename(), lot_p);
-	return lot_p;
-}
-std::__cxx11::string files::file_t::lot_split()
-{
-	parse_filename_parts();
-// 	if (lot_split_p=="")
-// 		logger::info("files::file_t::lot_split() " +filename(), lot_split_p);
-	return lot_split_p;
-}
-std::__cxx11::string files::file_t::monitor()
-{
-	parse_filename_parts();
-// 	if (monitor_p=="")
-// 		logger::info("files::file_t::monitor() " +filename(),monitor_p);
-	return monitor_p;
-}
-int files::file_t::olcdb()
-{
-	parse_filename_parts();
-	if (olcdb_p<0)
-		logger::warning("files::file_t::olcdb() ",olcdb_p);
-	return olcdb_p;
-}
-vector<std::__cxx11::string> files::file_t::not_parseable_filename_parts()
-{
-	parse_filename_parts();
-	return not_parseable_filename_parts_p;
-}
-int files::file_t::wafer()
-{
-	parse_filename_parts();
-	if (wafer_p<0)
-		logger::warning("files::file_t::wafer() ",wafer_p);
-	return wafer_p;
-}
-std::__cxx11::string files::file_t::repetition()
-{
-	parse_filename_parts();
-	return repetition_p;
-}
+const set<string> files::file_t::contents_t::identifiers={""};
+const string files::file_t::contents_t::delimiter = "\t";
+
+const set<string> files::file_t::name_t::identifiers={""};
+const string files::file_t::name_t::delimiter = "_";
+
 
 files::file_t files::file_t::file() const
 {
 	return *this;
 }
 
-files::file_t::file_t(string filename_with_path_s) : name(filename_with_path_s)
+files::file_t::file_t(const string& filename_with_path_s,string* contents_s) : name(filename_with_path_s),  contents(filename_with_path_s,contents_s)
 {
 	logger::info("files::file_t::file_t",filename_with_path_s);
-	filename_with_path_p = filename_with_path_s;
 }
 
-std::__cxx11::string files::file_t::filename_type_ending() const
-{
-	string filename_type_ending_p =tools::file::extract_filetype_ending(filename_with_path_p,".");
-	if (filename_type_ending_p=="")
-		logger::error("files::file_t::filename_type_ending() ",filename_type_ending_p);
-	return filename_type_ending_p;
-}
-
-std::__cxx11::string files::file_t::filename_with_path() const
-{
-	return filename_with_path_p;
-}
-
-string files::file_t::filename() const
-{
-	return tools::file::extract_filename(filename_with_path_p);
-}
-
-string files::file_t::directory() const
-{
-	return tools::file::extract_directory_from_filename(filename_with_path_p);
-}
-
-const bool files::file_t::is_correct_file_type(/*const set<std::__cxx11::string>& filename_type_ids, const set<std::__cxx11::string>& file_content_ids*/)
+const bool files::file_t::is_correct_type()
 {
 	if (correct_file_type) return true;
-	for (auto& fti : filename_type_ids_p)
+	for (auto& fti : name.identifiers)
 	{
-		if (fti==filename_type_ending()) 
+		if (fti==name.filename_type_ending()) 
 		{
 			correct_file_type = true;
 			break;
@@ -136,12 +53,11 @@ const bool files::file_t::is_correct_file_type(/*const set<std::__cxx11::string>
 		logger::info("files::file_t::is_correct_file_type(): !correct_file_type");
 		return false;
 	}
-	if (file_content_ids_p.size()==0) return true;
+	if (contents.identifiers.size()==0) return true;
 	
-	string contents = load_contents();
-	for (auto& fci : file_content_ids_p)
+	for (auto& fci : contents.identifiers)
 	{
-		if (contents.find(fci)==string::npos)
+		if (contents.load().find(fci)==string::npos)
 		{
 			logger::info("files::file_t::is_correct_file_type(): contents.find(fci)==string::npos");
 			return false;
@@ -151,199 +67,45 @@ const bool files::file_t::is_correct_file_type(/*const set<std::__cxx11::string>
 	return true;
 }
 
-
-bool files::file_t::parse_all_parts_at_once()
-{
-	smatch match;
-	regex reg ("^([0-9]{4,})_([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)_[wW]?([0-9]{1,2})(_.*)_([0-9]+?)([a-z]*?)$"); 
-	string f = filename();
-	if (regex_search(f,match,reg)) 
-	{
-		olcdb_p = 	tools::str::str_to_int(match[1]);
-		lot_p = 		match[2];
-		lot_split_p=	match[3];
-		wafer_p = 	tools::str::str_to_int(match[4]);
-		group_p = 	tools::str::str_to_int(match[6]);
-		repetition_p=	match[7];
-	}
-	else
-	{
-		logger::warning("files::file_t::parse_all_parts_at_once()",false);
-		return false;
-	}
-	return true;
-}
-
-
-bool files::file_t::parse_filename_parts()
-{
-	if (parsed) return parsed;
-	vector<string> filename_parts = tools::str::get_strings_between_delimiter(filename(),delimiter);
-	for (auto filename_part:filename_parts)
-	{
-		// parse everything just once (except crater depths)
-		// THE ORDER IS VERY IMPORTANT
-		if (olcdb_p==-1) if(parse_olcdb(filename_part)) continue;
-		if (wafer_p==-1) if(parse_wafer(filename_part)) continue;
-		if (lot_p=="") if(parse_lot(filename_part)) continue;
-		if (chip_x_p==-1)	if(parse_chip(filename_part)) continue;
-		if (monitor_p=="") if(parse_monitor(filename_part)) continue;
-		if (group_p=="") if(parse_group(filename_part)) continue;
-// 		if (parse_crater_depth(filename_part)) continue;
-		// no parser worked
-		not_parseable_filename_parts_p.push_back(filename_part);
-	}
-	if (lot_p=="" || olcdb_p==-1 || wafer_p==-1 || group_p=="") parse_all_parts_at_once();
-// 	if (lot=="" && not_parseable_filename_parts.size()>0) lot=not_parseable_filename_parts[0];
-	parsed = true;
-	return true;
-}
-
-bool files::file_t::parse_monitor(string filename_part) 
-{
-	smatch match;
-	regex reg1 ("^m-*([a-zA-Z0-9]+)$"); 
-	regex reg2 ("^monitor-([a-zA-Z0-9]+)$"); 
-	regex reg3 ("^[Q|q]-*([a-zA-Z0-9]+)$"); 
-	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) || regex_search(filename_part,match,reg3)) 
-	{
-		monitor_p = match[1];
-		return true;
-	}
-	return false;
-}
-
-bool files::file_t::parse_chip(string filename_part)
-{
-	smatch match;
-	regex reg1 ("^x([0-9]{1,2})y([0-9]{1,2})$", std::regex_constants::icase); 
-	regex reg2 ("^chip-([0-9]{1,2})-([0-9]{1,2})$"); 
-	regex reg3 ("^c([0-9]{1,2})-([0-9]{1,2})$"); 
-	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) || regex_search(filename_part,match,reg3)) 
-	{
-		chip_x_p = tools::str::str_to_int(match[1]);
-		chip_y_p = tools::str::str_to_int(match[2]);
-		return true;
-	}
-	return false;
-}
-
-bool files::file_t::parse_olcdb(string filename_part)
-{
-	smatch match;
-	regex reg ("^([0-9]{4,})$"); 
-	if (regex_search(filename_part,match,reg)) 
-	{
-		olcdb_p = tools::str::str_to_int(filename_part);
-		return true;
-	}
-	return false;
-}
-
-bool files::file_t::parse_lot(string filename_part)
-{
-	smatch match;
-	regex reg ("^([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)$"); 
-	if (regex_search(filename_part,match,reg)) 
-	{
-		lot_p = match[1];
-		lot_split_p = match[2];
-		return true;
-	}
-	return false;
-}
-
-bool files::file_t::parse_wafer(string filename_part)
-{
-	smatch match;
-	regex reg ("^[wW]([0-9]{1,2})$"); 
-	if (regex_search(filename_part,match,reg)) 
-	{
-		wafer_p = tools::str::str_to_int(match[1]);
-		return true;
-	}
-	return false;
-}
-
-bool files::file_t::parse_group(string filename_part)
-{
-	smatch match;
-	regex reg1 ("^g-?*([0-9]+?)([a-z]*?)$"); 
-	regex reg2 ("^group-*([0-9]+?)([a-z]*?)$"); 
-	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
-	{
-		group_p = tools::str::str_to_int(match[1]);
-		repetition_p = match[2];
-		return true;
-	}
-	return false;
-}
-
-bool files::file_t::parse_repetitor(string filename_part)
-{
-	smatch match;
-	regex reg1 ("^r-?*([0-9]+?)$"); 
-	regex reg2 ("^[rep|repetitor|repetition|repeat]-*([0-9]+?)$"); 
-	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
-	{
-		repetition_p = match[1];
-		return true;
-	}
-	return false;
-}
-
-
-
-void files::file_t::to_screen(string prefix)
-{
-	
-	cout<< prefix << "filename=\t"<< filename()<<endl;
-	cout<< prefix << "filename_with_path=\t"<< filename_with_path()<<endl;
-	cout << prefix<< "directory=\t"<< directory()<<endl;
-	
-	cout<< prefix << "wafer=\t"<< wafer()<<endl;
-	cout << prefix<< "lot=\t"<< lot()<<endl;
-	cout << prefix<< "lot_split=\t"<< lot_split()<<endl;
-	cout<< prefix << "chip_x=\t"<< chip_x()<<endl;
-	cout << prefix<< "chip_y=\t"<< chip_y()<<endl;
-	cout << prefix<< "monitor=\t"<< monitor()<<endl;
-
-	cout << prefix<< "olcdb=\t"<< olcdb()<<endl;
-	cout << prefix<< "group=\t"<< group()<<endl;
-	cout << prefix<< "repetition=\t"<< repetition()<<endl;
-	
-	
-	cout << prefix<< "not_parseable_filename_parts:" << endl;
-	print(not_parseable_filename_parts());
-}
-
 bool files::file_t::operator<(const files::file_t& fname) const
 {
-	if (filename_with_path_p >= fname.filename_with_path_p) 
+	if (name.filename_with_path() >= fname.name.filename_with_path()) 
 		return false;
 	return true;
 }
 
 bool files::file_t::operator==(const files::file_t& fname) const
 {
-	if (filename_with_path()==fname.filename_with_path()) return true;
+	if (name.filename_with_path()==fname.name.filename_with_path()) return true;
 	return false;
 }
 
-std::__cxx11::string files::file_t::load_contents()
+
+/***************************/
+/** file_t::contents_t **/
+
+const string& files::file_t::contents_t::load()
 {
-	return tools::file::load_file_to_string(filename_with_path());
-// 	if (contents_p.size()==0)
-// 		contents_p = tools::file::load_file_to_string(filename_with_path());
-// 	return contents_p;
+	if (contents_p->size()==0)
+	{
+		*contents_p = tools::file::load_file_to_string(filename_with_path_p);
+		logger::debug("tools::file::load_file_to_string(filename_with_path_p)",filename_with_path_p);;
+	}
+	return *contents_p;
 }
 
-bool files::file_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
+files::file_t::contents_t::contents_t(const string& filename_with_path_s, string* contents_s) : filename_with_path_p(filename_with_path_s)
 {
-	if (!is_correct_file_type()) return false;
+	contents_p = contents_s;
+	if (contents_p==nullptr)
+		contents_p = &contents_v;
+}
+
+bool files::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
+{
 	raw_data_tensor->clear();
 	raw_header_tensor->clear();
-	vector<vector<string>> raw_mat = tools::mat::format_string_to_matrix(load_contents(),LINE_DELIMITER,delimiter);
+	vector<vector<string>> raw_mat = tools::mat::format_string_to_matrix(load(),LINE_DELIMITER,delimiter);
 	tools::mat::remove_empty_lines_from_matrix(&raw_mat);
 	vector<vector<string> > header_temp, data_temp;
 	bool data_scanned=false;
@@ -385,9 +147,11 @@ bool files::file_t::parse_data_and_header_tensors(vector<vector<vector<std::__cx
 		header_temp.clear();
 		header_scanned=false;
 	}
+// 	contents_v.clear();
+	contents_p->clear();
 	return true;
 }
-vector<vector<vector<std::__cxx11::string> > > files::file_t::raw_header_tensor()
+vector<vector<vector<std::__cxx11::string> > > files::file_t::contents_t::raw_header_tensor()
 {
 // 	vector<vector<vector<std::__cxx11::string> > > raw_header_tensor_p, raw_data_tensor_p;
 // 	parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p);
@@ -400,7 +164,7 @@ vector<vector<vector<std::__cxx11::string> > > files::file_t::raw_header_tensor(
 	}
 	return raw_header_tensor_p;
 }
-vector<vector<vector<std::__cxx11::string> > > files::file_t::raw_data_tensor()
+vector<vector<vector<std::__cxx11::string> > > files::file_t::contents_t::raw_data_tensor()
 {
 // 	vector<vector<vector<std::__cxx11::string> > > raw_header_tensor_p, raw_data_tensor_p;
 // 	parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p);
@@ -415,39 +179,278 @@ vector<vector<vector<std::__cxx11::string> > > files::file_t::raw_data_tensor()
 }
 
 
-
 /***************************/
 /** file_t::name_t **/
 
-files::file_t::name_t::name_t(string& name_with_path_s) : name_with_path_p(name_with_path_s)
+files::file_t::name_t::name_t(const string& name_with_path_s) : filename_with_path_p(name_with_path_s)
+{
+}
+
+int files::file_t::name_t::chip_x()
+{
+	parse_filename_parts();
+// 	if (chip_x_p<0)
+// 		logger::info("files::file_t::chip_x() " ,chip_x_p);
+	return chip_x_p;
+}
+int files::file_t::name_t::chip_y()
+{
+	parse_filename_parts();
+// 	if (chip_y_p<0)
+// 		logger::info("files::file_t::chip_y() " +filename(), chip_y_p);
+	return chip_y_p;
+}
+std::__cxx11::string files::file_t::name_t::group()
+{
+	parse_filename_parts();
+	if (group_p=="")
+		logger::info("files::file_t::group() " +filename(),group_p);
+	return group_p;
+}
+std::__cxx11::string files::file_t::name_t::lot()
+{
+	parse_filename_parts();
+	if (lot_p=="")
+		logger::warning("files::file_t::lot() " +filename(), lot_p);
+	return lot_p;
+}
+std::__cxx11::string files::file_t::name_t::lot_split()
+{
+	parse_filename_parts();
+// 	if (lot_split_p=="")
+// 		logger::info("files::file_t::lot_split() " +filename(), lot_split_p);
+	return lot_split_p;
+}
+std::__cxx11::string files::file_t::name_t::monitor()
+{
+	parse_filename_parts();
+// 	if (monitor_p=="")
+// 		logger::info("files::file_t::monitor() " +filename(),monitor_p);
+	return monitor_p;
+}
+int files::file_t::name_t::olcdb()
+{
+	parse_filename_parts();
+	if (olcdb_p<0)
+		logger::warning("files::file_t::olcdb() ",olcdb_p);
+	return olcdb_p;
+}
+vector<std::__cxx11::string> files::file_t::name_t::not_parseable_filename_parts()
+{
+	parse_filename_parts();
+	return not_parseable_filename_parts_p;
+}
+int files::file_t::name_t::wafer()
+{
+	parse_filename_parts();
+	if (wafer_p<0)
+		logger::warning("files::file_t::wafer() ",wafer_p);
+	return wafer_p;
+}
+std::__cxx11::string files::file_t::name_t::repetition()
+{
+	parse_filename_parts();
+	return repetition_p;
+}
+
+void files::file_t::name_t::to_screen(string prefix)
 {
 	
+	cout<< prefix << "filename=\t"<< filename()<<endl;
+	cout<< prefix << "filename_with_path=\t"<< filename_with_path()<<endl;
+	cout << prefix<< "directory=\t"<< directory()<<endl;
+	
+	cout<< prefix << "wafer=\t"<< wafer()<<endl;
+	cout << prefix<< "lot=\t"<< lot()<<endl;
+	cout << prefix<< "lot_split=\t"<< lot_split()<<endl;
+	cout<< prefix << "chip_x=\t"<< chip_x()<<endl;
+	cout << prefix<< "chip_y=\t"<< chip_y()<<endl;
+	cout << prefix<< "monitor=\t"<< monitor()<<endl;
+
+	cout << prefix<< "olcdb=\t"<< olcdb()<<endl;
+	cout << prefix<< "group=\t"<< group()<<endl;
+	cout << prefix<< "repetition=\t"<< repetition()<<endl;
+	
+	
+	cout << prefix<< "not_parseable_filename_parts:" << endl;
+	print(not_parseable_filename_parts());
 }
 
-string files::file_t::name_t::name()
+void files::file_t::name_t::parse_all_parts_at_once()
 {
-	return "files::file_t::name_t::name()";
+	smatch match;
+// 	regex reg ("^([0-9]{4,})_([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)_[wW]?([0-9]{1,2})(_.*)_([0-9]+?)([a-z]*?)$"); 
+	regex reg ("^([0-9]{4,})_([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)_[wW]?([0-9]{1,2})(_.*?)([0-9]*?)([a-z]*?)$"); 
+	string f = filename();
+	if (regex_search(f,match,reg)) 
+	{
+		olcdb_p = 	tools::str::str_to_int(match[1]);
+		lot_p = 		match[2];
+		lot_split_p=	match[3];
+		wafer_p = 	tools::str::str_to_int(match[4]);
+		group_p = 	match[6];
+		repetition_p=	match[7];
+		not_parseable_filename_parts_p = tools::str::get_strings_between_delimiter(filename(),delimiter);
+		for (auto& m:match)
+			not_parseable_filename_parts_p.erase(remove(not_parseable_filename_parts_p.begin(),not_parseable_filename_parts_p.end(),m), not_parseable_filename_parts_p.end());
+		logger::info("files::file_t::name_t::parse_all_parts_at_once()");
+	}
 }
 
-string files::file_t::name_t::name_with_path()
+void files::file_t::name_t::parse_filename_parts()
 {
-	return "files::file_t::name_t::name_with_path()";
+	if (parsed_filename_parts) return;
+	vector<string> filename_parts = tools::str::get_strings_between_delimiter(filename(),delimiter);
+	for (auto filename_part:filename_parts)
+	{
+		// parse everything just once (except crater depths)
+		// THE ORDER IS VERY IMPORTANT
+		if (olcdb_p==-1) if(parse_olcdb(filename_part)) continue;
+		if (wafer_p==-1) if(parse_wafer(filename_part)) continue;
+		if (lot_p=="") if(parse_lot(filename_part)) continue;
+		if (chip_x_p==-1)	if(parse_chip(filename_part)) continue;
+		if (monitor_p=="") if(parse_monitor(filename_part)) continue;
+		if (group_p=="") if(parse_group(filename_part)) continue;
+// 		if (parse_crater_depth(filename_part)) continue;
+		// no parser worked
+		not_parseable_filename_parts_p.push_back(filename_part);
+	}
+	if (lot_p=="" || olcdb_p==-1 || wafer_p==-1 || group_p=="") parse_all_parts_at_once();
+	parsed_filename_parts = true;
+// 	if (lot=="" && not_parseable_filename_parts.size()>0) lot=not_parseable_filename_parts[0];
 }
+
+bool files::file_t::name_t::parse_monitor(string filename_part) 
+{
+	smatch match;
+	regex reg1 ("^m-*([a-zA-Z0-9]+)$"); 
+	regex reg2 ("^monitor-([a-zA-Z0-9]+)$"); 
+	regex reg3 ("^[Q|q]-*([a-zA-Z0-9]+)$"); 
+	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) || regex_search(filename_part,match,reg3)) 
+	{
+		monitor_p = match[1];
+		return true;
+	}
+	return false;
+}
+
+bool files::file_t::name_t::parse_chip(string filename_part)
+{
+	smatch match;
+	regex reg1 ("^x([0-9]{1,2})y([0-9]{1,2})$", std::regex_constants::icase); 
+	regex reg2 ("^chip-([0-9]{1,2})-([0-9]{1,2})$"); 
+	regex reg3 ("^c([0-9]{1,2})-([0-9]{1,2})$"); 
+	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) || regex_search(filename_part,match,reg3)) 
+	{
+		chip_x_p = tools::str::str_to_int(match[1]);
+		chip_y_p = tools::str::str_to_int(match[2]);
+		return true;
+	}
+	return false;
+}
+
+bool files::file_t::name_t::parse_olcdb(string filename_part)
+{
+	smatch match;
+	regex reg ("^([0-9]{4,})$"); 
+	if (regex_search(filename_part,match,reg)) 
+	{
+		olcdb_p = tools::str::str_to_int(filename_part);
+		return true;
+	}
+	return false;
+}
+
+bool files::file_t::name_t::parse_lot(string filename_part)
+{
+	smatch match;
+	regex reg ("^([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)$"); 
+	if (regex_search(filename_part,match,reg)) 
+	{
+		lot_p = match[1];
+		lot_split_p = match[2];
+		return true;
+	}
+	return false;
+}
+
+bool files::file_t::name_t::parse_wafer(string filename_part)
+{
+	smatch match;
+	regex reg ("^[wW]([0-9]{1,2})$"); 
+	if (regex_search(filename_part,match,reg)) 
+	{
+		wafer_p = tools::str::str_to_int(match[1]);
+		return true;
+	}
+	return false;
+}
+
+bool files::file_t::name_t::parse_group(string filename_part)
+{
+	smatch match;
+	regex reg1 ("^g-?*([0-9]+?)([a-z]*?)$"); 
+	regex reg2 ("^group-*([0-9]+?)([a-z]*?)$"); 
+	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
+	{
+		group_p = tools::str::str_to_int(match[1]);
+		repetition_p = match[2];
+		return true;
+	}
+	return false;
+}
+
+bool files::file_t::name_t::parse_repetitor(string filename_part)
+{
+	smatch match;
+	regex reg1 ("^r-?*([0-9]+?)$"); 
+	regex reg2 ("^[rep|repetitor|repetition|repeat]-*([0-9]+?)$"); 
+	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
+	{
+		repetition_p = match[1];
+		return true;
+	}
+	return false;
+}
+
+std::__cxx11::string files::file_t::name_t::filename_type_ending() const
+{
+	string filename_type_ending_p =tools::file::extract_filetype_ending(filename_with_path_p,".");
+	if (filename_type_ending_p=="")
+		logger::error("files::file_t::filename_type_ending() ",filename_type_ending_p);
+	return filename_type_ending_p;
+}
+
+std::__cxx11::string files::file_t::name_t::filename_with_path() const
+{
+	return filename_with_path_p;
+}
+
+const string files::file_t::name_t::filename() const
+{
+	return tools::file::extract_filename(filename_with_path_p);
+}
+
+const string files::file_t::name_t::directory() const
+{
+	return tools::file::extract_directory_from_filename(filename_with_path_p);
+}
+
 
 /***************************/
 /** sims_t::name_t **/
 
-files::sims_t::name_t::name_t(string& name_with_path_s) : file_t::name_t(name_with_path_s)
+files::sims_t::name_t::name_t(const std::__cxx11::string& name_with_path_s) : file_t::name_t(name_with_path_s)
 {
 	
 }
 
-string files::sims_t::name_t::test()
+/***************************/
+/** sims_t::contents_t **/
+
+files::sims_t::contents_t::contents_t(const string& filename_with_path_s, string* contents_s) : file_t::contents_t(filename_with_path_s,contents_s)
 {
-	cout << "in test:" << endl;
-	cout << name() << endl;
-	cout << name_with_path() << endl;
-	return "";
+	
 }
 
 /*******************************/
@@ -457,11 +460,11 @@ string files::sims_t::name_t::test()
 
 
 
-files::sims_t::sims_t(std::__cxx11::string filename_with_path_s) : file_t(filename_with_path_s)
+files::sims_t::sims_t(const string& filename_with_path_s, string* contents_s) : file_t(filename_with_path_s,contents_s)
 {
 }
 
-const total_sputter_depth_t files::sims_t::total_sputter_depths()
+const total_sputter_depth_t files::sims_t::name_t::total_sputter_depths()
 {
 	if (total_sputter_depths_p.size()==0)
 	{
@@ -483,9 +486,9 @@ const total_sputter_depth_t files::sims_t::total_sputter_depths()
 	return tspd;
 }
 
-const string files::sims_t::filename_without_crater_depths()
+const string files::sims_t::name_t::filename_without_crater_depths()
 {
-	string filename_wo_crater_depths  = tools::file::extract_filename(filename_with_path_p);
+	string filename_wo_crater_depths  = tools::file::extract_filename(filename_with_path());
 	stringstream remove;
 	for (double total_sputter_depth:total_sputter_depths().data())
 	{
@@ -497,7 +500,7 @@ const string files::sims_t::filename_without_crater_depths()
 	return filename_wo_crater_depths;
 }
 
-const bool files::sims_t::parse_sputter_energy_element_polarity()
+const bool files::sims_t::name_t::parse_sputter_energy_element_polarity()
 {
 	smatch match;
 	regex reg;
@@ -525,47 +528,27 @@ const bool files::sims_t::parse_sputter_energy_element_polarity()
 	return false;
 }
 
-const sputter_energy_t files::sims_t::sputter_energy()
+const sputter_energy_t files::sims_t::name_t::sputter_energy()
 {
 	if (!sputter_energy_p.is_set()) 
 		parse_sputter_energy_element_polarity();
 	return sputter_energy_p;
 }
 
-const element_t files::sims_t::sputter_element()
+const element_t files::sims_t::name_t::sputter_element()
 {
 	if (!sputter_element_p.is_set()) 
 		parse_sputter_energy_element_polarity();
 	return sputter_element_p;
 }
 
-const string files::sims_t::polarity()
+const string files::sims_t::name_t::polarity()
 {
 	if (polarity_p=="") 
 		parse_sputter_energy_element_polarity();
 	return polarity_p;
 }
 
-
-/***********************/
-/** TOF SIMS**/
-
-files::tofsims_t::tofsims_t(std::__cxx11::string filename_with_path_s) : sims_t(filename_with_path_s) 
-{
-	tool_name = "tofsims";
-	delimiter = "\t";
-	filename_type_ids_p = {"TXT"};
-	file_content_ids_p = {"###"};
-}
-
-
-/************************/
-/** PROFILER **/
-
-files::profiler_t::profiler_t(std::__cxx11::string filename_with_path_s) : file_t(filename_with_path_s) 
-{
-	tool_name = "profilometer";
-	delimiter = "\t";
-	filename_type_ids_p = {"jpg"};
-	file_content_ids_p = {"*** DATA FILES ***"};
-}
+/*****************************************/
+/*****       files::profiler_t    ********/
+/*****************************************/
