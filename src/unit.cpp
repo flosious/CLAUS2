@@ -94,10 +94,14 @@ bool unit_t::operator!=(const unit_t& obj) const
 
 unit_t unit_t::operator*(const unit_t& obj) const
 {
+	if (name()=="") return obj.name();
+	if (obj.name()=="") return name();
 	return unit_t{name() + "*" + obj.name()};
 }
 
 unit_t unit_t::operator/(const unit_t& obj) const
 {
+	if (name()=="") return unit_t{"1/(" + obj.name()+")"};
+	if (obj.name()=="") return name();
 	return unit_t{name() + " / (" + obj.name()+")"};
 }

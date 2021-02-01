@@ -28,11 +28,11 @@
 
 using namespace std;
 
-static vector<string> debug_messages;
-static vector<string> error_messages;
-static vector<string> fatal_messages;
-static vector<string> warning_messages;
-static vector<string> info_messages;
+static vector<string> fatal_messages; // 4
+static vector<string> error_messages; // 3
+static vector<string> warning_messages; // 2
+static vector<string> info_messages; // 1
+static vector<string> debug_messages; // 0
 
 // template <class T>
 class logger

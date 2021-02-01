@@ -16,7 +16,7 @@
 /*******files::dsims_dp_rpc_asc_t******/
 /**************************************/
 
-files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s,string* contents_s) : 	sims_t(filename_with_path_s, contents_s),
+files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s,string contents_s) : 	sims_t(filename_with_path_s, contents_s),
 																										name(filename_with_path_s), 
 																										contents(filename_with_path_s,contents_s)
 {
@@ -39,33 +39,75 @@ files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s
 // 	return sd;
 // }
 
-
-const vector<cluster_t> files::dsims_dp_rpc_asc_t::clusters()
+void files::dsims_dp_rpc_asc_t::to_screen(string prefix)
 {
-	vector<cluster_t> collected_clusters;
-	for (auto& clustername : contents.cluster_names())
-	{
-		if (clustername=="Ipr") continue;
-		sputter_time_t sputter_time_s;
-		sputter_depth_t sputter_depth_s;
-		concentration_t concentration_s;
-		intensity_t intensity_s;
-		for (auto& col:contents.columns())
-		{
-			if (col.cluster_name != clustername) continue;
-			if (col.dimension=="Time") sputter_time_s = sputter_time_t(col.data,col.unit);
-			if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
-			if (col.dimension=="C") concentration_s = concentration_t(col.data,col.unit);
-			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
-		}
-		cluster_t cluster(clustername,sputter_time_s,intensity_s,sputter_depth_s,concentration_s);
-		if (cluster.is_set()) collected_clusters.push_back(cluster);
-		else
-			logger::error("files::dsims_dp_rpc_asc_t::clusters() cluster.is_set()", false);
-	}
-	return collected_clusters;
+	cout << prefix << "name:" << endl;
+	cout << prefix << "\t"<<"filename_with_path:\t" << name.filename_with_path() << endl;
+	cout << prefix << "\t"<<"filename:\t" << name.filename() << endl;
+	cout << prefix << "\t"<<"filename_type_ending:\t" << name.filename_type_ending() << endl;
+	cout << prefix << "\t"<<"filename_without_crater_depths:\t" << name.filename_without_crater_depths() << endl;
+	cout << prefix << "\t"<<"simple_name:\t" << name.simple_name() << endl;
+	cout << prefix << "\t"<<"directory:\t" << name.directory() << endl;
+	
+	cout << prefix << "\tdelimiter:\t'" << name.delimiter <<"'" << endl;
+	if (name.identifiers.size()==1) cout << prefix << "\tidentifiers:\t" << *name.identifiers.begin() << endl;
+	else cout << prefix << "\tidentifiers:\t<" << name.identifiers.size() << ">" << endl;
+	
+	cout << prefix << "\t" <<"olcdb:\t" << name.olcdb() << endl;
+	cout << prefix << "\t" <<"lot:\t" << name.lot() << endl;
+	cout << prefix << "\t" << "lot_split:\t" << name.lot_split() << endl;
+	cout << prefix << "\t"<<"wafer:\t" << name.wafer() << endl;
+	cout << prefix << "\t" << "chip x;y:\t" << name.chip_x() << ";" << name.chip_y() << endl;
+	cout << prefix << "\t" << "monitor:\t" << name.monitor() << endl;
+	cout << prefix << "\t"<<"group:\t" << name.group() << endl;
+	cout << prefix << "\t"<<"repetition:\t" << name.repetition() << endl;
+	
+	if (name.not_parseable_filename_parts().size()==1) cout << prefix << "\t"<<"not_parseable_filename_parts:\t" << *name.not_parseable_filename_parts().begin() << endl;
+	else cout << prefix << "\t"<<"not_parseable_filename_parts:\t<" << name.not_parseable_filename_parts().size() << ">" << endl;
+		
+	cout << prefix << "\t"<<"sputter_element:\t" << name.sputter_element().to_string() << endl;
+	cout << prefix << "\t"<<"sputter_energy:\t" << name.sputter_energy().to_string() << endl;
+	cout << prefix << "\t"<<"secondary_polarity:\t" << name.secondary_polarity() << endl;
+	
+	cout << prefix << "\t"<<"total_sputter_depths:\t" << name.total_sputter_depths().to_string() << endl;
+	
+	
+	cout << prefix << "contents:" << endl;
+	cout << prefix << "\tdelimiter:\t'" << contents.delimiter <<"'" << endl;
+	if (contents.identifiers.size()==1) cout << prefix << "\tidentifiers:\t" << *contents.identifiers.begin() << endl;
+	else cout << prefix << "\tidentifiers:\t<" << contents.identifiers.size() << ">" << endl;
+	cout << prefix << "\t"<<"creation_date_time:\t" << tools::time::tm_struct_to_string_time(contents.creation_date_time()) << endl;
+	cout << prefix << "\t"<<"start_date_time:\t" << tools::time::tm_struct_to_string_time(contents.start_date_time()) << endl;
+	cout << prefix << "\t"<<"clusters:" << endl;
+	for (auto c:contents.clusters())
+		cout << prefix << "\t\t" << c.to_string() << endl;
+	cout << prefix << "\t"<<"Ipr:\t" << contents.Ipr().to_string() << endl;
+	
+	cout << prefix << "\t"<<"chamber_pressure:\t" << contents.chamber_pressure().to_string() << endl;
+	cout << prefix << "\t"<<"field_aperture:\t" << contents.field_aperture().to_string() << endl;
+	cout << prefix << "\t"<<"contrast_aperture:\t" << contents.contrast_aperture().to_string() << endl;
+	cout << prefix << "\t"<<"entrance_slit:\t" << contents.entrance_slit().to_string() << endl;
+	cout << prefix << "\t"<<"exit_slit:\t" << contents.exit_slit().to_string() << endl;
+	cout << prefix << "\t"<<"mass_resolution:\t" << contents.mass_resolution().to_string() << endl;
+	cout << prefix << "\t"<<"energy_window:\t" << contents.energy_window().to_string() << endl;
+	cout << prefix << "\t"<<"egate:\t" << contents.egate().to_string() << endl;
+	
+	cout << prefix << "\t"<<"secondary_polarity:\t" << contents.secondary_polarity() << endl;
+	cout << prefix << "\t"<<"secondary_voltage:\t" << contents.secondary_voltage().to_string() << endl;
+	
+	cout << prefix << "\t"<<"em_voltage:\t" << contents.em_voltage().to_string() << endl;
+	cout << prefix << "\t"<<"em_yield:\t" << contents.em_yield().to_string() << endl;
+	
+	cout << prefix << "\t"<<"sputter_element:\t" << contents.sputter_element().to_string() << endl;
+	cout << prefix << "\t"<<"sputter_energy:\t" << contents.sputter_energy().to_string() << endl;
+	cout << prefix << "\t"<<"sputter_rastersize:\t" << contents.sputter_rastersize().to_string() << endl;
+	cout << prefix << "\t"<<"analysis_rastersize:\t" << contents.analysis_rastersize().to_string() << endl;
+	
+	cout << prefix << "\t" << "matrix:" ;
+	for (auto& ele:contents.matrix_elements())
+		cout << "\t" << ele.to_string();
+	cout << endl;
 }
-
 
 /**************************************************/
 /*****  files::dsims_dp_rpc_asc_t::Ipr_t       ****/
@@ -93,6 +135,12 @@ files::dsims_dp_rpc_asc_t::Ipr_t::Ipr_t(sputter_current_t sputter_current_s, spu
 	sputter_depth_p = sputter_depth_s;
 }
 
+const std::__cxx11::string files::dsims_dp_rpc_asc_t::Ipr_t::to_string() const
+{
+	stringstream out;
+	out << sputter_time().to_string() << "\t" << sputter_depth().to_string() << "\t" << sputter_current().to_string();
+	return out.str();
+}
 
 
 /**************************************************/
@@ -117,9 +165,39 @@ files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : sims
 /**************************************************/
 
 
-files::dsims_dp_rpc_asc_t::contents_t::contents_t(const string& filename_with_path_s, string* contents_s) : sims_t::contents_t(filename_with_path_s,"\t",{"*** DATA FILES ***"},contents_s)
+files::dsims_dp_rpc_asc_t::contents_t::contents_t(const string& filename_with_path_s, string contents_s) : sims_t::contents_t(filename_with_path_s,"\t",{"*** DATA FILES ***"},contents_s)
 {
 	
+}
+
+const vector<cluster_t> files::dsims_dp_rpc_asc_t::contents_t::clusters()
+{
+	vector<cluster_t> collected_clusters;
+	for (auto& clustername : cluster_names())
+	{
+		if (clustername=="Ipr") continue;
+		sputter_time_t sputter_time_s;
+		sputter_depth_t sputter_depth_s;
+		concentration_t concentration_s;
+		intensity_t intensity_s;
+		for (auto& col:columns())
+		{
+			if (col.cluster_name != clustername) continue;
+			if (col.dimension=="Time") sputter_time_s = sputter_time_t(col.data,col.unit);
+			if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
+			if (col.dimension=="C") concentration_s = concentration_t(col.data,col.unit);
+			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
+		}
+		cluster_t cluster(clustername);
+		cluster.sputter_time_p=sputter_time_s;
+		cluster.intensity_p=intensity_s;
+		cluster.sputter_depth_p=sputter_depth_s;
+		cluster.concentration_p=concentration_s;
+		if (cluster.is_set()) collected_clusters.push_back(cluster);
+		else
+			logger::error("files::dsims_dp_rpc_asc_t::clusters() cluster.is_set()", false);
+	}
+	return collected_clusters;
 }
 
 const vector<files::dsims_dp_rpc_asc_t::column_t> files::dsims_dp_rpc_asc_t::contents_t::columns()
@@ -360,9 +438,146 @@ const quantity_t files::dsims_dp_rpc_asc_t::contents_t::get_quantity_from_dimens
 	return quantity_t{statistics::common_vector(data_vecs),unit};
 }
 
-map<string,string>& files::dsims_dp_rpc_asc_t::contents_t::infos_and_settings()
+const map<string,string>& files::dsims_dp_rpc_asc_t::contents_t::infos_and_settings()
 {
-// 	if (infos_and_settings_p.size()>0) return infos_and_settings_p;
-// 	print(raw_header_tensor()[0]);
+	if (infos_and_settings_p.size()>0) return infos_and_settings_p;
+	string key, value;
+	for (auto header_mat:raw_header_tensor())
+	{
+// 		tools::mat::remove_empty_cols_from_matrix(&header_mat);
+		for (auto& header_line:header_mat)
+		{
+			if (header_line.size()<2) continue;
+			key.clear();
+			value.clear();
+			for (auto& word:header_line)
+			{
+				if (word=="") continue;
+				if (key=="") key=word;
+				else if (value=="") value=word;
+				else break;
+			}
+			infos_and_settings_p.insert(pair<string,string>(key,value));
+		}
+	}
+	return infos_and_settings_p;
+}
+
+const tm files::dsims_dp_rpc_asc_t::contents_t::start_date_time()
+{
+	// Analysis date   03/06/2020    
+	// Analysis time   10:43
+	// "03/06/2020 10:43"
+	stringstream time;
+	time << infos_and_settings().at("Analysis date") << " " << infos_and_settings().at("Analysis time") << ":00"; 
+	return tools::time::string_time_to_tm_structure(time.str(),"%m/%d/%Y %H:%M:%S");
+}
+
+const tm files::dsims_dp_rpc_asc_t::contents_t::creation_date_time()
+{
+	// Creation date   03/06/2020    
+	// Creation time   10:43
+	// "03/06/2020 10:43"
+	stringstream time;
+	time << infos_and_settings().at("Creation date") << " " << infos_and_settings().at("Creation time") <<":00"; 
+	return tools::time::string_time_to_tm_structure(time.str(),"%m/%d/%Y %H:%M:%S");
+}
+
+const string files::dsims_dp_rpc_asc_t::contents_t::secondary_polarity()
+{
+	return infos_and_settings().at("Secondary ion polarity");
+}
+
+const sputter_energy_t files::dsims_dp_rpc_asc_t::contents_t::sputter_energy()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Impact energy (eV)"));
+	return sputter_energy_t({data},{"eV"});
+}
+
+const element_t files::dsims_dp_rpc_asc_t::contents_t::sputter_element()
+{
+	string ele = infos_and_settings().at("Primary ions");
+	ele.erase(remove(ele.begin(), ele.end(), '+'), ele.end());
+	ele.erase(remove(ele.begin(), ele.end(), '-'), ele.end());
+	ele.erase(remove(ele.begin(), ele.end(), '2'), ele.end());
+	return element_t({ele});
+}
+
+const secondary_voltage_t files::dsims_dp_rpc_asc_t::contents_t::secondary_voltage()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Secondary ion energy (V)"));
+	return secondary_voltage_t({data},{"V"});
+}
+
+const sputter_rastersize_t files::dsims_dp_rpc_asc_t::contents_t::sputter_rastersize()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Raster size (um)"));
+	return sputter_rastersize_t({data},{"um"});
+}
+
+const analysis_rastersize_t files::dsims_dp_rpc_asc_t::contents_t::analysis_rastersize()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Analyzed area size (um)"));
+	return sputter_rastersize_t({data},{"um"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::chamber_pressure()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Analysis chamber press (mbar)"));
+	return quantity_t("chamber_pressure",{data},{"mbar"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::contrast_aperture()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Contrast aperture (um)"));
+	return quantity_t("contrast_aperture",{data},{"um"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::egate()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("EGate rate (%)"));
+	return quantity_t("egate",{data},{"%"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::em_voltage()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("EM HV (V)"));
+	return quantity_t("em_voltage",{data},{"V"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::em_yield()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("EM yield (%)"));
+	return quantity_t("em_yield",{data},{"%"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::entrance_slit()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Entrance slit (um)"));
+	return quantity_t("entrance_slit",{data},{"um"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::energy_window()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Energy window (eV)"));
+	return quantity_t("energy_window",{data},{"eV"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::exit_slit()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Exit slit (um)"));
+	return quantity_t("exit_slit",{data},{"um"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::field_aperture()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Field aperture (um)"));
+	return quantity_t("field_aperture",{data},{"um"});
+}
+
+const quantity_t files::dsims_dp_rpc_asc_t::contents_t::mass_resolution()
+{
+	double data = tools::str::str_to_double(infos_and_settings().at("Mass resolution"));
+	return quantity_t("mass_resolution",{data},{""});
 }
 

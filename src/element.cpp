@@ -1,139 +1,211 @@
 #include "element.hpp"
 
-int element_t::atoms() const
+
+/************************************/
+/*********     isotope_t       ******/
+/************************************/
+
+isotope_t::isotope_t(const std::__cxx11::string symbol_s, const int nucleons_s, const double abundance_s) : symbol(symbol_s), 
+																											nucleons_p(nucleons_s),
+																											abundance_p(abundance_s)
+{}
+
+// const int isotope_t::amount_from_abundance() const
+// {
+// 	return pow(10,ceil(log10(abs(abundance_p))))*abundance_p;
+// }
+
+
+const abundance_t isotope_t::abundance() const
 {
-	return atoms_p;
+	if (abundance_p>0) return abundance_t();
+	if (symbol=="") 
+	{
+		logger::error("isotope_t::abundance() symbol not set", "this will likely cause calculation errors");
+		return abundance_t();
+	}
+	if (nucleons()<=0)
+	{
+		logger::error("abundance_t::mass() nucleons not set or found", "this will likely cause calculation errors");
+		return mass_t();
+	}
+	if (PSE.element(symbol)->isotope_from_nucleons(nucleons())==nullptr) 
+	{
+		logger::error("isotope_t::abundance() isotope not found in PSE", "this will likely cause calculation errors");
+		return abundance_t();
+	}
+	return abundance_t({PSE.element(symbol)->isotope_from_nucleons(nucleons())->abundance});
 }
 
-std::__cxx11::string element_t::symbol() const
+const mass_t isotope_t::mass() const
 {
-	return symbol_p;
+	if (symbol=="")
+	{
+		logger::error("isotope_t::mass() symbol not set", "this will likely cause calculation errors");
+		return mass_t();
+	}
+	if (nucleons()<=0)
+	{
+		logger::error("isotope_t::mass() nucleons not set or found", "this will likely cause calculation errors");
+		return mass_t();
+	}
+	if (PSE.element(symbol)->isotope_from_nucleons(nucleons())==nullptr) 
+	{
+		logger::error("mass_t::abundance() isotope not found in PSE", "this will likely cause calculation errors");
+		return mass_t();
+	}
+	return mass_t({PSE.element(symbol)->isotope_from_nucleons(nucleons())->mass});
 }
-bool element_t::operator!=(const element_t& obj) const
+
+const int isotope_t::nucleons() const
 {
-	return !(operator==(obj));
+	if (nucleons_p>0) return nucleons_p;
+	if (symbol=="") 
+	{
+		logger::error("isotope_t::mass() symbol not set", "this will likely cause calculation errors");
+		return nucleons_p;
+	}
+	return PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
 }
-bool element_t::operator==(const element_t& obj) const
+
+
+
+const bool isotope_t::operator==(const isotope_t& obj) const
 {
-	if (symbol()!=obj.symbol()) return false;
+	if (symbol!=obj.symbol) return false;
 	if (nucleons()!=obj.nucleons()) return false;
 	return true;
 }
-bool element_t::operator<(const element_t& obj) const
+
+const bool isotope_t::operator<(const isotope_t& obj) const
 {
-	if (symbol()<obj.symbol()) return true;
-	if (nucleons()<obj.nucleons()) return true;
+	if (symbol < obj.symbol) return true;
+	if (nucleons() < obj.nucleons()) return true;
 	return false;
 }
 
-std::__cxx11::string element_t::name() const
+const std::__cxx11::string isotope_t::to_string() const
 {
 	stringstream out;
-	out << nucleons() << symbol();
+	out << nucleons() << symbol;
+	if (abundance().is_set())
+		out << " " << abundance().to_string();
 	return out.str();
 }
 
-const int element_t::nucleons() const
+
+
+
+/************************************/
+/*********     element_t       ******/
+/************************************/
+
+
+
+element_t::element_t(const vector<isotope_t>& isotopes_s) : isotopes(isotopes_s)
 {
-	
-	return nucleons_p;
 }
 
-
-element_t::element_t(std::__cxx11::string element_str)
+element_t::element_t(const isotope_t& isotope_s) : isotopes({isotope_s})
 {
-	smatch match;
-	regex reg ("^([0-9]{0,3})([a-zA-Z]{1,2})([0-9]*)$"); 
-	if (regex_search(element_str,match,reg)) 
+}
+
+const int element_t::protons() const
+{
+	if (symbol()=="")
 	{
-		if (match[1].length()>0) nucleons_p = tools::str::str_to_int(match[1]);
-		symbol_p = match[2];
-		if (match[3].length()>0) atoms_p = tools::str::str_to_int(match[3]);
-		if (nucleons_p<1)
-		{
-			nucleons_p = element_t(PSE.get_isotope_with_highest_abundance(symbol())).nucleons();
-		}
+		logger::error("pse_t::element_t::protons() symbol is empty","abort");
+		return -1;
 	}
+	return PSE.element(symbol())->protons;
 }
 
 
-element_t::element_t::element_t()
+const mass_t element_t::mass() const
 {
-
-}
-
-element_t::element_t::element_t(int nucleons_s, string symbol_s)
-{
-	nucleons_p = nucleons_s;
-	symbol_p = symbol_s;
-	if (nucleons_p<1)
+	if (symbol()!="" && isotopes.size()==0)
 	{
-		nucleons_p = element_t(PSE.get_isotope_with_highest_abundance(symbol())).nucleons();
+		return mass_t({PSE.element(symbol())->mass()});
 	}
+	mass_t mass_s({0});
+	for (int i=0;i<isotopes.size();i++)
+		mass_s += (isotopes.at(i).mass() * isotopes.at(i).abundance());
+	return mass_s;
 }
 
-const bool element_t::is_set()
+const std::__cxx11::string element_t::symbol() const
 {
-	if (symbol()=="") return false;
-	if (PSE.get_isotopes_from_element(symbol()).size()==0) return false;
-	for (auto& nucleon : PSE.get_isotopes_from_element(symbol()))
+	if (symbol_p!="") return symbol_p;
+	if (isotopes.size()==0)
 	{
-		if (tools::str::str_to_int(nucleon)==nucleons()) return true;
+		logger::error("element_t::symbol isotopes.size()==0", "abort");
+		return "";
 	}
-	return false;
+	return isotopes.at(0).symbol;
 }
 
-
-/************************/
-
-
-
-/*
-
-
-
-int isotope_t::nucleons() const
-{
-	return nucleons_p;
-}
-bool isotope_t::operator!=(const isotope_t& obj) const
-{
-	return !(operator==(obj));
-}
-bool isotope_t::operator==(const isotope_t& obj) const
+const bool element_t::operator==(const element_t& obj) const
 {
 	if (symbol()!=obj.symbol()) return false;
-	if (atoms()!=obj.atoms()) return false;
-	if (nucleons()!=obj.nucleons()) return false;
 	return true;
 }
-bool isotope_t::operator<(const isotope_t& obj) const
+
+const bool element_t::operator<(const element_t& obj) const
 {
-	if (symbol()<obj.symbol()) return true;
-	if (atoms()<obj.atoms()) return true;
-	if (nucleons()<obj.nucleons()) return true;
-	return false;
+	return symbol()<obj.symbol();
 }
-std::__cxx11::string isotope_t::to_string() const
+
+const std::__cxx11::string element_t::to_string() const
 {
 	stringstream out;
-	out << nucleons() << symbol() << atoms();
+	for (int i=0;i<isotopes.size();i++)
+	{
+		out << isotopes.at(i).to_string() << "\t";
+	}
 	return out.str();
 }
 
-isotope_t::isotope_t(std::__cxx11::string isotope_str)
+element_t::element_t(const string symbol_s) : symbol_p(symbol_s)
 {
-	smatch match;
-	regex reg ("^([0-9]{1,3})([a-zA-Z]{1,2})([0-9]*)$"); 
-	if (regex_search(isotope_str,match,reg)) 
-	{
-		nucleons_p = tools::str::str_to_int(match[1]);
-		symbol_p = match[2];
-		if (match[3].length()>0) atoms_p = tools::str::str_to_int(match[3]);
-	}
 }
 
+// const vector<isotope_t> * element_t::isotopes() const
+// {
+// 	if (isotopes_p.size()>0)
+// 		return &isotopes_p;
+// 	if (symbol()!="")
+// 	{
+// 		vector<isotope_t> isos;
+// 		for (auto& iso : PSE.element(symbol())->isotopes)
+// 		{
+// 			isos.push_back({symbol(),iso.nucleons,iso.abundance});
+// 		}
+// 		*this = element_t(isos);
+// 	}
+// 	return nullptr;
+// }
 
-isotope_t::isotope_t()
-{
-}*/
+
+// set<element_t> element_t::elements(vector<isotope_t>& isotopes)
+// {
+// 	set<element_t> elements;
+// 	set<string> symbols;
+// 	for (auto& iso : isotopes)
+// 		symbols.insert(iso.symbol);
+// 	
+// 	for (auto& symbol : symbols)
+// 	{
+// 		vector<isotope_t> isotopes_in_ele;
+// 		for (auto& iso : isotopes)
+// 		{
+// 			if (iso.symbol==symbol)
+// 				isotopes_in_ele.push_back(iso);
+// 		}
+// 		if (isotopes_in_ele.size()>0) elements.insert(isotopes_in_ele);
+// 	}
+// 	return elements;
+// }
+
+
+
+

@@ -23,21 +23,34 @@ processor::processor(vector<string> args_p)
 {	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	set<string> input_strings(args_p.begin(),args_p.end()); // eliminate same entries
-// 	set<files::dsims_dp_rpc_asc_t> files = load_files<files::dsims_dp_rpc_asc_t>(input_strings);
 	
-	files::dsims_dp_rpc_asc_t f(*input_strings.begin());
-	f.name.is_correct_type();
-	f.contents.is_correct_type();
-	cout << f.contents.delimiter.size() << "|" << f.contents.delimiter  << "|"<< endl;
-	cout << f.name.delimiter.size() << "|" << f.name.delimiter << "|" << endl;
-	cout << f.name.lot() << endl;
-// 	for (auto f:files)
-// 	{
-// 		cout << *f.name.identifiers.begin() << endl;
-// 		f.contents.infos_and_settings();
-// 	}
+	set<files::dsims_dp_rpc_asc_t> dsims_files = load_files<files::dsims_dp_rpc_asc_t>(input_strings);
+	set<sample_t> samples = samples_from_files(dsims_files);
+	
+	for (auto file:dsims_files)
+	{
+		file.to_screen();
+// 		file.contents.matrix_elements();
+// 		break;
+	}
+	pse_t PSE;
+	PSE.to_screen();
+	
+// 	files::dsims_dp_rpc_asc_t f(*input_strings.begin());
+// 	vector<files::dsims_dp_rpc_asc_t> files;
+// 	files.push_back(f);
+// 	files.begin()->to_screen();
+	
+// 	cout << f.contents.sputter_energy().to_string() << endl;
+// 	cout << f.contents.secondary_polarity() << endl;
+// 	for (auto c:f.contents.clusters())
+// 		cout << c.name() << endl;
 
-	
+	print(debug_messages);
+	print(info_messages);
+	print(warning_messages);
+	print(error_messages);
+	print(fatal_messages);
 
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;

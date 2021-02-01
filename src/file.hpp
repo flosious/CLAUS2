@@ -65,7 +65,7 @@ template <typename T>
 	for (auto& fn:filenames_with_path_s)
 	{
 		T file(fn);
-		if (file.is_correct_type())
+		if (file.name.is_correct_type() && file.contents.is_correct_type())
 			files_s.insert(file);
 	}
 	return files_s;	
@@ -90,23 +90,24 @@ protected:
 	{
 	private:
 		///should be freed after parse_data_and_header_tensors, as it has no longer use
-		string contents_v;
-		///should be freed after parse_data_and_header_tensors, as it has no longer use
-		string* contents_p;
+		string contents_p;
 		const string& filename_with_path_p;
 		///populates raw_data_tensor_p, raw_header_tensor_p, will clear *contents_p
 		bool parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor);
 	protected:
 		vector<vector<vector<string>>> raw_data_tensor_p, raw_header_tensor_p;
-		vector<vector<vector<string>>> raw_data_tensor();
-		vector<vector<vector<string>>> raw_header_tensor();
+		vector<vector<vector<string>>>& raw_data_tensor();
+		vector<vector<vector<string>>>& raw_header_tensor();
 	public:
+		/// "matrix = Si Ge 30Sn"
+		const set<element_t> matrix_elements();
+		void to_screen(string prefix="");
 		const string delimiter;
 		const set<string> identifiers;
-		const string& load();
+		const std::__cxx11::string& contents_string();
 		const bool is_correct_type(); 
 		///give me contents_s if already loaded somewhere
-		contents_t(const string& filename_with_path_s,string delimiter_s,const set<string> identifiers_s,string* contents_s=nullptr);
+		contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s,string contents_s="");
 	};
 	///standard IHP olc filename template
 	class name_t
@@ -139,8 +140,8 @@ protected:
 	public:
 		const string delimiter;
 		const set<string> identifiers;
-		name_t(const string& name_with_path_s,string delimiter_s,const set<string> identifiers_s);
-		vector<string> not_parseable_filename_parts();
+		name_t(const string& name_with_path_s, const string delimiter_s,const set<string> identifiers_s);
+		const vector<string>& not_parseable_filename_parts();
 		string filename_with_path() const;
 		string filename_type_ending() const;
 		const string filename() const;
@@ -151,7 +152,7 @@ protected:
 		string monitor();
 		string repetition();
 		///empty if lot and wafer is set
-		string simple_name();
+		const string simple_name();
 		int chip_x();
 		int chip_y();
 		int olcdb();
@@ -159,17 +160,18 @@ protected:
 		void to_screen(string prefix="");
 		const bool is_correct_type(); 
 	};
-	bool correct_file_type=false;
+// 	bool correct_file_type=false;
 public:
 	///returns the file_t parent
 	file_t file() const;
-	file_t(const string& filename_with_path_s, string* contents_s=nullptr);
+	file_t(const string& filename_with_path_s, string contents_s="");
 	name_t name;
 	contents_t contents;
 	///this does not work as intended for some reason
-	const bool is_correct_type(); 
+// 	const bool is_correct_type(); 
 	bool operator< (const file_t& fname) const;
 	bool operator== (const file_t& fname) const;
+	const string creation_date_time() const;
 };
 
 /**********************/
@@ -193,32 +195,32 @@ protected:
 	{
 	private:
 		vector<total_sputter_depth_t> total_sputter_depths_p;
-		const bool parse_sputter_energy_element_polarity();
-		string polarity_p="";
+		bool parse_sputter_energy_element_polarity();
+		string secondary_polarity_p="";
 		sputter_energy_t sputter_energy_p;
-		element_t sputter_element_p;
+		string sputter_element_p;
 	public:
-		name_t(const string& name_with_path_s,string delimiter_s,const set<string> identifiers_s);
+		name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s);
 		const sputter_energy_t sputter_energy();
 		const element_t sputter_element();
+		const string secondary_polarity();
 		const total_sputter_depth_t total_sputter_depths();
 		const string filename_without_crater_depths();
-		const string polarity();
 	};
 	class contents_t : public file_t::contents_t
 	{
 	public:
 		///give me contents_s if already loaded somewhere
-		contents_t(const string& filename_with_path_s,string delimiter_s,const set<string> identifiers_s,string* contents_s=nullptr);
+		contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s,string contents_s="");
 	};
 public:
-	sims_t(const string& filename_with_path_s, string* contents_s=nullptr);
+	sims_t(const string& filename_with_path_s, string contents_s="");
 };
+
 
 /**************************/
 /*** dsims_dp_rpc_asc_t ***/
 /**************************/
-
 class dsims_dp_rpc_asc_t : public sims_t
 {
 	friend class dsims_jpg_t;
@@ -234,14 +236,16 @@ private:
 		const sputter_time_t sputter_time() const;
 		const sputter_depth_t sputter_depth() const;
 		const sputter_current_t sputter_current() const;
+		const string to_string() const;
 	};
 protected:
 // public:
 	class contents_t : public sims_t::contents_t
 	{	
 	private:
-// 		const string delimiter;
 		map<string,string> infos_and_settings_p;
+		///will create a map: keys->values from raw_data_tensor()
+		const map<string,string>& infos_and_settings();
 		vector<string> units_p;
 		vector<string> dimensions_p;
 		vector<string> cluster_names_p;
@@ -261,14 +265,34 @@ protected:
 		const quantity_t get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername="");
 		const vector<string>& units();
 		const vector<string>& dimensions();
-	public:
-		contents_t(const string& filename_with_path_s,string* contents_s=nullptr);
-		const set<string> identifiers;
-		const vector<string>& cluster_names();
 		const vector<column_t> columns();
-		const Ipr_t Ipr();
+		const vector<string>& cluster_names();
+	public:
+		contents_t(const string& filename_with_path_s,string contents_s="");
+// 		const set<string> identifiers;
 		
-		map<string,string>& infos_and_settings();
+		
+		///primary current (sputter_current vs time/depth)
+		const Ipr_t Ipr();
+		const tm start_date_time();
+		const tm creation_date_time();
+		const sputter_energy_t sputter_energy();
+		const secondary_voltage_t secondary_voltage();
+		const element_t sputter_element();
+		const string secondary_polarity();
+		const vector<cluster_t> clusters();
+		const sputter_rastersize_t sputter_rastersize();
+		const analysis_rastersize_t analysis_rastersize();
+		const quantity_t chamber_pressure();
+		const quantity_t egate();
+		const quantity_t mass_resolution();
+		const quantity_t field_aperture();
+		const quantity_t contrast_aperture();
+		const quantity_t entrance_slit();
+		const quantity_t exit_slit();
+		const quantity_t energy_window();
+		const quantity_t em_yield();
+		const quantity_t em_voltage();
 	};
 	class name_t : public sims_t::name_t
 	{
@@ -276,18 +300,19 @@ protected:
 // 		const string delimiter;
 	public:
 		name_t(const string& name_with_path_s);
-		const set<string> identifiers;
+// 		const set<string> identifiers;
 	};
 public:
-	dsims_dp_rpc_asc_t(const string& filename_with_path_s, string* contents_s=nullptr);
+	dsims_dp_rpc_asc_t(const string& filename_with_path_s, string contents_s="");
 	name_t name;
 	contents_t contents;
+	void to_screen(string prefix="");
 	
 // 	static std::set< files::dsims_dp_rpc_asc_t > files(std::set< std::__cxx11::string >& filenames_with_path);
 	const sputter_time_t greatest_common_sputter_time();
 	const sputter_depth_t greatest_common_sputter_depth();
-	const vector<cluster_t> clusters();
 };
+
 
 /**************************/
 /*** tofsims_TXT_t      ***/
@@ -299,9 +324,10 @@ private:
 	{
 	private:
 		bool parse_analysis_energy_element(string filename_part);
+		string analysis_element_p;
 	public:
-		contents_t(const string& filename_with_path_s,string* contents_s=nullptr);
-		const set<string> identifiers;
+		contents_t(const string& filename_with_path_s,string contents_s="");
+// 		const set<string> identifiers;
 		const element_t analysis_element();
 		const analysis_energy_t analysis_energy();
 	};
@@ -310,10 +336,10 @@ private:
 	private:
 	public:
 		name_t(const string& name_with_path_s);
-		const set<string> identifiers;
+// 		const set<string> identifiers;
 	};
 public:
-	tofsims_TXT_t(const string& filename_with_path_s, string* contents_s=nullptr);
+	tofsims_TXT_t(const string& filename_with_path_s, string contents_s="");
 	name_t name;
 	contents_t contents;
 // 	static set<tofsims_TXT_t> files(set<string>& filenames_with_path);
@@ -324,7 +350,7 @@ class dsims_jpg_t : public file_t
 	class name_t : dsims_dp_rpc_asc_t::name_t
 	{
 		name_t(const string& name_with_path_s);
-		const set<string> identifiers;
+// 		const set<string> identifiers;
 	};
 	dsims_jpg_t(string filename_with_path_s);
 // 	static set<dsims_jpg_t> files(set<string>& filenames_with_path);
@@ -341,15 +367,15 @@ private:
 	private:
 		bool parse_analysis_energy_element(string filename_part);
 	public:
-		contents_t(const string& filename_with_path_s,string* contents_s=nullptr);
-		const set<string> identifiers;
+		contents_t(const string& filename_with_path_s,string contents_s="");
+// 		const set<string> identifiers;
 	};
 	class name_t : file_t::name_t
 	{
 	private:
 	public:
 		name_t(const string& name_with_path_s);
-		const set<string> identifiers;
+// 		const set<string> identifiers;
 // 		const string delimiter="_";
 	};
 public:

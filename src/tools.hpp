@@ -7,7 +7,6 @@
 #include <cmath>
 #include <iomanip>      // std::get_time
 #include <ctime>        // struct std::tm
-#include <time.h>
 #include <algorithm>
 #include <iostream>
 #include <stdlib.h>
@@ -163,8 +162,8 @@ public:
 		static void combine_vecs_to_map(vector<double> *X, vector<double> Y, map<double,double>* XY_mat);
 		static void combine_vecs_to_map(vector<double> X, vector<double> *Y, map<double,double>* XY_mat);
 		static void combine_vecs_to_map(vector<double> X, vector<double> Y, map<double,double>* XY_mat);
-		static string combine_vec_to_string(vector<string>& vec, string delimiter="");
-		static string combine_vec_to_string(vector<string> vec, string delimiter="");
+		static string combine_vec_to_string(const vector<string>& vec, string delimiter="");
+// 		static string combine_vec_to_string(vector<string> vec, string delimiter="");
 		
 	};
     class mat {

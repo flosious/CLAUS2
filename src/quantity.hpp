@@ -72,6 +72,8 @@ public:
 	void operator<<(const quantity_t& obj);
 	quantity_t operator+(const quantity_t& quantity_p) const;
 	quantity_t operator+(const double summand) const;
+	void operator+=(const quantity_t& quantity_p);
+	void operator+=(const double summand);
 	quantity_t operator-(const quantity_t& quantity_p) const;
 	quantity_t operator-(const double summand) const;
 	quantity_t operator*(const quantity_t& quantity_p) const;
@@ -113,6 +115,13 @@ public:
 		sputter_energy_t(quantity_t quantity_s);
 	}; 
 	
+	class secondary_voltage_t : public quantity_t
+	{
+	public:;
+		secondary_voltage_t(vector<double> data_s={},unit_t unit_s={"V"});
+		secondary_voltage_t(quantity_t quantity_s);
+	}; 
+	
 	class sputter_rastersize_t : public quantity_t
 	{
 	public:
@@ -152,13 +161,6 @@ public:
 	public:
 		analysis_energy_t(vector<double> data_s={},unit_t unit_s={"eV"});
 		analysis_energy_t(quantity_t quantity_s);
-	};
-	
-	class analysis_rastersize_t : public quantity_t
-	{
-	public:
-		analysis_rastersize_t(vector<double> data_s={},unit_t unit_s={"m"});
-		analysis_rastersize_t(quantity_t quantity_s);
 	};
 	
 	class concentration_t : public quantity_t
@@ -209,6 +211,12 @@ public:
 		SR_t(vector<double> data_s={},unit_t unit_s={"nm/s"});
 		SR_t(quantity_t quantity_s);
 	}; 
-		
+	
+	class analysis_rastersize_t : public quantity_t
+	{
+	public:
+		analysis_rastersize_t(vector<double> data_s={},unit_t unit_s={"m"});
+		analysis_rastersize_t(quantity_t quantity_s);
+	}; 
 
 #endif // QUANTITY_HPP

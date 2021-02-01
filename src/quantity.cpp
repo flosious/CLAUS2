@@ -201,6 +201,7 @@ quantity_t quantity_t::operator-(const double summand) const
 quantity_t quantity_t::operator * (const quantity_t& quantity_p) const
 {
 	if (!is_set() || !quantity_p.is_set()) return {};
+
 	quantity_t produkt{name() + "*" + quantity_p.name(),{unit()*quantity_p.unit()}};
 	
 	if (data_p.size()==1)
@@ -278,6 +279,17 @@ quantity_t quantity_t::operator * (const double factor) const
 
 	return quotient;
 }
+
+void quantity_t::operator+=(const double summand)
+{
+	*this = *this + summand;
+}
+
+void quantity_t::operator+=(const quantity_t& quantity_p)
+{
+	*this = *this + quantity_p;
+}
+
 
 /******************************************/
 /*STATICS*/
@@ -360,3 +372,10 @@ RSF_t::RSF_t(quantity_t quantity_s) : RSF_t(quantity_s.data(),quantity_s.unit())
 
 SR_t::SR_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_rate",data_s,unit_s){}
 SR_t::SR_t(quantity_t quantity_s) : SR_t(quantity_s.data(),quantity_s.unit()) {}
+
+secondary_voltage_t::secondary_voltage_t(vector<double> data_s, unit_t unit_s) : quantity_t("secondary_voltage",data_s,unit_s) {}
+secondary_voltage_t::secondary_voltage_t(quantity_t quantity_s) :secondary_voltage_t(quantity_s.data(),quantity_s.unit()) {}
+
+
+
+

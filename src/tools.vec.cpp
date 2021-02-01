@@ -30,15 +30,16 @@
 // 	result_vec->insert(result_vec->end(),adder.begin(),adder.end());
 // }
 
-string tools::vec::combine_vec_to_string(vector<string> vec, string delimiter)
-{
-	string result="";
-	for (int i=0;i<vec.size();i++)
-		result+=delimiter+vec[i];
-	if (delimiter!="" && result.length()>delimiter.length()) result.erase(0,delimiter.length());
-	return result;
-}
-string tools::vec::combine_vec_to_string(vector<string>& vec, string delimiter)
+// string tools::vec::combine_vec_to_string(vector<string> vec, string delimiter)
+// {
+// 	string result="";
+// 	for (int i=0;i<vec.size();i++)
+// 		result+=delimiter+vec[i];
+// 	if (delimiter!="" && result.length()>delimiter.length()) result.erase(0,delimiter.length());
+// 	return result;
+// }
+
+string tools::vec::combine_vec_to_string(const vector<string>& vec, string delimiter)
 {
 	string result="";
 	for (int i=0;i<vec.size();i++)

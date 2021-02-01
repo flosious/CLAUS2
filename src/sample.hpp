@@ -31,6 +31,20 @@
 using namespace std;
 
 class dsims_measurement_t;
+class sample_t;
+
+
+template <typename T>
+set<sample_t> samples_from_files(set<T>& files)
+{
+	set<sample_t> samples_s;
+	for (auto f:files)
+	{
+		samples_s.insert(f.file());
+	}
+	return samples_s;
+}
+	
 
 class sample_t
 {
@@ -46,44 +60,41 @@ private:
 		static bool chip;
 		static bool simple_name;
 	} definition;
-	int wafer_number_p=-1;
-	string lot_p="";
-	string lot_split_p="";
-	string monitor_p="";
-	string simple_name_p="unknown_sample_name";
-	matrix_t matrix_p;
 public:
-	sample_t(string lot_s, int wafer_number_s ,string lot_split_s="", string monitor_s="", int chip_x_s=-1, int chip_y_s=-1 ,string simple_name_s="");
-// 	sample_t(files::file_t file_s);
-// 	sample_t(files::sims_t file_s);
-	sample_t(files::dsims_dp_rpc_asc_t file_s);
-	sample_t(files::tofsims_TXT_t file_s);
-	
-	
+	class matrix_t
+	{
+	private:
+		set<element_t> elements_p;
+	public:
+		matrix_t(set<element_t> elements_s);
+		const string to_string();
+		const set<element_t>& elements();
+		bool operator==(matrix_t& obj) ;
+		bool operator!=(matrix_t& obj) ;
+	};
 	class chip_t
 	{
-		friend class sample_t;
-	private:
-		int x_p=-1;
-		int y_p=-1;
 	public:
-		int x() const;
-		int y() const;
+		chip_t(const int x, const int y);
+		const int x;
+		const int y;
 		bool operator==(const chip_t& obj) const;
 		bool operator!=(const chip_t& obj) const;
-	} chip;
-	int wafer_number() const;
-	string lot() const;
-	string lot_split() const;
-	string monitor() const;
-	//used, when lot or wafer is empty
-	string simple_name() const;
-// 	sample_t(string& lot_s, string& lot_split_s,int& wafer_s,string& monitor_s, chip_t& chip_s, string& simple_name_s);
-// 	sample_t(files::file_t& file);
+	};
+	sample_t(string lot_s, int wafer_number_s ,string lot_split_s="", string monitor_s="", int chip_x_s=-1, int chip_y_s=-1 ,string simple_name_s="",set<element_t> elements_s={});
+	sample_t(files::file_t file_s);
+	sample_t(files::dsims_dp_rpc_asc_t file_s);
+
+	const chip_t chip;
+	const int wafer_number;
+	const string lot;
+	const string lot_split;
+	const string monitor;
+	const string simple_name;
 	// reads from database
-	matrix_t matrix() const;
-    unordered_set<dsims_measurement_t*> dsims_measurements;
-	void to_screen(string prefix="") const;
+	matrix_t matrix;
+    
+	void to_screen(string prefix="");
 	bool operator==(const sample_t& obj) const;
 	bool operator!=(const sample_t& obj) const;
 	bool operator<(const sample_t& obj) const;

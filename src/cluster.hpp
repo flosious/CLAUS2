@@ -24,29 +24,57 @@
 #include "element.hpp"
 #include <vector>
 #include "log.hpp"
+#include "quantity.hpp"
+#include "regex"
+// #include "sample.hpp"
+// #include "crater.hpp"
 
 using namespace std;
 
+namespace files
+{
+	class dsims_dp_rpc_asc_t;
+};
+
 class cluster_t
 {
+	friend class files::dsims_dp_rpc_asc_t;
 private:
-	string clustername_p;
-	///each element contains the number of atoms
-	vector<element_t> elements_p;
+	int equilibrium_starting_position=-1;
+	map<isotope_t,int> isotopes_amount_p;
 	concentration_t concentration_p;
 	intensity_t intensity_p;
 	sputter_time_t sputter_time_p;
 	sputter_depth_t sputter_depth_p;
+// 	const crater_t* crater();
+// 	const sample_t::matrix_t* matrix();
+	const cluster_t* reference_cluster();
+	///put this in the measurement_t class
+// 	vector<element_t>* matrix_elements; 
+
+	
 public:
-	bool is_set() const;
-	const concentration_t concentration() const;
-	const intensity_t intensity() const;
-	const sputter_time_t sputter_time() const;
-	const sputter_depth_t sputter_depth() const;
-	const vector<element_t> elements();
+	const map<isotope_t,int>& isotopes_amount() const;
+	///pointer to the isotope within this cluster, where matrix isotopes have been removed
+	const isotope_t* corsseponding_isotope() const; 
+	/// "28Si0.4 29Si0.5" will add 28Si with an abundance of 4/9*100% and 29Si with an abundance of 5/9*100% to the isotopes
 	cluster_t(string clustername);
-	cluster_t(string clustername, sputter_time_t sputter_time_s,intensity_t intensity_s,sputter_depth_t sputter_depth_s={},concentration_t concentration_s={});
-	cluster_t(vector<element_t> elements);
+	/// "28Si0.4 29Si0.5" will add 28Si with an abundance of 4/9*100% and 29Si with an abundance of 5/9*100% to the isotopes
+	cluster_t(vector<string> clustername_parts);
+// 	cluster_t(string clustername, sputter_time_t sputter_time_s,intensity_t intensity_s,sputter_depth_t sputter_depth_s={},concentration_t concentration_s={});
+	cluster_t(vector<isotope_t>& isotopes_s);
+	cluster_t(map<isotope_t,int>& isotopes_amount_s);
+	
+	const string to_string() const;
+	const bool is_set() const;
+	///isotopes which define this cluster
+	const concentration_t* concentration();
+	const intensity_t* intensity();
+	const sputter_time_t* sputter_time();
+	const sputter_depth_t* sputter_depth();
+	const SF_t SF();
+	///sputter equilibrium state of this cluster
+	cluster_t equilibrium();
 };
 
 #endif // CLUSTER_T_HPP
