@@ -60,8 +60,7 @@ cluster_t::cluster_t(vector<std::__cxx11::string> clustername_parts)
 			if (match[1]!="") nucleons = tools::str::str_to_int(match[1]);
 			else 
 			{
-				logger::error("cluster_t::cluster_t() nucleons not parseable, skipping", iso_p);
-				continue;
+				nucleons=PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
 			}
 			if (match[2]!="") symbol = match[2];
 			else
@@ -69,7 +68,7 @@ cluster_t::cluster_t(vector<std::__cxx11::string> clustername_parts)
 				logger::error("cluster_t::cluster_t() symbol not parseable, skipping", iso_p);
 				continue;
 			}
-			if (match[3]!="") atoms = tools::str::str_to_double(match[3]);
+			if (match[3]!="") atoms = tools::str::str_to_int(match[3]);
 			else atoms = 1;
 			isotopes_amount_p.insert(pair<isotope_t,int> ({symbol,nucleons},atoms));
 		}

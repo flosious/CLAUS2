@@ -75,7 +75,15 @@ unit_t::unit_t(std::__cxx11::string name_s)
 	name_p = name_s;
 }
 
-std::__cxx11::string unit_t::name() const
+const std::__cxx11::string unit_t::to_string() const
+{
+	stringstream out;
+	out << "[" << name() << "]";
+	return out.str();
+}
+
+
+const std::__cxx11::string unit_t::name() const
 {
 	return name_p;
 }

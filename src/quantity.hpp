@@ -26,6 +26,8 @@
 #include <string>
 #include "unit.hpp"
 #include "print.hpp"
+#include "log.hpp"
+#include <math.h>
 
 using namespace std;
 
@@ -35,6 +37,7 @@ using namespace std;
 */
 class quantity_t
 {
+// 	friend class matrix_t;
 protected:
 	string name_p="";
 	unit_t unit_p{""};
@@ -108,11 +111,11 @@ public:
 		abundance_t(quantity_t quantity_s);
 	}; 
 	
-	class sputter_energy_t : public quantity_t
+	class energy_t : public quantity_t
 	{
 	public:;
-		sputter_energy_t(vector<double> data_s={},unit_t unit_s={"eV"});
-		sputter_energy_t(quantity_t quantity_s);
+		energy_t(vector<double> data_s={},unit_t unit_s={"eV"});
+		energy_t(quantity_t quantity_s);
 	}; 
 	
 	class secondary_voltage_t : public quantity_t
@@ -122,13 +125,19 @@ public:
 		secondary_voltage_t(quantity_t quantity_s);
 	}; 
 	
-	class sputter_rastersize_t : public quantity_t
+	class rastersize_t : public quantity_t
 	{
 	public:
-		sputter_rastersize_t(vector<double> data_s={},unit_t unit_s={"um"});
-		sputter_rastersize_t(quantity_t quantity_s);
+		rastersize_t(vector<double> data_s={},unit_t unit_s={"um"});
+		rastersize_t(quantity_t quantity_s);
 	};
 	
+	class depth_t : public quantity_t
+	{
+	public:
+		depth_t(vector<double> data_s={},unit_t unit_s={"nm"});
+		depth_t(quantity_t quantity_s);
+	};
 	class sputter_depth_t : public quantity_t
 	{
 	public:
@@ -156,12 +165,12 @@ public:
 		total_sputter_time_t(quantity_t quantity_s);
 	};
 	
-	class analysis_energy_t : public quantity_t
-	{
-	public:
-		analysis_energy_t(vector<double> data_s={},unit_t unit_s={"eV"});
-		analysis_energy_t(quantity_t quantity_s);
-	};
+// 	class analysis_energy_t : public quantity_t
+// 	{
+// 	public:
+// 		analysis_energy_t(vector<double> data_s={},unit_t unit_s={"eV"});
+// 		analysis_energy_t(quantity_t quantity_s);
+// 	};
 	
 	class concentration_t : public quantity_t
 	{
@@ -212,11 +221,25 @@ public:
 		SR_t(quantity_t quantity_s);
 	}; 
 	
-	class analysis_rastersize_t : public quantity_t
+// 	class analysis_rastersize_t : public quantity_t
+// 	{
+// 	public:
+// 		analysis_rastersize_t(vector<double> data_s={},unit_t unit_s={"m"});
+// 		analysis_rastersize_t(quantity_t quantity_s);
+// 	}; 
+	
+	class substance_amount_t : public quantity_t
 	{
 	public:
-		analysis_rastersize_t(vector<double> data_s={},unit_t unit_s={"m"});
-		analysis_rastersize_t(quantity_t quantity_s);
+		substance_amount_t(vector<double> data_s={},unit_t unit_s={"mol"});
+		substance_amount_t(quantity_t quantity_s);
+// 		const substance_amount_t round_to_full_integer_data() const;
 	}; 
+	
+	class electrical_charge_t : public quantity_t
+	{
+		electrical_charge_t(vector<double> data_s={},unit_t unit_s={"e"});
+		electrical_charge_t(quantity_t quantity_s);
+	};
 
 #endif // QUANTITY_HPP

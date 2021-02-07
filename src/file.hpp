@@ -23,7 +23,7 @@
 #include <iterator>
 #include <algorithm>
 #include "log.hpp"
-#include "DEFINES.hpp"
+#include "definitions.hpp"
 #include <iostream>
 #include <string>
 // #include "quantity.hpp"
@@ -70,17 +70,9 @@ template <typename T>
 	}
 	return files_s;	
 }
-	
-	
-namespace files
-{
-	
 
-/**********************/
-/****     file_t    ***/
-/**********************/
 
- ///standard IHP olc file template
+///standard IHP olc file template
 class file_t
 {
 	friend class config_t;	
@@ -100,7 +92,7 @@ protected:
 		vector<vector<vector<string>>>& raw_header_tensor();
 	public:
 		/// "matrix = Si Ge 30Sn"
-		const set<element_t> matrix_elements();
+		const string matrix_elements();
 		void to_screen(string prefix="");
 		const string delimiter;
 		const set<string> identifiers;
@@ -155,12 +147,11 @@ protected:
 		const string simple_name();
 		int chip_x();
 		int chip_y();
-		int olcdb();
+		const int olcdb();
 		int wafer();
 		void to_screen(string prefix="");
 		const bool is_correct_type(); 
 	};
-// 	bool correct_file_type=false;
 public:
 	///returns the file_t parent
 	file_t file() const;
@@ -168,11 +159,20 @@ public:
 	name_t name;
 	contents_t contents;
 	///this does not work as intended for some reason
-// 	const bool is_correct_type(); 
 	bool operator< (const file_t& fname) const;
 	bool operator== (const file_t& fname) const;
 	const string creation_date_time() const;
 };
+	
+namespace files
+{
+	
+
+/**********************/
+/****     file_t    ***/
+/**********************/
+
+
 
 /**********************/
 /****     sims_t    ***/
@@ -197,11 +197,11 @@ protected:
 		vector<total_sputter_depth_t> total_sputter_depths_p;
 		bool parse_sputter_energy_element_polarity();
 		string secondary_polarity_p="";
-		sputter_energy_t sputter_energy_p;
+		energy_t sputter_energy_p;
 		string sputter_element_p;
 	public:
 		name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s);
-		const sputter_energy_t sputter_energy();
+		const energy_t sputter_energy();
 		const element_t sputter_element();
 		const string secondary_polarity();
 		const total_sputter_depth_t total_sputter_depths();
@@ -269,20 +269,18 @@ protected:
 		const vector<string>& cluster_names();
 	public:
 		contents_t(const string& filename_with_path_s,string contents_s="");
-// 		const set<string> identifiers;
-		
-		
-		///primary current (sputter_current vs time/depth)
-		const Ipr_t Ipr();
+		const vector<cluster_t> clusters();
 		const tm start_date_time();
 		const tm creation_date_time();
-		const sputter_energy_t sputter_energy();
+		///primary current (sputter_current vs time/depth)
+		const Ipr_t Ipr();
+		
+		const energy_t sputter_energy();
 		const secondary_voltage_t secondary_voltage();
 		const element_t sputter_element();
+		const rastersize_t sputter_rastersize();
+		const rastersize_t analysis_rastersize();
 		const string secondary_polarity();
-		const vector<cluster_t> clusters();
-		const sputter_rastersize_t sputter_rastersize();
-		const analysis_rastersize_t analysis_rastersize();
 		const quantity_t chamber_pressure();
 		const quantity_t egate();
 		const quantity_t mass_resolution();
@@ -308,7 +306,6 @@ public:
 	contents_t contents;
 	void to_screen(string prefix="");
 	
-// 	static std::set< files::dsims_dp_rpc_asc_t > files(std::set< std::__cxx11::string >& filenames_with_path);
 	const sputter_time_t greatest_common_sputter_time();
 	const sputter_depth_t greatest_common_sputter_depth();
 };
@@ -329,7 +326,7 @@ private:
 		contents_t(const string& filename_with_path_s,string contents_s="");
 // 		const set<string> identifiers;
 		const element_t analysis_element();
-		const analysis_energy_t analysis_energy();
+		const energy_t analysis_energy();
 	};
 	class name_t : sims_t::name_t
 	{

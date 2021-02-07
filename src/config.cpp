@@ -81,7 +81,7 @@ int config_t::parse(vector<string> config_lines) {
 
 // 		else if (key=="pse") 																		pse_t::file_locations.push_back(value);
 // 		else if (key=="sql_db" || key=="db_location") 												database_t::file_location = value;
-// 		else if (key=="ignore_file_type_endings") { if (value.find("1")!=string::npos) 				measurement_tools_t::ignore_file_type_endings=true; }
+// 		else if (key=="use_file_type_endings") { if (value.find("1")!=string::npos) 				measurement_tools_t::use_file_type_endings=true; }
 		
 // 		else if (key=="print_errors") { if (value.find("1")!=string::npos) 													processor::print_errors=true; }
 // 		else if (key=="use_jiang" || key=="jaing")  { if (value.find("0")!=string::npos) 									processor::use_jiang=false;}
@@ -90,10 +90,10 @@ int config_t::parse(vector<string> config_lines) {
 		
 		else if (key=="debug") { if (value.find("1")!=string::npos) 								logger::activate_debug=true;}
 		
-		else if (key=="use_directory_files_list") { if (value.find("1")!=string::npos) 				files_t::use_directory_files_list=true;}
-        else if (key=="use_wildcards_in_filenames") { if (value.find("1")!=string::npos) 			files_t::use_wildcards_in_filenames=true; }
-        else if (key=="search_sub_directories") { if (value.find("1")!=string::npos) 				files_t::search_sub_directories=true; }
-        else if (key=="ignore_filename_substrings" || key=="ignore_filename") 						files_t::ignore_filename_substrings.insert(value);
+// 		else if (key=="use_directory_files_list") { if (value.find("1")!=string::npos) 				files_t::use_directory_files_list=true;}
+//         else if (key=="use_wildcards_in_filenames") { if (value.find("1")!=string::npos) 			files_t::use_wildcards_in_filenames=true; }
+//         else if (key=="search_sub_directories") { if (value.find("1")!=string::npos) 				files_t::search_sub_directories=true; }
+//         else if (key=="use_filename_substrings" || key=="use_filename") 						files_t::use_filename_substrings.insert(value);
 		
 //         else if (key=="plots_location") 															plot_t::plots_location=value;
 		
@@ -169,23 +169,48 @@ void config_t::save_sample_definition(std::__cxx11::string value)
 	tools::str::remove_spaces(&value);
 	vector<string> definitions = tools::str::get_strings_between_delimiter(value,"+");
 	tools::str::remove_spaces(&definitions);
+	sample_t::use_lot=false;
+	sample_t::use_wafer=false;
+	sample_t::use_lot_split = false;
+	sample_t::use_monitor = false;
+	sample_t::use_chip = false;
+	sample_t::use_simple_name = false;
 	
-	sample_t::definition_t::wafer_number = false;
-	sample_t::definition_t::lot = false;
-	sample_t::definition_t::lot_split = false;
-	sample_t::definition_t::monitor = false;
-	sample_t::definition_t::chip = false;
-	sample_t::definition_t::simple_name = false;
-	
+	stringstream new_definition;
 	for (auto& definition:definitions)
 	{
-		if (definition=="lot") sample_t::definition_t::lot=true;
-		else if (definition=="lot_split") sample_t::definition_t::lot_split=true;
-		else if (definition=="wafer" || definition=="wafer_number") sample_t::definition_t::wafer_number=true;
-		else if (definition=="monitor") sample_t::definition_t::monitor=true;
-		else if (definition=="chip") sample_t::definition_t::chip=true;
-		else if (definition=="simple_name" || definition=="name") sample_t::definition_t::simple_name=true;
+		if (definition=="lot") 
+		{
+			sample_t::use_lot=true;
+		}
+		else if (definition=="lot_split") 
+		{
+			sample_t::use_lot_split=true;
+		}
+		else if (definition=="wafer" || definition=="wafer_number")
+		{
+			sample_t::use_wafer=true;
+		}
+		else if (definition=="monitor") 
+		{
+			sample_t::use_monitor=true;
+		}
+		else if (definition=="chip") 
+		{
+			sample_t::use_chip=true;
+		}
+		else if (definition=="simple_name" || definition=="name")
+		{
+			sample_t::use_simple_name=true;
+		}
+		else 
+		{
+			logger::error("config_t::save_sample_definition: unknown input value", definition);
+			continue;
+		}
+		new_definition << definition << " ";
 	}
+	logger::info("updated sample definition:",new_definition.str());
 }
 
 

@@ -328,11 +328,14 @@ mass_t::mass_t(quantity_t quantity_s) : mass_t(quantity_s.data(),quantity_s.unit
 abundance_t::abundance_t(vector<double> data_s,unit_t unit_s) : quantity_t("abundance",data_s,unit_s){}
 abundance_t::abundance_t(quantity_t quantity_s) : abundance_t(quantity_s.data(),quantity_s.unit()) {}
 
-sputter_energy_t::sputter_energy_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_energy",data_s,unit_s){}
-sputter_energy_t::sputter_energy_t(quantity_t quantity_s) : sputter_energy_t(quantity_s.data(),quantity_s.unit()) {}
+energy_t::energy_t(vector<double> data_s,unit_t unit_s) : quantity_t("energy",data_s,unit_s){}
+energy_t::energy_t(quantity_t quantity_s) : energy_t(quantity_s.data(),quantity_s.unit()) {}
 
-sputter_rastersize_t::sputter_rastersize_t(vector<double> data_s,unit_t unit_s) : quantity_t( "sputter_rastersize",data_s,unit_s){}
-sputter_rastersize_t::sputter_rastersize_t(quantity_t quantity_s) : sputter_rastersize_t(quantity_s.data(),quantity_s.unit()) {}
+rastersize_t::rastersize_t(vector<double> data_s,unit_t unit_s) : quantity_t( "rastersize",data_s,unit_s){}
+rastersize_t::rastersize_t(quantity_t quantity_s) : rastersize_t(quantity_s.data(),quantity_s.unit()) {}
+
+depth_t::depth_t(vector<double> data_s,unit_t unit_s) : quantity_t("depth",data_s,unit_s){}
+depth_t::depth_t(quantity_t quantity_s) : depth_t(quantity_s.data(),quantity_s.unit()) {}
 
 sputter_depth_t::sputter_depth_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_depth",data_s,unit_s){}
 sputter_depth_t::sputter_depth_t(quantity_t quantity_s) : sputter_depth_t(quantity_s.data(),quantity_s.unit()) {}
@@ -346,11 +349,11 @@ sputter_time_t::sputter_time_t(quantity_t quantity_s) : sputter_time_t(quantity_
 total_sputter_time_t::total_sputter_time_t(vector<double> data_s,unit_t unit_s) : quantity_t("total_sputter_time",data_s,unit_s){}
 total_sputter_time_t::total_sputter_time_t(quantity_t quantity_s) : total_sputter_time_t(quantity_s.data(),quantity_s.unit()) {}
 
-analysis_energy_t::analysis_energy_t(vector<double> data_s,unit_t unit_s) : quantity_t("analysis_energy",data_s,unit_s){}
-analysis_energy_t::analysis_energy_t(quantity_t quantity_s) : analysis_energy_t(quantity_s.data(),quantity_s.unit()) {}
-
-analysis_rastersize_t::analysis_rastersize_t(vector<double> data_s,unit_t unit_s) : quantity_t("analysis_rastersize",data_s,unit_s){}
-analysis_rastersize_t::analysis_rastersize_t(quantity_t quantity_s) : analysis_rastersize_t(quantity_s.data(),quantity_s.unit()) {}
+// analysis_energy_t::analysis_energy_t(vector<double> data_s,unit_t unit_s) : quantity_t("analysis_energy",data_s,unit_s){}
+// analysis_energy_t::analysis_energy_t(quantity_t quantity_s) : analysis_energy_t(quantity_s.data(),quantity_s.unit()) {}
+// 
+// analysis_rastersize_t::analysis_rastersize_t(vector<double> data_s,unit_t unit_s) : quantity_t("analysis_rastersize",data_s,unit_s){}
+// analysis_rastersize_t::analysis_rastersize_t(quantity_t quantity_s) : analysis_rastersize_t(quantity_s.data(),quantity_s.unit()) {}
 
 intensity_t::intensity_t(vector<double> data_s,unit_t unit_s) : quantity_t("intensity",data_s,unit_s){}
 intensity_t::intensity_t(quantity_t quantity_s) : intensity_t(quantity_s.data(),quantity_s.unit()) {}
@@ -375,6 +378,12 @@ SR_t::SR_t(quantity_t quantity_s) : SR_t(quantity_s.data(),quantity_s.unit()) {}
 
 secondary_voltage_t::secondary_voltage_t(vector<double> data_s, unit_t unit_s) : quantity_t("secondary_voltage",data_s,unit_s) {}
 secondary_voltage_t::secondary_voltage_t(quantity_t quantity_s) :secondary_voltage_t(quantity_s.data(),quantity_s.unit()) {}
+
+substance_amount_t::substance_amount_t(vector<double> data_s, unit_t unit_s) : quantity_t("substance_amount",data_s,unit_s) {}
+substance_amount_t::substance_amount_t(quantity_t quantity_s) :substance_amount_t(quantity_s.data(),quantity_s.unit()) {}
+
+electrical_charge_t::electrical_charge_t(vector<double> data_s, unit_t unit_s) : quantity_t("electrical_charge",data_s,unit_s) {}
+electrical_charge_t::electrical_charge_t(quantity_t quantity_s) :electrical_charge_t(quantity_s.data(),quantity_s.unit()) {}
 
 
 

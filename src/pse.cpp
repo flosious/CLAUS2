@@ -235,7 +235,7 @@ bool pse_t::load_file()
 			nuclide = contents[i][2];
 			mass = contents[i][3];
 			abundance = contents[i][4];
-			abundance = tools::str::remove_chars_from_string(abundance,"()");
+			abundance = tools::str::get_strings_between_delimiter(abundance,"(")[0]; // just take the mean part and ignore uncertainty
 			if (abundance=="") abundance = "0";
 			if (mass == "")
 			{

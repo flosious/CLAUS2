@@ -21,11 +21,14 @@
 #define CLUSTER_T_HPP
 
 #include <string>
-#include "element.hpp"
+
 #include <vector>
 #include "log.hpp"
 #include "quantity.hpp"
 #include "regex"
+#include <map>
+// #include "file.hpp"
+#include "element.hpp"
 // #include "sample.hpp"
 // #include "crater.hpp"
 
@@ -57,9 +60,8 @@ public:
 	const map<isotope_t,int>& isotopes_amount() const;
 	///pointer to the isotope within this cluster, where matrix isotopes have been removed
 	const isotope_t* corsseponding_isotope() const; 
-	/// "28Si0.4 29Si0.5" will add 28Si with an abundance of 4/9*100% and 29Si with an abundance of 5/9*100% to the isotopes
+	/// 28Si2 Ge2
 	cluster_t(string clustername);
-	/// "28Si0.4 29Si0.5" will add 28Si with an abundance of 4/9*100% and 29Si with an abundance of 5/9*100% to the isotopes
 	cluster_t(vector<string> clustername_parts);
 // 	cluster_t(string clustername, sputter_time_t sputter_time_s,intensity_t intensity_s,sputter_depth_t sputter_depth_s={},concentration_t concentration_s={});
 	cluster_t(vector<isotope_t>& isotopes_s);

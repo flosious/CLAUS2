@@ -25,27 +25,20 @@ processor::processor(vector<string> args_p)
 	set<string> input_strings(args_p.begin(),args_p.end()); // eliminate same entries
 	
 	set<files::dsims_dp_rpc_asc_t> dsims_files = load_files<files::dsims_dp_rpc_asc_t>(input_strings);
-	set<sample_t> samples = samples_from_files(dsims_files);
+// 	set<sample_t> samples = samples_from_files(dsims_files);
 	
 	for (auto file:dsims_files)
 	{
-		file.to_screen();
+		file.contents.matrix_elements();
 // 		file.contents.matrix_elements();
 // 		break;
 	}
-	pse_t PSE;
-	PSE.to_screen();
 	
-// 	files::dsims_dp_rpc_asc_t f(*input_strings.begin());
-// 	vector<files::dsims_dp_rpc_asc_t> files;
-// 	files.push_back(f);
-// 	files.begin()->to_screen();
+	matrix_t mat("Si Ge30");
+	cout << mat.to_string() << endl;
 	
-// 	cout << f.contents.sputter_energy().to_string() << endl;
-// 	cout << f.contents.secondary_polarity() << endl;
-// 	for (auto c:f.contents.clusters())
-// 		cout << c.name() << endl;
-
+	
+	
 	print(debug_messages);
 	print(info_messages);
 	print(warning_messages);

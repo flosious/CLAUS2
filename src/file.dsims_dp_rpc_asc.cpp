@@ -104,8 +104,8 @@ void files::dsims_dp_rpc_asc_t::to_screen(string prefix)
 	cout << prefix << "\t"<<"analysis_rastersize:\t" << contents.analysis_rastersize().to_string() << endl;
 	
 	cout << prefix << "\t" << "matrix:" ;
-	for (auto& ele:contents.matrix_elements())
-		cout << "\t" << ele.to_string();
+// 	for (auto& ele:contents.matrix_elements())
+// 		cout << "\t" << ele.to_string();
 	cout << endl;
 }
 
@@ -488,10 +488,10 @@ const string files::dsims_dp_rpc_asc_t::contents_t::secondary_polarity()
 	return infos_and_settings().at("Secondary ion polarity");
 }
 
-const sputter_energy_t files::dsims_dp_rpc_asc_t::contents_t::sputter_energy()
+const energy_t files::dsims_dp_rpc_asc_t::contents_t::sputter_energy()
 {
 	double data = tools::str::str_to_double(infos_and_settings().at("Impact energy (eV)"));
-	return sputter_energy_t({data},{"eV"});
+	return energy_t({data},{"eV"});
 }
 
 const element_t files::dsims_dp_rpc_asc_t::contents_t::sputter_element()
@@ -509,16 +509,16 @@ const secondary_voltage_t files::dsims_dp_rpc_asc_t::contents_t::secondary_volta
 	return secondary_voltage_t({data},{"V"});
 }
 
-const sputter_rastersize_t files::dsims_dp_rpc_asc_t::contents_t::sputter_rastersize()
+const rastersize_t files::dsims_dp_rpc_asc_t::contents_t::sputter_rastersize()
 {
 	double data = tools::str::str_to_double(infos_and_settings().at("Raster size (um)"));
-	return sputter_rastersize_t({data},{"um"});
+	return rastersize_t({data},{"um"});
 }
 
-const analysis_rastersize_t files::dsims_dp_rpc_asc_t::contents_t::analysis_rastersize()
+const rastersize_t files::dsims_dp_rpc_asc_t::contents_t::analysis_rastersize()
 {
 	double data = tools::str::str_to_double(infos_and_settings().at("Analyzed area size (um)"));
-	return sputter_rastersize_t({data},{"um"});
+	return rastersize_t({data},{"um"});
 }
 
 const quantity_t files::dsims_dp_rpc_asc_t::contents_t::chamber_pressure()

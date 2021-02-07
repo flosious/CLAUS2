@@ -23,62 +23,61 @@
 #include <string>
 #include "quantity.hpp"
 #include "element.hpp"
-// #include "file.hpp"
 
 using namespace std;
 
 namespace settings
 {
-	
-/*
- * parent class
- */
-class measurement_settings_t
-{
-private:
-public:
-};
-
 
 /*
  * parent class
  */
-class sims_t : measurement_settings_t
+class beam_settings_t
 {
-protected:
-//     sputter_energy_t sputter_energy_p;
-// 	sputter_rastersize_t sputter_raster_size_p;
-//     element_t sputter_element_p;
 public:
-    const sputter_energy_t sputter_energy() const;
-	const sputter_rastersize_t sputter_raster_size() const;
-    const element_t sputter_element() const;
-	sims_t(sputter_energy_t sputter_energy_s, sputter_rastersize_t sputter_raster_size_s, element_t sputter_element_s);
+    const energy_t energy;
+	const rastersize_t raster_size;
+    const ion_t ion;
+	beam_settings_t(energy_t energy_s, rastersize_t rastersize_s, ion_t ion_s);
 };
 
+class sims_t
+{
+public:
+	const string secondary_polarity;
+	const beam_settings_t sputter_beam;
+	sims_t(beam_settings_t sputter_beam_s, string secondary_polarity_s);
+};
 
-
-
+/*
+ * direct copy of its parent
+ */
 class dsims_t : public sims_t
 {
-private:
-    
 public:
-	dsims_t(sputter_energy_t sputter_energy_s, sputter_rastersize_t sputter_raster_size_s, element_t sputter_element_s);
+	dsims_t(beam_settings_t sputter_beam_s, string secondary_polarity_s);
+	///from secondary voltage?
+	const string secondary_polarity() const;
+	const secondary_voltage_t secondary_voltage();
+	
+	const quantity_t chamber_pressure;
+	const quantity_t egate;
+	const quantity_t mass_resolution;
+	const quantity_t field_aperture;
+	const quantity_t contrast_aperture;
+	const quantity_t entrance_slit;
+	const quantity_t exit_slit;
+	const quantity_t energy_window;
+	const quantity_t em_yield;
+	const quantity_t em_voltage;
+	
 };
 
 class tofsims_t : public sims_t
 {
-private:
-//     analysis_energy_t analysis_energy_p;
-// 	analysis_rastersize_t analysis_raster_size_p;
-//     element_t analysis_element_p;
 public:
-    const analysis_energy_t analysis_energy() const;
-	const analysis_rastersize_t analysis_raster_size() const;
-    const element_t analysis_element() const;
-	tofsims_t(sputter_energy_t sputter_energy_s, sputter_rastersize_t sputter_raster_size_s, element_t sputter_element_s, 
-			  sputter_energy_t analysis_energy_s, sputter_rastersize_t analysis_rastersize_s, element_t analysis_element_s);
+	const beam_settings_t analysis_beam;
+	tofsims_t(beam_settings_t sputter_beam_s, string secondary_polarity_s, beam_settings_t analysis_beam_s);
 };
 }
 #endif // MEASUREMENT_SETTINGS_T_HPP

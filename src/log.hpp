@@ -23,8 +23,8 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "DEFINES.hpp"
 #include <iostream>
+#include "definitions.hpp"
 
 using namespace std;
 

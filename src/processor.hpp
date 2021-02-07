@@ -20,17 +20,17 @@
 #define PROCESSOR_HPP
 
 #include <chrono>
-#include "hash_functions.hpp"
+// #include "hash_functions.hpp"
 #include <list>
 #include <string>
 #include <vector>
 #include "tools.hpp"
 #include "file.hpp"
 #include "sample.hpp"
-#include "measurement_group.hpp"
-#include "measurement.hpp"
-#include <unordered_set>
-#include "quantity.hpp"
+// #include "measurement_group.hpp"
+// #include "measurement.hpp"
+// #include <unordered_set>
+// #include "quantity.hpp"
 
 using namespace std;
 
@@ -39,13 +39,15 @@ class processor
 {
 private:
 	// directory+filenames
-// 	set<file_t> files;
-// 	std::set<dsims_measurement_group_t> dsims_measurement_groups;
-// 	std::set<dsims_measurement_t> dsims_measurements;
-// 	std::set<sample_t> samples;
-public:
-// 	std::list<dsims_filename_t> dsims_filenames;
 	
+public:
+// 	list<file_t> files;
+// 	list measurement_groups
+// 	list samples
+	vector<string> input_filenames;
+	
+	///samples across all MGs
+	list<sample_t> samples;
 	processor(vector<string> args_p);
 };
 

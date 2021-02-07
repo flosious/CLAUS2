@@ -19,14 +19,14 @@
 #ifndef ELEMENT_T_HPP
 #define ELEMENT_T_HPP
 
-#include "DEFINES.hpp"
+
 #include <sstream>
 #include <vector>
 #include <string>
 #include "log.hpp"
 #include "pse.hpp"
 #include "quantity.hpp"
-
+#include "definitions.hpp"
 
 
 
@@ -41,50 +41,72 @@ static pse_t PSE;
 
 class isotope_t
 {
+// 	friend class matrix_t;
 private:
-	const double abundance_p;
+	abundance_t abundance_p;
 	const int nucleons_p;
 // 	const string symbol_p;
 public:
 	///nucleons_s=-1 -> isotope with highest natural abundance
 	isotope_t(const string symbol_s, const int nucleons_s=-1, const double abundance_s=-1);
-	const abundance_t abundance() const;
+	const abundance_t& abundance() const;
 	const mass_t mass() const;
 	
 	const int nucleons() const;
 	const string symbol;
 	const string symbol_alternative() const;
+	///NOT checking abundance
 	const bool operator==(const isotope_t& obj) const;
 	const bool operator<(const isotope_t& obj) const;
 	const string to_string() const;
+	
+	substance_amount_t substance_amount;
+	concentration_t concentration;
+	depth_t depth;
 };
 
 class element_t
 {
+	friend class matrix_t;
 private:
 	const string symbol_p="";
+	vector<isotope_t> isotopes_p;
+	substance_amount_t substance_amount_p;
 public:
 	element_t();
-	element_t(string symbol_s);
-	element_t(const vector<isotope_t>& isotopes_s);
-	element_t(const isotope_t& isotope_s);
+	element_t(string symbol_s, double abs_amount=1, bool use_naturale_abundance=false);
+	element_t(const vector<isotope_t>& isotopes_s, double abs_amount=1);
+// 	element_t(const isotope_t& isotope_s, double amount=1);
 // 	const vector<isotope_t>* isotopes() const;
-	const vector<isotope_t> isotopes;
+	const vector<isotope_t>& isotopes() const;
+// 	const substance_amount_t& substance_amount() const;
 	
 // 	const double abundance() const;
 	const mass_t mass() const;
 	const string symbol() const;
 	const string to_string() const;
 	const int protons() const;
+	///some abosulte value: atoms, mole, particles, ...
 	
 // 	const isotope_t* isotope_with_highest_abundance() const;
 // 	const isotope_t* isotope_from_nucleons(int nucleons) const;
+	///checking isotopes but NOT their abundances
 	const bool operator==(const element_t& obj) const;
 	const bool operator<(const element_t& obj) const;
-	
-// 	static set<element_t> elements(vector<isotope_t>& isotopes);
 };
 
+class ion_t
+{
+private:
+// 	const vector<element_t> elements_p;
+// 	const electrical_charge_t electric_charge_p;
+public:
+	ion_t(vector<element_t>& elements_s, electrical_charge_t electric_charge_s);
+	const std::vector< element_t > elements;
+	const electrical_charge_t electric_charge;
+	const string to_string() const;
+	const bool is_set() const;
+};
 
 
 

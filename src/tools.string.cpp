@@ -143,13 +143,23 @@ int tools::str::is_number(std::string str) {
 }
 
 void tools::str::remove_spaces_from_string_start(string *mainstring) {
+// 	cout << "mainstring->at(0):'" << mainstring->at(0) <<"'" << endl;
     std::size_t pos_start = mainstring->find_first_not_of(" ");
-    if (pos_start!=string::npos && pos_start > 0) mainstring->erase(pos_start-1,pos_start);
+    if (pos_start!=string::npos && pos_start > 0) 
+	{
+		string s = mainstring->substr(pos_start,mainstring->size()-1);
+		*mainstring = s;
+	}
 }
 
 void tools::str::remove_spaces_from_string_end(string *mainstring) {
     std::size_t pos_end = mainstring->find_last_not_of(" ");
-    if (pos_end!=string::npos && pos_end < mainstring->length()) mainstring->erase(pos_end+1,mainstring->length()-pos_end+1);
+    if (pos_end!=string::npos && pos_end < mainstring->length()) 
+	{
+// 		mainstring->erase(pos_end+1,mainstring->length()-pos_end+1);
+		string s = mainstring->substr(0,pos_end);
+		*mainstring = s;
+	}
 }
 
 void tools::str::replace_NOTchars_from_string(string *mainstring, string replacethis_NOT, string replacewith) {
