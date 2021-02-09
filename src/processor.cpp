@@ -34,10 +34,8 @@ processor::processor(vector<string> args_p)
 // 		break;
 	}
 	
-	matrix_t mat("Si Ge30");
+	matrix_t mat("30Si2 29Si68 Ge30");
 	cout << mat.to_string() << endl;
-	
-	
 	
 	print(debug_messages);
 	print(info_messages);

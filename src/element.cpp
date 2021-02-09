@@ -5,10 +5,17 @@
 /*********     isotope_t       ******/
 /************************************/
 
-isotope_t::isotope_t(const std::__cxx11::string symbol_s, const int nucleons_s, const double abundance_s) : symbol(symbol_s), 
-																											nucleons_p(nucleons_s),
-																											abundance_p({abundance_s})
+isotope_t::isotope_t(const std::__cxx11::string symbol_s, const int nucleons_s, const double abundance_s, const double amount_s) : symbol(symbol_s), 
+																																   nucleons_p(nucleons_s),
+																																   abundance_p({abundance_s}),
+																																   substance_amount_p({amount_s})
 {}
+
+// isotope_t::isotope_t(const std::__cxx11::string symbol_s, const int nucleons_s, const abundance_t abundance_s, const substance_amount_t amount_s) : symbol(symbol_s), 
+// 																																   nucleons_p(nucleons_s),
+// 																																   abundance_p(abundance_s),
+// 																																   substance_amount_p(amount_s)
+// {}
 
 // const int isotope_t::amount_from_abundance() const
 // {
@@ -86,17 +93,21 @@ const bool isotope_t::operator<(const isotope_t& obj) const
 	return false;
 }
 
-const std::__cxx11::string isotope_t::to_string() const
+std::__cxx11::string isotope_t::to_string()
 {
 	stringstream out;
 	out << nucleons() << symbol;
-// 	if (abundance().is_set())
-// 		out << abundance().data().at(0) << abundance().unit().to_string();
-	if (substance_amount.is_set())
-		out << substance_amount.data().at(0) << substance_amount.unit().to_string();
+	if (abundance().is_set())
+		out << ":" << abundance().data().at(0) << abundance().unit().to_string();
+	if (substance_amount().is_set())
+		out << ":" << substance_amount().data().at(0) << substance_amount().unit().to_string();
 	return out.str();
 }
 
+const substance_amount_t & isotope_t::substance_amount()
+{
+	return substance_amount_p;
+}
 
 
 
@@ -119,7 +130,7 @@ element_t::element_t(const std::vector< isotope_t >& isotopes_s, double abs_amou
 {
 }
 
-const int element_t::protons() const
+const int element_t::protons()
 {
 	if (symbol()=="")
 	{
@@ -130,7 +141,7 @@ const int element_t::protons() const
 }
 
 
-const mass_t element_t::mass() const
+const mass_t element_t::mass()
 {
 	if (symbol()!="" && isotopes().size()==0)
 	{
@@ -142,7 +153,7 @@ const mass_t element_t::mass() const
 	return mass_s;
 }
 
-const std::__cxx11::string element_t::symbol() const
+const std::__cxx11::string element_t::symbol()
 {
 	if (symbol_p!="") return symbol_p;
 	if (isotopes().size()==0)
@@ -153,7 +164,7 @@ const std::__cxx11::string element_t::symbol() const
 	return isotopes().at(0).symbol;
 }
 
-const bool element_t::operator==(const element_t& obj) const
+const bool element_t::operator==(element_t& obj)
 {
 	if (symbol()!=obj.symbol()) return false;
 	if (isotopes().size()!=obj.isotopes().size()) return false;
@@ -174,12 +185,12 @@ const bool element_t::operator==(const element_t& obj) const
 	return true;
 }
 
-const bool element_t::operator<(const element_t& obj) const
+const bool element_t::operator<(element_t& obj)
 {
 	return symbol()<obj.symbol();
 }
 
-const std::__cxx11::string element_t::to_string() const
+const std::__cxx11::string element_t::to_string()
 {
 	stringstream out;
 	const int size = isotopes().size();
@@ -192,7 +203,7 @@ const std::__cxx11::string element_t::to_string() const
 	return out.str();
 }
 
-const vector<isotope_t> & element_t::isotopes() const
+vector<isotope_t> & element_t::isotopes()
 {
 	return isotopes_p;
 }
@@ -248,20 +259,20 @@ const vector<isotope_t> & element_t::isotopes() const
 /*******     ion_t     ********/
 /***************************/
 
-ion_t::ion_t(vector<element_t>& elements_s,  electrical_charge_t electric_charge_s) : elements(elements_s), electric_charge(electric_charge_s)
+ion_t::ion_t(vector<element_t>& elements_s,  electrical_charge_t electric_charge_s) : elements_p(elements_s), electric_charge(electric_charge_s)
 {
 }
 
 
-const std::__cxx11::string ion_t::to_string() const
+const std::__cxx11::string ion_t::to_string()
 {
 	if (!is_set()) return "";
 	stringstream out;
 	out << "(" ;
-	const int size=elements.size(); 
+	const int size=elements().size(); 
 	for (int i=0;i<size;i++)
 	{
-		out << elements.at(i).to_string();
+		out << elements_p.at(i).to_string();
 		if (i==size-1)
 			cout << ",";
 	}
@@ -269,13 +280,16 @@ const std::__cxx11::string ion_t::to_string() const
 	return out.str();
 }
 
-const bool ion_t::is_set() const
+const bool ion_t::is_set()
 {
-	if (elements.size()==0) return false;
+	if (elements().size()==0) return false;
 	if (!electric_charge.is_set()) return false;
 	return true;
 }
 
-
+vector<element_t>& ion_t::elements()
+{
+	return elements_p;
+}
 
 

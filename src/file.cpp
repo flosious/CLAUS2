@@ -588,7 +588,7 @@ const energy_t files::sims_t::name_t::sputter_energy()
 	return sputter_energy_p;
 }
 
-const element_t files::sims_t::name_t::sputter_element()
+element_t files::sims_t::name_t::sputter_element()
 {
 	if (sputter_element_p!="") 
 		parse_sputter_energy_element_polarity();

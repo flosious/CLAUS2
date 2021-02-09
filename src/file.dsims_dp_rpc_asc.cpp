@@ -64,7 +64,7 @@ void files::dsims_dp_rpc_asc_t::to_screen(string prefix)
 	
 	if (name.not_parseable_filename_parts().size()==1) cout << prefix << "\t"<<"not_parseable_filename_parts:\t" << *name.not_parseable_filename_parts().begin() << endl;
 	else cout << prefix << "\t"<<"not_parseable_filename_parts:\t<" << name.not_parseable_filename_parts().size() << ">" << endl;
-		
+
 	cout << prefix << "\t"<<"sputter_element:\t" << name.sputter_element().to_string() << endl;
 	cout << prefix << "\t"<<"sputter_energy:\t" << name.sputter_energy().to_string() << endl;
 	cout << prefix << "\t"<<"secondary_polarity:\t" << name.secondary_polarity() << endl;
@@ -494,7 +494,7 @@ const energy_t files::dsims_dp_rpc_asc_t::contents_t::sputter_energy()
 	return energy_t({data},{"eV"});
 }
 
-const element_t files::dsims_dp_rpc_asc_t::contents_t::sputter_element()
+element_t files::dsims_dp_rpc_asc_t::contents_t::sputter_element()
 {
 	string ele = infos_and_settings().at("Primary ions");
 	ele.erase(remove(ele.begin(), ele.end(), '+'), ele.end());

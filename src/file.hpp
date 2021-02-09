@@ -202,7 +202,7 @@ protected:
 	public:
 		name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s);
 		const energy_t sputter_energy();
-		const element_t sputter_element();
+		element_t sputter_element();
 		const string secondary_polarity();
 		const total_sputter_depth_t total_sputter_depths();
 		const string filename_without_crater_depths();
@@ -277,7 +277,7 @@ protected:
 		
 		const energy_t sputter_energy();
 		const secondary_voltage_t secondary_voltage();
-		const element_t sputter_element();
+		element_t sputter_element();
 		const rastersize_t sputter_rastersize();
 		const rastersize_t analysis_rastersize();
 		const string secondary_polarity();

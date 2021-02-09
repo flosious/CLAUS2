@@ -44,7 +44,8 @@ class cluster_t
 	friend class files::dsims_dp_rpc_asc_t;
 private:
 	int equilibrium_starting_position=-1;
-	map<isotope_t,int> isotopes_amount_p;
+// 	map<isotope_t,int> isotopes_amount_p;
+	vector<isotope_t> isotopes_p;
 	concentration_t concentration_p;
 	intensity_t intensity_p;
 	sputter_time_t sputter_time_p;
@@ -57,7 +58,8 @@ private:
 
 	
 public:
-	const map<isotope_t,int>& isotopes_amount() const;
+// 	const map<isotope_t,int>& isotopes_amount() const;
+	vector<isotope_t>& isotopes();
 	///pointer to the isotope within this cluster, where matrix isotopes have been removed
 	const isotope_t* corsseponding_isotope() const; 
 	/// 28Si2 Ge2
@@ -65,15 +67,15 @@ public:
 	cluster_t(vector<string> clustername_parts);
 // 	cluster_t(string clustername, sputter_time_t sputter_time_s,intensity_t intensity_s,sputter_depth_t sputter_depth_s={},concentration_t concentration_s={});
 	cluster_t(vector<isotope_t>& isotopes_s);
-	cluster_t(map<isotope_t,int>& isotopes_amount_s);
+// 	cluster_t(map<isotope_t,int>& isotopes_amount_s);
 	
-	const string to_string() const;
+	string to_string();
 	const bool is_set() const;
 	///isotopes which define this cluster
-	const concentration_t* concentration();
-	const intensity_t* intensity();
-	const sputter_time_t* sputter_time();
-	const sputter_depth_t* sputter_depth();
+	const concentration_t& concentration();
+	const intensity_t& intensity();
+	const sputter_time_t& sputter_time();
+	const sputter_depth_t& sputter_depth();
 	const SF_t SF();
 	///sputter equilibrium state of this cluster
 	cluster_t equilibrium();

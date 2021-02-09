@@ -93,7 +93,7 @@ quantity_t quantity_t::median() const
 
 bool quantity_t::is_set() const
 {
-	if (data_p.size()==0 || unit().name()=="") return false;
+	if (data_p.size()==0) return false;
 	return true;
 }
 

@@ -64,6 +64,12 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 				logger::error("matrix_t::matrix_t() symbol not parseable, skipping", ele_or_iso);
 				return;
 			}
+			if (nucleons>0 && PSE.element(symbol)->isotope_from_nucleons(nucleons)==nullptr)
+			{
+				*this = matrix_t(); //make me empty
+				logger::error("matrix_t::matrix_t() isotope is not listed in the PSE, skipping", ele_or_iso);
+				return;
+			}
 			/*************/
 			
 			vector<isotope_t> new_isotopes_to_add;
@@ -73,8 +79,7 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 				for (auto& pse_iso: PSE.element(symbol)->isotopes ) 
 				{
 					isotope_t iso{symbol,pse_iso.nucleons,pse_iso.abundance};
-					cout << "abundance=" << pse_iso.abundance << " ,amount*abundance=" << amount*pse_iso.abundance << endl;
-					iso.substance_amount = substance_amount_t({amount*pse_iso.abundance});
+					iso.substance_amount_p = substance_amount_t({amount*pse_iso.abundance});
 					new_isotopes_to_add.push_back(iso);
 				}
 				if (amount==-1)	unknown_amounts++;
@@ -84,11 +89,11 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 				isotope_t iso{symbol,nucleons};
 				if (amount==-1)  // e.g. "29Si" = 29Si->-1mol
 				{
-					iso.substance_amount = substance_amount_t({-1});
+					iso.substance_amount_p = substance_amount_t({-1});
 					unknown_amounts++;
 				}
 				else // e.g. "29Si5" = 29Si->5mol
-					iso.substance_amount = substance_amount_t({amount});
+					iso.substance_amount_p = substance_amount_t({amount});
 				new_isotopes_to_add.push_back(iso);
 			}
 			
@@ -102,8 +107,7 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 					logger::error("matrix_t::matrix_t(): indistinguishable isotopes, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
 					return;
 				}
-// 				if (new_iso.abundance().is_set() && new_iso.abundance().data().at(0)<0) total_neg_abundance-= new_iso.abundance().data().at(0);
-				if (new_iso.substance_amount.is_set() && new_iso.substance_amount.data().at(0)>0) total_amount+=new_iso.substance_amount.data().at(0);
+				if (new_iso.substance_amount_p.is_set() && new_iso.substance_amount_p.data().at(0)>0) total_amount+=new_iso.substance_amount_p.data().at(0);
 				/*add to matrix isotopes*/
 				isotopes.push_back(new_iso);
 			}
@@ -118,13 +122,45 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 	}
 	
 	const int max_ = pow(10,ceil(log10(total_amount)));
-	cout << "max_=" << max_ << endl;
-	cout << "total_amount=" << total_amount << endl;
 	
+	/*calculate not given substance_amount*/
 	for (auto& iso : isotopes)
 	{
-		if (iso.substance_amount.is_set() && iso.substance_amount.data().at(0)<0) 
-			iso.substance_amount =  iso.substance_amount * (total_amount - max_ ) ;
+		if (iso.substance_amount_p.is_set() && iso.substance_amount_p.data().at(0)<0) 
+			iso.substance_amount_p =  iso.substance_amount_p * (total_amount - max_ ) ;
+	}
+	
+	/*calculate total substance_amount for each element/symbol*/
+	map<string,double> symbol_to_total_amount;
+	for (auto& iso : isotopes)
+	{
+		if (iso.abundance().data().at(0)<0)
+		{
+			if (!iso.substance_amount_p.is_set())
+			{
+				*this = matrix_t(); //make me empty
+				logger::error("matrix_t::matrix_t(): !iso.substance_amount.is_set(), skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
+				return;
+			}
+			if (symbol_to_total_amount.find(iso.symbol)==symbol_to_total_amount.end())
+				symbol_to_total_amount.insert(pair<string,double> (iso.symbol,iso.substance_amount_p.data().at(0)));
+			else
+				symbol_to_total_amount.find(iso.symbol)->second+=iso.substance_amount_p.data().at(0);
+		}
+	}
+	
+	/*calculate unset(-1) abundance*/
+	for (auto& iso:isotopes)
+	{
+// 		isotope_t* iso = &isotopes.at(i);
+		if (iso.abundance().data().at(0)<0)
+		{
+			iso.abundance_p = abundance_t({iso.substance_amount_p.data().at(0)/symbol_to_total_amount.find(iso.symbol)->second});
+			
+// 			isotope_t new_iso(iso->symbol,iso->nucleons(),iso.substance_amount.data().at(0)/symbol_to_total_amount.find(iso->symbol)->second);
+// 			new_iso.substance_amount = iso->substance_amount;
+// 			*iso = new_iso;
+		}
 	}
 }
 
