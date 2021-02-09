@@ -58,10 +58,6 @@ private:
 
 	
 public:
-// 	const map<isotope_t,int>& isotopes_amount() const;
-	vector<isotope_t>& isotopes();
-	///pointer to the isotope within this cluster, where matrix isotopes have been removed
-	const isotope_t* corsseponding_isotope() const; 
 	/// 28Si2 Ge2
 	cluster_t(string clustername);
 	cluster_t(vector<string> clustername_parts);
@@ -79,6 +75,10 @@ public:
 	const SF_t SF();
 	///sputter equilibrium state of this cluster
 	cluster_t equilibrium();
+	// 	const map<isotope_t,int>& isotopes_amount() const;
+	vector<isotope_t>& isotopes();
+	///pointer to the isotope within this cluster, where matrix isotopes have been removed
+	const isotope_t* corsseponding_isotope() const; 
 };
 
 #endif // CLUSTER_T_HPP

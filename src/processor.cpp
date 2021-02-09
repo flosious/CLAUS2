@@ -23,20 +23,14 @@ processor::processor(vector<string> args_p)
 {	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	set<string> input_strings(args_p.begin(),args_p.end()); // eliminate same entries
-	
+
 	set<files::dsims_dp_rpc_asc_t> dsims_files = load_files<files::dsims_dp_rpc_asc_t>(input_strings);
-// 	set<sample_t> samples = samples_from_files(dsims_files);
-	
+
 	for (auto file:dsims_files)
 	{
-		file.contents.matrix_elements();
-// 		file.contents.matrix_elements();
-// 		break;
+		cout << file.contents.matrix().to_string() << endl;
 	}
-	
-	matrix_t mat("30Si2 29Si68 Ge30");
-	cout << mat.to_string() << endl;
-	
+
 	print(debug_messages);
 	print(info_messages);
 	print(warning_messages);

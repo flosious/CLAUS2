@@ -38,6 +38,7 @@
 #include "cluster.hpp"
 #include "crater.hpp"
 #include "measurement_settings.hpp"
+#include "matrix.hpp"
 // #include "sample.hpp"
 // #include "measurement.hpp"
 // #include "measurement_group.hpp"
@@ -92,7 +93,8 @@ protected:
 		vector<vector<vector<string>>>& raw_header_tensor();
 	public:
 		/// "matrix = Si Ge 30Sn"
-		const string matrix_elements();
+// 		const string matrix_elements();
+		matrix_t matrix();
 		void to_screen(string prefix="");
 		const string delimiter;
 		const set<string> identifiers;

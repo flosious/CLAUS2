@@ -64,7 +64,7 @@ bool file_t::operator==(const file_t& fname) const
 /*** file_t::contents_t  ***/
 /***************************/
 
-const string file_t::contents_t::matrix_elements()
+matrix_t file_t::contents_t::matrix()
 {
 	if (raw_header_tensor().size()==0) return {};
 	if (raw_header_tensor()[0].size()==0) return {};
@@ -77,12 +77,30 @@ const string file_t::contents_t::matrix_elements()
 		vector<string> matrix_elements_vec = tools::str::get_strings_between_delimiter(matrix_string," ");
 		tools::str::remove_substring_from_mainstring(&matrix_string,"=");
 		tools::str::remove_substring_from_mainstring(&matrix_string,"matrix");
-// 		tools::str::remove_spaces_from_string_end(&matrix_string);
 		tools::str::remove_spaces_from_string_start(&matrix_string);
-		return matrix_string;
+		return matrix_t(matrix_string);
 	}
-	return "";
+	return {};
 }
+
+// const string file_t::contents_t::matrix_elements()
+// {
+// 	if (raw_header_tensor().size()==0) return {};
+// 	if (raw_header_tensor()[0].size()==0) return {};
+// 	set<element_t> matrix_elements_s;
+// 	for (auto& line: raw_header_tensor()[0])
+// 	{
+// 		if (line.size()==0) continue;
+// 		if (line.at(0).find("matrix")==string::npos) continue;
+// 		string matrix_string = tools::vec::combine_vec_to_string(line,delimiter);
+// 		vector<string> matrix_elements_vec = tools::str::get_strings_between_delimiter(matrix_string," ");
+// 		tools::str::remove_substring_from_mainstring(&matrix_string,"=");
+// 		tools::str::remove_substring_from_mainstring(&matrix_string,"matrix");
+// 		tools::str::remove_spaces_from_string_start(&matrix_string);
+// 		return matrix_string;
+// 	}
+// 	return "";
+// }
 
 const string& file_t::contents_t::contents_string()
 {

@@ -33,11 +33,10 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 	double amount;
 	string symbol;
 	double total_amount{0};
-// 	double total_neg_abundance{0};
 	int unknown_amounts{0};
 	for (auto& ele_or_iso:elements_or_isotopes_s)
 	{
-		if (regex_search(ele_or_iso,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)"))) 
+		if (regex_search(ele_or_iso,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9\\.]*)"))) 
 		{
 			/*records*/
 			if (match[1]!="")
@@ -51,10 +50,10 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 				symbol="";
 			
 			if (match[3]!="") 
-				amount = tools::str::str_to_int(match[3]);
+				amount = tools::str::str_to_double(match[3]);
 			else 
 				amount = -1;
-			
+// 			cout << "amount="<< amount << endl;
 			/*******/
 			
 			/*catch error*/
@@ -112,6 +111,12 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 				isotopes.push_back(new_iso);
 			}
 		}
+		else
+		{
+			*this = matrix_t(); //make me empty
+			logger::error("matrix_t::matrix_t(): not parseable, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
+			return;
+		}
 	}
 	
 	if (unknown_amounts>1)
@@ -152,14 +157,9 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 	/*calculate unset(-1) abundance*/
 	for (auto& iso:isotopes)
 	{
-// 		isotope_t* iso = &isotopes.at(i);
 		if (iso.abundance().data().at(0)<0)
 		{
 			iso.abundance_p = abundance_t({iso.substance_amount_p.data().at(0)/symbol_to_total_amount.find(iso.symbol)->second});
-			
-// 			isotope_t new_iso(iso->symbol,iso->nucleons(),iso.substance_amount.data().at(0)/symbol_to_total_amount.find(iso->symbol)->second);
-// 			new_iso.substance_amount = iso->substance_amount;
-// 			*iso = new_iso;
 		}
 	}
 }

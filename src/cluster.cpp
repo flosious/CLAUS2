@@ -24,7 +24,6 @@ cluster_t::cluster_t(std::__cxx11::string clustername)
 
 std::__cxx11::string cluster_t::to_string()
 {
-// 	for (map<const isotope_t,const int>::iterator it=isotopes_amount().begin();it!=isotopes_amount().end();++it)
 	const int max = isotopes().size();
 	if (max==0) return "";
 	stringstream out;
@@ -44,17 +43,10 @@ const bool cluster_t::is_set() const
 	return false;
 }
 
-// const map<isotope_t,int> & cluster_t::isotopes_amount() const
-// {
-// 	return isotopes_amount_p;
-// }
-
-
 cluster_t::cluster_t(vector<std::__cxx11::string> clustername_parts)
 {
 	smatch match;
 	int nucleons;
-// 	int atoms;
 	double amount;
 	string symbol;
 	for (auto& iso_p : clustername_parts)
@@ -74,22 +66,20 @@ cluster_t::cluster_t(vector<std::__cxx11::string> clustername_parts)
 			}
 			if (match[3]!="") amount = tools::str::str_to_double(match[3]);
 			else amount = 1;
-// 			isotopes_amount_p.insert(pair<isotope_t,int> ({symbol,nucleons},atoms));
 			isotopes_p.push_back({symbol,nucleons,-1,amount});
+		}
+		else
+		{
+			*this = cluster_t("");
+			logger::error("cluster_t::cluster_t() cluster not parseable, skipping", iso_p);
+			return;
 		}
 	}
 }
 
 cluster_t::cluster_t(vector<isotope_t>& isotopes_s)  : isotopes_p(isotopes_s)
 {
-// 	for (auto& iso : isotopes_s)
-// 		isotopes_amount_p.insert(pair<isotope_t,int> (iso,1));
 }
-
-// cluster_t::cluster_t(map<isotope_t,int>& isotopes_amount_s) : isotopes_amount_p(isotopes_amount_s)
-// {	
-// }
-
 
 const concentration_t& cluster_t::concentration()
 {
