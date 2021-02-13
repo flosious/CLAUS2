@@ -117,6 +117,11 @@ const substance_amount_t & isotope_t::substance_amount()
 
 element_t::element_t(std::__cxx11::string symbol_s, double abs_amount, bool use_natural_abundance) :symbol_p(symbol_s),substance_amount_p({abs_amount})
 {
+	if (PSE.element(symbol_s)==nullptr)
+	{
+		if (symbol_s!="") logger::error("element_t::element_t symbol not in PSE",symbol_s);
+		return;
+	}
 	for (auto& iso:PSE.element(symbol_s)->isotopes)
 	{
 		if (use_natural_abundance)
@@ -194,6 +199,8 @@ const std::__cxx11::string element_t::to_string()
 {
 	stringstream out;
 	const int size = isotopes().size();
+	
+	if (size==0) return "";
 	for (int i=0;i<size;i++)
 	{
 		out << isotopes().at(i).to_string();
@@ -274,9 +281,9 @@ const std::__cxx11::string ion_t::to_string()
 	{
 		out << elements_p.at(i).to_string();
 		if (i==size-1)
-			cout << ",";
+			out << ",";
 	}
-	cout << ")" << static_cast<int>(electric_charge.data().at(0));
+	out << ")" << static_cast<int>(electric_charge.data().at(0));
 	return out.str();
 }
 

@@ -19,7 +19,7 @@
 #ifndef SAMPLE_T_HPP
 #define SAMPLE_T_HPP
 
-// #include "file.hpp"
+#include "file.hpp"
 #include <unordered_set>
 #include <vector>
 #include <string>
@@ -37,16 +37,6 @@ class dsims_measurement_t;
 class sample_t;
 
 
-// template <typename T>
-// set<sample_t> samples_from_files(set<T>& files)
-// {
-// 	set<sample_t> samples_s;
-// 	for (auto f:files)
-// 	{
-// 		samples_s.insert(f.file());
-// 	}
-// 	return samples_s;
-// }
 
 
 
@@ -60,44 +50,69 @@ private:
 	static bool use_monitor;
 	static bool use_chip;
 	static bool use_simple_name;
+	static bool use_matrix;
 public:
-	
+	///files corresponding to this sample
+	set<file_t*> files;
 	class chip_t
 	{
 	public:
-		chip_t(const int x, const int y);
-		const int x;
-		const int y;
+		chip_t(int x=-1, int y=-1);
+		int x;
+		int y;
 		bool operator==(const chip_t& obj) const;
 		bool operator!=(const chip_t& obj) const;
+		bool is_set();
+		void to_screen(string prefix="");
 	};
-// 	sample_t(const file_t& file_s);
-// 	sample_t(files::dsims_dp_rpc_asc_t file_s);
-	sample_t(string lot, string lot_split, int wafer,chip_t chip, string monitor,string simple_name);
+	sample_t(file_t& file_s);
+// 	sample_t(string lot, string lot_split, int wafer,chip_t chip, string monitor,string simple_name);
 	
-	const set<const measurement_t*> measurements();
-	
-// 	const string group;
-// 	const int olcdbid;
-// 	const string repition;
-	const chip_t chip;
-	const int wafer;
-	const string lot;
-	const string lot_split;
-	const string monitor;
-	const string simple_name;
+	chip_t chip();
+	int wafer();
+	string lot();
+	string lot_split();
+	string monitor();
+	string simple_name();
 	
 	// reads from database or file
-	matrix_t matrix;
+	matrix_t matrix();
+	
+	
     
+// 	bool try_add(file_t& file_s);
 	void to_screen(string prefix="");
 	/*operators*/
-	bool operator==(const sample_t& obj) const;
-	bool operator!=(const sample_t& obj) const;
-	bool operator<(const sample_t& obj) const;
+	bool operator==( sample_t& obj) ;
+	bool operator!=( sample_t& obj) ;
+	bool operator<( sample_t& obj) ;
 	
+	///all samples of all measurements and measurement_groups
+	static vector<sample_t> samples_list;
+	static void feed_samples_list(vector<file_t>& files);
+	static void feed_samples_list(file_t& file);
+// 	static vector<sample_t> samples(vector<file_t>& files);
+// 	static void add_to_list(vector<file_t>& files,vector<sample_t>& samples_list);
+// 	static void add_to_list(file_t& file,vector<sample_t>& samples_list);
+// 	static vector<sample_t> samples(vector<file_t>* files);
 };
 
+// template <typename T>
+// vector<sample_t> samples(vector<T>& files)
+// {
+// 	vector<sample_t> sam;
+// 	vector<sample_t>::iterator found;
+// 	for (int i=0;i<files.size();i++)
+// 	{
+// 		sample_t s(files.at(i));
+// 		found= find(sam.begin(),sam.end(),s);
+// 		if (found==sam.end())
+// 			sam.push_back(s);
+// 		else
+// 			found->files.push_back(&files.at(i));
+// 	}
+// 	return sam;
+// }
 
 
 #endif // SAMPLE_T_HPP

@@ -20,6 +20,7 @@
 #ifndef LOG_T_HPP
 #define LOG_T_HPP
 
+#include "print.hpp"
 #include <string>
 #include <vector>
 #include <sstream>
@@ -28,11 +29,13 @@
 
 using namespace std;
 
-static vector<string> fatal_messages; // 4
-static vector<string> error_messages; // 3
-static vector<string> warning_messages; // 2
-static vector<string> info_messages; // 1
-static vector<string> debug_messages; // 0
+// static vector<string> fatal_messages; // 4
+// static vector<string> error_messages; // 3
+// static vector<string> warning_messages; // 2
+// static vector<string> info_messages; // 1
+// static vector<string> debug_messages; // 0
+
+
 
 // template <class T>
 class logger
@@ -42,6 +45,7 @@ private:
 	static bool activate_debug;
 // 	static void log_message(string type, string message, T variable={});
 public:
+	static vector<string> log_messages;
 	///  Any error that is forcing a shutdown of the service or application to prevent data loss (or further data loss).
 	static void fatal(string message,string variable={});
 	static void fatal(string message,int variable);
@@ -67,6 +71,7 @@ public:
 	static void debug(string message,int variable);
 	static void debug(string message,double variable);
 // 	static void debug(string message,bool variable);
+	static void to_screen();
 };
 
 #endif // LOG_T_HPP

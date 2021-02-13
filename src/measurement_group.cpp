@@ -15,7 +15,7 @@ const int measurement_group_t::olcdb() const
 		return -1;
 	if (measurements().at(0)->files()->size()==0)
 		return -1;
-	return measurements().at(0)->files()->front()->name.olcdb();
+	return measurements().at(0)->files()->front()->name->olcdb();
 }
 
 const string measurement_group_t::group() const
@@ -25,7 +25,7 @@ const string measurement_group_t::group() const
 		return "";
 	if (measurements().at(0)->files()->size()==0)
 		return "";
-	return measurements().at(0)->files()->front()->name.group();
+	return measurements().at(0)->files()->front()->name->group();
 }
 
 const vector<measurement_t *> & measurement_group_t::measurements() const

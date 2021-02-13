@@ -1,13 +1,14 @@
 #include "log.hpp"
 
 bool logger::activate_debug = false;
+vector<string> logger::log_messages;
 
 void logger::debug(std::__cxx11::string message, string variable)
 {
 	stringstream crit;
-	crit << "*** DEBUG ***"  << "\t\t" << message << "\t\t" << variable << LINE_DELIMITER;
-	debug_messages.push_back(crit.str());
-	cout << crit.str();
+	crit << "*** DEBUG ***"  << "\t\t" << message << "\t\t" << variable ;
+	log_messages.push_back(crit.str());
+// 	cout << crit.str();
 }
 void logger::debug(std::__cxx11::string message, int variable)
 {
@@ -29,9 +30,9 @@ void logger::debug(std::__cxx11::string message, double variable)
 void logger::fatal(std::__cxx11::string message, string variable)
 {
 	stringstream crit;
-	crit << "*** FATAL ***"  << "\t\t" << message << "\t\t" << variable << LINE_DELIMITER;
-	fatal_messages.push_back(crit.str());
-	cout << crit.str();
+	crit << "*** FATAL ***"  << "\t\t" << message << "\t\t" << variable ;
+	log_messages.push_back(crit.str());
+// 	cout << crit.str();
 }
 void logger::fatal(std::__cxx11::string message, int variable)
 {
@@ -52,9 +53,9 @@ void logger::fatal(std::__cxx11::string message, double variable)
 void logger::error(std::__cxx11::string message, string variable)
 {
 	stringstream crit;
-	crit << "*** ERROR ***"  << "\t\t" << message << "\t\t" << variable << LINE_DELIMITER;
-	error_messages.push_back(crit.str());
-	cout << crit.str();
+	crit << "*** ERROR ***"  << "\t\t" << message << "\t\t" << variable ;
+	log_messages.push_back(crit.str());
+// 	cout << crit.str();
 // 	log::log_message("*** ERROR ***",message, variable);
 }
 void logger::error(std::__cxx11::string message, int variable)
@@ -76,9 +77,9 @@ void logger::error(std::__cxx11::string message, double variable)
 void logger::info(std::__cxx11::string message, string variable)
 {
 	stringstream crit;
-	crit << "*** INFO ***"  << "\t\t" << message << "\t\t" << variable << LINE_DELIMITER;
-	info_messages.push_back(crit.str());
-	cout << crit.str();
+	crit << "*** INFO ***"  << "\t\t" << message << "\t\t" << variable ;
+	log_messages.push_back(crit.str());
+// 	cout << crit.str();
 // 	log::log_message("*** INFO ***",message, variable);
 }
 void logger::info(std::__cxx11::string message, int variable)
@@ -100,9 +101,9 @@ void logger::info(std::__cxx11::string message, double variable)
 void logger::warning(std::__cxx11::string message, string variable)
 {
 	stringstream crit;
-	crit << "*** WARNING ***"  << "\t\t" << message << "\t\t" << variable << LINE_DELIMITER;
-	warning_messages.push_back(crit.str());
-	cout << crit.str();
+	crit << "*** WARNING ***"  << "\t\t" << message << "\t\t" << variable ;
+	log_messages.push_back(crit.str());
+// 	cout << crit.str();
 }
 void logger::warning(std::__cxx11::string message, int variable)
 {
@@ -119,3 +120,9 @@ void logger::warning(std::__cxx11::string message, double variable)
 // 	else
 // 		warning(message,"FALSE");
 // }
+
+void logger::to_screen()
+{
+	print(log_messages);
+}
+

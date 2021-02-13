@@ -403,6 +403,26 @@ vector<vector <string> > tools::mat::format_string_to_matrix(const string& mains
 }
 
 
+vector<vector <string> > tools::mat::format_string_to_matrix(string* mainstring, string line_delimiter, string column_delimiter) 
+{
+	string line;
+	vector<string> columns_in_line;
+	vector<vector< string >> matrix;
+	vector<string> lines = tools::str::get_strings_between_delimiter(*mainstring,line_delimiter);
+	for (int i=0;i<lines.size();i++) {
+		if (lines[i].length()==0) continue;
+		line = lines[i];
+		tools::str::replace_chars(&(line),"\r",""); // win
+		if (line.length()>0) 
+		{
+			columns_in_line = tools::str::get_strings_between_delimiter(line,column_delimiter,true);
+			matrix.push_back(columns_in_line);
+		}
+	}
+	return matrix;
+}
+
+
 string tools::mat::format_matrix_to_string(vector<vector<string> > *matrix, string line_delimiter, string column_delimiter) 
 {
 	stringstream ss;

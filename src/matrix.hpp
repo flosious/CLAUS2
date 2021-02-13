@@ -48,8 +48,9 @@ public:
 	///RELATIVE! in at%
 	const concentration_t concentration(isotope_t& iso) const;
 // 	const concentration_t concentration(element_t& ele) const;
-	bool operator==(matrix_t& obj) ;
-	bool operator!=(matrix_t& obj) ;
+	bool operator==(matrix_t obj) ;
+	bool operator!=(matrix_t obj) ;
+	bool operator<(matrix_t obj) ;
 };
 	
 

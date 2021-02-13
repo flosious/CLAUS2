@@ -16,12 +16,20 @@
 /*******files::dsims_dp_rpc_asc_t******/
 /**************************************/
 
-files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s,string contents_s) : 	sims_t(filename_with_path_s, contents_s),
-																										name(filename_with_path_s), 
+files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s,string contents_s) : 	
+																										name(filename_with_path_s,"_",{"dp_rpc_asc"}), 
 																										contents(filename_with_path_s,contents_s)
 {
-// 	name = name_t{filename_with_path_s};
+	///this is quite important, so populated name parts are accessible by file_t
+	file_t::name=&name;
+	file_t::contents=&contents;
 }
+
+// files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s,string contents_s) : 	name(filename_with_path_s), 
+// 																										contents(filename_with_path_s,contents_s),
+// 																										sims_t(name,contents)
+// {
+// }
 
 // const sputter_time_t files::dsims_dp_rpc_asc_t::greatest_common_sputter_time()
 // {
@@ -64,7 +72,7 @@ void files::dsims_dp_rpc_asc_t::to_screen(string prefix)
 	
 	if (name.not_parseable_filename_parts().size()==1) cout << prefix << "\t"<<"not_parseable_filename_parts:\t" << *name.not_parseable_filename_parts().begin() << endl;
 	else cout << prefix << "\t"<<"not_parseable_filename_parts:\t<" << name.not_parseable_filename_parts().size() << ">" << endl;
-
+	
 	cout << prefix << "\t"<<"sputter_element:\t" << name.sputter_element().to_string() << endl;
 	cout << prefix << "\t"<<"sputter_energy:\t" << name.sputter_energy().to_string() << endl;
 	cout << prefix << "\t"<<"secondary_polarity:\t" << name.secondary_polarity() << endl;
@@ -102,11 +110,6 @@ void files::dsims_dp_rpc_asc_t::to_screen(string prefix)
 	cout << prefix << "\t"<<"sputter_energy:\t" << contents.sputter_energy().to_string() << endl;
 	cout << prefix << "\t"<<"sputter_rastersize:\t" << contents.sputter_rastersize().to_string() << endl;
 	cout << prefix << "\t"<<"analysis_rastersize:\t" << contents.analysis_rastersize().to_string() << endl;
-	
-	cout << prefix << "\t" << "matrix:" ;
-// 	for (auto& ele:contents.matrix_elements())
-// 		cout << "\t" << ele.to_string();
-	cout << endl;
 }
 
 /**************************************************/
@@ -156,9 +159,10 @@ void files::dsims_dp_rpc_asc_t::column_t::to_screen()
 /*****  files::dsims_dp_rpc_asc_t::name_t      ****/
 /**************************************************/
 
-files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : sims_t::name_t(name_with_path_s,"_",{"dp_rpc_asc"})
-{
-}
+// files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : sims_t::name_t(name_with_path_s,"_",{"dp_rpc_asc"})
+// {
+// // 	delimiter="_";
+// }
 
 /**************************************************/
 /*****  files::dsims_dp_rpc_asc_t::contents_t  ****/

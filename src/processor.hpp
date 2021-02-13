@@ -44,10 +44,10 @@ public:
 // 	list<file_t> files;
 // 	list measurement_groups
 // 	list samples
-	vector<string> input_filenames;
+// 	vector<string> input_filenames;
 	
 	///samples across all MGs
-	list<sample_t> samples;
+// 	list<sample_t> samples;
 	processor(vector<string> args_p);
 };
 

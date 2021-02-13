@@ -18,44 +18,94 @@
 
 #include "file.hpp"
 
+
 /***STATICS***/
 
-// const set<string> file_t::contents_t::identifiers={""};
-// const string file_t::contents_t::delimiter = "\t";
-// 
-// const set<string> file_t::name_t::identifiers={""};
-// const string file_t::name_t::delimiter = "_";
+void files::load(vector<string>& filenames_with_path)
+{
+	files::feed_files_list(filenames_with_path, files::dsims_dp_rpc_asc_t::files_list);
+	files::feed_files_list(filenames_with_path, files::tofsims_TXT_t::files_list);
+// 	files::feed_files_list(filenames_with_path, files::dsims_jpg_t::files_list);
+// 	files::feed_files_list(filenames_with_path, files::profiler_t::files_list);
+	
+	for (auto& f:files::dsims_dp_rpc_asc_t::files_list)
+		logger::info("recognized dsims_dp_rpc_asc_t",f.name.filename_with_path());
+	for (auto& f:files::tofsims_TXT_t::files_list)
+		logger::info("recognized tofsims_TXT_t",f.name.filename_with_path());
+// 	for (auto& f:files::dsims_jpg_t::files_list)
+// 		logger::info("recognized dsims_jpg_t",f.name.filename_with_path());
+// 	for (auto& f:files::profiler_t::files_list)
+// 		logger::info("recognized profiler_t",f.name.filename_with_path());
+}
 
+vector<file_t*> files_list()
+{
+	vector<file_t*> files;
+	
+	for (auto& d: files::dsims_dp_rpc_asc_t::files_list)
+		files.push_back(&d);
+	
+	for (auto& d: files::tofsims_TXT_t::files_list)
+		files.push_back(&d);
+	
+	for (auto& d: files::dsims_jpg_t::files_list)
+		files.push_back(&d);
+	
+	for (auto& d: files::profiler_t::files_list)
+		files.push_back(&d);
+	
+	return files;
+}
+
+vector<files::tofsims_TXT_t> files::tofsims_TXT_t::files_list;
+vector<files::dsims_dp_rpc_asc_t> files::dsims_dp_rpc_asc_t::files_list;
+vector<files::dsims_jpg_t> files::dsims_jpg_t::files_list;
+vector<files::profiler_t> files::profiler_t::files_list;
+
+/***************************/
+/********  file_t  *********/
+/***************************/
 file_t file_t::file() const
 {
 	return *this;
 }
 
-file_t::file_t(const string& filename_with_path_s,string contents_s) :name(filename_with_path_s,"",{""}), contents(filename_with_path_s,"",{""},contents_s)
+void file_t::to_screen()
 {
-	logger::info("file_t::file_t",filename_with_path_s);
+	cout << "creation_date_time\t" << creation_date_time() << endl;
+	cout << "name:" << endl;
+	if (name!=nullptr) name->to_screen("\t");
+	cout << "contents:" << endl;
+	if (contents != nullptr) contents->to_screen("\t");
 }
 
 
-// const bool file_t::is_correct_type()
+// file_t::file_t(const string& filename_with_path_s,string contents_s)
 // {
-// 	if (correct_file_type) 				return true;
-// 	if (!name.is_correct_type())		return false;
-// 	if (!contents.is_correct_type())	return false;
-// 	correct_file_type=true;
-// 	return true;
+// 	logger::info("file_t::file_t",filename_with_path_s);
 // }
 
-bool file_t::operator<(const file_t& fname) const
+// file_t::file_t(name_t name_s, contents_t contents_s) :name(name_s), contents(contents_s)
+// {
+// // 	logger::info("file_t::file_t",filename_with_path_s);
+// }
+
+const string file_t::creation_date_time() const
 {
-	if (name.filename_with_path() >= fname.name.filename_with_path()) 
+	time_t cdt = tools::file::creation_date(name->filename_with_path());
+	return tools::time::time_t_to_string(cdt);
+}
+
+bool file_t::operator<(const file_t& obj) const
+{
+	if (name->filename_with_path() >= obj.name->filename_with_path()) 
 		return false;
 	return true;
 }
 
-bool file_t::operator==(const file_t& fname) const
+bool file_t::operator==(const file_t& obj) const
 {
-	if (name.filename_with_path()==fname.name.filename_with_path()) return true;
+	if (name->filename_with_path()==obj.name->filename_with_path()) return true;
 	return false;
 }
 
@@ -134,15 +184,16 @@ file_t::contents_t::contents_t(const string& filename_with_path_s,
 
 const bool file_t::contents_t::is_correct_type()
 {
+	if (contents_string()=="") return false;
 	for (auto& fci : identifiers)
 	{
 		if (contents_string().find(fci)==string::npos)
 		{
-			logger::info("file_t::contents_t::is_correct_file_type()","FALSE");
+// 			logger::info("file_t::contents_t::is_correct_file_type()","FALSE");
 			return false;
 		}
 	}
-	logger::info("file_t::contents_t::is_correct_file_type()","TRUE");
+// 	logger::info("file_t::contents_t::is_correct_file_type() ",filename_with_path_p);
 	return true;
 }
 
@@ -151,6 +202,7 @@ bool file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std:
 	raw_data_tensor->clear();
 	raw_header_tensor->clear();
 	vector<vector<string>> raw_mat = tools::mat::format_string_to_matrix(contents_string(),LINE_DELIMITER,delimiter);
+	
 	tools::mat::remove_empty_lines_from_matrix(&raw_mat);
 	vector<vector<string> > header_temp, data_temp;
 	bool data_scanned=false;
@@ -202,7 +254,6 @@ vector<vector<vector<std::__cxx11::string> > >& file_t::contents_t::raw_header_t
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
 		logger::debug("file_t::raw_header_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
-// 		return {};
 	}
 	return raw_header_tensor_p;
 }
@@ -220,8 +271,9 @@ vector<vector<vector<std::__cxx11::string> > >& file_t::contents_t::raw_data_ten
 
 void file_t::contents_t::to_screen(string prefix)
 {
-	cout << prefix <<"delimiter\t" << delimiter << endl;
-	cout << prefix <<"identifiers\t<" << identifiers.size() << ">" << endl;
+	cout << prefix << "delimiter:\t'" << delimiter <<"'" << endl;
+	if (identifiers.size()==1) cout << prefix << "identifiers:\t" << *identifiers.begin() << endl;
+	else cout << prefix << "identifiers:\t<" << identifiers.size() << ">" << endl;
 }
 
 /***************************/
@@ -244,16 +296,17 @@ const string file_t::name_t::simple_name()
 
 const bool file_t::name_t::is_correct_type()
 {
+	if (filename_type_ending()=="") return false;
 	for (auto& fti : identifiers)
 	{
 // 		cout << "name_t fti=" << fti << endl;
 		if (fti==filename_type_ending()) 
 		{
-			logger::info("file_t::name_t::is_correct_file_type()","TRUE");
+// 			logger::info("file_t::name_t::is_correct_file_type()","TRUE");
 			return true;
 		}
 	}
-	logger::info("file_t::name_t::is_correct_file_type()","FALSE");
+// 	logger::info("file_t::name_t::is_correct_file_type()","FALSE");
 	return false;
 }
 
@@ -326,8 +379,9 @@ std::__cxx11::string file_t::name_t::repetition()
 
 void file_t::name_t::to_screen(string prefix)
 {
-	cout << prefix <<"delimiter\t" << delimiter << endl;
-	cout << prefix <<"identifiers\t<" << identifiers.size() << ">" << endl;
+	cout << prefix <<"delimiter\t'" << delimiter << "'" << endl;
+	if (identifiers.size()==1) cout << prefix <<"identifier\t" << *identifiers.begin()  << endl;
+	else cout << prefix <<"identifiers\t<" << identifiers.size() << ">" << endl;
 	cout<< prefix << "filename=\t"<< filename()<<endl;
 	cout<< prefix << "filename_with_path=\t"<< filename_with_path()<<endl;
 	cout << prefix<< "directory=\t"<< directory()<<endl;
@@ -344,7 +398,6 @@ void file_t::name_t::to_screen(string prefix)
 	cout << prefix<< "repetition=\t"<< repetition()<<endl;
 	
 	cout << prefix<< "not_parseable_filename_parts:\t<" << not_parseable_filename_parts().size()  << ">" << endl;
-// 	print(not_parseable_filename_parts());
 }
 
 void file_t::name_t::parse_all_parts_at_once()
@@ -487,8 +540,8 @@ bool file_t::name_t::parse_repetitor(string filename_part)
 std::__cxx11::string file_t::name_t::filename_type_ending() const
 {
 	string filename_type_ending_p =tools::file::extract_filetype_ending(filename_with_path_p,".");
-	if (filename_type_ending_p=="")
-		logger::error("file_t::filename_type_ending() ",filename_type_ending_p);
+// 	if (filename_type_ending_p=="")
+// 		logger::error("file_t::filename_type_ending()",filename_type_ending_p);
 	return filename_type_ending_p;
 }
 
@@ -508,34 +561,37 @@ const string file_t::name_t::directory() const
 }
 
 
-/***************************/
+/********************/
 /** sims_t::name_t **/
+/********************/
 
-files::sims_t::name_t::name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s) : 	file_t::name_t(name_with_path_s,delimiter_s,identifiers_s)
+sims_t::name_t::name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s) : 	file_t::name_t(name_with_path_s,delimiter_s,identifiers_s)
 {
 	
 }
 
-/***************************/
+/************************/
 /** sims_t::contents_t **/
+/************************/
 
-files::sims_t::contents_t::contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s, string contents_s) : file_t::contents_t(filename_with_path_s,delimiter_s,identifiers_s,contents_s)
+sims_t::contents_t::contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s, string contents_s) : file_t::contents_t(filename_with_path_s,delimiter_s,identifiers_s,contents_s)
 {
 	
 }
 
-/*******************************/
-/** SIMS ***/
+/**************/
+/*** sims_t ***/
+/**************/
 
+// sims_t::sims_t(const string& filename_with_path_s, string contents_s) : file_t(filename_with_path_s,contents_s)
+// {
+// }
 
+// sims_t::sims_t(name_t name_s,contents_t contents_s) : file_t(name_s,contents_s)
+// {
+// }
 
-
-
-files::sims_t::sims_t(const string& filename_with_path_s, string contents_s) : file_t(filename_with_path_s,contents_s)
-{
-}
-
-const total_sputter_depth_t files::sims_t::name_t::total_sputter_depths()
+const total_sputter_depth_t sims_t::name_t::total_sputter_depths()
 {
 	if (total_sputter_depths_p.size()==0)
 	{
@@ -557,7 +613,7 @@ const total_sputter_depth_t files::sims_t::name_t::total_sputter_depths()
 	return tspd;
 }
 
-const string files::sims_t::name_t::filename_without_crater_depths()
+const string sims_t::name_t::filename_without_crater_depths()
 {
 	string filename_wo_crater_depths  = tools::file::extract_filename(filename_with_path());
 	stringstream remove;
@@ -571,7 +627,7 @@ const string files::sims_t::name_t::filename_without_crater_depths()
 	return filename_wo_crater_depths;
 }
 
-bool files::sims_t::name_t::parse_sputter_energy_element_polarity()
+bool sims_t::name_t::parse_sputter_energy_element_polarity()
 {
 	smatch match;
 	regex reg;
@@ -595,25 +651,26 @@ bool files::sims_t::name_t::parse_sputter_energy_element_polarity()
 			return true;
 		}
 	}
-	
 	return false;
 }
 
-const energy_t files::sims_t::name_t::sputter_energy()
+const energy_t sims_t::name_t::sputter_energy()
 {
 	if (!sputter_energy_p.is_set()) 
 		parse_sputter_energy_element_polarity();
 	return sputter_energy_p;
 }
 
-element_t files::sims_t::name_t::sputter_element()
+element_t sims_t::name_t::sputter_element()
 {
-	if (sputter_element_p!="") 
+	if (sputter_element_p=="") 
+	{
 		parse_sputter_energy_element_polarity();
+	}
 	return sputter_element_p;
 }
 
-const string files::sims_t::name_t::secondary_polarity()
+const string sims_t::name_t::secondary_polarity()
 {
 	if (secondary_polarity_p=="") 
 		parse_sputter_energy_element_polarity();

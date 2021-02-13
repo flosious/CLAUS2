@@ -211,12 +211,6 @@ bool pse_t::load_file()
 		logger::fatal("PSE file could not be loaded", "dying...");
 		return false;
 	}
-// 	tools::mat::remove_empty_cols_from_matrix(&contents);
-// 	tools::mat::remove_empty_lines_from_matrix(&contents);
-// 	tools::str::remove_spaces(&contents);
-// 	tools::file::write_mat_to_file(filename,&contents,false,delimiter,"\n");
-	
-// 	isotopes_p.reserve(contents.size());
 	string symbol, nuclide, mass, abundance, symbol_alternative, protons;
 	map<string,vector<pse_element_t>> symbols_to_eles; //a list where each element contains just 1 isotop
 	for (int i=0;i<contents.size();i++) 
@@ -251,9 +245,6 @@ bool pse_t::load_file()
 				symbols_to_eles.insert(pair<string,vector<pse_element_t>> (symbol,{ele}));
 			else 
 				symbols_to_eles.at(symbol).push_back(ele);
-			
-// 			if (symbol_alternative!="")
-// 				symbols_to_eles.insert(pair<string,set<pse_isotope_t>> (symbol_alternative,{iso}));
 		}
 		else
 			logger::error("pse_t::load_file() could not read line (to less entries): ", i+1);
@@ -271,8 +262,6 @@ bool pse_t::load_file()
 		elements_s.insert(element);
 	}
 	elements_p = {elements_s.begin(),elements_s.end()};
-// 	vector<pse_element_t> elements_vec (elements_s.begin(),elements_s.end());
-// 	*this = pse_t(elements_vec);
 	
 	logger::info("PSE loaded");
 	return true;

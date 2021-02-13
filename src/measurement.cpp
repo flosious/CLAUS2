@@ -13,21 +13,21 @@ const int measurement_t::olcdb() const
 {
 	if (!use_olcdb) return -1;
 	if (files()->size()==0) return 0;
-	return files()->front()->name.olcdb();
+	return files()->front()->name->olcdb();
 }
 
 const string measurement_t::group() const
 {
 	if (!use_group) return "";
 	if (files()->size()==0) return "";
-	return files()->front()->name.group();
+	return files()->front()->name->group();
 }
 
 const string measurement_t::repitition() const
 {
 	if (!use_repition) return "";
 	if (files()->size()==0) return "";
-	return files()->front()->name.repetition();
+	return files()->front()->name->repetition();
 }
 
 const list<file_t *> * measurement_t::files() const

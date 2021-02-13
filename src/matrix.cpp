@@ -171,7 +171,7 @@ const bool matrix_t::is_set() const
 	return true;
 }
 
-bool matrix_t::operator==(matrix_t& obj)
+bool matrix_t::operator==(matrix_t obj)
 {
 	if (isotopes.size()!=obj.isotopes.size()) return false;
 	bool same_iso;
@@ -191,9 +191,24 @@ bool matrix_t::operator==(matrix_t& obj)
 	return true;
 }
 
-bool matrix_t::operator!=(matrix_t& obj)
+bool matrix_t::operator!=(matrix_t obj)
 {
 	return !operator==(obj);
+}
+
+bool matrix_t::operator<(matrix_t obj)
+{
+	if (isotopes.size()<obj.isotopes.size()) return true;
+	if (isotopes.size()>obj.isotopes.size()) return false;
+	
+	set<isotope_t> iso(isotopes.begin(),isotopes.end());
+	set<isotope_t> obj_iso(obj.isotopes.begin(),obj.isotopes.end());
+	
+	for (auto& i : iso)
+		for (auto& j : obj_iso)
+			if (i<j) return true;
+			
+	return false;
 }
 
 const std::__cxx11::string matrix_t::to_string()

@@ -59,18 +59,10 @@ using namespace std;
  * 
  */
 
-template <typename T>
-	set<T> load_files(set<string>& filenames_with_path_s)
-{
-	set<T> files_s;
-	for (auto& fn:filenames_with_path_s)
-	{
-		T file(fn);
-		if (file.name.is_correct_type() && file.contents.is_correct_type())
-			files_s.insert(file);
-	}
-	return files_s;	
-}
+
+/**********************/
+/****     file_t    ***/
+/**********************/
 
 
 ///standard IHP olc file template
@@ -84,7 +76,7 @@ protected:
 	private:
 		///should be freed after parse_data_and_header_tensors, as it has no longer use
 		string contents_p;
-		const string& filename_with_path_p;
+		const string filename_with_path_p;
 		///populates raw_data_tensor_p, raw_header_tensor_p, will clear *contents_p
 		bool parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor);
 	protected:
@@ -107,7 +99,7 @@ protected:
 	class name_t
 	{
 	private:
-		const string& filename_with_path_p;
+		const string filename_with_path_p;
 		vector<string> not_parseable_filename_parts_p;
 		string group_p="";
 		string lot_p="";
@@ -157,28 +149,26 @@ protected:
 public:
 	///returns the file_t parent
 	file_t file() const;
-	file_t(const string& filename_with_path_s, string contents_s="");
-	name_t name;
-	contents_t contents;
+// 	file_t(const string& filename_with_path_s, string contents_s="");
+// 	file_t(name_t name_s, contents_t contents_s);
+	///should be overwritten by child
+	name_t* name=nullptr;
+	///should be overwritten by child
+	contents_t* contents=nullptr;
 	///this does not work as intended for some reason
-	bool operator< (const file_t& fname) const;
-	bool operator== (const file_t& fname) const;
+	bool operator< (const file_t& obj) const;
+	bool operator== (const file_t& obj) const;
 	const string creation_date_time() const;
+	void to_screen();
+	
+	
 };
-	
-namespace files
-{
-	
-
-/**********************/
-/****     file_t    ***/
-/**********************/
-
-
 
 /**********************/
 /****     sims_t    ***/
 /**********************/
+
+///standard sims template
 class sims_t : public file_t
 {
 protected:
@@ -216,8 +206,51 @@ protected:
 		contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s,string contents_s="");
 	};
 public:
-	sims_t(const string& filename_with_path_s, string contents_s="");
 };
+
+
+
+
+
+
+
+/******************************/
+/****  namespace files   ******/
+/******************************/
+
+
+namespace files
+{
+/// load all files to their corresponding tools
+/// populates < files::types >files_list
+/// use this first
+void load(vector<string>& filenames_with_path);
+
+
+///feeds the typenames corresponding files_list --> use "load()" for all types at once
+///clears the recognized(loadable) filenames_with_path_s entry from the list
+template <typename T>
+static void feed_files_list(vector<string>& filenames_with_path_s, vector<T>& files_s)
+{
+	for (int i=0;i<filenames_with_path_s.size();i++)
+	{
+		T file(filenames_with_path_s.at(i));
+		if (file.name.is_correct_type() && file.contents.is_correct_type())
+		{
+			files_s.push_back(file);
+			//remove from "filenames_with_path_s" vector
+			filenames_with_path_s.at(i)="";
+		}
+	}
+}
+
+
+
+///all files over all groups, measurements and samples
+static vector<file_t*> files_list();
+
+
+
 
 
 /**************************/
@@ -294,20 +327,17 @@ protected:
 		const quantity_t em_yield();
 		const quantity_t em_voltage();
 	};
-	class name_t : public sims_t::name_t
-	{
-	private:
-// 		const string delimiter;
-	public:
-		name_t(const string& name_with_path_s);
-// 		const set<string> identifiers;
-	};
+// 	class name_t : public sims_t::name_t
+// 	{
+// 	public:
+// 		name_t(const string& name_with_path_s);
+// 	};
 public:
 	dsims_dp_rpc_asc_t(const string& filename_with_path_s, string contents_s="");
 	name_t name;
 	contents_t contents;
 	void to_screen(string prefix="");
-	
+	static vector<dsims_dp_rpc_asc_t> files_list;
 	const sputter_time_t greatest_common_sputter_time();
 	const sputter_depth_t greatest_common_sputter_depth();
 };
@@ -318,8 +348,8 @@ public:
 /**************************/
 class tofsims_TXT_t : public sims_t
 {
-private:
-	class contents_t : sims_t::contents_t
+protected:
+	class contents_t : public sims_t::contents_t
 	{
 	private:
 		bool parse_analysis_energy_element(string filename_part);
@@ -330,7 +360,7 @@ private:
 		const element_t analysis_element();
 		const energy_t analysis_energy();
 	};
-	class name_t : sims_t::name_t
+	class name_t : public sims_t::name_t
 	{
 	private:
 	public:
@@ -342,7 +372,12 @@ public:
 	name_t name;
 	contents_t contents;
 // 	static set<tofsims_TXT_t> files(set<string>& filenames_with_path);
+	static vector<tofsims_TXT_t> files_list;
 };
+
+/**********************/
+/**** dsims_jpg_t ****/
+/**********************/
 
 class dsims_jpg_t : public file_t
 {
@@ -351,12 +386,16 @@ class dsims_jpg_t : public file_t
 		name_t(const string& name_with_path_s);
 // 		const set<string> identifiers;
 	};
+public:
+	name_t name;
+	contents_t contents;
 	dsims_jpg_t(string filename_with_path_s);
 // 	static set<dsims_jpg_t> files(set<string>& filenames_with_path);
+	static vector<dsims_jpg_t> files_list;
 };
 
 /**************************/
-/***   profiler_t       ***/
+/****     profiler_t    ******/
 /**************************/
 class profiler_t : public file_t 
 {
@@ -378,7 +417,10 @@ private:
 // 		const string delimiter="_";
 	};
 public:
+	name_t name;
+	contents_t contents;
 	profiler_t(string filename_with_path_s);
+	static vector<profiler_t> files_list;
 // 	static set<profiler_t> files(set<string>& filenames_with_path);
 };
 
