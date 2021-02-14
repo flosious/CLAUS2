@@ -51,6 +51,8 @@ private:
 	static bool use_chip;
 	static bool use_simple_name;
 	static bool use_matrix;
+	///all samples from all loaded files
+	static vector<sample_t> samples_list_p;
 public:
 	///files corresponding to this sample
 	set<file_t*> files;
@@ -66,6 +68,7 @@ public:
 		void to_screen(string prefix="");
 	};
 	sample_t(file_t& file_s);
+	sample_t(file_t* file_s);
 // 	sample_t(string lot, string lot_split, int wafer,chip_t chip, string monitor,string simple_name);
 	
 	chip_t chip();
@@ -78,41 +81,16 @@ public:
 	// reads from database or file
 	matrix_t matrix();
 	
-	
-    
-// 	bool try_add(file_t& file_s);
 	void to_screen(string prefix="");
 	/*operators*/
 	bool operator==( sample_t& obj) ;
 	bool operator!=( sample_t& obj) ;
 	bool operator<( sample_t& obj) ;
 	
-	///all samples of all measurements and measurement_groups
-	static vector<sample_t> samples_list;
-	static void feed_samples_list(vector<file_t>& files);
-	static void feed_samples_list(file_t& file);
-// 	static vector<sample_t> samples(vector<file_t>& files);
-// 	static void add_to_list(vector<file_t>& files,vector<sample_t>& samples_list);
-// 	static void add_to_list(file_t& file,vector<sample_t>& samples_list);
-// 	static vector<sample_t> samples(vector<file_t>* files);
+	///all samples from all loaded files
+	static vector<sample_t>* samples_list();
 };
 
-// template <typename T>
-// vector<sample_t> samples(vector<T>& files)
-// {
-// 	vector<sample_t> sam;
-// 	vector<sample_t>::iterator found;
-// 	for (int i=0;i<files.size();i++)
-// 	{
-// 		sample_t s(files.at(i));
-// 		found= find(sam.begin(),sam.end(),s);
-// 		if (found==sam.end())
-// 			sam.push_back(s);
-// 		else
-// 			found->files.push_back(&files.at(i));
-// 	}
-// 	return sam;
-// }
 
 
 #endif // SAMPLE_T_HPP

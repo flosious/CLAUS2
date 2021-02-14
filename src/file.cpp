@@ -38,7 +38,7 @@ void files::load(vector<string>& filenames_with_path)
 // 		logger::info("recognized profiler_t",f.name.filename_with_path());
 }
 
-vector<file_t*> files_list()
+vector<file_t*> files::files_list()
 {
 	vector<file_t*> files;
 	
@@ -133,24 +133,7 @@ matrix_t file_t::contents_t::matrix()
 	return {};
 }
 
-// const string file_t::contents_t::matrix_elements()
-// {
-// 	if (raw_header_tensor().size()==0) return {};
-// 	if (raw_header_tensor()[0].size()==0) return {};
-// 	set<element_t> matrix_elements_s;
-// 	for (auto& line: raw_header_tensor()[0])
-// 	{
-// 		if (line.size()==0) continue;
-// 		if (line.at(0).find("matrix")==string::npos) continue;
-// 		string matrix_string = tools::vec::combine_vec_to_string(line,delimiter);
-// 		vector<string> matrix_elements_vec = tools::str::get_strings_between_delimiter(matrix_string," ");
-// 		tools::str::remove_substring_from_mainstring(&matrix_string,"=");
-// 		tools::str::remove_substring_from_mainstring(&matrix_string,"matrix");
-// 		tools::str::remove_spaces_from_string_start(&matrix_string);
-// 		return matrix_string;
-// 	}
-// 	return "";
-// }
+
 
 const string& file_t::contents_t::contents_string()
 {
@@ -176,11 +159,8 @@ file_t::contents_t::contents_t(const string& filename_with_path_s,
 															identifiers(identifiers_s),
 															contents_p(contents_s)
 {
-// 	if (contents_s!="")
-// 	{
-// 		contents_p = contents_s;
-// 	}
 }
+
 
 const bool file_t::contents_t::is_correct_type()
 {
@@ -565,7 +545,7 @@ const string file_t::name_t::directory() const
 /** sims_t::name_t **/
 /********************/
 
-sims_t::name_t::name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s) : 	file_t::name_t(name_with_path_s,delimiter_s,identifiers_s)
+files::sims_t::name_t::name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s) : 	file_t::name_t(name_with_path_s,delimiter_s,identifiers_s)
 {
 	
 }
@@ -574,7 +554,7 @@ sims_t::name_t::name_t(const string& name_with_path_s,const string delimiter_s,c
 /** sims_t::contents_t **/
 /************************/
 
-sims_t::contents_t::contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s, string contents_s) : file_t::contents_t(filename_with_path_s,delimiter_s,identifiers_s,contents_s)
+files::sims_t::contents_t::contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s, string contents_s) : file_t::contents_t(filename_with_path_s,delimiter_s,identifiers_s,contents_s)
 {
 	
 }
@@ -583,15 +563,15 @@ sims_t::contents_t::contents_t(const string& filename_with_path_s,const string d
 /*** sims_t ***/
 /**************/
 
-// sims_t::sims_t(const string& filename_with_path_s, string contents_s) : file_t(filename_with_path_s,contents_s)
+// files::sims_t::sims_t(const string& filename_with_path_s, string contents_s) : file_t(filename_with_path_s,contents_s)
 // {
 // }
 
-// sims_t::sims_t(name_t name_s,contents_t contents_s) : file_t(name_s,contents_s)
+// files::sims_t::sims_t(name_t name_s,contents_t contents_s) : file_t(name_s,contents_s)
 // {
 // }
 
-const total_sputter_depth_t sims_t::name_t::total_sputter_depths()
+const total_sputter_depth_t files::sims_t::name_t::total_sputter_depths()
 {
 	if (total_sputter_depths_p.size()==0)
 	{
@@ -613,7 +593,7 @@ const total_sputter_depth_t sims_t::name_t::total_sputter_depths()
 	return tspd;
 }
 
-const string sims_t::name_t::filename_without_crater_depths()
+const string files::sims_t::name_t::filename_without_crater_depths()
 {
 	string filename_wo_crater_depths  = tools::file::extract_filename(filename_with_path());
 	stringstream remove;
@@ -627,7 +607,7 @@ const string sims_t::name_t::filename_without_crater_depths()
 	return filename_wo_crater_depths;
 }
 
-bool sims_t::name_t::parse_sputter_energy_element_polarity()
+bool files::sims_t::name_t::parse_sputter_energy_element_polarity()
 {
 	smatch match;
 	regex reg;
@@ -654,14 +634,14 @@ bool sims_t::name_t::parse_sputter_energy_element_polarity()
 	return false;
 }
 
-const energy_t sims_t::name_t::sputter_energy()
+const energy_t files::sims_t::name_t::sputter_energy()
 {
 	if (!sputter_energy_p.is_set()) 
 		parse_sputter_energy_element_polarity();
 	return sputter_energy_p;
 }
 
-element_t sims_t::name_t::sputter_element()
+element_t files::sims_t::name_t::sputter_element()
 {
 	if (sputter_element_p=="") 
 	{
@@ -670,7 +650,7 @@ element_t sims_t::name_t::sputter_element()
 	return sputter_element_p;
 }
 
-const string sims_t::name_t::secondary_polarity()
+const string files::sims_t::name_t::secondary_polarity()
 {
 	if (secondary_polarity_p=="") 
 		parse_sputter_energy_element_polarity();

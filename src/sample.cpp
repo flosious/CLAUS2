@@ -35,11 +35,9 @@ void sample_t::chip_t::to_screen(string prefix)
 
 
 
-// 
-// 
-// /***********************/
-
-
+/***********************/
+/*****   STATICS   *****/
+/***********************/
 
 
 bool sample_t::use_lot=true;
@@ -50,102 +48,41 @@ bool sample_t::use_chip=true;
 bool sample_t::use_simple_name=true;
 bool sample_t::use_matrix=false; //maybe not set for some 
 
+vector<sample_t> sample_t::samples_list_p;
+
+vector<sample_t>* sample_t::samples_list()
+{
+	bool inserted;
+	for (auto& f: files::files_list())
+	{
+		sample_t sample(f);
+		inserted = false;
+		for (auto& s : samples_list_p)
+		{
+			if (s==sample)
+			{
+				s.files.insert(f);
+				inserted = true;
+			}
+		}
+		if (!inserted) samples_list_p.push_back(sample);
+	}
+	if (samples_list_p.size()==0) return nullptr;
+	return &samples_list_p;
+}
+
 
 /***********************/
 
-vector<sample_t> sample_t::samples_list;
-
-void sample_t::feed_samples_list(file_t& file)
-{
-	sample_t sample(file);
-	for (auto& s : samples_list)
-	{
-		if (sample==s) 
-		{
-			s.files.insert(&file);
-			return;
-		}
-	}
-	samples_list.push_back(sample);
-}
-
-void sample_t::feed_samples_list(vector<file_t>& files)
-{
-	for (auto& f : files)
-		feed_samples_list(f);
-}
-
-
-/*
-vector<sample_t> sample_t::samples(vector<file_t>& files_s)
-{
-	vector<sample_t> sam;
-	vector<sample_t>::iterator found;
-	for (int i=0;i<files_s.size();i++)
-	{
-		sample_t s(files_s.at(i));
-		found= find(sam.begin(),sam.end(),s);
-		if (found==sam.end())
-			sam.push_back(s);
-		else
-			found->files.insert(&files_s.at(i));
-	}
-	return sam;
-}
-*/
-
-// vector<sample_t> sample_t::samples(vector<file_t>* files)
-// {
-// 	vector<sample_t> sam;
-// 	vector<sample_t>::iterator found;
-// 	for (int i=0;i<files->size();i++)
-// 	{
-// 		sample_t s(files->at(i));
-// 		found= find(sam.begin(),sam.end(),s);
-// 		if (found==sam.end())
-// 			sam.push_back(s);
-// 		else
-// 			found->files.push_back(&files->at(i));
-// 	}
-// 	return sam;
-// }
-
-
-
-// void sample_t::add_to_list(file_t& file, vector<sample_t>& samples_list)
-// {
-// 	sample_t sample(file);
-// 	vector<sample_t>::iterator s = find(samples_list.begin(),samples_list.end(),sample);
-// 	if (s==samples_list.end())	samples_list.push_back(sample);
-// 	else s->files.insert(&file);
-// }
-
-
-
-
-
-/********************************/
-/*********   sample _t   ********/
-/********************************/
-
-// sample_t::sample_t(std::__cxx11::string lot, 
-// 				   std::__cxx11::string lot_split, 
-// 				   int wafer,
-// 				   sample_t::chip_t chip, 
-// 				   std::__cxx11::string monitor,
-// 				   std::__cxx11::string simple_name) :
-// 				   lot(lot),
-// 				   lot_split(lot_split),
-// 				   wafer(wafer),
-// 				   chip(chip),
-// 				   monitor(monitor),
-// 				   simple_name(simple_name)
-// {
-// }
 
 sample_t::sample_t(file_t& file_s)
 {	
 	files.insert(&file_s);
+}
+
+sample_t::sample_t(file_t* file_s)
+{	
+	files.insert(file_s);
 }
 
 
@@ -291,11 +228,6 @@ bool sample_t::operator<(sample_t& obj)
 	{
 		if (simple_name()<obj.simple_name()) return true;
 		if (simple_name()>obj.simple_name()) return false;
-	}
-
-	if (use_matrix)
-	{
-		if (matrix() < obj.matrix()) return true;
 	}
 	
 	return false;

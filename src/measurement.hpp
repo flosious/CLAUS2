@@ -33,9 +33,18 @@
 class sample_t;
 class measurement_group_t;
 
+
+namespace measurements
+{
+	class sims_t;
+	class dsims_t;
+	class tofsims_t;
+}
+
 namespace measurement_groups
 {
 	class dsims_t;
+	class tofsims_t;
 }
 /************************/
 
@@ -43,7 +52,7 @@ namespace measurement_groups
 using namespace std;
 
 class measurement_t
-	{
+{
 // 	friend class config_t;
 private:
 	///use these figures to diistinguish one measurement from another
@@ -62,9 +71,11 @@ private:
 	list<sample_t>* sample_list_global;
 	///all files, belonging to this measurement
 	list<file_t*> files_p;
-public:
-	/*ctors*/
+	protected:
+		/*ctors*/
 	measurement_t(const list<file_t>& files, const measurement_group_t* MG_p);
+public:
+	
 	/*vars*/
 	const measurement_group_t* MG;
 	/*functions*/
@@ -83,35 +94,48 @@ public:
 	const bool operator<(const measurement_t& obj) const;
 };
 
+
+
 namespace measurements
-{
+{	
+	///standard sims template
+	///can only be instanziated by friends
+	class sims_t : public measurement_t
+	{
+	private:
+		crater_t crater;
+	public:
+	};
 
-class profiler_t : public measurement_t
-{
-private:
-public:
-	static list<measurements::profiler_t> measurements(unordered_set<string>* filenames);
-};
+	class profiler_t : public measurement_t
+	{
+	private:
+		static vector<profiler_t> measurements_p;
+	public:
+		static vector<profiler_t>* measurements();
+	};
 
 
-class sims_t : public measurement_t
-{
-private:
-	crater_t crater;
-public:
-};
+	class dsims_t : public sims_t 
+	{
+	private:
+		static vector<dsims_t> measurements_p;
+	public:
+		measurement_groups::dsims_t* measurement_group;
+		void test();
+		static vector<dsims_t>* measurements();
+	};
 
-
-class dsims_t : public measurements::sims_t 
-{
-private:
-public:
-    measurement_groups::dsims_t* measurement_group;
-	static list<measurements::dsims_t> measurements(unordered_set<string>* filenames);
-	static list<measurements::dsims_t> measurements(unordered_set<string>* filenames,set<measurements::profiler_t>& proflier_measurements);
-    void test();
-};
-
+	class tofsims_t : public sims_t 
+	{
+	private:
+		static vector<tofsims_t> measurements_p;
+	public:
+		measurement_groups::tofsims_t* measurement_group;
+		void test();
+		static vector<tofsims_t>* measurements();
+	};
 }
+
 #endif // MEASUREMENT_T_HPP
 
