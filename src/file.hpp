@@ -59,121 +59,119 @@ using namespace std;
  * 
  */
 
-
-/**********************/
-/****     file_t    ***/
-/**********************/
-
-
-///standard IHP olc file template
-class file_t
-{
-	friend class config_t;	
-protected:
-	class contents_t
-	{
-	private:
-		///should be freed after parse_data_and_header_tensors, as it has no longer use
-		string contents_p;
-		const string filename_with_path_p;
-		///populates raw_data_tensor_p, raw_header_tensor_p, will clear *contents_p
-		bool parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor);
-	protected:
-		vector<vector<vector<string>>> raw_data_tensor_p, raw_header_tensor_p;
-		vector<vector<vector<string>>>& raw_data_tensor();
-		vector<vector<vector<string>>>& raw_header_tensor();
-	public:
-		/// "matrix = Si Ge 30Sn"
-		matrix_t matrix();
-		void to_screen(string prefix="");
-		const string delimiter;
-		const set<string> identifiers;
-		const std::__cxx11::string& contents_string();
-		const bool is_correct_type(); 
-		///give me contents_s if already loaded somewhere
-		contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s,string contents_s="");
-	};
-	///standard IHP olc filename template
-	class name_t
-	{
-	private:
-		const string filename_with_path_p;
-		vector<string> not_parseable_filename_parts_p;
-		string group_p="";
-		string lot_p="";
-		string lot_split_p="";
-		string monitor_p="";
-		string repetition_p="";
-		int wafer_p=-1;
-		int chip_x_p=-1;
-		int chip_y_p=-1;
-		int olcdb_p=-1;
-		
-		void parse_all_parts_at_once();
-		///order of parsing the parts
-		void parse_filename_parts();
-		
-		bool parse_olcdb(string filename_part);
-		bool parse_lot(string filename_part);
-		bool parse_wafer(string filename_part);
-		bool parse_chip(string filename_part);
-		bool parse_monitor(string filename_part);
-		bool parse_group(string filename_part);
-		bool parse_repetitor(string filename_part);
-		bool parsed_filename_parts = false;
-	public:
-		const string delimiter;
-		const set<string> identifiers;
-		name_t(const string& name_with_path_s, const string delimiter_s,const set<string> identifiers_s);
-		const vector<string>& not_parseable_filename_parts();
-		string filename_with_path() const;
-		string filename_type_ending() const;
-		const string filename() const;
-		const string directory() const;
-		string group();
-		string lot();
-		string lot_split();
-		string monitor();
-		string repetition();
-		///empty if lot and wafer is set
-		const string simple_name();
-		int chip_x();
-		int chip_y();
-		const int olcdb();
-		int wafer();
-		void to_screen(string prefix="");
-		const bool is_correct_type(); 
-	};
-	
-	/*ctors*/
-	file_t() {};
-public:
-	///returns the file_t parent, similar to casting a child to its base
-	file_t file() const;
-	///should be overwritten by child
-	name_t* name=nullptr;
-	///should be overwritten by child
-	contents_t* contents=nullptr;
-	///this does not work as intended for some reason
-	bool operator< (const file_t& obj) const;
-	bool operator== (const file_t& obj) const;
-	const string creation_date_time() const;
-	void to_screen();
-};
-
-
-
-
-
-
-
-
-
 /******************************/
 /****  namespace files   ******/
 /******************************/
 namespace files
 {
+
+
+	/**********************/
+	/****     file_t    ***/
+	/**********************/
+
+
+	///standard IHP olc file template
+	class file_t
+	{
+		friend class config_t;	
+	public:
+		class contents_t
+		{
+		private:
+			const string filename_with_path_p;
+			///should be freed after parse_data_and_header_tensors, as it has no longer use
+			string contents_p;
+			///populates raw_data_tensor_p, raw_header_tensor_p, will clear *contents_p
+			bool parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor);
+		protected:
+			vector<vector<vector<string>>> raw_data_tensor_p, raw_header_tensor_p;
+			vector<vector<vector<string>>>& raw_data_tensor();
+			vector<vector<vector<string>>>& raw_header_tensor();
+			
+		public:
+			/// "matrix = Si Ge 30Sn"
+			matrix_t matrix();
+			void to_screen(string prefix="");
+			const string delimiter;
+			const set<string> identifiers;
+			const std::__cxx11::string& contents_string();
+			const bool is_correct_type(); 
+			///give me contents_s if already loaded somewhere
+			contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s);
+		};
+		///standard IHP olc filename template
+		class name_t
+		{
+		private:
+			const string filename_with_path_p;
+			vector<string> not_parseable_filename_parts_p;
+			string group_p="";
+			string lot_p="";
+			string lot_split_p="";
+			string monitor_p="";
+			string repetition_p="";
+			int wafer_p=-1;
+			int chip_x_p=-1;
+			int chip_y_p=-1;
+			int olcdb_p=-1;
+			
+			void parse_all_parts_at_once();
+			///order of parsing the parts
+			void parse_filename_parts();
+			
+			bool parse_olcdb(string filename_part);
+			bool parse_lot(string filename_part);
+			bool parse_wafer(string filename_part);
+			bool parse_chip(string filename_part);
+			bool parse_monitor(string filename_part);
+			bool parse_group(string filename_part);
+			bool parse_repetitor(string filename_part);
+			bool parsed_filename_parts = false;
+		protected:
+			
+		public:
+			const string delimiter;
+			const set<string> identifiers;
+			name_t(const string& filename_with_path_s, const string delimiter_s,const set<string> identifiers_s);
+			const vector<string>& not_parseable_filename_parts();
+			string filename_with_path() const;
+			string filename_type_ending() const;
+			const string filename() const;
+			const string directory() const;
+			string group();
+			string lot();
+			string lot_split();
+			string monitor();
+			string repetition();
+			///empty if lot and wafer is set
+			const string simple_name();
+			int chip_x();
+			int chip_y();
+			const int olcdb();
+			int wafer();
+			void to_screen(string prefix="");
+			const bool is_correct_type(); 
+		};
+		/*ctors*/
+		file_t(const std::__cxx11::string& filename_with_path_s);
+		const string filename_with_path;
+	public:
+		///this does not work as intended for some reason
+		bool operator< (const file_t& obj) const;
+		bool operator== (const file_t& obj) const;
+		const string creation_date_time() const;
+	};
+
+
+
+
+
+
+
+
+
+
 	/******************************/
 	/****      STATIICS      ******/
 	/******************************/
@@ -181,34 +179,14 @@ namespace files
 	/// load all files to their corresponding tools
 	/// populates < files::types >files_list
 	/// use this first
-	void load(vector<string>& filenames_with_path);
+// 	void load(vector<string>& filenames_with_path);
 	
 	///all files over all groups, measurements and samples
-	vector<file_t*> files_list();
-
-	///feeds the typenames corresponding files_list --> use "load()" for all types at once
-	///clears the recognized(loadable) filenames_with_path_s entry from the list
-	template <typename T>
-	static void feed_files_list(vector<string>& filenames_with_path_s, vector<T>& files_s)
-	{
-		for (int i=0;i<filenames_with_path_s.size();i++)
-		{
-			T file(filenames_with_path_s.at(i));
-			if (file.name.is_correct_type() && file.contents.is_correct_type())
-			{
-				files_s.push_back(file);
-				//remove from "filenames_with_path_s" vector
-				filenames_with_path_s.at(i)="";
-			}
-		}
-	}
-
-
+// 	const list<file_t*> files_list();
 
 	
 
-
-
+// 	list<files::dsims_dp_rpc_asc_t> dsims_files(vector<string>& filenames_with_path_s);
 
 	/**********************/
 	/****     sims_t    ***/
@@ -218,6 +196,8 @@ namespace files
 	class sims_t : public file_t
 	{
 	protected:
+		sims_t(const std::__cxx11::string& filename_with_path_s);
+	public:
 		///content column
 		class column_t
 		{
@@ -237,22 +217,18 @@ namespace files
 			energy_t sputter_energy_p;
 			string sputter_element_p;
 		public:
-			name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s);
+			name_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s);
 			const energy_t sputter_energy();
 			element_t sputter_element();
 			const string secondary_polarity();
 			const total_sputter_depth_t total_sputter_depths();
 			const string filename_without_crater_depths();
-		};
+		};	
 		class contents_t : public file_t::contents_t
 		{
 		public:
-			///give me contents_s if already loaded somewhere
-			contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s,string contents_s="");
+			contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s);
 		};
-	
-		sims_t() {};
-	public:
 	};
 
 
@@ -279,7 +255,7 @@ namespace files
 		};
 	protected:
 	// public:
-		class contents_t : public sims_t::contents_t
+		class contents_t : public files::sims_t::contents_t
 		{	
 		private:
 			map<string,string> infos_and_settings_p;
@@ -307,7 +283,7 @@ namespace files
 			const vector<column_t> columns();
 			const vector<string>& cluster_names();
 		public:
-			contents_t(const string& filename_with_path_s,string contents_s="");
+			contents_t(const string& filename_with_path_s);
 			const vector<cluster_t> clusters();
 			const tm start_date_time();
 			const tm creation_date_time();
@@ -331,19 +307,21 @@ namespace files
 			const quantity_t em_yield();
 			const quantity_t em_voltage();
 		};	
+		class name_t : public files::sims_t::name_t
+		{
+		public:
+			name_t(const std::__cxx11::string& name_with_path_s);
+		};
 	public:
-		dsims_dp_rpc_asc_t(const string& filename_with_path_s, string contents_s="");
+		dsims_dp_rpc_asc_t(const string& filename_with_path_s);
 		name_t name;
 		contents_t contents;
 		void to_screen(string prefix="");
-		static vector<dsims_dp_rpc_asc_t> files_list;
-		const sputter_time_t greatest_common_sputter_time();
-		const sputter_depth_t greatest_common_sputter_depth();
 	};	
 
 
 	/**************************/
-	/*** tofsims_TXT_t      ***/
+	/***    tofsims_TXT_t   ***/
 	/**************************/
 	class tofsims_TXT_t : public sims_t
 	{
@@ -354,39 +332,37 @@ namespace files
 			bool parse_analysis_energy_element(string filename_part);
 			string analysis_element_p;
 		public:
-			contents_t(const string& filename_with_path_s,string contents_s="");
+			contents_t(const string& filename_with_path_s);
 			const element_t analysis_element();
 			const energy_t analysis_energy();
 		};
-		class name_t : public sims_t::name_t
-		{
-		private:
-		public:
-			name_t(const string& name_with_path_s);
-		};
+// 		class name_t : public sims_t::name_t
+// 		{
+// 		private:
+// 		public:
+// 			name_t(const string& filename_with_path_s);
+// 		};
 	public:
-		tofsims_TXT_t(const string& filename_with_path_s, string contents_s="");
+		tofsims_TXT_t(const string& filename_with_path_s);
 		name_t name;
 		contents_t contents;
-		static vector<tofsims_TXT_t> files_list;
 	};
 
 	/**********************/
 	/**** dsims_jpg_t ****/
 	/**********************/
 
-	class dsims_jpg_t : public file_t
+	class jpg_t : public file_t
 	{
-		class name_t : dsims_dp_rpc_asc_t::name_t
-		{
-		public:
-			name_t(const string& name_with_path_s);
-		};
+// 		class name_t : dsims_dp_rpc_asc_t::name_t
+// 		{
+// 		public:
+// 			name_t(const string& filename_with_path_s);
+// 		};
 	public:
 		name_t name;
-		contents_t contents;
-		dsims_jpg_t(string filename_with_path_s);
-		static vector<dsims_jpg_t> files_list;
+// 		contents_t contents;
+		jpg_t(const string& filename_with_path_s);
 	};
 
 	/**************************/
@@ -395,24 +371,23 @@ namespace files
 	class profiler_t : public file_t 
 	{
 	private:
-		class contents_t : file_t::contents_t
-		{
-		private:
-			bool parse_analysis_energy_element(string filename_part);
-		public:
-			contents_t(const string& filename_with_path_s,string contents_s="");
-		};
-		class name_t : file_t::name_t
-		{
-		private:
-		public:
-			name_t(const string& name_with_path_s);
-		};	
+// 		class contents_t : file_t::contents_t
+// 		{
+// 		private:
+// 			bool parse_analysis_energy_element(string filename_part);
+// 		public:
+// 			contents_t(const string& filename_with_path_s,string contents_s="");
+// 		};
+// 		class name_t : file_t::name_t
+// 		{
+// 		private:
+// 		public:
+// 			name_t(const string& name_with_path_s);
+// 		};	
 	public:
 		name_t name;
 		contents_t contents;
-		profiler_t(string filename_with_path_s);
-		static vector<profiler_t> files_list;
+		profiler_t(const string& filename_with_path_s);
 	};
 
 }

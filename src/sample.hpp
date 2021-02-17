@@ -52,10 +52,14 @@ private:
 	static bool use_simple_name;
 	static bool use_matrix;
 	///all samples from all loaded files
-	static vector<sample_t> samples_list_p;
+// 	static vector<sample_t> samples_list_p;
+protected:
+	///local matrix its necessary, because we have to work in it (concentrations)
+	matrix_t matrix_p;
 public:
 	///files corresponding to this sample
-	set<file_t*> files;
+	set<files::file_t::name_t*> filenames;
+	set<files::file_t::contents_t*> filecontents;
 	class chip_t
 	{
 	public:
@@ -67,8 +71,7 @@ public:
 		bool is_set();
 		void to_screen(string prefix="");
 	};
-	sample_t(file_t& file_s);
-	sample_t(file_t* file_s);
+	sample_t(files::file_t::name_t& name, files::file_t::contents_t& contents);
 // 	sample_t(string lot, string lot_split, int wafer,chip_t chip, string monitor,string simple_name);
 	
 	chip_t chip();
@@ -79,16 +82,16 @@ public:
 	string simple_name();
 	
 	// reads from database or file
-	matrix_t matrix();
+	matrix_t& matrix();
 	
 	void to_screen(string prefix="");
 	/*operators*/
-	bool operator==( sample_t& obj) ;
-	bool operator!=( sample_t& obj) ;
-	bool operator<( sample_t& obj) ;
+	bool operator==(sample_t& obj) ;
+	bool operator!=(sample_t& obj) ;
+	bool operator<(sample_t& obj) ;
 	
 	///all samples from all loaded files
-	static vector<sample_t>* samples_list();
+// 	list<sample_t> samples_list();
 };
 
 

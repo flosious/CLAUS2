@@ -19,102 +19,101 @@
 #include "file.hpp"
 
 
+
 /***STATICS***/
 
-void files::load(vector<string>& filenames_with_path)
-{
-	files::feed_files_list(filenames_with_path, files::dsims_dp_rpc_asc_t::files_list);
-	files::feed_files_list(filenames_with_path, files::tofsims_TXT_t::files_list);
-// 	files::feed_files_list(filenames_with_path, files::dsims_jpg_t::files_list);
-// 	files::feed_files_list(filenames_with_path, files::profiler_t::files_list);
-	
-	for (auto& f:files::dsims_dp_rpc_asc_t::files_list)
-		logger::info("recognized dsims_dp_rpc_asc_t",f.name.filename_with_path());
-	for (auto& f:files::tofsims_TXT_t::files_list)
-		logger::info("recognized tofsims_TXT_t",f.name.filename_with_path());
-// 	for (auto& f:files::dsims_jpg_t::files_list)
-// 		logger::info("recognized dsims_jpg_t",f.name.filename_with_path());
-// 	for (auto& f:files::profiler_t::files_list)
-// 		logger::info("recognized profiler_t",f.name.filename_with_path());
-}
+// void files::load(vector<string>& filenames_with_path)
+// {
+// 	files::feed_files_list(filenames_with_path, files::dsims_dp_rpc_asc_t::files_list);
+// 	files::feed_files_list(filenames_with_path, files::tofsims_TXT_t::files_list);
+// // 	files::feed_files_list(filenames_with_path, files::dsims_jpg_t::files_list);
+// // 	files::feed_files_list(filenames_with_path, files::profiler_t::files_list);
+// 	
+// 	for (auto& f:files::dsims_dp_rpc_asc_t::files_list)
+// 		logger::info("recognized dsims_dp_rpc_asc_t",f.name.filename_with_path());
+// 	for (auto& f:files::tofsims_TXT_t::files_list)
+// 		logger::info("recognized tofsims_TXT_t",f.name.filename_with_path());
+// // 	for (auto& f:files::dsims_jpg_t::files_list)
+// // 		logger::info("recognized dsims_jpg_t",f.name.filename_with_path());
+// // 	for (auto& f:files::profiler_t::files_list)
+// // 		logger::info("recognized profiler_t",f.name.filename_with_path());
+// }
 
-vector<file_t*> files::files_list()
-{
-	vector<file_t*> files;
-	
-	for (auto& d: files::dsims_dp_rpc_asc_t::files_list)
-		files.push_back(&d);
-	
-	for (auto& d: files::tofsims_TXT_t::files_list)
-		files.push_back(&d);
-	
-	for (auto& d: files::dsims_jpg_t::files_list)
-		files.push_back(&d);
-	
-	for (auto& d: files::profiler_t::files_list)
-		files.push_back(&d);
-	
-	return files;
-}
-
-vector<files::tofsims_TXT_t> files::tofsims_TXT_t::files_list;
-vector<files::dsims_dp_rpc_asc_t> files::dsims_dp_rpc_asc_t::files_list;
-vector<files::dsims_jpg_t> files::dsims_jpg_t::files_list;
-vector<files::profiler_t> files::profiler_t::files_list;
+// const list<file_t*> files::files_list()
+// {
+// 	list<file_t*> files_;
+// 	cout << "in" << endl;
+// 	
+// 	for (auto& d: files::dsims_dp_rpc_asc_t::files_list)
+// 		files_.push_back(&d);
+// 	
+// 	for (auto& d: files::tofsims_TXT_t::files_list)
+// 		files_.push_back(&d);
+// 	
+// 	for (auto& f:files_)
+// 		cout << f->name->filename_with_path() << endl;
+// // 	for (auto& d: files::dsims_jpg_t::files_list)
+// // 		files.push_back(&d);
+// 	
+// // 	for (auto& d: files::profiler_t::files_list)
+// // 		files.push_back(&d);
+// 	
+// 	
+// 	cout << "OUT" << endl;
+// 	return files_;
+// }
+/*
+list<files::tofsims_TXT_t> files::tofsims_TXT_t::files_list;
+list<files::dsims_dp_rpc_asc_t> files::dsims_dp_rpc_asc_t::files_list;
+list<files::dsims_jpg_t> files::dsims_jpg_t::files_list;
+list<files::profiler_t> files::profiler_t::files_list;*/
 
 /***************************/
 /********  file_t  *********/
 /***************************/
-file_t file_t::file() const
-{
-	return *this;
-}
-
-void file_t::to_screen()
-{
-	cout << "creation_date_time\t" << creation_date_time() << endl;
-	cout << "name:" << endl;
-	if (name!=nullptr) name->to_screen("\t");
-	cout << "contents:" << endl;
-	if (contents != nullptr) contents->to_screen("\t");
-}
-
-
-// file_t::file_t(const string& filename_with_path_s,string contents_s)
+// file_t files::file_t::file() const
 // {
-// 	logger::info("file_t::file_t",filename_with_path_s);
+// 	return *this;
 // }
 
-// file_t::file_t(name_t name_s, contents_t contents_s) :name(name_s), contents(contents_s)
+
+files::file_t::file_t(const string& filename_with_path_s) : filename_with_path(filename_with_path_s)
+{
+}
+
+// files::file_t::file_t(name_t name_s, contents_t contents_s) :name(name_s), contents(contents_s)
 // {
-// // 	logger::info("file_t::file_t",filename_with_path_s);
+// // 	logger::info("files::file_t::file_t",filename_with_path_s);
 // }
 
-const string file_t::creation_date_time() const
+const string files::file_t::creation_date_time() const
 {
-	time_t cdt = tools::file::creation_date(name->filename_with_path());
+	time_t cdt = tools::file::creation_date(filename_with_path);
 	return tools::time::time_t_to_string(cdt);
 }
 
-bool file_t::operator<(const file_t& obj) const
+bool files::file_t::operator<(const file_t& obj) const
 {
-	if (name->filename_with_path() >= obj.name->filename_with_path()) 
+	if (filename_with_path >= obj.filename_with_path) 
 		return false;
 	return true;
 }
 
-bool file_t::operator==(const file_t& obj) const
+bool files::file_t::operator==(const file_t& obj) const
 {
-	if (name->filename_with_path()==obj.name->filename_with_path()) return true;
+	if (filename_with_path == obj.filename_with_path)
+	{
+		return true;
+	}
 	return false;
 }
 
 
 /***************************/
-/*** file_t::contents_t  ***/
+/*** files::file_t::contents_t  ***/
 /***************************/
 
-matrix_t file_t::contents_t::matrix()
+matrix_t files::file_t::contents_t::matrix()
 {
 	if (raw_header_tensor().size()==0) return {};
 	if (raw_header_tensor()[0].size()==0) return {};
@@ -135,7 +134,7 @@ matrix_t file_t::contents_t::matrix()
 
 
 
-const string& file_t::contents_t::contents_string()
+const string& files::file_t::contents_t::contents_string()
 {
 	if (contents_p.size()==0)
 	{
@@ -151,33 +150,32 @@ const string& file_t::contents_t::contents_string()
 	return contents_p;
 }
 
-file_t::contents_t::contents_t(const string& filename_with_path_s,
+files::file_t::contents_t::contents_t(const string& filename_with_path_s,
 									  const string delimiter_s,
-									  const set< string > identifiers_s,
-									  string contents_s) : 	filename_with_path_p(filename_with_path_s),
+									  const set< string > identifiers_s ) : 	
+															filename_with_path_p(filename_with_path_s),
 															delimiter(delimiter_s), 
-															identifiers(identifiers_s),
-															contents_p(contents_s)
+															identifiers(identifiers_s)
 {
 }
 
 
-const bool file_t::contents_t::is_correct_type()
+const bool files::file_t::contents_t::is_correct_type()
 {
 	if (contents_string()=="") return false;
 	for (auto& fci : identifiers)
 	{
 		if (contents_string().find(fci)==string::npos)
 		{
-// 			logger::info("file_t::contents_t::is_correct_file_type()","FALSE");
+// 			logger::info("files::file_t::contents_t::is_correct_file_type()","FALSE");
 			return false;
 		}
 	}
-// 	logger::info("file_t::contents_t::is_correct_file_type() ",filename_with_path_p);
+// 	logger::info("files::file_t::contents_t::is_correct_file_type() ",filename_with_path_p);
 	return true;
 }
 
-bool file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
+bool files::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
 {
 	raw_data_tensor->clear();
 	raw_header_tensor->clear();
@@ -227,29 +225,29 @@ bool file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std:
 	contents_p.clear();
 	return true;
 }
-vector<vector<vector<std::__cxx11::string> > >& file_t::contents_t::raw_header_tensor()
+vector<vector<vector<std::__cxx11::string> > >& files::file_t::contents_t::raw_header_tensor()
 {
 	if (raw_header_tensor_p.size()>0) return raw_header_tensor_p;
 	
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
-		logger::debug("file_t::raw_header_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+		logger::debug("files::file_t::raw_header_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
 	}
 	return raw_header_tensor_p;
 }
-vector<vector<vector<std::__cxx11::string> > >& file_t::contents_t::raw_data_tensor()
+vector<vector<vector<std::__cxx11::string> > >& files::file_t::contents_t::raw_data_tensor()
 {
 
 	if (raw_data_tensor_p.size()>0) return raw_data_tensor_p;
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
-		logger::debug("file_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+		logger::debug("files::file_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
 // 		return {};
 	}
 	return raw_data_tensor_p;
 }
 
-void file_t::contents_t::to_screen(string prefix)
+void files::file_t::contents_t::to_screen(string prefix)
 {
 	cout << prefix << "delimiter:\t'" << delimiter <<"'" << endl;
 	if (identifiers.size()==1) cout << prefix << "identifiers:\t" << *identifiers.begin() << endl;
@@ -257,15 +255,15 @@ void file_t::contents_t::to_screen(string prefix)
 }
 
 /***************************/
-/** file_t::name_t **/
+/** files::file_t::name_t **/
 
-file_t::name_t::name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s) : 	filename_with_path_p(name_with_path_s),
+files::file_t::name_t::name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s) : 	filename_with_path_p(name_with_path_s),
 																													delimiter(delimiter_s),
 																													identifiers(identifiers_s)
 {
 }
 
-const string file_t::name_t::simple_name()
+const string files::file_t::name_t::simple_name()
 {
 	string simple_name_p;
 	if ((lot()=="") && not_parseable_filename_parts().size()>0) simple_name_p=tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
@@ -274,7 +272,7 @@ const string file_t::name_t::simple_name()
 	return simple_name_p;
 }
 
-const bool file_t::name_t::is_correct_type()
+const bool files::file_t::name_t::is_correct_type()
 {
 	if (filename_type_ending()=="") return false;
 	for (auto& fti : identifiers)
@@ -282,82 +280,82 @@ const bool file_t::name_t::is_correct_type()
 // 		cout << "name_t fti=" << fti << endl;
 		if (fti==filename_type_ending()) 
 		{
-// 			logger::info("file_t::name_t::is_correct_file_type()","TRUE");
+// 			logger::info("files::file_t::name_t::is_correct_file_type()","TRUE");
 			return true;
 		}
 	}
-// 	logger::info("file_t::name_t::is_correct_file_type()","FALSE");
+// 	logger::info("files::file_t::name_t::is_correct_file_type()","FALSE");
 	return false;
 }
 
-int file_t::name_t::chip_x()
+int files::file_t::name_t::chip_x()
 {
 	parse_filename_parts();
 // 	if (chip_x_p<0)
-// 		logger::info("file_t::chip_x() " ,chip_x_p);
+// 		logger::info("files::file_t::chip_x() " ,chip_x_p);
 	return chip_x_p;
 }
-int file_t::name_t::chip_y()
+int files::file_t::name_t::chip_y()
 {
 	parse_filename_parts();
 // 	if (chip_y_p<0)
-// 		logger::info("file_t::chip_y() " +filename(), chip_y_p);
+// 		logger::info("files::file_t::chip_y() " +filename(), chip_y_p);
 	return chip_y_p;
 }
-std::__cxx11::string file_t::name_t::group()
+std::__cxx11::string files::file_t::name_t::group()
 {
 	parse_filename_parts();
 	if (group_p=="")
-		logger::info("file_t::group() " +filename(),group_p);
+		logger::info("files::file_t::group() " +filename(),group_p);
 	return group_p;
 }
-std::__cxx11::string file_t::name_t::lot()
+std::__cxx11::string files::file_t::name_t::lot()
 {
 	parse_filename_parts();
 	if (lot_p=="")
-		logger::warning("file_t::lot() " +filename(), lot_p);
+		logger::warning("files::file_t::lot() " +filename(), lot_p);
 	return lot_p;
 }
-std::__cxx11::string file_t::name_t::lot_split()
+std::__cxx11::string files::file_t::name_t::lot_split()
 {
 	parse_filename_parts();
 // 	if (lot_split_p=="")
-// 		logger::info("file_t::lot_split() " +filename(), lot_split_p);
+// 		logger::info("files::file_t::lot_split() " +filename(), lot_split_p);
 	return lot_split_p;
 }
-std::__cxx11::string file_t::name_t::monitor()
+std::__cxx11::string files::file_t::name_t::monitor()
 {
 	parse_filename_parts();
 // 	if (monitor_p=="")
-// 		logger::info("file_t::monitor() " +filename(),monitor_p);
+// 		logger::info("files::file_t::monitor() " +filename(),monitor_p);
 	return monitor_p;
 }
-const int file_t::name_t::olcdb()
+const int files::file_t::name_t::olcdb()
 {
 	parse_filename_parts();
 	if (olcdb_p<0)
-		logger::warning("file_t::olcdb() ",olcdb_p);
+		logger::warning("files::file_t::olcdb() ",olcdb_p);
 	return olcdb_p;
 }
-const vector<std::__cxx11::string>& file_t::name_t::not_parseable_filename_parts()
+const vector<std::__cxx11::string>& files::file_t::name_t::not_parseable_filename_parts()
 {
 	parse_filename_parts();
 	return not_parseable_filename_parts_p;
 }
-int file_t::name_t::wafer()
+int files::file_t::name_t::wafer()
 {
 	parse_filename_parts();
 	if (wafer_p<0)
-		logger::warning("file_t::wafer() ",wafer_p);
+		logger::warning("files::file_t::wafer() ",wafer_p);
 	return wafer_p;
 }
-std::__cxx11::string file_t::name_t::repetition()
+std::__cxx11::string files::file_t::name_t::repetition()
 {
 	parse_filename_parts();
 	return repetition_p;
 }
 
-void file_t::name_t::to_screen(string prefix)
+void files::file_t::name_t::to_screen(string prefix)
 {
 	cout << prefix <<"delimiter\t'" << delimiter << "'" << endl;
 	if (identifiers.size()==1) cout << prefix <<"identifier\t" << *identifiers.begin()  << endl;
@@ -380,10 +378,9 @@ void file_t::name_t::to_screen(string prefix)
 	cout << prefix<< "not_parseable_filename_parts:\t<" << not_parseable_filename_parts().size()  << ">" << endl;
 }
 
-void file_t::name_t::parse_all_parts_at_once()
+void files::file_t::name_t::parse_all_parts_at_once()
 {
 	smatch match;
-// 	regex reg ("^([0-9]{4,})_([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)_[wW]?([0-9]{1,2})(_.*)_([0-9]+?)([a-z]*?)$"); 
 	regex reg ("^([0-9]{4,})_([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)_[wW]?([0-9]{1,2})(_.*?)([0-9]*?)([a-z]*?)$"); 
 	string f = filename();
 	if (regex_search(f,match,reg)) 
@@ -397,11 +394,11 @@ void file_t::name_t::parse_all_parts_at_once()
 		not_parseable_filename_parts_p = tools::str::get_strings_between_delimiter(filename(),delimiter);
 		for (auto& m:match)
 			not_parseable_filename_parts_p.erase(remove(not_parseable_filename_parts_p.begin(),not_parseable_filename_parts_p.end(),m), not_parseable_filename_parts_p.end());
-		logger::info("file_t::name_t::parse_all_parts_at_once()");
+		logger::info("files::file_t::name_t::parse_all_parts_at_once()");
 	}
 }
 
-void file_t::name_t::parse_filename_parts()
+void files::file_t::name_t::parse_filename_parts()
 {
 	if (parsed_filename_parts) return;
 	vector<string> filename_parts = tools::str::get_strings_between_delimiter(filename(),delimiter);
@@ -424,7 +421,7 @@ void file_t::name_t::parse_filename_parts()
 // 	if (lot=="" && not_parseable_filename_parts.size()>0) lot=not_parseable_filename_parts[0];
 }
 
-bool file_t::name_t::parse_monitor(string filename_part) 
+bool files::file_t::name_t::parse_monitor(string filename_part) 
 {
 	smatch match;
 	regex reg1 ("^m-*([a-zA-Z0-9]+)$"); 
@@ -438,7 +435,7 @@ bool file_t::name_t::parse_monitor(string filename_part)
 	return false;
 }
 
-bool file_t::name_t::parse_chip(string filename_part)
+bool files::file_t::name_t::parse_chip(string filename_part)
 {
 	smatch match;
 	regex reg1 ("^x([0-9]{1,2})y([0-9]{1,2})$", std::regex_constants::icase); 
@@ -453,7 +450,7 @@ bool file_t::name_t::parse_chip(string filename_part)
 	return false;
 }
 
-bool file_t::name_t::parse_olcdb(string filename_part)
+bool files::file_t::name_t::parse_olcdb(string filename_part)
 {
 	smatch match;
 	regex reg ("^([0-9]{4,})$"); 
@@ -465,7 +462,7 @@ bool file_t::name_t::parse_olcdb(string filename_part)
 	return false;
 }
 
-bool file_t::name_t::parse_lot(string filename_part)
+bool files::file_t::name_t::parse_lot(string filename_part)
 {
 	smatch match;
 	regex reg ("^([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)$"); 
@@ -478,7 +475,7 @@ bool file_t::name_t::parse_lot(string filename_part)
 	return false;
 }
 
-bool file_t::name_t::parse_wafer(string filename_part)
+bool files::file_t::name_t::parse_wafer(string filename_part)
 {
 	smatch match;
 	regex reg ("^[wW]([0-9]{1,2})$"); 
@@ -490,7 +487,7 @@ bool file_t::name_t::parse_wafer(string filename_part)
 	return false;
 }
 
-bool file_t::name_t::parse_group(string filename_part)
+bool files::file_t::name_t::parse_group(string filename_part)
 {
 	smatch match;
 	regex reg1 ("^g-?*([0-9]+?)([a-z]*?)$"); 
@@ -504,7 +501,7 @@ bool file_t::name_t::parse_group(string filename_part)
 	return false;
 }
 
-bool file_t::name_t::parse_repetitor(string filename_part)
+bool files::file_t::name_t::parse_repetitor(string filename_part)
 {
 	smatch match;
 	regex reg1 ("^r-?*([0-9]+?)$"); 
@@ -517,25 +514,25 @@ bool file_t::name_t::parse_repetitor(string filename_part)
 	return false;
 }
 
-std::__cxx11::string file_t::name_t::filename_type_ending() const
+std::__cxx11::string files::file_t::name_t::filename_type_ending() const
 {
 	string filename_type_ending_p =tools::file::extract_filetype_ending(filename_with_path_p,".");
 // 	if (filename_type_ending_p=="")
-// 		logger::error("file_t::filename_type_ending()",filename_type_ending_p);
+// 		logger::error("files::file_t::filename_type_ending()",filename_type_ending_p);
 	return filename_type_ending_p;
 }
 
-std::__cxx11::string file_t::name_t::filename_with_path() const
+std::__cxx11::string files::file_t::name_t::filename_with_path() const
 {
 	return filename_with_path_p;
 }
 
-const string file_t::name_t::filename() const
+const string files::file_t::name_t::filename() const
 {
 	return tools::file::extract_filename(filename_with_path_p);
 }
 
-const string file_t::name_t::directory() const
+const string files::file_t::name_t::directory() const
 {
 	return tools::file::extract_directory_from_filename(filename_with_path_p);
 }
@@ -545,27 +542,27 @@ const string file_t::name_t::directory() const
 /** sims_t::name_t **/
 /********************/
 
-files::sims_t::name_t::name_t(const string& name_with_path_s,const string delimiter_s,const set<string> identifiers_s) : 	file_t::name_t(name_with_path_s,delimiter_s,identifiers_s)
+files::sims_t::name_t::name_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s) : 
+																	files::file_t::name_t(filename_with_path_s,delimiter_s,identifiers_s)
 {
-	
 }
 
 /************************/
 /** sims_t::contents_t **/
 /************************/
 
-files::sims_t::contents_t::contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s, string contents_s) : file_t::contents_t(filename_with_path_s,delimiter_s,identifiers_s,contents_s)
+files::sims_t::contents_t::contents_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s) :
+																	files::file_t::contents_t(filename_with_path_s,delimiter_s,identifiers_s)
 {
-	
 }
 
 /**************/
 /*** sims_t ***/
 /**************/
 
-// files::sims_t::sims_t(const string& filename_with_path_s, string contents_s) : file_t(filename_with_path_s,contents_s)
-// {
-// }
+files::sims_t::sims_t(const string& filename_with_path_s) : file_t(filename_with_path_s)
+{
+}
 
 // files::sims_t::sims_t(name_t name_s,contents_t contents_s) : file_t(name_s,contents_s)
 // {

@@ -38,8 +38,44 @@ using namespace std;
 class processor 
 {
 private:
-	// directory+filenames
+	///feeds the typenames corresponding files_list --> use "load()" for all types at once
+	///clears the recognized(loadable) filenames_with_path_s entry from the list
+	template <typename T>
+	void feed_files_list(vector<string>& filenames_with_path_s, list<T>& files_s)
+	{
+		for (int i=0;i<filenames_with_path_s.size();i++)
+		{
+			T file(filenames_with_path_s.at(i));
+			if (file.name.is_correct_type() && file.contents.is_correct_type())
+			{
+				files_s.push_back(file);
+				//remove from "filenames_with_path_s" vector
+				filenames_with_path_s.at(i)="";
+			}
+		}
+	}
 	
+	template <typename T>
+	void feed_samples_list(list<T>& files,list<sample_t>& samples)
+	{
+		bool found_in_list;
+		for (auto& file: files)
+		{
+			sample_t sample(file.name,file.contents);
+			found_in_list=false;
+			for (auto& s_in_list : samples)
+			{
+				if (s_in_list==sample)
+				{
+					found_in_list=true;
+					s_in_list.filenames.insert(&file.name);
+					s_in_list.filecontents.insert(&file.contents);
+					samples.push_back(sample);
+				}
+			}
+			if (!found_in_list) samples.push_back(sample);
+		}
+	}
 public:
 // 	list<file_t> files;
 // 	list measurement_groups

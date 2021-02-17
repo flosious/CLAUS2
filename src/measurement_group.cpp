@@ -8,25 +8,25 @@ bool measurement_group_t::use_settings = true;
 /******************************************/
 
 
-const int measurement_group_t::olcdb() const
-{
-	if (!use_olcdb) return -1;
-	if (measurements().size()==0)
-		return -1;
-	if (measurements().at(0)->files()->size()==0)
-		return -1;
-	return measurements().at(0)->files()->front()->name->olcdb();
-}
-
-const string measurement_group_t::group() const
-{
-	if (!use_group) return "";
-	if (measurements().size()==0)
-		return "";
-	if (measurements().at(0)->files()->size()==0)
-		return "";
-	return measurements().at(0)->files()->front()->name->group();
-}
+// const int measurement_group_t::olcdb() const
+// {
+// 	if (!use_olcdb) return -1;
+// 	if (measurements().size()==0)
+// 		return -1;
+// 	if (measurements().at(0)->files()->size()==0)
+// 		return -1;
+// 	return measurements().at(0)->files()->front()->name->olcdb();
+// }
+// 
+// const string measurement_group_t::group() const
+// {
+// 	if (!use_group) return "";
+// 	if (measurements().size()==0)
+// 		return "";
+// 	if (measurements().at(0)->files()->size()==0)
+// 		return "";
+// 	return measurements().at(0)->files()->front()->name->group();
+// }
 
 const vector<measurement_t *> & measurement_group_t::measurements() const
 {

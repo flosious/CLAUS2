@@ -16,13 +16,10 @@
 /*******files::dsims_dp_rpc_asc_t******/
 /**************************************/
 
-files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s,string contents_s) : 	
-																										name(filename_with_path_s,"_",{"dp_rpc_asc"}), 
-																										contents(filename_with_path_s,contents_s)
+files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s) : sims_t(filename_with_path_s),
+																				name(filename_with_path_s), 
+																				contents(filename_with_path_s)
 {
-	///this is quite important, so populated name parts are accessible by file_t
-	file_t::name=&name;
-	file_t::contents=&contents;
 }
 
 // files::dsims_dp_rpc_asc_t::dsims_dp_rpc_asc_t(const string& filename_with_path_s,string contents_s) : 	name(filename_with_path_s), 
@@ -159,17 +156,17 @@ void files::dsims_dp_rpc_asc_t::column_t::to_screen()
 /*****  files::dsims_dp_rpc_asc_t::name_t      ****/
 /**************************************************/
 
-// files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : sims_t::name_t(name_with_path_s,"_",{"dp_rpc_asc"})
-// {
-// // 	delimiter="_";
-// }
+files::dsims_dp_rpc_asc_t::name_t::name_t(const string& name_with_path_s) : files::sims_t::name_t(name_with_path_s,"_",{"dp_rpc_asc"})
+{
+// 	delimiter="_";
+}
 
 /**************************************************/
 /*****  files::dsims_dp_rpc_asc_t::contents_t  ****/
 /**************************************************/
 
 
-files::dsims_dp_rpc_asc_t::contents_t::contents_t(const string& filename_with_path_s, string contents_s) : sims_t::contents_t(filename_with_path_s,"\t",{"*** DATA FILES ***"},contents_s)
+files::dsims_dp_rpc_asc_t::contents_t::contents_t(const string& filename_with_path_s) : sims_t::contents_t(filename_with_path_s,"\t",{"*** DATA FILES ***"})
 {
 	
 }

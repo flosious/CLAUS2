@@ -103,7 +103,7 @@ public:
 	/*functions*/
 	const vector<measurement_t*>& measurements() const;
 	/*static functions*/
-	static list<measurement_group_t> measurement_groups(const list<file_t>& files_global, const list<measurement_t>& measurements_global);
+	static list<measurement_group_t> measurement_groups(const list<files::file_t>& files_global, const list<measurement_t>& measurements_global);
 	/*operators*/
 	const bool operator==(const measurement_group_t& obj) const;
 	const bool operator!=(const measurement_group_t& obj) const;

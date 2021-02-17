@@ -48,51 +48,47 @@ bool sample_t::use_chip=true;
 bool sample_t::use_simple_name=true;
 bool sample_t::use_matrix=false; //maybe not set for some 
 
-vector<sample_t> sample_t::samples_list_p;
-
-vector<sample_t>* sample_t::samples_list()
-{
-	bool inserted;
-	for (auto& f: files::files_list())
-	{
-		sample_t sample(f);
-		inserted = false;
-		for (auto& s : samples_list_p)
-		{
-			if (s==sample)
-			{
-				s.files.insert(f);
-				inserted = true;
-			}
-		}
-		if (!inserted) samples_list_p.push_back(sample);
-	}
-	if (samples_list_p.size()==0) return nullptr;
-	return &samples_list_p;
-}
+// vector<sample_t> sample_t::samples_list_p;
+// 
+// vector<sample_t>* sample_t::samples_list()
+// {
+// 	bool inserted;
+// 	for (auto& f: files::files_list())
+// 	{
+// 		sample_t sample(f);
+// 		inserted = false;
+// 		for (auto& s : samples_list_p)
+// 		{
+// 			if (s==sample)
+// 			{
+// 				s.files.insert(f);
+// 				inserted = true;
+// 			}
+// 		}
+// 		if (!inserted) samples_list_p.push_back(sample);
+// 	}
+// 	if (samples_list_p.size()==0) return nullptr;
+// 	return &samples_list_p;
+// }
 
 
 /***********************/
 
 
-sample_t::sample_t(file_t& file_s)
-{	
-	files.insert(&file_s);
-}
-
-sample_t::sample_t(file_t* file_s)
-{	
-	files.insert(file_s);
+sample_t::sample_t(files::file_t::name_t& name, files::file_t::contents_t& contents)
+{
+	filenames.insert(&name);
+	filecontents.insert(&contents);
 }
 
 
 std::__cxx11::string sample_t::simple_name()
 {
-	if (!use_simple_name || files.size()==0) return "";
-	for (auto& f : files)
+	if (filenames.size()==0) return "";
+	for (auto& f : filenames)
 	{
-		if (f->name->simple_name()!="")
-			return f->name->simple_name();
+		if (f->simple_name()!="")
+			return f->simple_name();
 	}
 	return "";
 }
@@ -100,80 +96,83 @@ std::__cxx11::string sample_t::simple_name()
 
 std::__cxx11::string sample_t::monitor()
 {
-	if (!use_monitor || files.size()==0) return "";
-	for (auto& f : files)
+	if ( filenames.size()==0) return "";
+	for (auto& f : filenames)
 	{
-		if (f->name->monitor()!="")
-			return f->name->monitor();
+		if (f->monitor()!="")
+			return f->monitor();
 	}
 	return "";
 }
 
 std::__cxx11::string sample_t::lot_split()
 {
-	if (!use_lot_split || files.size()==0) return "";
-	for (auto& f : files)
+	if (filenames.size()==0) return "";
+	for (auto& f : filenames)
 	{
-		if (f->name->lot_split()!="")
-			return f->name->lot_split();
+		if (f->lot_split()!="")
+			return f->lot_split();
 	}
 	return "";
 }
 
 string sample_t::lot()
 {
-	if (!use_lot || files.size()==0) return "";
-	for (auto& f : files)
+	if (filenames.size()==0) return "";
+	for (auto& f : filenames)
 	{
-		if (f->name->lot()!="")
-			return f->name->lot();
+		if (f->lot()!="")
+			return f->lot();
 	}
 	return "";
 }
 
 sample_t::chip_t sample_t::chip()
 {
-	if (!use_chip || files.size()==0) return {-1,-1};
-	for (auto& f : files)
+	if (filenames.size()==0) return {-1,-1};
+	for (auto& f : filenames)
 	{
-		if (f->name->chip_x()>=0 && f->name->chip_y()>=0)
-			return {f->name->chip_x(),f->name->chip_y()};
+		if (f->chip_x()>=0 && f->chip_y()>=0)
+			return {f->chip_x(),f->chip_y()};
 	}
 	return {-1,-1};
 }
 
 int sample_t::wafer()
 {
-	if (!use_wafer || files.size()==0) return -1;
-	for (auto& f : files)
+	if (filenames.size()==0) return -1;
+	for (auto& f : filenames)
 	{
 		//can there be a wafer "0" ? - no
-		if (f->name->wafer()>0)
-			return f->name->wafer();
+		if (f->wafer()>0)
+			return f->wafer();
 	}
 	return -1;
 }
 
-matrix_t sample_t::matrix()
+matrix_t& sample_t::matrix()
 {
-	if (!use_matrix || files.size()==0) return {};
-	for (auto& f : files)
+	if (filecontents.size()==0)
+		return matrix_p;
+	for (auto& f : filecontents)
 	{
-		if (f->contents->matrix().is_set())
-			return f->contents->matrix();
+		if (f->matrix().is_set())
+		{
+			matrix_p = f->matrix();
+		}
 	}
-	return {};
+	return matrix_p;
 }
 
 void sample_t::to_screen(std::__cxx11::string prefix)
 {
-	cout << prefix << "files\t<" << files.size() << ">" << endl;
 	cout << prefix << "lot\t" << lot() << endl;
 	cout << prefix << "lot_split\t" << lot_split() << endl;
 	cout << prefix << "wafer\t" << wafer() << endl;
 	chip().to_screen(prefix);
 	cout << prefix << "monitor\t" << monitor() << endl;
 	cout << prefix << "simple_name\t" << simple_name() << endl;
+	cout << prefix << "matrix\t" << matrix().to_string() << endl;
 }
 
 // bool sample_t::try_add(file_t& file_s)

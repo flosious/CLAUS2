@@ -23,33 +23,20 @@ processor::processor(vector<string> args_p)
 {	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	cout << "processor start" << endl;
-	files::load(args_p);
-	for (int i=0;i<files::files_list().size();i++)
+
+	
+	list<files::dsims_dp_rpc_asc_t> dsims_files;
+	feed_files_list(args_p,dsims_files);
+	for (auto& df:dsims_files)
 	{
-		files::files_list().at(i)->to_screen();
+		files::file_t::contents_t* m = &df.contents;
+		cout << m->matrix().to_string() << endl;
 	}
-// 	for (int i=0;i<sample_t::samples_list()->size();i++)
+	list<sample_t> samples;
+	feed_samples_list(dsims_files,samples);
+// 	for (auto& s : samples)
 // 	{
-// 		sample_t::samples_list()->at(i).to_screen();
-// 	}
-// 	print(args_p);
-// 	set<string> input_strings(args_p.begin(),args_p.end()); // eliminate same entries
-// 	vector<files::dsims_dp_rpc_asc_t> dsims_files = load_files<files::dsims_dp_rpc_asc_t>(input_strings);
-	
-	
-// 	vector<sample_t> samples = ::samples<files::dsims_dp_rpc_asc_t>(dsims_files);
-	
-	
-// 	cout << "f.name.delimiter="<<<<"=" << endl;
-	
-// 	cout << test.B_p.delimiter << endl;
-// 	cout << test.C_p.delimiter << endl;
-	
-// 	cout << f_p->contents.matrix().to_string() << endl;
-// 	cout << f.contents.matrix().to_string() << endl;
-// 	for (auto file:dsims_files)
-// 	{
-// 		file.to_screen();
+// 		s.to_screen();
 // 	}
 	
 	logger::to_screen();

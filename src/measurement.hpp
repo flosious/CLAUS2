@@ -51,60 +51,55 @@ namespace measurement_groups
 
 using namespace std;
 
-class measurement_t
-{
-// 	friend class config_t;
-private:
-	///use these figures to diistinguish one measurement from another
-	static bool use_olcdb;
-	static bool use_group;
-	static bool use_settings;
-	static bool use_repition;
-	static bool use_sample;
-	
-	///measurements are distinguished by their group -> always true
-	///measurements are distinguished by their sample -> always true
-	///measurements are distinguished by their reptition ID, that means 2 measurements can not be the same, when they differ in repition ID
-	///user specified definition from config file input
-// 	static definitions_t user_definitions;
-	///all samples loaded across all measurement_groups and measurements
-	list<sample_t>* sample_list_global;
-	///all files, belonging to this measurement
-	list<file_t*> files_p;
-	protected:
-		/*ctors*/
-	measurement_t(const list<file_t>& files, const measurement_group_t* MG_p);
-public:
-	
-	/*vars*/
-	const measurement_group_t* MG;
-	/*functions*/
-	///pointer to its corsseponding the sample
-	const sample_t* sample() const;
-	const list<file_t*>* files() const;
-	const int olcdb() const;
-	const string repitition() const;
-	const string group() const;
-	/*static functions*/
-	///measurements
-	static list<measurement_t> measurements(const list<file_t>& files_s, const measurement_group_t* MG_s=nullptr);
-	/*operators*/
-	const bool operator==(const measurement_t& obj) const;
-	const bool operator!=(const measurement_t& obj) const;
-	const bool operator<(const measurement_t& obj) const;
-};
-
 
 
 namespace measurements
-{	
+{
+	
+	class measurement_t
+	{
+	// 	friend class config_t;
+	private:
+		///use these figures to diistinguish one measurement from another
+		static bool use_olcdb;
+		static bool use_group;
+		static bool use_settings;
+		static bool use_repition;
+		static bool use_sample;
+		
+		set<files::file_t::name_t*> filenames;
+		set<files::file_t::contents_t*> filecontents;
+	protected:
+		list<sample_t>* samples_list;
+		sample_t* sample_p;
+		/*ctors*/
+		measurement_t(files::file_t::name_t& filename_p, files::file_t::contents_t& filecontents_p, list<sample_t>& samples_list_p);
+	public:
+		/*functions*/
+		///pointer to its corsseponding the sample
+		const sample_t* sample();
+		const int olcdb() const;
+		const string repitition() const;
+		const string group() const;
+		/*static functions*/
+		/*operators*/
+		const bool operator==(measurement_t& obj);
+		const bool operator!=(measurement_t& obj);
+		const bool operator<(measurement_t& obj);
+	};
+
 	///standard sims template
 	///can only be instanziated by friends
 	class sims_t : public measurement_t
 	{
 	private:
-		crater_t crater;
+		set<files::sims_t::name_t*> filenames;
+		set<files::sims_t::contents_t*> filecontents;
+	protected:
+		crater_t crater_p;
+		sims_t(files::sims_t::name_t& filename_p, files::sims_t::contents_t& filecontents_p, list<sample_t>& samples_list_p);
 	public:
+		crater_t* crater();
 	};
 
 	class profiler_t : public measurement_t
