@@ -55,10 +55,9 @@ using namespace std;
 
 namespace measurements
 {
-	
 	class measurement_t
 	{
-	// 	friend class config_t;
+// 		friend class processor;
 	private:
 		///use these figures to diistinguish one measurement from another
 		static bool use_olcdb;
@@ -71,8 +70,9 @@ namespace measurements
 		set<files::file_t::contents_t*> filecontents;
 	protected:
 		list<sample_t>* samples_list;
-		sample_t* sample_p;
+		sample_t* sample_p=nullptr;
 		/*ctors*/
+	public:
 		measurement_t(files::file_t::name_t& filename_p, files::file_t::contents_t& filecontents_p, list<sample_t>& samples_list_p);
 	public:
 		/*functions*/
@@ -85,9 +85,15 @@ namespace measurements
 		/*operators*/
 		const bool operator==(measurement_t& obj);
 		const bool operator!=(measurement_t& obj);
-		const bool operator<(measurement_t& obj);
 	};
 
+	
+	class profiler_t : public measurement_t
+	{
+	
+	};
+	
+	
 	///standard sims template
 	///can only be instanziated by friends
 	class sims_t : public measurement_t
@@ -95,40 +101,37 @@ namespace measurements
 	private:
 		set<files::sims_t::name_t*> filenames;
 		set<files::sims_t::contents_t*> filecontents;
+		vector<cluster_t> clusters_p;
 	protected:
+		//measurement_settings
 		crater_t crater_p;
 		sims_t(files::sims_t::name_t& filename_p, files::sims_t::contents_t& filecontents_p, list<sample_t>& samples_list_p);
 	public:
-		crater_t* crater();
-	};
-
-	class profiler_t : public measurement_t
-	{
-	private:
-		static vector<profiler_t> measurements_p;
-	public:
-		static vector<profiler_t>* measurements();
+		crater_t& crater();
+		///returns the cluster corresponding isotope
+		isotope_t* isotope(cluster_t& cluster);
+		///isotopes collected from clusters
+		vector<isotope_t*> isotopes();
+		///copies filecontents to cluster_p
+		vector<cluster_t*> clusters();
+		///returns the isotope corresponding clusterS (there can be more than one)
+		///e.g. isotope(31P) --> cluster(74Ge 31P) & cluster(31P) & ...
+		vector<cluster_t*> clusters(isotope_t& isotope);
+		const bool operator==(sims_t& obj);
+		const bool operator!=(sims_t& obj);
 	};
 
 
 	class dsims_t : public sims_t 
 	{
-	private:
-		static vector<dsims_t> measurements_p;
-	public:
-		measurement_groups::dsims_t* measurement_group;
-		void test();
-		static vector<dsims_t>* measurements();
+		dsims_t(files::dsims_dp_rpc_asc_t::name_t& filename_p, files::dsims_dp_rpc_asc_t::contents_t& filecontents_p, list<sample_t>& samples_list_p);
+		dsims_t(files::jpg_t::name_t& filename_p, list<sample_t>& samples_list_p);
 	};
 
+	
 	class tofsims_t : public sims_t 
 	{
-	private:
-		static vector<tofsims_t> measurements_p;
-	public:
-		measurement_groups::tofsims_t* measurement_group;
-		void test();
-		static vector<tofsims_t>* measurements();
+	
 	};
 }
 

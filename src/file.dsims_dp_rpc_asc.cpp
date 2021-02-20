@@ -107,6 +107,7 @@ void files::dsims_dp_rpc_asc_t::to_screen(string prefix)
 	cout << prefix << "\t"<<"sputter_energy:\t" << contents.sputter_energy().to_string() << endl;
 	cout << prefix << "\t"<<"sputter_rastersize:\t" << contents.sputter_rastersize().to_string() << endl;
 	cout << prefix << "\t"<<"analysis_rastersize:\t" << contents.analysis_rastersize().to_string() << endl;
+	cout << prefix << "\t"<< "matrix\t" << contents.matrix().to_string() << endl;
 }
 
 /**************************************************/

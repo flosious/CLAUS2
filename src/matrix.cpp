@@ -20,11 +20,12 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 {
 	/* 
 	 * mole/abundance/concentration/atoms input values are asumed as absolutes, which are iternally normalized to 100at%: 
-	 * sum of all elements must be 100 at%
+	 * sum of all elements must be 100 at% (will be enforced)
 	 * input is something like: "Si Ge30" -> [28,29,30]Si70at% + [74,73,72,70]Ge30at% === [28,29,30]Si7mol + [74,73,72,70]Ge3mol
 	 * single isotopes are also possible, for purified matrices: "28Si30 Ge60" -> [28]Si33at% [74,73,72,70]Ge66at%
 	 * uncalculateable concentrations like "Si Ge" -> will lead to an error and aborting
 	 * indistinguishable isotopes like "29Si30 Si50 Ge10 Sn10" --> will lead to an error and aborting
+	 * not recognized isotopes --> will lead to an error an aborting
 	 */
 	
 	/*parsing*/
@@ -52,7 +53,12 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 			if (match[3]!="") 
 				amount = tools::str::str_to_double(match[3]);
 			else 
-				amount = -1;
+			{
+				if (elements_or_isotopes_s.size()==1)
+					amount = 1;
+				else
+					amount = -1;
+			}
 // 			cout << "amount="<< amount << endl;
 			/*******/
 			

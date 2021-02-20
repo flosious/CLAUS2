@@ -34,7 +34,6 @@ class crater_t
 {
 private:
 	vector<lineprofile_t> lineprofiles;
-	
 	sputter_current_t sputter_current_p;
 	sputter_time_t sputter_time_p;
 	sputter_depth_t sputter_depth_p;

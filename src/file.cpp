@@ -113,23 +113,40 @@ bool files::file_t::operator==(const file_t& obj) const
 /*** files::file_t::contents_t  ***/
 /***************************/
 
-matrix_t files::file_t::contents_t::matrix()
+string files::file_t::contents_t::value_by_key(string key)
 {
-	if (raw_header_tensor().size()==0) return {};
-	if (raw_header_tensor()[0].size()==0) return {};
-	set<element_t> matrix_elements_s;
+	if (raw_header_tensor().size()==0) return "";
+	if (raw_header_tensor()[0].size()==0) return "";
 	for (auto& line: raw_header_tensor()[0])
 	{
 		if (line.size()==0) continue;
-		if (line.at(0).find("matrix")==string::npos) continue;
-		string matrix_string = tools::vec::combine_vec_to_string(line,delimiter);
-		vector<string> matrix_elements_vec = tools::str::get_strings_between_delimiter(matrix_string," ");
-		tools::str::remove_substring_from_mainstring(&matrix_string,"=");
-		tools::str::remove_substring_from_mainstring(&matrix_string,"matrix");
-		tools::str::remove_spaces_from_string_start(&matrix_string);
-		return matrix_t(matrix_string);
+		if (line.at(0).find(key)==string::npos) continue;
+		string value_string = tools::vec::combine_vec_to_string(line,delimiter);
+		tools::str::remove_substring_from_mainstring(&value_string,"=");
+		tools::str::remove_substring_from_mainstring(&value_string,key);
+		tools::str::remove_spaces_from_string_start(&value_string);
+		return value_string;
 	}
-	return {};
+	return "";
+}
+
+matrix_t files::file_t::contents_t::matrix()
+{
+	return value_by_key("matrix");
+// 	if (raw_header_tensor().size()==0) return {};
+// 	if (raw_header_tensor()[0].size()==0) return {};
+// 	set<element_t> matrix_elements_s;
+// 	for (auto& line: raw_header_tensor()[0])
+// 	{
+// 		if (line.size()==0) continue;
+// 		if (line.at(0).find("matrix")==string::npos) continue;
+// 		string matrix_string = tools::vec::combine_vec_to_string(line,delimiter);
+// 		tools::str::remove_substring_from_mainstring(&matrix_string,"=");
+// 		tools::str::remove_substring_from_mainstring(&matrix_string,"matrix");
+// 		tools::str::remove_spaces_from_string_start(&matrix_string);
+// 		return matrix_t(matrix_string);
+// 	}
+// 	return {};
 }
 
 

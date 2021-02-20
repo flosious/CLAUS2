@@ -88,9 +88,9 @@ namespace files
 			vector<vector<vector<string>>> raw_data_tensor_p, raw_header_tensor_p;
 			vector<vector<vector<string>>>& raw_data_tensor();
 			vector<vector<vector<string>>>& raw_header_tensor();
-			
+			string value_by_key(string key);
 		public:
-			/// "matrix = Si Ge 30Sn"
+			/// "matrix = 30Si5 70Ge85 Sn10"
 			matrix_t matrix();
 			void to_screen(string prefix="");
 			const string delimiter;
@@ -156,37 +156,15 @@ namespace files
 		/*ctors*/
 		file_t(const std::__cxx11::string& filename_with_path_s);
 		const string filename_with_path;
+		
 	public:
 		///this does not work as intended for some reason
 		bool operator< (const file_t& obj) const;
 		bool operator== (const file_t& obj) const;
 		const string creation_date_time() const;
+		
 	};
 
-
-
-
-
-
-
-
-
-
-	/******************************/
-	/****      STATIICS      ******/
-	/******************************/
-	
-	/// load all files to their corresponding tools
-	/// populates < files::types >files_list
-	/// use this first
-// 	void load(vector<string>& filenames_with_path);
-	
-	///all files over all groups, measurements and samples
-// 	const list<file_t*> files_list();
-
-	
-
-// 	list<files::dsims_dp_rpc_asc_t> dsims_files(vector<string>& filenames_with_path_s);
 
 	/**********************/
 	/****     sims_t    ***/
@@ -253,8 +231,8 @@ namespace files
 			const sputter_current_t sputter_current() const;
 			const string to_string() const;
 		};
-	protected:
-	// public:
+// 	protected:
+	public:
 		class contents_t : public files::sims_t::contents_t
 		{	
 		private:
@@ -312,7 +290,7 @@ namespace files
 		public:
 			name_t(const std::__cxx11::string& name_with_path_s);
 		};
-	public:
+	
 		dsims_dp_rpc_asc_t(const string& filename_with_path_s);
 		name_t name;
 		contents_t contents;

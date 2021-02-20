@@ -32,10 +32,16 @@
 
 using namespace std;
 
-class measurement_t;
-class dsims_measurement_t;
-class sample_t;
 
+/*FORWARD DECLARE*/
+namespace measurements
+{
+	class dsims_t;
+	class tofsims_t;
+	class profiler_t;
+}
+class sample_t;
+/*****************/
 
 
 
@@ -50,13 +56,19 @@ private:
 	static bool use_monitor;
 	static bool use_chip;
 	static bool use_simple_name;
-	static bool use_matrix;
+	
 	///all samples from all loaded files
 // 	static vector<sample_t> samples_list_p;
 protected:
 	///local matrix its necessary, because we have to work in it (concentrations)
 	matrix_t matrix_p;
 public:
+
+	set<measurements::dsims_t> dsims;
+	set<measurements::tofsims_t> tofsims;
+	set<measurements::profiler_t> profiler;
+	
+	
 	///files corresponding to this sample
 	set<files::file_t::name_t*> filenames;
 	set<files::file_t::contents_t*> filecontents;

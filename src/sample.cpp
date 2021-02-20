@@ -46,7 +46,6 @@ bool sample_t::use_wafer=true;
 bool sample_t::use_monitor=true;
 bool sample_t::use_chip=true;
 bool sample_t::use_simple_name=true;
-bool sample_t::use_matrix=false; //maybe not set for some 
 
 // vector<sample_t> sample_t::samples_list_p;
 // 

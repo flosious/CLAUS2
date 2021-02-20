@@ -17,7 +17,6 @@
 */
 
 #include "processor.hpp"
-#include "test.hpp"
 
 processor::processor(vector<string> args_p)
 {	
@@ -25,19 +24,19 @@ processor::processor(vector<string> args_p)
 	cout << "processor start" << endl;
 
 	
-	list<files::dsims_dp_rpc_asc_t> dsims_files;
-	feed_files_list(args_p,dsims_files);
-	for (auto& df:dsims_files)
-	{
-		files::file_t::contents_t* m = &df.contents;
-		cout << m->matrix().to_string() << endl;
-	}
+	list<files::dsims_dp_rpc_asc_t> dsims_Fs;
+	lists::feed_files_list(args_p,dsims_Fs,true);
+	
 	list<sample_t> samples;
-	feed_samples_list(dsims_files,samples);
-// 	for (auto& s : samples)
-// 	{
-// 		s.to_screen();
-// 	}
+	list<measurements::dsims_t> dsims_Ms;
+	
+	for (auto& df:dsims_Fs)
+	{
+		measurements::measurement_t mf(df.name,df.contents,samples);
+		(*mf.sample()->filenames.begin())->to_screen(); // this works
+	}
+	
+	
 	
 	logger::to_screen();
 	
