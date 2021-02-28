@@ -1,6 +1,10 @@
 #include "cluster.hpp"
 
-cluster_t::cluster_t(std::__cxx11::string clustername)
+cluster_t::cluster_t(string clustername, 
+			  sputter_time_t sputter_time,
+			  intensity_t intensity,
+			  sputter_depth_t sputter_depth,
+			  concentration_t concentration) : sputter_time_p(sputter_time), intensity_p(intensity), sputter_depth_p(sputter_depth), concentration_p(concentration)
 {
 	vector<string> clustername_parts = tools::str::get_strings_between_delimiter(clustername, " ");
 	*this = cluster_t(clustername_parts);
@@ -105,4 +109,44 @@ vector<isotope_t>& cluster_t::isotopes()
 {
 	return isotopes_p;
 }
+
+bool cluster_t::operator!=(const cluster_t& obj) const
+{
+	return !operator==(obj);
+}
+
+bool cluster_t::operator==(const cluster_t& obj) const
+{
+	if (isotopes_p.size()!=obj.isotopes_p.size()) return false;
+	for (auto& iso : isotopes_p)
+		if (find(obj.isotopes_p.begin(),obj.isotopes_p.end(),iso)==obj.isotopes_p.end())
+			return false;
+	return true;
+}
+
+bool cluster_t::operator<(const cluster_t& obj) const
+{
+	if (isotopes_p.size()<obj.isotopes_p.size()) return true;
+	if (isotopes_p.size()>obj.isotopes_p.size()) return false;
+	
+// 	set<isotope_t> isos(isotopes_p.begin(),isotopes_p.end());
+// 	set<isotope_t> objisos(obj.isotopes_p.begin(),obj.isotopes_p.end());
+	
+// 	vector<isotope_t> i_vec(isos.begin(),isos)
+	
+	for (int i=0;i<isotopes_p.size();i++)
+	{
+		if (isotopes_p[i] < obj.isotopes_p[i])
+			return true;
+		if (isotopes_p[i] == obj.isotopes_p[i])
+			continue;
+		return false;
+	}
+	
+	return false;
+}
+
+
+
+
 

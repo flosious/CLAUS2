@@ -358,8 +358,14 @@ total_sputter_time_t::total_sputter_time_t(quantity_t quantity_s) : total_sputte
 intensity_t::intensity_t(vector<double> data_s,unit_t unit_s) : quantity_t("intensity",data_s,unit_s){}
 intensity_t::intensity_t(quantity_t quantity_s) : intensity_t(quantity_s.data(),quantity_s.unit()) {}
 
-sputter_current_t::sputter_current_t(vector<double> data_s,unit_t unit_s) : quantity_t("primary_current",data_s,unit_s){}
-sputter_current_t::sputter_current_t(quantity_t quantity_s) : sputter_current_t(quantity_s.data(),quantity_s.unit()) {}
+current_t::current_t(vector<double> data_s,unit_t unit_s) : quantity_t("current",data_s,unit_s){}
+current_t::current_t(quantity_t quantity_s) : current_t(quantity_s.data(),quantity_s.unit()) {}
+
+sputter_current_t::sputter_current_t(vector<double> data_s,unit_t unit_s) : quantity_t("primary_sputter_current",data_s,unit_s){}
+sputter_current_t::sputter_current_t(quantity_t quantity_s) : quantity_t(quantity_s.data(),quantity_s.unit()) {}
+
+analysis_current_t::analysis_current_t(vector<double> data_s,unit_t unit_s) : quantity_t("primary_analysis_current",data_s,unit_s){}
+analysis_current_t::analysis_current_t(quantity_t quantity_s) : quantity_t(quantity_s.data(),quantity_s.unit()) {}
 
 concentration_t::concentration_t(vector<double> data_s,unit_t unit_s) : quantity_t("concentration",data_s,unit_s){}
 concentration_t::concentration_t(quantity_t quantity_s) : concentration_t(quantity_s.data(),quantity_s.unit()) {}

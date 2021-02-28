@@ -30,7 +30,6 @@
 // #include "measurement_tools_t.hpp"
 #include "processor.hpp"
 // #include "database_t.hpp"
-#include "hash_functions.hpp"
 #include "sample.hpp"
 
 using namespace std;

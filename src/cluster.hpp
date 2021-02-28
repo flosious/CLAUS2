@@ -34,14 +34,10 @@
 
 using namespace std;
 
-namespace files
-{
-	class dsims_dp_rpc_asc_t;
-};
+
 
 class cluster_t
 {
-	friend class files::dsims_dp_rpc_asc_t;
 private:
 	int equilibrium_starting_position=-1;
 // 	map<isotope_t,int> isotopes_amount_p;
@@ -59,7 +55,12 @@ private:
 	
 public:
 	/// 28Si2 Ge2
-	cluster_t(string clustername);
+	cluster_t(string clustername, 
+			  sputter_time_t sputter_time={},
+			  intensity_t intensity={},
+			  sputter_depth_t sputter_depth={},
+			  concentration_t concentration={});
+	
 	cluster_t(vector<string> clustername_parts);
 // 	cluster_t(string clustername, sputter_time_t sputter_time_s,intensity_t intensity_s,sputter_depth_t sputter_depth_s={},concentration_t concentration_s={});
 	cluster_t(vector<isotope_t>& isotopes_s);
@@ -79,6 +80,9 @@ public:
 	vector<isotope_t>& isotopes();
 	///pointer to the isotope within this cluster, where matrix isotopes have been removed
 	const isotope_t* corsseponding_isotope() const; 
+	bool operator==(const cluster_t& obj) const;
+	bool operator<(const cluster_t& obj) const;
+	bool operator!=(const cluster_t& obj) const;
 };
 
 #endif // CLUSTER_T_HPP

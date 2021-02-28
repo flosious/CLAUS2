@@ -92,6 +92,6 @@ public:
 	const string source() const;
 };
 
-// extern const pse_t PSE;
+extern pse_t PSE;
 
 #endif // PSE_HPP

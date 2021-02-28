@@ -19,16 +19,18 @@
 #ifndef SAMPLE_T_HPP
 #define SAMPLE_T_HPP
 
-#include "file.hpp"
+
 #include <unordered_set>
 #include <vector>
 #include <string>
 #include <list>
+#include <set>
+
 #include "element.hpp"
 #include "matrix.hpp"
 #include "definitions.hpp"
-#include <set>
-#include "measurement.hpp"
+#include "measurements/measurement.hpp"
+#include "files/file.hpp"
 
 using namespace std;
 
@@ -63,15 +65,6 @@ protected:
 	///local matrix its necessary, because we have to work in it (concentrations)
 	matrix_t matrix_p;
 public:
-
-	set<measurements::dsims_t> dsims;
-	set<measurements::tofsims_t> tofsims;
-	set<measurements::profiler_t> profiler;
-	
-	
-	///files corresponding to this sample
-	set<files::file_t::name_t*> filenames;
-	set<files::file_t::contents_t*> filecontents;
 	class chip_t
 	{
 	public:
@@ -83,9 +76,17 @@ public:
 		bool is_set();
 		void to_screen(string prefix="");
 	};
-	sample_t(files::file_t::name_t& name, files::file_t::contents_t& contents);
-// 	sample_t(string lot, string lot_split, int wafer,chip_t chip, string monitor,string simple_name);
+	set<measurements::dsims_t*> dsims;
+	set<measurements::tofsims_t*> tofsims;
+	set<measurements::profiler_t*> profiler;
 	
+	
+	///files corresponding to this sample
+	set<files::file_t*> files;
+	
+	sample_t(files::file_t* file);
+// 	sample_t(string lot, string lot_split, int wafer,chip_t chip, string monitor,string simple_name);
+	string to_string();
 	chip_t chip();
 	int wafer();
 	string lot();
@@ -104,6 +105,7 @@ public:
 	
 	///all samples from all loaded files
 // 	list<sample_t> samples_list();
+	
 };
 
 

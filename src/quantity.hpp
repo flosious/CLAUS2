@@ -186,11 +186,25 @@ public:
 		intensity_t(quantity_t quantity_s);
 	};
 	
+	class current_t : public quantity_t
+	{
+	public:
+		current_t(vector<double> data_s={},unit_t unit_s={"nA"});
+		current_t(quantity_t quantity_s);
+	};
+	
 	class sputter_current_t : public quantity_t
 	{
 	public:
 		sputter_current_t(vector<double> data_s={},unit_t unit_s={"nA"});
 		sputter_current_t(quantity_t quantity_s);
+	};
+	
+	class analysis_current_t : public quantity_t
+	{
+	public:
+		analysis_current_t(vector<double> data_s={},unit_t unit_s={"nA"});
+		analysis_current_t(quantity_t quantity_s);
 	};
 	
 	class dose_t : public quantity_t
@@ -238,6 +252,7 @@ public:
 	
 	class electrical_charge_t : public quantity_t
 	{
+	public:
 		electrical_charge_t(vector<double> data_s={},unit_t unit_s={"e"});
 		electrical_charge_t(quantity_t quantity_s);
 	};

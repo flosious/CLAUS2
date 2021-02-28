@@ -20,70 +20,159 @@
 #define LISTS_HPP
 
 #include <list>
-#include "file.hpp"
+#include "files/file.hpp"
 #include "sample.hpp"
-#include "measurement.hpp"
-#include "measurement_group.hpp"
+#include "measurements/measurement.hpp"
+#include "mgroups/mgroup.hpp"
+#include "log.hpp"
 
 using namespace std;
 
 /*
- * storing the actual data in lists, so their pointers are preserved
+ * storing the actual data in linked lists, so their pointers are preserved
  * this is neccessary, because each measurement, group, sample 
  * and some of its members have to be able to access non-copies
  * of other measurements, samples or groups
  * in that way, CPU time and RAM is saved ... I think ...
  */
-namespace lists
+class lists
 {
-// 	static list<sample_t> samples;
+public:
+	static list<sample_t> samples;
+	
 
+// 	static list<sample_t> samples;
+	static list<filenames::dsims_t> dsims_filenames;
+	static list<files::dsims_t> dsims_files;
+	static list<measurements::dsims_t> dsims_measurements;
+	static list<mgroups::dsims_t> dsims_groups;
+	
+// 	static list<filenames::tofsims_t> tofsims_filenames;
+// 	static list<files::tofsims_t> tofsims_files;
+// 	static list<measurements::tofsims_t> tofsims_measurements;
+// 	static list<mgroups::tofsims_t> tofsims_groups;
+	
+	///populates all samples with their corresponding measurements (measurments list has to be populated 1st)
+	static void update_measurement_pointers_in_samples();
+// 	static void feed_measurements_list_dsims(files::dsims_t& file, list<::measurements::dsims_t>& measurements);
+// 	static void feed_measurements_list_dsims(list<files::dsims_t>& file, list<::measurements::dsims_t>& measurements);
 	
 	
+	template <typename M, typename MG>
+	static void feed_mgroup_list(M& measurement, list<MG>& mgroups)
+	{
+		MG G(&measurement);
+		MG* G_p = find_in_list(G,mgroups);
+		if (G_p==nullptr)
+		{
+			mgroups.push_back(G);
+			G_p = &mgroups.back();
+		}
+		else
+			G_p->insert_measurement(&measurement);
+	}
+	template <typename M, typename MG>
+	static void feed_mgroup_list(list<M>& measurements_p, list<MG>& mgroups)
+	{
+		for (auto& M_p : measurements_p)
+			feed_mgroup_list(M_p,mgroups);
+		update_measurement_pointers_in_samples;
+	}
 	
-// 	template <typename T>
-// 	void feed_samples_list(T& file)
-// 	{
-// 		sample_t sample(file.name,file.contents);
-// 		for (auto& s_in_list : samples)
-// 		{
-// 			if (s_in_list==sample)
-// 			{
-// 				s_in_list.filenames.insert(&file.name);
-// 				s_in_list.filecontents.insert(&file.contents);
-// 				samples.push_back(sample);
-// 				return;
-// 			}
-// 		}
-// 		samples.push_back(sample);
-// 	}
+	///populates measurements-list, pointers for measurement_p in measurements-list and sample_p in samples-list
+	template <typename F, typename M>
+	static void feed_measurements_list(F& file, list<M>& measurements, M** measurement_p, sample_t** sample_p)
+	{
+		sample_t sample(&file);
+		*sample_p=find_in_list(sample,samples);
+		if (*sample_p==nullptr)
+		{
+			samples.push_back(sample);
+			*sample_p = &samples.back();
+		}
+		M m(&file,*sample_p);
+		*measurement_p = find_in_list(m,measurements);
+		if (*measurement_p==nullptr) 
+		{
+			measurements.push_back(m);
+			*measurement_p = &measurements.back();
+		}
+		else
+			(*measurement_p)->insert_file(&file);
+	}
+	template <typename F, typename M>
+	static void feed_measurements_list(list<F>& files_s, list<M>& measurements)
+	{
+		M* M_p;
+		sample_t* S_p;
+		for (auto& f: files_s)
+			feed_measurements_list(f,measurements,&M_p,&S_p);
+// 		update_measurement_pointers_in_samples();
+	}
 	
-	template <typename T>
-	void feed_samples_list(list<T>& files)
+	/*files -> samples*/
+	template <typename F>
+	static void feed_samples_list(F& file)
+	{
+		sample_t sample(file.name,file.contents);
+		for (auto& s_in_list : samples)
+		{
+			if (s_in_list==sample)
+			{
+				s_in_list.files.insert(&file);
+				return;
+			}
+		}
+		samples.push_back(sample);
+	}
+	template <typename F>
+	static void feed_samples_list(list<F>& files)
 	{
 		for (auto& f: files)
-			feed_samples_list(f);
+			feed_samples_list(f,samples);
 	}
 
-	///erase_filename will clear filename after successfull feeding
-	template <typename T>
-	void feed_files_list(string& filename_with_path_s, list<T>& files_s, bool erase_filename=false)
+	/*filenames -> files*/
+	template <typename FN, typename F>
+	static void feed_files_list(FN& filename_s, list<F>& files_s)
 	{
-		T file(filename_with_path_s);
-		if (file.name.is_correct_type() && file.contents.is_correct_type())
-		{
+		F file(filename_s);
+		if (file.is_correct_type())
 			files_s.push_back(file);
-			if (erase_filename) filename_with_path_s="";
-		}
+	}
+	template <typename FN, typename F>
+	static void feed_files_list(list<FN>& filenames_s, list<F>& files_s)
+	{
+		for (auto& fn : filenames_s)
+			feed_files_list(fn, files_s);
 	}
 	
-	///erase_filename will clear filename after successfull feeding
-	template <typename T>
-	void feed_files_list(vector<string>& filenames_with_path_s, list<T>& files_s, bool erase_filename=false)
+	/*strings -> filenames*/
+	template <typename FN>
+	static void feed_filenames_list(string& filename_s, list<FN>& filenames)
 	{
-		for (auto& f : filenames_with_path_s)
-			feed_files_list(f, files_s, erase_filename);
+		FN file(filename_s);
+		if (file.is_correct_type())
+			filenames.push_back(file);
 	}
-}
+	template <typename FN>
+	static void feed_filenames_list(vector<string>& filenames_s, list<FN>& filenames)
+	{
+		for (auto& fn : filenames_s)
+			feed_filenames_list(fn, filenames);
+	}
+	
+	///returns the pointer to key in keys_list
+	template <typename F>
+	static F* find_in_list(F& f,list<F>& keys)
+	{
+		for (auto& key : keys)
+		{
+			if (key==f)
+				return &key;
+		}
+		return nullptr;
+	}
+};
 
 #endif // LISTS_HPP

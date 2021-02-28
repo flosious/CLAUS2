@@ -32,7 +32,7 @@ void logger::fatal(std::__cxx11::string message, string variable)
 	stringstream crit;
 	crit << "*** FATAL ***"  << "\t\t" << message << "\t\t" << variable ;
 	log_messages.push_back(crit.str());
-// 	cout << crit.str();
+	cout << crit.str();
 }
 void logger::fatal(std::__cxx11::string message, int variable)
 {

@@ -24,10 +24,12 @@
 #include <list>
 #include <string>
 #include <vector>
+
 #include "tools.hpp"
-#include "file.hpp"
+#include "files/file.hpp"
 #include "sample.hpp"
 #include "lists.hpp"
+#include "mgroups/mgroup.hpp"
 // #include "measurement_group.hpp"
 // #include "measurement.hpp"
 // #include <unordered_set>
@@ -39,15 +41,8 @@ using namespace std;
 class processor 
 {
 private:
-	
-public:
-// 	list<file_t> files;
-// 	list measurement_groups
-// 	list samples
-// 	vector<string> input_filenames;
-	
-	///samples across all MGs
 // 	list<sample_t> samples;
+public:
 	processor(vector<string> args_p);
 };
 

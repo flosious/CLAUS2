@@ -1,5 +1,7 @@
 #include "element.hpp"
 
+/*PSE singleton*/
+pse_t PSE;
 
 /************************************/
 /*********     isotope_t       ******/
@@ -77,6 +79,10 @@ const int isotope_t::nucleons() const
 	return PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
 }
 
+const bool isotope_t::operator!=(const isotope_t& obj) const
+{
+	return !operator==(obj);
+}
 
 
 const bool isotope_t::operator==(const isotope_t& obj) const
@@ -89,7 +95,9 @@ const bool isotope_t::operator==(const isotope_t& obj) const
 const bool isotope_t::operator<(const isotope_t& obj) const
 {
 	if (symbol < obj.symbol) return true;
+	if (symbol > obj.symbol) return false;
 	if (nucleons() < obj.nucleons()) return true;
+	if (nucleons() > obj.nucleons()) return false;
 	return false;
 }
 
@@ -125,9 +133,9 @@ element_t::element_t(std::__cxx11::string symbol_s, double abs_amount, bool use_
 	for (auto& iso:PSE.element(symbol_s)->isotopes)
 	{
 		if (use_natural_abundance)
-			isotopes_p.push_back({symbol_s,iso.nucleons,iso.abundance});
+			isotopes_p.push_back({symbol_s,iso.nucleons,iso.abundance,iso.abundance*abs_amount});
 		else
-			isotopes_p.push_back({symbol_s,iso.nucleons,-1});
+			isotopes_p.push_back({symbol_s,iso.nucleons,-1,-1});
 	}
 }
 
@@ -204,7 +212,7 @@ const std::__cxx11::string element_t::to_string()
 	for (int i=0;i<size;i++)
 	{
 		out << isotopes().at(i).to_string();
-		if (i==size-1)
+		if (i<size-1)
 			out << ",";
 	}
 	return out.str();
@@ -214,6 +222,18 @@ vector<isotope_t> & element_t::isotopes()
 {
 	return isotopes_p;
 }
+
+const bool element_t::is_set()
+{
+	if (isotopes().size()>0) return true;
+	return false;
+}
+
+substance_amount_t& element_t::substance_amount()
+{
+	return substance_amount_p;
+}
+
 
 // const substance_amount_t & element_t::substance_amount() const
 // {
@@ -265,8 +285,15 @@ vector<isotope_t> & element_t::isotopes()
 /***************************/
 /*******     ion_t     ********/
 /***************************/
+ion_t::ion_t()
+{
+}
 
 ion_t::ion_t(vector<element_t>& elements_s,  electrical_charge_t electric_charge_s) : elements_p(elements_s), electric_charge(electric_charge_s)
+{
+}
+
+ion_t::ion_t(element_t element_s,  electrical_charge_t electric_charge_s) : elements_p({element_s}), electric_charge(electric_charge_s)
 {
 }
 
@@ -280,14 +307,42 @@ const std::__cxx11::string ion_t::to_string()
 	for (int i=0;i<size;i++)
 	{
 		out << elements_p.at(i).to_string();
-		if (i==size-1)
+		if (i<size-1)
 			out << ",";
 	}
-	out << ")" << static_cast<int>(electric_charge.data().at(0));
+	out << ")"<< static_cast<int>(electric_charge.data().at(0));
+	if (electric_charge.data().at(0)<0) out << "-";
+	else out << "+";
 	return out.str();
 }
 
-const bool ion_t::is_set()
+bool ion_t::operator==(ion_t& obj)
+{
+	if (electric_charge!=obj.electric_charge) return false;
+	bool same_elements=false;
+	for (auto ele:elements())
+	{
+		same_elements = false;
+		for (auto objele:obj.elements())
+		{
+			if (ele == objele)
+			{
+				same_elements=true;
+				break;
+			}
+		}
+		if (!same_elements) return false;
+	}
+	return true;
+}
+
+bool ion_t::operator!=(ion_t& obj)
+{
+	return !operator==(obj);
+}
+
+
+bool ion_t::is_set()
 {
 	if (elements().size()==0) return false;
 	if (!electric_charge.is_set()) return false;
@@ -298,5 +353,4 @@ vector<element_t>& ion_t::elements()
 {
 	return elements_p;
 }
-
 

@@ -34,7 +34,7 @@ using namespace std;
 
 
 
-static pse_t PSE;
+// static pse_t PSE;
 
 
 /*interface to PSE*/
@@ -65,6 +65,7 @@ public:
 	
 	///NOT checking abundance
 	const bool operator==(const isotope_t& obj) const;
+	const bool operator!=(const isotope_t& obj) const;
 	const bool operator<(const isotope_t& obj) const;
 	
 	const string symbol;
@@ -85,7 +86,8 @@ public:
 // 	element_t(const isotope_t& isotope_s, double amount=1);
 // 	const vector<isotope_t>* isotopes() const;
 	vector<isotope_t>& isotopes();
-// 	const substance_amount_t& substance_amount() const;
+	
+	substance_amount_t& substance_amount();
 	
 // 	const double abundance() const;
 	const mass_t mass();
@@ -99,6 +101,7 @@ public:
 	///checking isotopes but NOT their abundances
 	const bool operator==(element_t& obj);
 	const bool operator<(element_t& obj);
+	const bool is_set();
 };
 
 class ion_t
@@ -108,11 +111,15 @@ private:
 // 	const electrical_charge_t electric_charge_p;
 	vector< element_t > elements_p;
 public:
+	ion_t();
 	ion_t(vector<element_t>& elements_s, electrical_charge_t electric_charge_s);
+	ion_t(element_t element_s, electrical_charge_t electric_charge_s);
 	vector< element_t >& elements();
-	const electrical_charge_t electric_charge;
+	electrical_charge_t electric_charge;
 	const string to_string();
-	const bool is_set();
+	bool operator==(ion_t& obj);
+	bool operator!=(ion_t& obj);
+	bool is_set();
 };
 
 

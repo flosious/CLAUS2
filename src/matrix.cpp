@@ -37,6 +37,7 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 	int unknown_amounts{0};
 	for (auto& ele_or_iso:elements_or_isotopes_s)
 	{
+		if (ele_or_iso=="") continue;
 		if (regex_search(ele_or_iso,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9\\.]*)"))) 
 		{
 			/*records*/
@@ -63,6 +64,12 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 			/*******/
 			
 			/*catch error*/
+			if (PSE.element(symbol)==nullptr)
+			{
+				*this = matrix_t(); //make me empty
+				logger::error("matrix_t::matrix_t() symbol is not listed in the PSE, skipping use space as seperator for multiple symbols", ele_or_iso);
+				return;
+			}
 			if (symbol=="")
 			{
 				*this = matrix_t(); //make me empty
@@ -230,55 +237,3 @@ const std::__cxx11::string matrix_t::to_string()
 }
 
 
-/*
-sample_t::matrix_t::matrix_t(const std::__cxx11::string matrix_elements_s)
-{
-	vector<string> isos_or_eles =  tools::str::get_strings_between_delimiter(matrix_elements_s, " ");
-	smatch match;
-	int nucleons;
-	double concentration;
-	string symbol;
-	for (auto& iso_p : isos_or_eles)
-	{
-		if (regex_search(iso_p,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)"))) 
-		{
-			if (match[1]!="") nucleons = tools::str::str_to_int(match[1]);
-			else 
-			{
-				vector<isotope_t> isos;
-				for (auto& iso : PSE.element(symbol)->isotopes)
-					isos.push_back({symbol,iso.nucleons,iso.abundance});
-				//TODO
-			}
-			if (match[2]!="") symbol = match[2];
-			else
-			{
-				logger::error("cluster_t::cluster_t() symbol not parseable, skipping", iso_p);
-				continue;
-			}
-			if (match[3]!="") concentration = tools::str::str_to_int(match[3]);
-			else concentration = 1;
-		}
-		
-	}
-// 	isotopes_concentration_p.insert(pair<isotope_t,concentration_t> ());
-	///TODO
-}
-
-sample_t::matrix_t::matrix_t(const set<element_t> elements_s) : elements_p(elements_s)
-{
-}
-
-
-bool sample_t::matrix_t::operator!=(matrix_t& obj) 
-{
-	return !(operator==(obj));
-}
-const string sample_t::matrix_t::to_string()
-{
-	stringstream out;
-	out << "elements:";
-	for (auto& element:elements())
-		out << "\t" << element.to_string() ;
-	return out.str();
-}*/
