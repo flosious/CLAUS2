@@ -1,175 +1,71 @@
+/*
+	Copyright (C) 2021 Florian Bärwolf
+	floribaer@gmx.de
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "measurement.hpp"
 
+bool measurements_::measurement_t::use_repetition=true;
+bool measurements_::measurement_t::use_sample=true;
 
-bool measurements::measurement_t::use_olcdb = true;
-bool measurements::measurement_t::use_sample = true;
-bool measurements::measurement_t::use_group = true;
-bool measurements::measurement_t::use_repition = true;
-bool measurements::measurement_t::use_settings = true;
-
-/*******************/
-
-measurements::measurement_t::measurement_t(files::file_t::name_t& filename_p, 
-										   files::file_t::contents_t& filecontents_p, 
-										   list<sample_t>& samples_list_p)
+measurements_::measurement_t::measurement_t(filenames::filename_t& filename, files::file_t& file, std::__cxx11::list< sample_t >& samples_list) : repetition(filename.repetition())
 {
-	filenames.insert(&filename_p);
-	filecontents.insert(&filecontents_p);
-	samples_list = &samples_list_p;
+	add_sample(filename,file,samples_list);	
 }
 
-const sample_t * measurements::measurement_t::sample()
+void measurements_::measurement_t::add_sample(filenames::filename_t& filename,files::file_t& file, list<sample_t>& samples_list)
 {
-	if (sample_p!=nullptr)
-		return sample_p;
-	if (filecontents.size()==0) return nullptr;
-	/*extract the sample and save its position in the list*/
-	sample_t sample(**filenames.begin(),**filecontents.begin());
-	for (auto& s : *samples_list)
-		if (s==sample)
+	if (sample==nullptr)
+	{
+		sample_t s(filename,file);
+		sample = tools::find_in_V(s,samples_list); 
+		if (sample==nullptr)
 		{
-			sample_p = &s;
-			return sample_p;
+			samples_list.push_back(s);
+			sample = &samples_list.back();
 		}
-	samples_list->push_back(sample);
-	sample_p = &samples_list->back();
-	return sample_p;
+		else
+		{
+			if (!sample->matrix().is_set())
+				sample->matrix() = s.matrix(); 
+		}
+	}
 }
 
-
-const int measurements::measurement_t::olcdb() const
-{
-	if (!use_olcdb) return -1;
-	if (filenames.size()==0) return 0;
-	return (*filenames.begin())->olcdb();
-}
-
-const string measurements::measurement_t::group() const
-{
-	if (!use_group) return "";
-	if (filenames.size()==0) return "";
-	return (*filenames.begin())->group();
-}
-
-const string measurements::measurement_t::repitition() const
-{
-	if (!use_repition) return "";
-	if (filenames.size()==0) return "";
-	return (*filenames.begin())->repetition();
-}
-
-const bool measurements::measurement_t::operator==(measurements::measurement_t& obj)
-{
-	if (use_sample)
-	{
-		//pointer comparison
-		if (sample()!=obj.sample()) return false;
-	}
-	
-	if (use_repition)
-	{
-		if (repitition()!=obj.repitition()) return false;
-	}
-	
-	if (use_olcdb)
-	{
-		if (olcdb()!=obj.olcdb()) return false;
-	}
-	
-	if (use_group)
-	{
-		if (group()!=obj.group()) return false;
-	}
-	
-// 	if (use_settings)
-// 	{
-// 		if (simple_name()!=obj.simple_name()) return false;
-// 	}
-	return false;
-}
-
-
-// const list<file_t *> * measurement_t::files() const
-// {
-// 	if (files_p.size()>0)
-// 		return &files_p;
-// 	return nullptr;
-// }
-
-// const sample_t * measurement_t::sample() const
-// {
-// // 	for (auto& s : *sample_list_global)
-// 	for (list<sample_t>::iterator s; s!=sample_list_global->end(); s++)
-// 	{
-// 		for (auto& f:files_p)
-// 		{
-// // 			if (sample_t(*f)==*s)
-// 				
-// 		}
-// 	}
-// 	return nullptr;
-// }
-// 
-
-/*operators*/
-/*
-const bool measurement_t::operator==(const measurement_t& obj) const
-{
-	if (use_sample)
-	{
-		//comparing pointers!
-		if (sample()!=obj.sample()) return false;
-	}
-	
-	if (use_olcdb)
-	{
-		if (olcdb()!=obj.olcdb()) return false;
-	}
-	
-	if (use_group)
-	{
-		if (group()!=obj.group()) return false;
-	}
-	
-	if (use_repition)
-	{
-		if (repitition()!=obj.repitition()) return false;
-	}
-	return true;
-}
-
-const bool measurement_t::operator!=(const measurement_t& obj) const
+bool measurements_::measurement_t::operator!=(measurements_::measurement_t& obj)
 {
 	return !(operator==(obj));
 }
 
-const bool measurement_t::operator<(const measurement_t& obj) const
+bool measurements_::measurement_t::operator==(measurements_::measurement_t& obj)
 {
+	if (use_repetition)
+		if (repetition!=obj.repetition) return false;
 	if (use_sample)
-	{
-		if (sample()<obj.sample()) return true;
-		if (sample()>obj.sample()) return false;
-	}
+		if (sample!=obj.sample) return false; // pointer comparison
+	if (sample==nullptr)
+		logger::error("sample is null","this should never happen");
 	
-	if (use_olcdb)
-	{
-		if (olcdb()<obj.olcdb()) return true;
-		if (olcdb()>obj.olcdb()) return false;
-	}
-	
-	if (use_group)
-	{
-		if (group()<obj.group()) return true;
-		if (group()>obj.group()) return false;
-	}
-	
-	if (use_repition)
-	{
-		if (repitition()<obj.repitition()) return true;
-		if (repitition()>obj.repitition()) return false;
-	}
-	
-	return false;
-}*/
+	return true;	
+}
 
-
+std::__cxx11::string measurements_::measurement_t::to_string(const std::__cxx11::string del) const
+{
+	stringstream ss;
+	if (use_sample) ss << "sample: " << sample->to_string(del) << del;
+	if (use_repetition) ss << "repetition: " << repetition ;
+	return ss.str();
+}

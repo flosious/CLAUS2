@@ -26,31 +26,24 @@
 #include <string>
 #include <list>
 #include <sstream>
-#include "../quantity.hpp"
-#include "../msettings/msettings.hpp"
+#include "quantity.hpp"
+#include "msettings.hpp"
 // #include "sample.hpp"
-#include "../definitions.hpp"
-#include "../files/file.hpp"
-#include "../measurements/measurement.hpp"
+#include "definitions.hpp"
+#include "file.hpp"
+#include "measurement.hpp"
 
 
 using namespace std;
 
 
 /* FORWARD DECLARATIONS*/
-namespace measurements
-{
-	class dsims_t;
-	class measurement_t;
-	class sims_t;
-	class tofsims_t;
-}
-
 /************************/
 
 
-namespace mgroups
+class mgroups
 {
+public:
 	/*
 	* there can not be different measurement methods in the same measurement_group.
 	* that means: there can only be list<dsims_measurement_t> in dsims_measurement_group_t
@@ -65,13 +58,17 @@ namespace mgroups
 		static bool use_settings;
 	protected:
 		///measurements belonging to this group
-		
+		mgroup_t(filenames::filename_t& fn, files::file_t& f, list<sample_t>& samples_list);
 	public:
-		string to_string();
-		void insert_measurement(measurements::measurement_t* M_p);
+// 		mgroup_t();
+		
+// 		bool is_set() const;
+// 		mgroup_t();
+		string to_string(const string del=", ");
+// 		void insert_measurement(measurements::measurement_t* M_p);
 		/*const defitions*/
 		///"51087" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-		const int olcdb() const;
+		const int olcdb;
 		/// "17" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
 	// 	const int wafer;
 		///"SJZ307" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
@@ -85,31 +82,25 @@ namespace mgroups
 		///multiple measurements of same sample use this: "q" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
 	// 	const string repetition;
 		///measurement group identifier: "5" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-		const string group() const;
+		const string group;
 		///"d-sims", "tof-sims", "xps", "profiler", ...
 		/*ctors*/
-		mgroup_t(measurements::measurement_t* measurement);
+
 		/*functions*/
-		set<measurements::measurement_t*> measurements;
+
 		/*static functions*/
 		/*operators*/
-		bool operator==(mgroup_t& obj);
-		bool operator!=(mgroup_t& obj);
+		bool operator==( const mgroup_t& obj) const;
+		bool operator!=( const mgroup_t& obj) const;
 	};
 
 	class sims_t: public mgroup_t
 	{
 	private:
 	protected:
-		
+		sims_t(filenames::sims_t& fn, files::sims_t& f, list<sample_t>& samples_list);
 	public:
-		string to_string();
-		set<measurements::sims_t*> measurements;
-		void insert_measurement(measurements::sims_t* M_p);
-		sims_t(measurements::sims_t* measurement);
-		msettings::sims_t settings();
-		bool operator==(sims_t& obj);
-		bool operator!=(sims_t& obj);
+		
 	};
 
 	class dsims_t: public sims_t
@@ -117,24 +108,42 @@ namespace mgroups
 	private:
 		
 	public:
-		string to_string();
-		msettings::dsims_t settings();
-		set<measurements::dsims_t*> measurements;
-		void insert_measurement(measurements::dsims_t* M_p);
-		dsims_t(measurements::dsims_t* measurement);
+		string to_string(const string del=", ");
+// 		void try_insert_measurement(measurements::dsims_t& M);
+// 		void update(dsims_t& MG);
+		vector<measurements_::dsims_t> measurements;
+		const msettings::dsims_t settings;
+		dsims_t(filenames::dsims_t& fn, files::dsims_t& f, list<sample_t>& samples_list);
+		bool operator==(const dsims_t& obj) const;
+		bool operator!=(const dsims_t& obj) const;
 	};
 	
-	class tofsims_t: public sims_t
+// 	class tofsims_t: public sims_t
+// 	{
+// 	private:
+// 		
+// 	public:
+// 		string to_string();
+// 		set<measurements::tofsims_t*> measurements;
+// 		void insert_measurement(measurements::tofsims_t* M_p);
+// 		tofsims_t(measurements::tofsims_t* measurement);
+// 	};
+	
+	template<typename Mt>
+	static void try_insert_sources_into_target_vec(vector<Mt>& Ms,vector<Mt>& M_target)
 	{
-	private:
-		
-	public:
-		string to_string();
-		set<measurements::tofsims_t*> measurements;
-		void insert_measurement(measurements::tofsims_t* M_p);
-		tofsims_t(measurements::tofsims_t* measurement);
-	};
-}
+		for (auto& M : Ms)
+		{
+			Mt* M_p = tools::vec::find_in_vec(M,M_target);
+			if (M_p == nullptr) // M  not  found in vec
+			{
+				M_target.push_back(M);
+			}
+		}
+	}
+
+	
+};
 
 
 #endif // MEASUREMENT_GROUP_T_HPP

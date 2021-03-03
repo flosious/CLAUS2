@@ -55,7 +55,7 @@ bool filenames::sims_t::parse_sputter_energy_element_polarity()
 		reg = ("^([0-9]{1,2})(kV|keV)(O|Cs)(\\+|-)$"); 
 		if (regex_search(filename_part,match,reg)) 
 		{	
-			secondary_voltage_p = secondary_voltage_t{{tools::str::str_to_double(match[1])*1000},{"V"}};
+			sputter_energy_p = energy_t{{tools::str::str_to_double(match[1])*1000},{"eV"}};
 			sputter_element_p = (match[3]);
 			secondary_polarity_p = match[4];
 			return true;
@@ -64,7 +64,7 @@ bool filenames::sims_t::parse_sputter_energy_element_polarity()
 		reg = ("^([0-9]{2,5})(V|eV)(O|Cs)(\\+|-)$"); 
 		if (regex_search(filename_part,match,reg)) 
 		{
-			secondary_voltage_p = secondary_voltage_t{{tools::str::str_to_double(match[1])},{"V"}};
+			sputter_energy_p = energy_t{{tools::str::str_to_double(match[1])},{"eV"}};
 			sputter_element_p = (match[3]);
 			secondary_polarity_p = match[4];
 			return true;
@@ -73,11 +73,11 @@ bool filenames::sims_t::parse_sputter_energy_element_polarity()
 	return false;
 }
 
-const secondary_voltage_t filenames::sims_t::secondary_voltage()
+const energy_t filenames::sims_t::sputter_energy()
 {
-	if (!secondary_voltage_p.is_set()) 
+	if (!sputter_energy_p.is_set()) 
 		parse_sputter_energy_element_polarity();
-	return secondary_voltage_p;
+	return sputter_energy_p;
 }
 
 element_t filenames::sims_t::sputter_element()

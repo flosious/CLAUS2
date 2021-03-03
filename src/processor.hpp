@@ -26,10 +26,10 @@
 #include <vector>
 
 #include "tools.hpp"
-#include "files/file.hpp"
-#include "sample.hpp"
-#include "lists.hpp"
-#include "mgroups/mgroup.hpp"
+#include "file.hpp"
+// #include "sample.hpp"
+// #include "lists.hpp"
+#include "mgroup.hpp"
 // #include "measurement_group.hpp"
 // #include "measurement.hpp"
 // #include <unordered_set>
@@ -41,7 +41,27 @@ using namespace std;
 class processor 
 {
 private:
-// 	list<sample_t> samples;
+	list<sample_t> samples_list;
+	vector<mgroups::dsims_t> dsims_groups;
+	
+	///filter filenames for dsims measurement groups
+	void populate_dsims_groups(vector<string>& filenames);
+	
+	template <typename FN, typename F,typename G>
+	bool try_insert_groups(FN& fn, F& f, vector<G>& groups)
+	{
+		if (!fn.is_correct_type() || !f.is_correct_type()) return false;
+		G MG(fn,f,samples_list);
+		G* MG_p = tools::vec::find_in_vec(MG,groups);
+		if (MG_p!=nullptr) // in group list
+		{
+			mgroups::try_insert_sources_into_target_vec(MG.measurements,MG_p->measurements);
+		}
+		else
+			groups.push_back(MG);
+		return true;
+}
+	
 public:
 	processor(vector<string> args_p);
 };

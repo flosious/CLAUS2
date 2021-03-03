@@ -66,6 +66,17 @@ using namespace std;
 class tools{
 private:  
 public:
+	///returns the pointer to key in V<keys>
+	template <typename F,typename V>
+	static F* find_in_V(F& f,V& keys)
+	{
+		for (auto& key : keys)
+		{
+			if (key==f)
+				return &key;
+		}
+		return nullptr;
+	}
 	class web {
 	public:
 		static string get_contents(string url);
@@ -153,6 +164,18 @@ public:
 	class vec 
 	{
 	public:
+		///returns the pointer to key in keys_list
+		template <typename F>
+		static F* find_in_vec(F& f,vector<F>& keys)
+		{
+			return find_in_V(f,keys);
+// 			for (auto& key : keys)
+// 			{
+// 				if (key==f)
+// 					return &key;
+// 			}
+// 			return nullptr;
+		}
 // 		template <typename T> static vector<T> add(vector<T> *start,/*vector*/<T> *ende);
 		static void add(vector<string> *result_vec,vector<string> adder);
 		static void add(vector<double> *result_vec,vector<double> adder);

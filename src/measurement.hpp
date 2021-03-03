@@ -24,28 +24,13 @@
 #include <string>
 #include <set>
 #include "sample.hpp"
-#include "crater.hpp"
+// #include "crater.hpp"
 #include "file.hpp"
-#include "measurement_group.hpp"
+// #include "mgroup.hpp"
+// #include "msettings.hpp"
 
 
-/* FORWARD DECLARATIONS*/
-class sample_t;
-class measurement_group_t;
 
-
-namespace measurements
-{
-	class sims_t;
-	class dsims_t;
-	class tofsims_t;
-}
-
-namespace measurement_groups
-{
-	class dsims_t;
-	class tofsims_t;
-}
 /************************/
 
 
@@ -53,87 +38,51 @@ using namespace std;
 
 
 
-namespace measurements
+class measurements_
 {
+public:	
 	class measurement_t
 	{
-// 		friend class processor;
-	private:
-		///use these figures to diistinguish one measurement from another
-		static bool use_olcdb;
-		static bool use_group;
-		static bool use_settings;
-		static bool use_repition;
-		static bool use_sample;
-		
-		set<files::file_t::name_t*> filenames;
-		set<files::file_t::contents_t*> filecontents;
 	protected:
-		list<sample_t>* samples_list;
-		sample_t* sample_p=nullptr;
-		/*ctors*/
+		///use these figures to diistinguish one measurement from another
+		static bool use_repetition;
+		static bool use_sample;
+		void add_sample(filenames::filename_t& filename, files::file_t& file, list<sample_t>& samples_list);
+		measurement_t(filenames::filename_t& filename, files::file_t& file, list<sample_t>& samples_list);
 	public:
-		measurement_t(files::file_t::name_t& filename_p, files::file_t::contents_t& filecontents_p, list<sample_t>& samples_list_p);
-	public:
-		/*functions*/
-		///pointer to its corsseponding the sample
-		const sample_t* sample();
-		const int olcdb() const;
-		const string repitition() const;
-		const string group() const;
-		/*static functions*/
-		/*operators*/
-		const bool operator==(measurement_t& obj);
-		const bool operator!=(measurement_t& obj);
-	};
-
-	
-	class profiler_t : public measurement_t
-	{
-	
+		string to_string(const string del = ", ") const;
+		bool is_set() const;
+// 		int olcdb=-1;
+		const string repetition;
+		sample_t* sample=nullptr;
+		bool operator==(measurement_t& obj);
+		bool operator!=(measurement_t& obj);
 	};
 	
-	
-	///standard sims template
-	///can only be instanziated by friends
 	class sims_t : public measurement_t
 	{
-	private:
-		set<files::sims_t::name_t*> filenames;
-		set<files::sims_t::contents_t*> filecontents;
-		vector<cluster_t> clusters_p;
 	protected:
-		//measurement_settings
-		crater_t crater_p;
-		sims_t(files::sims_t::name_t& filename_p, files::sims_t::contents_t& filecontents_p, list<sample_t>& samples_list_p);
+		void add_clusters(vector<cluster_t>& clusters_s);
 	public:
-		crater_t& crater();
+		string to_string(const string del = ", ") const;
+		sims_t(filenames::sims_t& filename, files::sims_t& file, list<sample_t>& samples_list);
+		vector<cluster_t> clusters;
 		///returns the cluster corresponding isotope
 		isotope_t* isotope(cluster_t& cluster);
 		///isotopes collected from clusters
-		vector<isotope_t*> isotopes();
-		///copies filecontents to cluster_p
-		vector<cluster_t*> clusters();
+		set<isotope_t*> isotopes();
 		///returns the isotope corresponding clusterS (there can be more than one)
 		///e.g. isotope(31P) --> cluster(74Ge 31P) & cluster(31P) & ...
-		vector<cluster_t*> clusters(isotope_t& isotope);
-		const bool operator==(sims_t& obj);
-		const bool operator!=(sims_t& obj);
+		set<cluster_t*> clusters_from_iso(isotope_t& isotope);
+// 		crater_t& crater;
 	};
-
-
-	class dsims_t : public sims_t 
-	{
-		dsims_t(files::dsims_dp_rpc_asc_t::name_t& filename_p, files::dsims_dp_rpc_asc_t::contents_t& filecontents_p, list<sample_t>& samples_list_p);
-		dsims_t(files::jpg_t::name_t& filename_p, list<sample_t>& samples_list_p);
-	};
-
 	
-	class tofsims_t : public sims_t 
+	class dsims_t : public sims_t
 	{
-	
+	public:
+		dsims_t(filenames::dsims_t& filename, files::dsims_t& file, list<sample_t>& samples_list);
 	};
-}
+};
 
 #endif // MEASUREMENT_T_HPP
 

@@ -209,6 +209,7 @@ bool pse_t::load_file()
 	if (contents.size()==0)
 	{
 		logger::fatal("PSE file could not be loaded", "dying...");
+		exit (EXIT_FAILURE);
 		return false;
 	}
 	string symbol, nuclide, mass, abundance, symbol_alternative, protons;

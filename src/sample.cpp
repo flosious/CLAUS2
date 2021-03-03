@@ -41,7 +41,7 @@ void sample_t::chip_t::to_screen(string prefix)
 
 
 bool sample_t::use_lot=true;
-bool sample_t::use_lot_split=true;
+bool sample_t::use_lot_split=true; // identification by wafer is normaly sufficient 
 bool sample_t::use_wafer=true;
 bool sample_t::use_monitor=true;
 bool sample_t::use_chip=true;
@@ -74,107 +74,36 @@ bool sample_t::use_simple_name=true;
 /***********************/
 
 
-sample_t::sample_t(files::file_t* file)
+sample_t::sample_t(filenames::filename_t& fn,files::file_t& f) : 
+																wafer(fn.wafer()), 
+																monitor(fn.monitor()),
+																lot(fn.lot()),
+																lot_split(fn.lot_split()),
+																chip(fn.chip_x(),fn.chip_y()),
+																simple_name(fn.simple_name()),
+																matrix_p(f.matrix())
 {
-	files.insert(file);
-// 	files.push_back(file);
-}
-
-
-std::__cxx11::string sample_t::simple_name()
-{
-	if (files.size()==0) return "";
-	for (files::file_t* f : files)
-	{
-		if (f->name.simple_name()!="")
-			return f->name.simple_name();
-	}
-	return "";
-}
-
-
-std::__cxx11::string sample_t::monitor()
-{
-	if ( files.size()==0) return "";
-	for (files::file_t* f : files)
-	{
-		if (f->name.monitor()!="")
-			return f->name.monitor();
-	}
-	return "";
-}
-
-std::__cxx11::string sample_t::lot_split()
-{
-	if (files.size()==0) return "";
-	for (files::file_t* f : files)
-	{
-		if (f->name.lot_split()!="")
-			return f->name.lot_split();
-	}
-	return "";
-}
-
-string sample_t::lot()
-{
-	if (files.size()==0) return "";
-	for (files::file_t* f : files)
-	{
-		if (f->name.lot()!="")
-			return f->name.lot();
-	}
-	return "";
-}
-
-sample_t::chip_t sample_t::chip()
-{
-	if (files.size()==0) return {-1,-1};
-	for (files::file_t* f : files)
-	{
-		if (f->name.chip_x()>=0 && f->name.chip_y()>=0)
-			return {f->name.chip_x(),f->name.chip_y()};
-	}
-	return {-1,-1};
-}
-
-int sample_t::wafer()
-{
-	if (files.size()==0) return -1;
-	for (files::file_t* f : files)
-	{
-		//can there be a wafer "0" ? - no
-		if (f->name.wafer()>0)
-			return f->name.wafer();
-	}
-	return -1;
 }
 
 matrix_t& sample_t::matrix()
 {
-	if (files.size()==0)
-		return matrix_p;
-	for (files::file_t* f : files)
-	{
-		if (f->matrix().is_set())
-		{
-			matrix_p = f->matrix();
-		}
-	}
+	if (matrix_p.is_set()) return matrix_p;
+	// do something to populate matrix_p --> look up Database
 	return matrix_p;
 }
 
-void sample_t::to_screen(std::__cxx11::string prefix)
-{
-	cout << prefix << "lot\t" << lot() << endl;
-	cout << prefix << "lot_split\t" << lot_split() << endl;
-	cout << prefix << "wafer\t" << wafer() << endl;
-	chip().to_screen(prefix);
-	cout << prefix << "monitor\t" << monitor() << endl;
-	cout << prefix << "simple_name\t" << simple_name() << endl;
-	cout << prefix << "matrix\t" << matrix().to_string() << endl;
-}
+// void sample_t::to_screen(std::__cxx11::string prefix)
+// {
+// 	cout << prefix << "lot\t" << lot() << endl;
+// 	cout << prefix << "lot_split\t" << lot_split() << endl;
+// 	cout << prefix << "wafer\t" << wafer() << endl;
+// 	chip().to_screen(prefix);
+// 	cout << prefix << "monitor\t" << monitor() << endl;
+// 	cout << prefix << "simple_name\t" << simple_name() << endl;
+// 	cout << prefix << "matrix\t" << matrix().to_string() << endl;
+// }
 
-
+/*
 bool sample_t::operator<(sample_t& obj)
 {	
 	if (use_lot)
@@ -216,7 +145,7 @@ bool sample_t::operator<(sample_t& obj)
 	}
 	
 	return false;
-}
+}*/
 
 bool sample_t::operator==(sample_t& obj)
 {
@@ -225,7 +154,7 @@ bool sample_t::operator==(sample_t& obj)
 	if (use_lot)
 	{
 // 		cout << "use_lot" << endl;
-		if (lot()!=obj.lot())
+		if (lot!=obj.lot)
 		{
 // 			cout << "sample lot different" << endl;
 			return false;
@@ -235,31 +164,31 @@ bool sample_t::operator==(sample_t& obj)
 	if (use_lot_split)
 	{
 // 		cout << "use_lot_split" << endl;
-		if (lot_split()!=obj.lot_split()) return false;
+		if (lot_split!=obj.lot_split) return false;
 	}
 	
 	if (use_wafer)
 	{
 // 		cout << "use_wafer" << endl;
-		if (wafer()!=obj.wafer()) return false;
+		if (wafer!=obj.wafer) return false;
 	}
 	
 	if (use_monitor)
 	{
 // 		cout << "use_monitor" << endl;
-		if (monitor()!=obj.monitor()) return false;
+		if (monitor!=obj.monitor) return false;
 	}
 	
 	if (use_chip)
 	{
 // 		cout << "use_chip" << endl;
-		if (chip()!=obj.chip()) return false;
+		if (chip!=obj.chip) return false;
 	}
 	
 	if (use_simple_name)
 	{
 // 		cout << "use_simple_name" << endl;
-		if (simple_name()!=obj.simple_name()) return false;
+		if (simple_name!=obj.simple_name) return false;
 	}
 	return true;
 }
@@ -269,16 +198,15 @@ bool sample_t::operator!=(sample_t& obj)
 	return !operator==(obj);
 }
 
-std::__cxx11::string sample_t::to_string()
+std::__cxx11::string sample_t::to_string(const string del)
 {
 	stringstream ss;
-	const string del = ",";
-	ss << "lot: " << lot() << ",";
-	ss << "lot_split: " << lot_split() << ",";
-	ss << "wafer: " << wafer() << ",";
-	ss << "chip: " << "x:" << chip().x << " y:" <<chip().y << ",";
-	ss << "monitor: " << monitor() << ",";
-	ss << "simple_name: " << simple_name() << ",";
+	ss << "lot: " << lot << ",";
+	ss << "lot_split: " << lot_split << ",";
+	ss << "wafer: " << wafer << ",";
+	ss << "chip: " << "x:" << chip.x << " y:" <<chip.y << ",";
+	ss << "monitor: " << monitor << ",";
+	ss << "simple_name: " << simple_name << ",";
 	ss << "matrix: ";
 	if (matrix().is_set())
 		ss << matrix().to_string();
@@ -286,7 +214,4 @@ std::__cxx11::string sample_t::to_string()
 		ss << "uknown";
 	return ss.str();
 }
-
-
-
 

@@ -24,27 +24,35 @@ processor::processor(vector<string> args_p)
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	cout << "processor start" << endl;
 	
+	populate_dsims_groups(args_p);
+	
+	cout << "samples_list.size()=" << samples_list.size() << endl;
+	cout << "dsims_groups.size()=" << dsims_groups.size() << endl;
+	cout << "dsims_groups[0].measurements.size()=" << dsims_groups[0].measurements.size() << endl;
+	
+	for (auto& MG : dsims_groups)
+		cout << MG.to_string() << endl;
 	/*get filename objects*/
-	lists::feed_filenames_list(args_p,lists::dsims_filenames);
+// 	lists::feed_filenames_list(args_p,lists::dsims_filenames);
 // 	lists::feed_filenames_list(args_p,lists::tofsims_filenames);
 // 	lists::feed_filenames_list(args_p,lists::filenames::tofsims);
 
 	/*get file objects*/
-	lists::feed_files_list(lists::dsims_filenames,lists::dsims_files);
+// 	lists::feed_files_list(lists::dsims_filenames,lists::dsims_files);
 // 	lists::feed_files_list(lists::tofsims_filenames,lists::tofsims_files);
 // 	lists::feed_files_list(lists::filenames::tofsims,lists::files::tofsims);
 	
 	/*get measurement objects*/
-	lists::feed_measurements_list(lists::dsims_files,lists::dsims_measurements);
+// 	lists::feed_measurements_list(lists::dsims_files,lists::dsims_measurements);
 // 	lists::feed_measurements_list(lists::tofsims_files,lists::tofsims_measurements);
 	
 	
 // 	lists::update_measurement_pointers_in_samples();
 	
-	lists::feed_mgroup_list(lists::dsims_measurements,lists::dsims_groups);
+// 	lists::feed_mgroup_list(lists::dsims_measurements,lists::dsims_groups);
 	
 
-
+/*
 	cout << "lists::samples.size()=" << lists::samples.size() << endl;
 	for (auto& S : lists::samples)
 	{
@@ -72,7 +80,7 @@ processor::processor(vector<string> args_p)
 		}
 		cout << "}" << endl;
 	}
-
+*/
 
 	logger::to_screen();
 	
@@ -80,5 +88,16 @@ processor::processor(vector<string> args_p)
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
 }
 
+void processor::populate_dsims_groups(vector<string>& filenames)
+{
+	for (auto& filename : filenames)
+	{
+		filenames::dsims_t fn(filename);
+		if (!fn.is_correct_type())	continue;
+		files::dsims_t f(fn);
+		if (!f.is_correct_type())	continue;
+		if (try_insert_groups(fn,f,dsims_groups))	filename = ""; // delete from list
+	}
+}
 
 

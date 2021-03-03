@@ -24,19 +24,20 @@
 #include <string>
 #include <regex>
 
-#include "../element.hpp"
-#include "../log.hpp"
+#include "element.hpp"
+#include "log.hpp"
 
 
 using namespace std;
 
-namespace filenames
+class filenames
 {
+public:
 	///standard IHP olc filename template: olcdb_lot#split_wafernumber_chip_monitor_settings_etc_group_craterdepth
 	class filename_t
 	{
 	private:
-		const string filename_with_path_p;
+		const string& filename_with_path_p;
 		vector<string> not_parseable_filename_parts_p;
 		string group_p="";
 		string lot_p="";
@@ -92,13 +93,13 @@ namespace filenames
 		vector<total_sputter_depth_t> total_sputter_depths_p;
 		bool parse_sputter_energy_element_polarity();
 		string secondary_polarity_p="";
-		secondary_voltage_t secondary_voltage_p;
+		energy_t sputter_energy_p;
 		string sputter_element_p;
 	protected:
 		sims_t(const string& filename_with_path_s,const string delimiter_s,const set<string> identifiers_s);
 	public:
 		string to_string();
-		const secondary_voltage_t secondary_voltage();
+		const energy_t sputter_energy();
 		element_t sputter_element();
 		const string secondary_polarity();
 		const total_sputter_depth_t total_sputter_depths();
@@ -147,6 +148,6 @@ namespace filenames
 	public:
 		profiler_t(const string& filename_with_path_s);
 	};
-}
+};
 
 #endif // FILENAME_T_HPP

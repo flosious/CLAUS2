@@ -84,7 +84,7 @@ void files::dsims_t::to_screen(string prefix)
 	else cout << prefix << "\t"<<"not_parseable_filename_parts:\t<" << name.not_parseable_filename_parts().size() << ">" << endl;
 	
 	cout << prefix << "\t"<<"sputter_element:\t" << name.sputter_element().to_string() << endl;
-	cout << prefix << "\t"<<"secondary_voltage:\t" << name.secondary_voltage().to_string() << endl;
+	cout << prefix << "\t"<<"sputter_energy:\t" << name.sputter_energy().to_string() << endl;
 	cout << prefix << "\t"<<"secondary_polarity:\t" << name.secondary_polarity() << endl;
 	
 	cout << prefix << "\t"<<"total_sputter_depths:\t" << name.total_sputter_depths().to_string() << endl;
@@ -126,8 +126,7 @@ void files::dsims_t::to_screen(string prefix)
 
 
 
-
-const vector<cluster_t> files::dsims_t::clusters()
+vector<cluster_t> files::dsims_t::clusters()
 {
 	vector<cluster_t> collected_clusters;
 	for (auto& clustername : cluster_names())
@@ -477,7 +476,7 @@ const energy_t files::dsims_t::sputter_energy()
 	return energy_t({data},{"eV"});
 }
 
-element_t files::dsims_t::sputter_element()
+const element_t files::dsims_t::sputter_element()
 {
 	string ele = infos_and_settings().at("Primary ions");
 	ele.erase(remove(ele.begin(), ele.end(), '+'), ele.end());

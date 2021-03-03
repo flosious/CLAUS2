@@ -20,12 +20,13 @@
 #define MATRIX_T_HPP
 
 #include <algorithm>
-#include "definitions.hpp"
 #include <sstream>
 #include <set>
 #include <string>
 #include <list>
+
 #include "element.hpp"
+#include "definitions.hpp"
 
 using namespace std;
 
@@ -43,14 +44,11 @@ public:
 	matrix_t(const string matrix_elements_s);
 	const bool is_set() const;
 	const string to_string();
-	///isotope mapping to their relative concentration within the matrix
-// 	const map<isotope_t,concentration_t>& isotopes_concentration();
 	///RELATIVE! in at%
 	const concentration_t concentration(isotope_t& iso) const;
-// 	const concentration_t concentration(element_t& ele) const;
-	bool operator==(matrix_t obj) ;
-	bool operator!=(matrix_t obj) ;
-	bool operator<(matrix_t obj) ;
+	bool operator==(matrix_t& obj) ;
+	bool operator!=(matrix_t& obj) ;
+	bool operator<(matrix_t& obj) ;
 };
 	
 

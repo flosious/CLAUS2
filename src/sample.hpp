@@ -29,20 +29,14 @@
 #include "element.hpp"
 #include "matrix.hpp"
 #include "definitions.hpp"
-#include "measurements/measurement.hpp"
-#include "files/file.hpp"
+// #include "measurement.hpp"
+#include "file.hpp"
 
 using namespace std;
 
 
 /*FORWARD DECLARE*/
-namespace measurements
-{
-	class dsims_t;
-	class tofsims_t;
-	class profiler_t;
-}
-class sample_t;
+
 /*****************/
 
 
@@ -59,49 +53,48 @@ private:
 	static bool use_chip;
 	static bool use_simple_name;
 	
+	matrix_t matrix_p;
 	///all samples from all loaded files
 // 	static vector<sample_t> samples_list_p;
 protected:
 	///local matrix its necessary, because we have to work in it (concentrations)
-	matrix_t matrix_p;
 public:
 	class chip_t
 	{
 	public:
 		chip_t(int x=-1, int y=-1);
-		int x;
-		int y;
+		int x=-1;
+		int y=-1;
 		bool operator==(const chip_t& obj) const;
 		bool operator!=(const chip_t& obj) const;
 		bool is_set();
 		void to_screen(string prefix="");
+		const string to_string(const string del=", ") const;
 	};
-	set<measurements::dsims_t*> dsims;
-	set<measurements::tofsims_t*> tofsims;
-	set<measurements::profiler_t*> profiler;
+	
+// 	set<measurements::dsims_t*> dsims;
+// 	set<measurements::tofsims_t*> tofsims;
+// 	set<measurements::profiler_t*> profiler;
 	
 	
-	///files corresponding to this sample
-	set<files::file_t*> files;
+	sample_t(filenames::filename_t& fn,files::file_t& f);
+// 	sample_t(set<filenames::filename_t*> filenames,set<files::file_t*> files);
+	string to_string(const string del=", ");
+	const chip_t chip;
+	const int wafer;
+	const string lot;
+	const string lot_split;
+	const string monitor;
+	const string simple_name;
 	
-	sample_t(files::file_t* file);
-// 	sample_t(string lot, string lot_split, int wafer,chip_t chip, string monitor,string simple_name);
-	string to_string();
-	chip_t chip();
-	int wafer();
-	string lot();
-	string lot_split();
-	string monitor();
-	string simple_name();
-	
-	// reads from database or file
+	// reads from database
 	matrix_t& matrix();
 	
-	void to_screen(string prefix="");
+// 	void to_screen(string prefix="");
 	/*operators*/
 	bool operator==(sample_t& obj) ;
 	bool operator!=(sample_t& obj) ;
-	bool operator<(sample_t& obj) ;
+// 	bool operator<(sample_t& obj) ;
 	
 	///all samples from all loaded files
 // 	list<sample_t> samples_list();

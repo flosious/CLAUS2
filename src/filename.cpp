@@ -1,3 +1,22 @@
+/*
+	Copyright (C) 2021 Florian Bärwolf
+	floribaer@gmx.de
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
 #include "filename.hpp"
 
 filenames::filename_t::filename_t(const string& filename_with_path_s, 
@@ -20,11 +39,12 @@ const string filenames::filename_t::simple_name()
 
 const bool filenames::filename_t::is_correct_type()
 {
-	if (filename_type_ending()=="") return false;
+	if (filename()=="") return false;
 	for (auto& fti : identifiers)
 	{
 // 		cout << "name_t fti=" << fti << endl;
-		if (fti==filename_type_ending()) 
+// 		if (fti==filename_type_ending()) 
+		if ((filename()+filename_type_ending()).find(fti)!=string::npos)
 		{
 // 			logger::info("filenames::filename_t::is_correct_file_type()","TRUE");
 			return true;
