@@ -20,84 +20,221 @@
 
 processor::processor(vector<string> args_p)
 {	
-	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	cout << "processor start" << endl;
+	filenames=args_p;
 	
-	populate_dsims_groups(args_p);
-	
+// 	for (auto& DM : dsims_measurements())
+// 		cout << "DM.crater.linescans.size()=" << DM.crater.linescans.size() << endl;
+
+	cout << "filenames.size()=" << filenames.size() << endl;
+	cout << "dsims_files().size()=" << dsims_files().size() << endl;
+	cout << "dsims_measurements.size()=" << dsims_measurements().size() << endl;
+	cout << "dsims_mgroups.size()=" << dsims_mgroups().size() << endl;
 	cout << "samples_list.size()=" << samples_list.size() << endl;
-	cout << "dsims_groups.size()=" << dsims_groups.size() << endl;
-	cout << "dsims_groups[0].measurements.size()=" << dsims_groups[0].measurements.size() << endl;
 	
-	for (auto& MG : dsims_groups)
+	
+	
+	
+	
+	
+// 	cout << "samples_list.size()=" << samples_list.size() << endl;
+// 	cout << "profiler_measurements.size()=" << profiler_measurements.size() << endl;
+	
+// 	
+	for (auto& MG : dsims_mgroups())
 		cout << MG.to_string() << endl;
-	/*get filename objects*/
-// 	lists::feed_filenames_list(args_p,lists::dsims_filenames);
-// 	lists::feed_filenames_list(args_p,lists::tofsims_filenames);
-// 	lists::feed_filenames_list(args_p,lists::filenames::tofsims);
-
-	/*get file objects*/
-// 	lists::feed_files_list(lists::dsims_filenames,lists::dsims_files);
-// 	lists::feed_files_list(lists::tofsims_filenames,lists::tofsims_files);
-// 	lists::feed_files_list(lists::filenames::tofsims,lists::files::tofsims);
 	
-	/*get measurement objects*/
-// 	lists::feed_measurements_list(lists::dsims_files,lists::dsims_measurements);
-// 	lists::feed_measurements_list(lists::tofsims_files,lists::tofsims_measurements);
-	
-	
-// 	lists::update_measurement_pointers_in_samples();
-	
-// 	lists::feed_mgroup_list(lists::dsims_measurements,lists::dsims_groups);
-	
-
-/*
-	cout << "lists::samples.size()=" << lists::samples.size() << endl;
-	for (auto& S : lists::samples)
-	{
-		cout << "\t" << S.to_string() << endl;
-	}
-	cout << "lists::dsims_groups.size()=" << lists::dsims_groups.size() << endl;
-	for (auto& MG : lists::dsims_groups)
-	{
-		cout  << MG.to_string() << endl;
-		cout << "{" << endl;
-		for (auto& M:MG.measurements)
-		{
-			cout << "\t"<< M->to_string() << endl;
-// 			cout << "\t" << M->settings().to_string() << endl;
-			cout << "\t{" << endl;
-			if (M->Ipr()==nullptr)
-				cout << "Ipr is null" << endl;
-			else
-				cout << "\t" << M->Ipr()->to_string() << endl;
-			for (auto* cluster : M->clusters())
-				cout << "\t\t" << cluster->to_string() << endl;
-// 			for (files::file_t* F:M->files)
-// 				cout << "\t\t" << F->name.to_string() << endl;
-			cout << "\t}" << endl;
-		}
-		cout << "}" << endl;
-	}
-*/
-
-	logger::to_screen();
-	
+// 	logger::to_screen();
+// 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
 }
 
-void processor::populate_dsims_groups(vector<string>& filenames)
+
+vector<mgroups::dsims_t>& processor::dsims_mgroups()
 {
-	for (auto& filename : filenames)
+	if (dsims_mgroups_p.size()>0)
+		return dsims_mgroups_p;
+	int old_size = 0;
+	dsims_measurements();
+	while (old_size!=dsims_measurements_p.size() && dsims_measurements_p.size() > 0)
 	{
-		filenames::dsims_t fn(filename);
-		if (!fn.is_correct_type())	continue;
-		files::dsims_t f(fn);
-		if (!f.is_correct_type())	continue;
-		if (try_insert_groups(fn,f,dsims_groups))	filename = ""; // delete from list
+		dsims_mgroups_p.push_back(mgroups::dsims_t(dsims_measurements_p));
+	}
+	return dsims_mgroups_p;
+}
+
+void processor::populate_profiler_files()
+{
+// 	vector<files::profiler_t> dsims_profiler_files;
+// 	vector<files::profiler_t> tofsims_profiler_files;
+	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+	{
+		/*dsims_profiler_t*/
+		files::profiler_t::name_t dpFN(*f);
+		if (dpFN.is_correct_type())
+		{
+			files::profiler_t::contents_t F(*f);
+			if (F.is_correct_type())
+			{
+				if (dpFN.method()=="dsims")
+					dsims_profiler_files_p.push_back({dpFN,F});
+				else if (dpFN.method()=="tofsims")
+					tofsims_profiler_files_p.push_back({dpFN,F});
+				else if (dpFN.method()=="")
+				{
+					tofsims_profiler_files_p.push_back({dpFN,F});
+					dsims_profiler_files_p.push_back({dpFN,F});
+				}
+				else 
+					logger::error("can not distinguish dsims / tofsims profiler measurements","expect wrong results");
+				filenames.erase(f);
+				f--;
+			}
+		}
+	}
+		
+}
+
+vector<files::profiler_t>& processor::dsims_profiler_files()
+{
+	if (dsims_profiler_files_p.size()==0) populate_profiler_files();
+	return dsims_profiler_files_p;
+}
+
+vector<files::profiler_t>& processor::tofsims_profiler_files()
+{
+	if (tofsims_profiler_files_p.size()==0) populate_profiler_files();
+	return tofsims_profiler_files_p;
+}
+
+vector<measurements_::dsims_t>& processor::dsims_measurements()
+{
+	if (dsims_measurements_p.size()>0)
+		return dsims_measurements_p;
+	
+	dsims_files();
+// 	int last_size = dsims_files().size();
+// 	while (last_size!=dsims_measurements_p.size() && dsims_files().size()>0)
+	for (vector<files::dsims_t>::iterator DF=dsims_files_p.begin();DF!=dsims_files_p.end();DF++)
+	{
+// 		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+// 		last_size=dsims_measurements_p.size();
+		dsims_measurements_p.push_back({*DF,samples_list,&dsims_jpg_files(),&dsims_profiler_files()});
+		dsims_files_p.erase(DF);
+		DF--;
+// 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+// 		std::cout << "\tM-S deltaT\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+	}
+	return dsims_measurements_p;
+}
+
+vector<files::dsims_t> & processor::dsims_files()
+{
+	if (dsims_files_p.size()>0)
+		return dsims_files_p;
+	
+	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+	{
+		files::dsims_t::name_t dFN(*f);
+		if (dFN.is_correct_type())
+		{
+			files::dsims_t::contents_t F(*f);
+			if (F.is_correct_type())
+			{
+				dsims_files_p.push_back({dFN,F});
+// 				filenames.erase(f); // dont allow doubles
+// 				f--;
+			}
+		}
+	}
+	return dsims_files_p;
+}
+
+
+void processor::populate_jpg_files()
+{
+	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+	{
+		files::jpg_t::name_t djFN(*f);
+		if (djFN.is_correct_type())
+		{
+			if (djFN.method()=="dsims") dsims_jpg_files_p.push_back(*f);
+			else if (djFN.method()=="tofsims") tofsims_jpg_files_p.push_back(*f);
+			else
+			{
+				dsims_jpg_files_p.push_back(*f);
+				tofsims_jpg_files_p.push_back(*f);
+			}
+// 			filenames.erase(f);
+// 			f--;
+		}
 	}
 }
+
+vector<files::jpg_t>& processor::dsims_jpg_files()
+{
+	if (dsims_jpg_files_p.size()==0) populate_jpg_files();
+	return dsims_jpg_files_p;
+}
+
+vector<files::jpg_t>& processor::tofsims_jpg_files()
+{
+	if (tofsims_jpg_files_p.size()==0) populate_jpg_files();
+	return tofsims_jpg_files_p;
+}
+
+// vector<measurements_::profiler_t> & processor::dsims_profiler_measurements()
+// {
+// 	if (dsims_profiler_measurements_p.size()>0)
+// 		return dsims_profiler_measurements_p;
+// 	populate_profiler_measurements();
+// 	
+// 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+// 	{
+// 		/*profiler_t*/
+// 		filenames::profiler_t pFN(*f);
+// 		if (pFN.is_correct_type())
+// 		{
+// 			filecontents::profiler_t F(pFN);
+// 			if (F.is_correct_type())
+// 			{
+// 				if (tofsims_profiler_measurements_p.size()>0)
+// 					logger::error("tofsims_profiler_measurements_p.size()>0: can not distinguish between dsims and tofsims profiler measurements","expect wrong results");
+// 				dsims_profiler_measurements_p.push_back({pFN,F,samples_list});
+// 				filenames.erase(f);
+// 				f--;
+// 			}
+// 		}
+// 	}
+// 	return dsims_profiler_measurements_p;
+// }
+// 
+// vector<measurements_::profiler_t> & processor::tofsims_profiler_measurements()
+// {
+// 	if (tofsims_profiler_measurements_p.size()>0)
+// 		return tofsims_profiler_measurements_p;
+// 	populate_profiler_measurements();
+// 	
+// 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+// 	{
+// 		/*profiler_t*/
+// 		filenames::profiler_t pFN(*f);
+// 		if (pFN.is_correct_type())
+// 		{
+// 			filecontents::profiler_t F(pFN);
+// 			if (F.is_correct_type())
+// 			{
+// 				if (dsims_profiler_measurements_p.size()>0)
+// 					logger::error("tofsims_profiler_measurements_p.size()>0: can not distinguish between dsims and tofsims profiler measurements","expect wrong results");
+// 				tofsims_profiler_measurements_p.push_back({pFN,F,samples_list});
+// 				filenames.erase(f);
+// 				f--;
+// 			}
+// 		}
+// 	}
+// 	return tofsims_profiler_measurements_p;
+// }
 
 

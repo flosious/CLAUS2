@@ -23,30 +23,32 @@
 /****  Dsims_t  *****/
 /********************/
 
-
-msettings::dsims_t::dsims_t(filenames::dsims_t& filename, files::dsims_t& file) : sims_t(filename)
+msettings::dsims_t::dsims_t(files::dsims_t& file) : dsims_t(file.name,file.contents)
 {
-	ion_t sputter_ion_from_file = ion_t(file.sputter_element(),{{1}}); // Cs + or O2 +
+}
+
+msettings::dsims_t::dsims_t(files::dsims_t::name_t& filename, files::dsims_t::contents_t& filecontents) : sims_t(filename)
+{
+	ion_t sputter_ion_from_file = ion_t(filecontents.sputter_element(),{{1}}); // Cs + or O2 +
 	/*overwrite values from filename with contents*/
-	if (sims_t::secondary_polarity != file.secondary_polarity()) logger::warning("secondary_polarity in filename differs from file contents, taking contents",filename.filename_with_path());
-	if (sims_t::sputter_energy != file.sputter_energy()) logger::warning("secondary_voltage in filename differs from file contents, taking contents",filename.filename_with_path());
-	if (sims_t::sputter_ion != sputter_ion_from_file ) logger::warning("sputter_ion in filename differs from file contents, taking contents",filename.filename_with_path());
-	secondary_polarity = file.secondary_polarity();
-	sputter_energy = file.sputter_energy();
+	if (sims_t::secondary_polarity != filecontents.secondary_polarity()) logger::warning("secondary_polarity in filename differs from file contents, taking contents",filename.filename_with_path);
+	if (sims_t::sputter_energy != filecontents.sputter_energy()) logger::warning("secondary_voltage in filename differs from file contents, taking contents",filename.filename_with_path);
+	if (sims_t::sputter_ion != sputter_ion_from_file ) logger::warning("sputter_ion in filename differs from file contents, taking contents",filename.filename_with_path);
+	secondary_polarity = filecontents.secondary_polarity();
+	sputter_energy = filecontents.sputter_energy();
 	sputter_ion = sputter_ion_from_file;
-	
-	sputter_rastersize = file.sputter_rastersize();
-	analyzed_area = file.analyzed_area();
-	chamber_pressure = file.chamber_pressure();
-	egate = file.egate();
-	mass_resolution = file.mass_resolution();
-	field_aperture = file.field_aperture();
-	contrast_aperture = file.contrast_aperture();
-	entrance_slit = file.entrance_slit();
-	exit_slit = file.exit_slit();
-	energy_window = file.energy_window();
-	em_yield = file.em_yield();
-	em_voltage = file.em_voltage();
+	sputter_rastersize = filecontents.sputter_rastersize();
+	analyzed_area = filecontents.analyzed_area();
+	chamber_pressure = filecontents.chamber_pressure();
+	egate = filecontents.egate();
+	mass_resolution = filecontents.mass_resolution();
+	field_aperture = filecontents.field_aperture();
+	contrast_aperture = filecontents.contrast_aperture();
+	entrance_slit = filecontents.entrance_slit();
+	exit_slit = filecontents.exit_slit();
+	energy_window = filecontents.energy_window();
+	em_yield = filecontents.em_yield();
+	em_voltage = filecontents.em_voltage();
 }
 
 const std::__cxx11::string msettings::dsims_t::to_string(const string del) const

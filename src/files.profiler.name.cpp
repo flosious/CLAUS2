@@ -17,13 +17,20 @@
 */
 
 
-#include "mgroup.hpp"
+#include "files.hpp"
 
-// mgroups::sims_t::sims_t(filenames::sims_t& fn, files::sims_t& f, list<sample_t>& samples_list,vector<filenames::sims_jpg_t>* jpegs) : mgroup_t(fn, f, samples_list)
+/*********************************/
+/****       profiler_t       *****/
+/*********************************/
+files::profiler_t::name_t::name_t(string& filename_with_path_s) :
+										files::sims_t::name_t(filename_with_path_s,"_",{".txt"},{})
+{
+}
+// filenames::dsims_profiler_t::dsims_profiler_t(std::__cxx11::string& filename_with_path_s) :
+// 										sims_t(filename_with_path_s,"_",{".txt"},{"dsims"})
 // {
 // }
-// 
-
-mgroups::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement)
-{	
-}
+// filenames::tofsims_profiler_t::tofsims_profiler_t(std::__cxx11::string& filename_with_path_s) : 
+// 										sims_t(filename_with_path_s,"_",{".txt"},{"tofsims"})
+// {
+// }

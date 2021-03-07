@@ -88,6 +88,13 @@ const std::__cxx11::string unit_t::name() const
 	return name_p;
 }
 
+bool unit_t::is_set()
+{
+	if (name()=="") return false;
+	return true;
+}
+
+
 bool unit_t::operator==(const unit_t& obj) const
 {
 	if (name()!=obj.name()) return false;

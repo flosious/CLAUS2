@@ -16,14 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "measurement.hpp"
 
-#include "mgroup.hpp"
 
-// mgroups::sims_t::sims_t(filenames::sims_t& fn, files::sims_t& f, list<sample_t>& samples_list,vector<filenames::sims_jpg_t>* jpegs) : mgroup_t(fn, f, samples_list)
-// {
-// }
-// 
-
-mgroups::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement)
-{	
+measurements_::profiler_t::profiler_t(files::profiler_t&  file, std::__cxx11::list< sample_t >& samples_list) : measurement_t(file.name,file.contents,samples_list)
+{
+	linescan = file.contents.linescan();
+// 	cout << ">>>inserting profiler_t: " << filename.filename_with_path << endl;
 }

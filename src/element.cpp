@@ -26,6 +26,10 @@ pse_t PSE;
 /*********     element_t       ******/
 /************************************/
 
+element_t::element_t()
+{
+}
+
 element_t::element_t(std::__cxx11::string symbol_s, double abs_amount, bool use_natural_abundance) :symbol(symbol_s),substance_amount({abs_amount})
 {
 	if (PSE.element(symbol_s)==nullptr)

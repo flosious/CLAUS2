@@ -16,14 +16,12 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "files.hpp"
 
-#include "mgroup.hpp"
+files::dsims_t::dsims_t(string& filename) : name(filename),contents(filename)
+{
+}
 
-// mgroups::sims_t::sims_t(filenames::sims_t& fn, files::sims_t& f, list<sample_t>& samples_list,vector<filenames::sims_jpg_t>* jpegs) : mgroup_t(fn, f, samples_list)
-// {
-// }
-// 
-
-mgroups::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement)
-{	
+files::dsims_t::dsims_t(files::dsims_t::name_t& name_s, files::dsims_t::contents_t& contents_s) : name(name_s), contents(contents_s)
+{
 }

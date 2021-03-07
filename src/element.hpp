@@ -41,7 +41,7 @@ private:
 // 	vector<isotope_t> isotopes_p;
 // 	substance_amount_t substance_amount_p;
 public:
-// 	element_t();
+	element_t();
 	element_t(string symbol_s, double abs_amount=1, bool use_naturale_abundance=true);
 	element_t(vector<isotope_t> isotopes_s, double abs_amount=1);
 // 	element_t(const isotope_t& isotope_s, double amount=1);

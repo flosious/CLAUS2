@@ -49,9 +49,9 @@ const std::__cxx11::string isotope_t::to_string() const
 	stringstream out;
 	out << nucleons << symbol;
 	if (abundance.is_set())
-		out << ":" << abundance.data().at(0) << abundance.unit().to_string();
+		out << ":" << abundance.data.at(0) << abundance.unit().to_string();
 	if (substance_amount.is_set())
-		out << ":" << substance_amount.data().at(0) << substance_amount.unit().to_string();
+		out << ":" << substance_amount.data.at(0) << substance_amount.unit().to_string();
 	return out.str();
 }
 

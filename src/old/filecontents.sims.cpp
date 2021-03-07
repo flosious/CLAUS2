@@ -16,14 +16,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "filecontents.hpp"
 
-#include "mgroup.hpp"
+/**************/
+/*** sims_t ***/
+/**************/
+filecontents::sims_t::sims_t(filenames::sims_t& name,const string& delimiter,const set<string>& identifiers) : file_t(name,delimiter,identifiers), name(name)
+{
+}
 
-// mgroups::sims_t::sims_t(filenames::sims_t& fn, files::sims_t& f, list<sample_t>& samples_list,vector<filenames::sims_jpg_t>* jpegs) : mgroup_t(fn, f, samples_list)
-// {
-// }
-// 
 
-mgroups::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement)
-{	
+vector<cluster_t> filecontents::sims_t::clusters()
+{
+	logger::fatal("you should never be able to read this","virtual const vector<cluster_t> filecontents::sims_t::clusters()");
+	return {};
 }

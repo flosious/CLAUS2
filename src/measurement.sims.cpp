@@ -29,15 +29,61 @@ void measurements_::sims_t::add_clusters(vector<cluster_t>& clusters_s)
 	}
 }
 
-measurements_::sims_t::sims_t(filenames::sims_t& filename, files::sims_t& file, list<sample_t>& samples_list) : measurement_t(filename,file,samples_list)
+
+measurements_::sims_t::sims_t(files::sims_t::name_t& filename, 
+							  files::sims_t::contents_t& filecontents, 
+							  list<sample_t>& samples_list, 
+							  vector<files::jpg_t>* jpg_files,
+							  vector<files::profiler_t>* profiler_files) : 
+									measurement_t(filename,filecontents,samples_list)
 {
-	clusters = file.clusters();
+	clusters = filecontents.clusters();
+	
+	/*JPEG files*/
+	if (jpg_files!=nullptr)
+	{
+// 		for (vector<files::jpg_t>::reverse_iterator it=jpg_files->rbegin();it!=jpg_files->rend();it++)
+		for (vector<files::jpg_t>::iterator it=jpg_files->begin();it!=jpg_files->end();it++)
+		{
+			measurement_t JM(it->name,samples_list);
+			if (*this != JM) continue;
+			crater.total_sputter_depths << it->name.total_sputter_depths();
+// 			jpg_files->erase(next(it).base());
+			jpg_files->erase(it);
+			it--;
+		}
+	}
+	
+	/*PROFILER files*/
+	if (profiler_files!=nullptr)
+	{
+// 		for (vector<files::profiler_t>::reverse_iterator it=profiler_files->rbegin();it!=profiler_files->rend();it++)
+		for (vector<files::profiler_t>::iterator it=profiler_files->begin();it!=profiler_files->end();it++)
+		{
+			measurement_t PM(it->name,samples_list);
+			if (*this != PM) continue;
+			crater.linescans.push_back(it->contents.linescan());
+			crater.total_sputter_depths << it->name.total_sputter_depths();
+// 			profiler_files->erase(next(it).base());
+			profiler_files->erase(it);
+			it--;
+		}
+	}
+
 }
+
+measurements_::sims_t::sims_t(files::sims_t::name_t& filename, list<sample_t>& samples_list) : measurement_t(filename,samples_list)
+{
+	crater.total_sputter_depths = filename.total_sputter_depths();
+}
+
+
 
 std::__cxx11::string measurements_::sims_t::to_string(const std::__cxx11::string del) const
 {
 	stringstream ss;
 	ss << measurement_t::to_string() << del;
+	ss << "crater: " << crater.total_sputter_depths.to_string() << del;
 	ss << "clusters: <" << clusters.size() << ">" ;
 	return ss.str();
 }

@@ -19,17 +19,29 @@
 
 #include "mgroup.hpp"
 
-mgroups::dsims_t::dsims_t(filenames::dsims_t& fn, files::dsims_t& f, list<sample_t>& samples_list) : sims_t(fn, f, samples_list), settings(msettings::dsims_t(fn,f))
+mgroups::dsims_t::dsims_t(measurements_::dsims_t& dsims_measurements) : 
+				sims_t(dsims_measurements), settings(dsims_measurements.settings)
 {
-	measurements.push_back({fn,f,samples_list});
+	measurements.push_back(dsims_measurements);
 }
 
-// bool mgroups::mgroup_t::is_set() const
-// {
-// 	if (use_olcdb && olcdb==-1) return false;
-// 	if (use_group && group=="") return false;
-// 	return true;
-// }
+mgroups::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurements) : 
+									dsims_t(dsims_measurements.back())
+{
+	dsims_measurements.pop_back();
+	for (vector<measurements_::dsims_t>::iterator DM=dsims_measurements.begin();DM!=dsims_measurements.end();DM++)
+	{
+		dsims_t MG(*DM);
+		if (*this != MG) continue;
+		measurements.push_back(*DM);
+		dsims_measurements.erase(DM);
+		DM--;
+	}
+}
+
+
+
+
 
 bool mgroups::dsims_t::operator==(const mgroups::dsims_t& obj) const
 {
@@ -50,40 +62,14 @@ std::__cxx11::string mgroups::dsims_t::to_string(const string del)
 	if (use_settings) ss << settings.to_string(del) << del;
 	ss << "measurements: <" << measurements.size() << ">" << endl;
 	ss << "{" << endl;
+	int counter = 0;
 	for (auto& M : measurements)
-		ss << "\t" << M.to_string(del) << endl;
+	{
+		ss << "\t" << "[" << counter << "] " << M.to_string(del) << endl;
+		counter++;
+	}
 	ss << "}" << endl;
 	string out = ss.str();
 // 	out.erase(out.end()-del.length(),out.end()); // remove the las del
 	return out;
 }
-
-
-
-// void mgroups::dsims_t::update(mgroups::dsims_t& MG)
-// {
-// 	if (*this == MG)
-// 	{
-// 		for (auto& M:MG.measurements)
-// 		{
-// 			measurements::dsims_t* M_p = tools::vec::find_in_vec(M,measurements);
-// 			if (M_p == nullptr) // M  not  found in measurements
-// 			{
-// 				measurements.push_back(M);
-// 			}
-// 			else
-// 			{
-// 				M_p->update(M);
-// 			}
-// 		}
-// 	}
-// }
-
-// void mgroups::dsims_t::try_insert_measurement(measurements::dsims_t& M)
-// {
-// 	measurements::dsims_t* M_p = tools::vec::find_in_vec(M,measurements);
-// 	if (M_p == nullptr) // M  not  found in measurements
-// 	{
-// 		measurements.push_back(M);
-// 	}
-// }

@@ -24,7 +24,7 @@
 #include <string>
 #include "quantity.hpp"
 #include "element.hpp"
-#include "file.hpp"
+#include "files.hpp"
 #include "log.hpp"
 #include "ion.hpp"
 
@@ -36,7 +36,7 @@ public:
 	class sims_t
 	{
 	public:
-		sims_t(filenames::dsims_t& filename);
+		sims_t(files::sims_t::name_t& filename);
 		const std::__cxx11::string to_string(const std::__cxx11::string del = ", ") const;
 		string secondary_polarity;
 		energy_t sputter_energy;
@@ -49,7 +49,8 @@ public:
 	class dsims_t : public sims_t
 	{
 	public:
-		dsims_t(filenames::dsims_t& filename, files::dsims_t& file);
+		dsims_t(files::dsims_t::name_t& filename, files::dsims_t::contents_t& filecontents);
+		dsims_t(files::dsims_t& file);
 		const string to_string(const string del=", ") const;
 		
 		rastersize_t sputter_rastersize;

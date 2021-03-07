@@ -23,7 +23,11 @@ bool mgroups::mgroup_t::use_olcdb=true;
 bool mgroups::mgroup_t::use_group=true;
 bool mgroups::mgroup_t::use_settings=true;
 
-mgroups::mgroup_t::mgroup_t(filenames::filename_t& fn, files::file_t& f, list<sample_t>& samples_list) : olcdb(fn.olcdb()), group(fn.group())
+// mgroups::mgroup_t::mgroup_t(filenames::filename_t& fn, files::file_t& f, list<sample_t>& samples_list) : olcdb(fn.olcdb()), group(fn.group())
+// {
+// }
+
+mgroups::mgroup_t::mgroup_t(measurements_::measurement_t& measurement) : olcdb(measurement.olcdb), group(measurement.group)
 {
 }
 

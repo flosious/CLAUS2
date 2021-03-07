@@ -119,7 +119,7 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 					logger::error("matrix_t::matrix_t(): indistinguishable isotopes, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
 					return;
 				}
-				if (new_iso.substance_amount.is_set() && new_iso.substance_amount.data().at(0)>0) total_amount+=new_iso.substance_amount.data().at(0);
+				if (new_iso.substance_amount.is_set() && new_iso.substance_amount.data.at(0)>0) total_amount+=new_iso.substance_amount.data.at(0);
 				/*add to matrix isotopes*/
 				isotopes.push_back(new_iso);
 			}
@@ -144,7 +144,7 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 	/*calculate not given substance_amount*/
 	for (auto& iso : isotopes)
 	{
-		if (iso.substance_amount.is_set() && iso.substance_amount.data().at(0)<0) 
+		if (iso.substance_amount.is_set() && iso.substance_amount.data.at(0)<0) 
 			iso.substance_amount =  iso.substance_amount * (total_amount - max_ ) ;
 	}
 	
@@ -152,7 +152,7 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 	map<string,double> symbol_to_total_amount;
 	for (auto& iso : isotopes)
 	{
-		if (iso.abundance.data().at(0)<0)
+		if (iso.abundance.data.at(0)<0)
 		{
 			if (!iso.substance_amount.is_set())
 			{
@@ -161,18 +161,18 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 				return;
 			}
 			if (symbol_to_total_amount.find(iso.symbol)==symbol_to_total_amount.end())
-				symbol_to_total_amount.insert(pair<string,double> (iso.symbol,iso.substance_amount.data().at(0)));
+				symbol_to_total_amount.insert(pair<string,double> (iso.symbol,iso.substance_amount.data.at(0)));
 			else
-				symbol_to_total_amount.find(iso.symbol)->second+=iso.substance_amount.data().at(0);
+				symbol_to_total_amount.find(iso.symbol)->second+=iso.substance_amount.data.at(0);
 		}
 	}
 	
 	/*calculate unset(-1) abundance*/
 	for (auto& iso:isotopes)
 	{
-		if (iso.abundance.data().at(0)<0)
+		if (iso.abundance.data.at(0)<0)
 		{
-			iso.abundance = abundance_t({iso.substance_amount.data().at(0)/symbol_to_total_amount.find(iso.symbol)->second});
+			iso.abundance = abundance_t({iso.substance_amount.data.at(0)/symbol_to_total_amount.find(iso.symbol)->second});
 		}
 	}
 }
@@ -230,8 +230,11 @@ const std::__cxx11::string matrix_t::to_string()
 	if (!is_set()) return "";
 	for (int i=0;i<isotopes.size();i++)
 	{
-		out << isotopes.at(i).to_string();
-		if (i<isotopes.size()-1) out << ",";
+		out << isotopes.at(i).nucleons << isotopes.at(i).symbol;
+		if (isotopes.at(i).substance_amount.is_set()) 
+			out << isotopes.at(i).substance_amount.data.at(0);
+// 		out << isotopes.at(i).to_string();
+		if (i<isotopes.size()-1) out << " ";
 	}
 	return out.str();
 }

@@ -35,6 +35,7 @@ private:
 	static const map<string,map<string,double>> current_unit_to_new_unit;
 public:
 	unit_t(string name_s="");
+	bool is_set();
 	const string name() const;
 	const string to_string() const;
 	double change_unit(unit_t new_unit);

@@ -86,8 +86,8 @@ std::__cxx11::string ion_t::to_string(const std::__cxx11::string del) const
 		if (i<size-1)
 			out << del;
 	}
-	out << ")"<< static_cast<int>(electric_charge.data().at(0));
-	if (electric_charge.data().at(0)<0) out << "-";
+	out << ")"<< static_cast<int>(electric_charge.data.at(0));
+	if (electric_charge.data.at(0)<0) out << "-";
 	else out << "+";
 	return out.str();
 }

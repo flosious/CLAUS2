@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2020 Florian Bärwolf
+	Copyright (C) 2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -16,34 +16,47 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef CRATER_HPP
-#define CRATER_HPP
+#ifndef CRATER_T_HPP
+#define CRATER_T_HPP
 
-#include <vector>
-#include <string>
 #include "quantity.hpp"
+#include "fit_functions.hpp"
+// #include "filename.hpp"
+// #include "filecontents.hpp"
 
-using namespace std;
 
-class lineprofile_t
+class linescan_t
 {
-	
+private:
+	vector <double> fit_parameters;
+	fit_functions::asym2sig_t asym2sig;
+	bool fitted=false;
+public:
+	linescan_t();
+	linescan_t(quantity_t xy,quantity_t z);
+	fit_functions::asym2sig_t fit_params();
+	/// the depth or height (z)
+	quantity_t z;
+	/// the surface (xy)
+	quantity_t xy;
+	/// calculates the depth from profile and returns it mean
+	quantity_t depth();
+	/// calculates roughness
+	quantity_t roughness();
+	/// origin -> peak-functions -> Asym2Sig
+	quantity_t fit();
+	string to_string(string prefix="");
+	bool is_set();
 };
+
 
 class crater_t
 {
-private:
-	vector<lineprofile_t> lineprofiles;
-	sputter_current_t sputter_current_p;
-	sputter_time_t sputter_time_p;
-	sputter_depth_t sputter_depth_p;
 public:
-	///multiple crater depths
-	sputter_depth_t depths();
-	/// sputter_depth to sputter_time vector
-	const sputter_depth_t sputter_depth();
-	
+	total_sputter_depth_t total_sputter_depths;
+	total_sputter_time_t total_sputter_time;
+	vector<linescan_t> linescans;
 };
 
 
-#endif // CRATER_HPP
+#endif // CRATER_T_HPP

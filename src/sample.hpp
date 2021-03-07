@@ -30,7 +30,8 @@
 #include "matrix.hpp"
 #include "definitions.hpp"
 // #include "measurement.hpp"
-#include "file.hpp"
+#include "files.hpp"
+#include "database_t.hpp"
 
 using namespace std;
 
@@ -46,6 +47,7 @@ class sample_t
 {
 	friend class config_t;
 private:
+// 	static const string db_tablename;
 	static bool use_lot;
 	static bool use_lot_split;
 	static bool use_wafer;
@@ -77,8 +79,10 @@ public:
 // 	set<measurements::profiler_t*> profiler;
 	
 	
-	sample_t(filenames::filename_t& fn,files::file_t& f);
-// 	sample_t(set<filenames::filename_t*> filenames,set<files::file_t*> files);
+	sample_t(files::file_t::name_t& fn,files::file_t::contents_t& f);
+	sample_t(files::file_t::name_t& fn);
+// 	sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix);
+
 	string to_string(const string del=", ");
 	const chip_t chip;
 	const int wafer;
@@ -87,18 +91,18 @@ public:
 	const string monitor;
 	const string simple_name;
 	
-	// reads from database
 	matrix_t& matrix();
 	
-// 	void to_screen(string prefix="");
+	/*database stuff*/
+	bool load_from_database();
+	bool save_to_database();
+// 	bool create_table();
+	/****************/
+	
 	/*operators*/
 	bool operator==(sample_t& obj) ;
 	bool operator!=(sample_t& obj) ;
-// 	bool operator<(sample_t& obj) ;
-	
-	///all samples from all loaded files
-// 	list<sample_t> samples_list();
-	
+	/***********/
 };
 
 

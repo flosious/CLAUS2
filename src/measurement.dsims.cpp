@@ -17,9 +17,48 @@
 */
 
 #include "measurement.hpp"
+#include <chrono>
 
-
-measurements_::dsims_t::dsims_t(filenames::dsims_t& filename, files::dsims_t& file, list<sample_t>& samples_list) : sims_t(filename,file,samples_list)
+measurements_::dsims_t::dsims_t(files::dsims_t& dsims_file, 
+								list<sample_t>& samples_list,
+								vector<files::jpg_t>* jpg_files,
+								vector<files::profiler_t>* profiler_files) : 
+				sims_t(dsims_file.name,dsims_file.contents,samples_list,jpg_files, profiler_files), 
+				settings(dsims_file.name,dsims_file.contents)
 {
 }
 
+// measurements_::dsims_t::dsims_t(vector<files::dsims_t>& dsims_files, 
+// 								list<sample_t>& samples_list, 
+// 								vector<files::jpg_t>* jpg_files, 
+// 								vector<files::profiler_t>* profiler_files) : 
+// 				dsims_t(dsims_files.back(),samples_list,jpg_files)
+// {
+// // 	vector<files::dsims_t> not_selected(dsims_files.size()-1);
+// 	dsims_files.pop_back(); // --> is *this
+// 	//starting from end of vector maybe more efficient (if last element will be erased)
+// // 	for (vector<files::dsims_t>::reverse_iterator df = dsims_files.rbegin();df!=dsims_files.rend();df++)
+// 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+// 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+// 	vector<dsims_t> Ms;
+// 	for (auto& F : dsims_files)
+// 		Ms.push_back({F,samples_list});
+// 	
+// 	
+// 	for (vector<files::dsims_t>::iterator df = dsims_files.begin();df!=dsims_files.end();df++)
+// 	{
+// 		end = std::chrono::steady_clock::now();
+// 		std::cout << "\t\tM deltaT\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+// 		begin = std::chrono::steady_clock::now();
+// 		dsims_t M(*df,samples_list);
+// 		if (*this!=M)	
+// 		{
+// 			continue;
+// 		}
+// 		//copy useful information from M into this measurement
+// 		crater.total_sputter_depths << M.crater.total_sputter_depths; 
+// 		dsims_files.erase(df);
+// 		df--; // or df++ ?
+// 	}
+// // 	dsims_files = not_selected;
+// }

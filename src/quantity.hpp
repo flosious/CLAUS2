@@ -19,15 +19,17 @@
 #ifndef QUANTITY_HPP
 #define QUANTITY_HPP
 
-#include "statistics.hpp"
-#include "tools.hpp"
+
+#include <math.h>
 #include <iostream>
 #include <vector>
 #include <string>
 #include "unit.hpp"
 #include "print.hpp"
 #include "log.hpp"
-#include <math.h>
+#include "statistics.hpp"
+#include "fit_functions.hpp"
+#include "tools.hpp"
 
 using namespace std;
 
@@ -42,13 +44,14 @@ protected:
 	string name_p="";
 	unit_t unit_p{""};
 	double resolution_p=-1;
-	vector<double> data_p;
+// 	vector<double> data_p;
 public:
 // 	///maps the data vecs to < X, *this>
 // 	const map<double,double> to_X(const quantity_t& X) const;
 // 	///maps the data vecs to < *this, Y>
 // 	const map<double,double> to_Y(const quantity_t& Y) const;
-	
+	vector<double> data;
+// 	const vector<double> data() const;
 	bool is_set() const;
 	quantity_t();
 	quantity_t(string name_s,unit_t unit_s);
@@ -64,7 +67,7 @@ public:
 	const string to_string() const;
 	const string name() const;
 
-	const vector<double> data() const;
+	
 
 	quantity_t mean() const;
 	quantity_t median() const;
@@ -84,18 +87,46 @@ public:
 	quantity_t operator/(const quantity_t& quantity_p) const;
 	quantity_t operator/(const double divisor) const;
 	
-// 	static quantity_t sputter_energy();
-// 	static quantity_t sputter_rastersize();
-// 	static quantity_t sputter_depth();
-// 	static quantity_t total_sputter_depth();
-// 	static quantity_t sputter_time();
-// 	static quantity_t total_sputter_time();
-// 	
-// 	static quantity_t analysis_energy();
-// 	static quantity_t analysis_rastersize();
-// 	static quantity_t concentration();
-// 	static quantity_t intensity();
-// 	static quantity_t dose();
+	/*statistics*/
+	
+	// moving windows
+	quantity_t moving_window_median(int window_size=0);
+	quantity_t moving_window_mad(int window_size=0);
+	quantity_t moving_window_mean(int window_size=0);
+	quantity_t moving_window_sd(int window_size=0);
+	
+	
+	//skalars
+	quantity_t quantile(double percentile=0.75);
+	quantity_t median();
+	quantity_t mean();
+	quantity_t trimmed_mean(float alpha=0.25);
+	quantity_t gastwirth();
+	quantity_t sd();
+	quantity_t mad();
+	quantity_t max();
+	/// returns x value at max(Y)
+	quantity_t max_at_x(quantity_t& X,double lower_X_limit, double upper_X_limit);
+	quantity_t max_at_x(quantity_t& X);
+	
+	quantity_t min();
+	/// returns x value at min(Y)
+	quantity_t min_at_x(quantity_t& X,double lower_X_limit=0, double upper_X_limit=0);
+// 	quantity_t integrate(quantity_t& x_data,double lower_X_limit=0, double upper_X_limit=0);
+	quantity_t integrate(quantity_t& x_data, double lower_X_limit = 0, double upper_X_limit = 0);
+	/// point by point integration
+	quantity_t integrate_pbp(quantity_t& x_data);
+	
+	
+	
+	quantity_t fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade=-1 );
+	quantity_t polyfit(int polynom_grade=-1);
+	
+	
+	quantity_t filter_recursive_median(int window_size=0);
+	quantity_t filter_impulse(int window_size=0, float factor=4);
+	quantity_t filter_gaussian(int window_size=0, double alpha=1);
+	
 };
 
 	class mass_t : public quantity_t

@@ -16,14 +16,24 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "files.hpp"
 
-#include "mgroup.hpp"
 
-// mgroups::sims_t::sims_t(filenames::sims_t& fn, files::sims_t& f, list<sample_t>& samples_list,vector<filenames::sims_jpg_t>* jpegs) : mgroup_t(fn, f, samples_list)
-// {
-// }
-// 
+/**************************/
+/***      profiler_t    ***/
+/**************************/
 
-mgroups::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement)
-{	
+files::profiler_t::contents_t::contents_t(string& filename_with_path) : files::sims_t::contents_t(filename_with_path,",",{"Scan Type,","Stylus Type"})
+{
+}
+
+linescan_t files::profiler_t::contents_t::linescan()
+{
+	if (raw_data_tensor().size()==0) return linescan_t();
+	vector<vector<double>> data_cols_lines = tools::mat::transpose_matrix(tools::mat::str_matrix_to_double_matrix(raw_data_tensor()[0]));
+	if (data_cols_lines.size()!=2) return {};
+	quantity_t xy("linescan_xy",data_cols_lines[0],{"um"});
+	quantity_t z("linescan_z",data_cols_lines[1],{"nm"});
+
+	return linescan_t(xy,z);
 }

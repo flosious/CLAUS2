@@ -73,8 +73,12 @@ bool sample_t::use_simple_name=true;
 
 /***********************/
 
+// sample_t::sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix) :
+// 		wafer(wafer),monitor(monitor), lot(lot), lot_split(lot_split), chip(chip),simple_name(simple_name), matrix_p(matrix)
+// {	
+// }
 
-sample_t::sample_t(filenames::filename_t& fn,files::file_t& f) : 
+sample_t::sample_t(files::file_t::name_t& fn,files::file_t::contents_t& f) : 
 																wafer(fn.wafer()), 
 																monitor(fn.monitor()),
 																lot(fn.lot()),
@@ -82,6 +86,15 @@ sample_t::sample_t(filenames::filename_t& fn,files::file_t& f) :
 																chip(fn.chip_x(),fn.chip_y()),
 																simple_name(fn.simple_name()),
 																matrix_p(f.matrix())
+{
+}
+
+sample_t::sample_t(files::file_t::name_t& fn) : wafer(fn.wafer()), 
+																monitor(fn.monitor()),
+																lot(fn.lot()),
+																lot_split(fn.lot_split()),
+																chip(fn.chip_x(),fn.chip_y()),
+																simple_name(fn.simple_name())
 {
 }
 
@@ -214,4 +227,24 @@ std::__cxx11::string sample_t::to_string(const string del)
 		ss << "uknown";
 	return ss.str();
 }
+
+// const string sample_t::db_tablename {"samples"};
+// bool sample_t::create_table()
+// {
+//     std::string sql;
+//     sql = "CREATE TABLE IF NOT EXISTS " + db_tablename + "(" \
+//          "sample_id INTEGER PRIMARY KEY, " \
+//          "lot                   	 TEXT, " \
+//          "wafer                  	 INT, " \
+//          "lot_split            	     TEXT, " \
+//          "chip_x                  	 INT, " \
+//          "chip_y                  	 INT, " \
+//          "monitor                	 TEXT, " \
+// 		 "matrix	                 TEXT, " \
+// 		 "matrix_thickness      	 REAL, " \
+//          "isotope                  	 TEXT, " \
+//          // 2E15 in at/scm
+//          "dose	                	 INT);";
+//     return db.execute_sql(sql);
+// }
 

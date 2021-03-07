@@ -17,13 +17,26 @@
 */
 
 
-#include "mgroup.hpp"
+#include "filename.hpp"
 
-// mgroups::sims_t::sims_t(filenames::sims_t& fn, files::sims_t& f, list<sample_t>& samples_list,vector<filenames::sims_jpg_t>* jpegs) : mgroup_t(fn, f, samples_list)
-// {
-// }
-// 
 
-mgroups::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement)
-{	
+/*********************/
+/***  sims_jpg_t  ****/
+/*********************/
+
+filenames::sims_jpg_t::~sims_jpg_t()
+{
 }
+
+filenames::sims_jpg_t::sims_jpg_t(string& filename_with_path_s) : sims_t(filename_with_path_s,"_",{".jpg",".jpeg"},{})
+{
+}
+
+filenames::dsims_jpg_t::dsims_jpg_t(string& filename_with_path_s) : sims_t(filename_with_path_s,"_",{".jpeg",".jpg"},{"dsims"})
+{
+}
+
+filenames::tofsims_jpg_t::tofsims_jpg_t(string& filename_with_path_s) : sims_t(filename_with_path_s,"_",{".jpeg",".jpg"},{"tofsims"})
+{
+}
+

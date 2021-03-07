@@ -30,7 +30,6 @@
 #include "msettings.hpp"
 // #include "sample.hpp"
 #include "definitions.hpp"
-#include "file.hpp"
 #include "measurement.hpp"
 
 
@@ -58,8 +57,10 @@ public:
 		static bool use_settings;
 	protected:
 		///measurements belonging to this group
-		mgroup_t(filenames::filename_t& fn, files::file_t& f, list<sample_t>& samples_list);
+// 		mgroup_t(filenames::filename_t& fn, files::file_t& f, list<sample_t>& samples_list);
+		
 	public:
+		mgroup_t(measurements_::measurement_t& measurement);
 // 		mgroup_t();
 		
 // 		bool is_set() const;
@@ -98,9 +99,8 @@ public:
 	{
 	private:
 	protected:
-		sims_t(filenames::sims_t& fn, files::sims_t& f, list<sample_t>& samples_list);
 	public:
-		
+		sims_t(measurements_::sims_t& measurement);
 	};
 
 	class dsims_t: public sims_t
@@ -108,12 +108,11 @@ public:
 	private:
 		
 	public:
+		dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
+		dsims_t(measurements_::dsims_t& dsims_measurements);
 		string to_string(const string del=", ");
-// 		void try_insert_measurement(measurements::dsims_t& M);
-// 		void update(dsims_t& MG);
 		vector<measurements_::dsims_t> measurements;
 		const msettings::dsims_t settings;
-		dsims_t(filenames::dsims_t& fn, files::dsims_t& f, list<sample_t>& samples_list);
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
 	};
@@ -129,18 +128,18 @@ public:
 // 		tofsims_t(measurements::tofsims_t* measurement);
 // 	};
 	
-	template<typename Mt>
-	static void try_insert_sources_into_target_vec(vector<Mt>& Ms,vector<Mt>& M_target)
-	{
-		for (auto& M : Ms)
-		{
-			Mt* M_p = tools::vec::find_in_vec(M,M_target);
-			if (M_p == nullptr) // M  not  found in vec
-			{
-				M_target.push_back(M);
-			}
-		}
-	}
+// 	template<typename Mt>
+// 	static void try_insert_sources_into_target_vec(vector<Mt>& Ms,vector<Mt>& M_target)
+// 	{
+// 		for (auto& M : Ms)
+// 		{
+// 			Mt* M_p = tools::vec::find_in_vec(M,M_target);
+// 			if (M_p == nullptr) // M  not  found in vec
+// 			{
+// 				M_target.push_back(M);
+// 			}
+// 		}
+// 	}
 
 	
 };
