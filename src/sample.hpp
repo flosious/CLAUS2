@@ -31,7 +31,7 @@
 #include "definitions.hpp"
 // #include "measurement.hpp"
 #include "files.hpp"
-#include "database_t.hpp"
+// #include "database_t.hpp"
 
 using namespace std;
 
@@ -69,7 +69,9 @@ public:
 		int y=-1;
 		bool operator==(const chip_t& obj) const;
 		bool operator!=(const chip_t& obj) const;
-		bool is_set();
+		bool operator<(const chip_t& obj) const;
+		bool operator>(const chip_t& obj) const;
+		bool is_set() const;
 		void to_screen(string prefix="");
 		const string to_string(const string del=", ") const;
 	};
@@ -84,12 +86,12 @@ public:
 // 	sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix);
 
 	string to_string(const string del=", ");
-	const chip_t chip;
-	const int wafer;
-	const string lot;
-	const string lot_split;
-	const string monitor;
-	const string simple_name;
+	chip_t chip;
+	int wafer;
+	string lot;
+	string lot_split;
+	string monitor;
+	string simple_name;
 	
 	matrix_t& matrix();
 	
@@ -102,6 +104,8 @@ public:
 	/*operators*/
 	bool operator==(sample_t& obj) ;
 	bool operator!=(sample_t& obj) ;
+	bool operator<(sample_t& obj);
+	bool operator>(sample_t& obj);
 	/***********/
 };
 

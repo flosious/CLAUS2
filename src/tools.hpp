@@ -164,6 +164,20 @@ public:
 	class vec 
 	{
 	public:
+		template<class In>
+		static vector<string> to_string(In& I)
+		{
+			vector<string> O;
+			to_string(begin(I),end(I),back_inserter(O));
+			return O;
+		}
+		/*from https://stackoverflow.com/questions/25371873/convert-vectordouble-to-vectorstring-elegant-way*/
+		template<class IteratorIn, class IteratorOut>
+		static void to_string(IteratorIn first, IteratorIn last, IteratorOut out)
+		{
+			std::transform(first, last, out,
+				[](typename std::iterator_traits<IteratorIn>::value_type d) { return std::to_string(d); } );
+		}
 		///returns the pointer to key in keys_list
 		template <typename F>
 		static F* find_in_vec(F& f,vector<F>& keys)

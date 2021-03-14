@@ -71,7 +71,7 @@ public:
 			string delimiter;
 			set<string> OR_identifiers_s;
 			set<string> AND_identifiers_s;
-			const vector<string>& not_parseable_filename_parts();
+			virtual const vector<string>& not_parseable_filename_parts();
 			string filename_with_path;
 			string filename_type_ending() const;
 			const string filename() const;
@@ -91,6 +91,7 @@ public:
 			const bool is_correct_type(); 
 			bool operator==(name_t& obj);
 			bool operator!=(name_t& obj);
+			bool operator<(name_t& obj);
 		};
 		
 		class contents_t
@@ -146,7 +147,7 @@ public:
 			const energy_t sputter_energy();
 			element_t sputter_element();
 			const string secondary_polarity();
-			const total_sputter_depth_t total_sputter_depths();
+			total_sputter_depth_t total_sputter_depths();
 			const string filename_without_crater_depths();
 			bool operator==(name_t& obj);
 			bool operator!=(name_t& obj);
@@ -244,6 +245,7 @@ public:
 		};	
 		dsims_t(string& filename);
 		dsims_t(files::dsims_t::name_t& name_s, files::dsims_t::contents_t& contents_s);
+		bool operator<(dsims_t& obj);
 		name_t name;
 		contents_t contents;
 	};
@@ -296,6 +298,7 @@ public:
 		};
 		profiler_t(string& filename);
 		profiler_t(files::profiler_t::name_t& name_s, files::profiler_t::contents_t& contents_s);
+		bool operator<(profiler_t& obj);
 		name_t name;
 		contents_t contents;
 	};
@@ -310,6 +313,7 @@ public:
 // 			virtual ~name_t();
 		};
 		jpg_t(string& filename);
+		bool operator<(jpg_t& obj);
 		name_t name;
 	};
 };

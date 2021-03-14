@@ -58,7 +58,7 @@ public:
 	quantity_t(vector<double> data_s,unit_t unit_s);
 	quantity_t(string name_s,vector<double> data_s,unit_t unit_s);
 	///tries to change the current unit to its target unit
-	const quantity_t change_unit(unit_t target_unit) const;
+	quantity_t change_unit(unit_t target_unit);
 	/// resolution <= 0 will use raw data, no interpolation
 	void change_resolution(double resolution_s);
 	void reset_resolution();
@@ -75,7 +75,7 @@ public:
 	bool operator==(const quantity_t& obj) const;
 	bool operator!=(const quantity_t& obj) const;
 	///appends obj.data to data vector
-	void operator<<(const quantity_t& obj);
+	void operator<<(quantity_t obj);
 	quantity_t operator+(const quantity_t& quantity_p) const;
 	quantity_t operator+(const double summand) const;
 	void operator+=(const quantity_t& quantity_p);

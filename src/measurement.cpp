@@ -92,3 +92,38 @@ std::__cxx11::string measurements_::measurement_t::to_string(const std::__cxx11:
 	/*if (use_repetition)*/ ss << "repetition: " << repetition ;
 	return ss.str();
 }
+
+bool measurements_::measurement_t::operator<(measurements_::measurement_t& obj)
+{
+	if (use_olcdb)
+	{
+		if (olcdb < obj.olcdb) return true;
+		if (olcdb > obj.olcdb) return false;
+	}
+	if (use_group)
+	{
+		if (group < obj.group) return true;
+		if (group > obj.group) return false;
+	}
+	if (use_repetition)
+	{
+		if (repetition < obj.repetition) return true;
+		if (repetition > obj.repetition) return false;
+	}
+	if (use_sample)
+	{
+		if (*sample < *obj.sample) return true;
+		if (*sample > *obj.sample) return false;
+	}
+	
+	
+	return false;
+}
+
+bool measurements_::measurement_t::operator>(measurements_::measurement_t& obj)
+{
+	if (!operator<(obj) && operator!=(obj)) return true;
+	return false;
+}
+
+

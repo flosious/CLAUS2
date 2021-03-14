@@ -17,6 +17,9 @@
 */
 
 #include "processor.hpp"
+// #include "gnuplot_i.hpp"
+
+
 
 processor::processor(vector<string> args_p)
 {	
@@ -33,29 +36,42 @@ processor::processor(vector<string> args_p)
 	cout << "dsims_mgroups.size()=" << dsims_mgroups().size() << endl;
 	cout << "samples_list.size()=" << samples_list.size() << endl;
 	
+// 	mglFLTK* gr2;
 	
-	
-	
-	
-	
-// 	cout << "samples_list.size()=" << samples_list.size() << endl;
-// 	cout << "profiler_measurements.size()=" << profiler_measurements.size() << endl;
-	
-// 	
 	for (auto& MG : dsims_mgroups())
+	{
 		cout << MG.to_string() << endl;
+		for (auto& M:MG.measurements)
+		{
+// 			for (auto& C:M.clusters)
+// 			{
+// 				cout << C.intensity().to_string() << endl;
+// 			}
+// 			gr2 = new mglFLTK(&M, "test plotter2");
+// 			M.export_origin_ascii();
+// 			M.plot_now();
+		}
+	}
+// 	gr2->Run();
+	samples_list.sort();
+	cout << "samples_list"<<endl;
+	for (auto& S : samples_list)
+		cout << "\t" << S.to_string() << endl;
 	
 // 	logger::to_screen();
 // 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+// 	getchar();
+// 	delete gr2;
+	
 }
-
 
 vector<mgroups::dsims_t>& processor::dsims_mgroups()
 {
 	if (dsims_mgroups_p.size()>0)
 		return dsims_mgroups_p;
+	
 	int old_size = 0;
 	dsims_measurements();
 	while (old_size!=dsims_measurements_p.size() && dsims_measurements_p.size() > 0)
@@ -67,8 +83,6 @@ vector<mgroups::dsims_t>& processor::dsims_mgroups()
 
 void processor::populate_profiler_files()
 {
-// 	vector<files::profiler_t> dsims_profiler_files;
-// 	vector<files::profiler_t> tofsims_profiler_files;
 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
 	{
 		/*dsims_profiler_t*/
@@ -94,7 +108,8 @@ void processor::populate_profiler_files()
 			}
 		}
 	}
-		
+	sort(dsims_profiler_files_p.begin(),dsims_profiler_files_p.end());
+	sort(tofsims_profiler_files_p.begin(),tofsims_profiler_files_p.end());
 }
 
 vector<files::profiler_t>& processor::dsims_profiler_files()
@@ -113,21 +128,29 @@ vector<measurements_::dsims_t>& processor::dsims_measurements()
 {
 	if (dsims_measurements_p.size()>0)
 		return dsims_measurements_p;
-	
-	dsims_files();
-// 	int last_size = dsims_files().size();
-// 	while (last_size!=dsims_measurements_p.size() && dsims_files().size()>0)
-	for (vector<files::dsims_t>::iterator DF=dsims_files_p.begin();DF!=dsims_files_p.end();DF++)
+	dsims_files(); // populate dsims_files_p
+	int old_size = 0;
+	while (old_size!=dsims_files_p.size() && dsims_files_p.size() > 0)
 	{
-// 		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-// 		last_size=dsims_measurements_p.size();
-		dsims_measurements_p.push_back({*DF,samples_list,&dsims_jpg_files(),&dsims_profiler_files()});
-		dsims_files_p.erase(DF);
-		DF--;
-// 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-// 		std::cout << "\tM-S deltaT\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+		dsims_measurements_p.push_back(measurements_::dsims_t(dsims_files_p,samples_list,&dsims_jpg_files(),&dsims_profiler_files_p));
 	}
 	return dsims_measurements_p;
+	
+// 	for (vector<files::dsims_t>::iterator DF=dsims_files_p.begin();DF!=dsims_files_p.end();DF++)
+// 	{
+// 		dsims_measurements_p.push_back({*DF,samples_list,&dsims_jpg_files(),&dsims_profiler_files()});
+// 		dsims_files_p.erase(DF);
+// 		DF--;
+// 	}
+	
+// 	/*
+// 	 * remove duplicates
+// 	 * this will also remove crater depth of doubles
+// 	 */
+// 	sort(dsims_measurements_p.begin(),dsims_measurements_p.end());
+// 	/*filter*/
+// 	dsims_measurements_p.erase(unique(dsims_measurements_p.begin(),dsims_measurements_p.end()),dsims_measurements_p.end());
+// 	return dsims_measurements_p;
 }
 
 vector<files::dsims_t> & processor::dsims_files()
@@ -135,20 +158,25 @@ vector<files::dsims_t> & processor::dsims_files()
 	if (dsims_files_p.size()>0)
 		return dsims_files_p;
 	
-	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+// 	#pragma omp declare reduction (merge : std::vector<files::dsims_t> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))	
+// 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+// 	#pragma omp parallel for reduction(merge: dsims_files_p)
+	for (int f=0;f<filenames.size();f++)
 	{
-		files::dsims_t::name_t dFN(*f);
+		files::dsims_t::name_t dFN(filenames.at(f));
 		if (dFN.is_correct_type())
 		{
-			files::dsims_t::contents_t F(*f);
+			files::dsims_t::contents_t F(filenames.at(f));
 			if (F.is_correct_type())
 			{
-				dsims_files_p.push_back({dFN,F});
+				files::dsims_t D{dFN,F};
+				dsims_files_p.push_back(D);
 // 				filenames.erase(f); // dont allow doubles
 // 				f--;
 			}
 		}
 	}
+	sort(dsims_files_p.begin(),dsims_files_p.end());
 	return dsims_files_p;
 }
 
@@ -171,6 +199,8 @@ void processor::populate_jpg_files()
 // 			f--;
 		}
 	}
+	sort(dsims_jpg_files_p.begin(),dsims_jpg_files_p.end());
+	sort(tofsims_jpg_files_p.begin(),tofsims_jpg_files_p.end());
 }
 
 vector<files::jpg_t>& processor::dsims_jpg_files()

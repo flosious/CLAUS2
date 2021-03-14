@@ -31,17 +31,19 @@
 #include "element.hpp"
 // #include "sample.hpp"
 // #include "crater.hpp"
+#include <mgl2/fltk.h>
 
 using namespace std;
 
 
 
-class cluster_t
+class cluster_t : public mglDraw
 {
 private:
+	static vector<isotope_t> parse_clustername(const string clustername);
 	int equilibrium_starting_position=-1;
 // 	map<isotope_t,int> isotopes_amount_p;
-	vector<isotope_t> isotopes_p;
+// 	vector<isotope_t> isotopes_p;
 	concentration_t concentration_p;
 	intensity_t intensity_p;
 	sputter_time_t sputter_time_p;
@@ -54,6 +56,7 @@ private:
 
 	
 public:
+	int Draw(mglGraph * gr) override;
 	/// 28Si2 Ge2
 	cluster_t(string clustername, 
 			  sputter_time_t sputter_time={},
@@ -61,12 +64,12 @@ public:
 			  sputter_depth_t sputter_depth={},
 			  concentration_t concentration={});
 	
-	cluster_t(vector<string> clustername_parts);
+	cluster_t(string clustername);
 // 	cluster_t(string clustername, sputter_time_t sputter_time_s,intensity_t intensity_s,sputter_depth_t sputter_depth_s={},concentration_t concentration_s={});
 	cluster_t(vector<isotope_t>& isotopes_s);
 // 	cluster_t(map<isotope_t,int>& isotopes_amount_s);
 	
-	string to_string();
+	string to_string(const string del=" ");
 	const bool is_set() const;
 	///isotopes which define this cluster
 	const concentration_t& concentration();
@@ -75,9 +78,9 @@ public:
 	const sputter_depth_t& sputter_depth();
 	const SF_t SF();
 	///sputter equilibrium state of this cluster
-	cluster_t equilibrium();
+// 	cluster_t equilibrium();
 	// 	const map<isotope_t,int>& isotopes_amount() const;
-	vector<isotope_t>& isotopes();
+	vector<isotope_t> isotopes;
 	///pointer to the isotope within this cluster, where matrix isotopes have been removed
 	const isotope_t* corsseponding_isotope() const; 
 	bool operator==(const cluster_t& obj) const;

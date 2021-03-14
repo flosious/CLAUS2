@@ -1,8 +1,27 @@
+/*
+	Copyright (C) 2021 Florian Bärwolf
+	floribaer@gmx.de
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
 #include "matrix.hpp"
 
 
 /****************************/
-/***  matrix_t  ***/
+/***       matrix_t       ***/
 /****************************/
 
 
@@ -139,7 +158,8 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 		return;
 	}
 	
-	const int max_ = pow(10,ceil(log10(total_amount)));
+	int max_ = pow(10,ceil(log10(total_amount)));
+	if (max_==10) max_ = 100; // Si Ge5 == Si95 Ge5
 	
 	/*calculate not given substance_amount*/
 	for (auto& iso : isotopes)

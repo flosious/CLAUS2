@@ -46,9 +46,9 @@ public:
 	abundance_t abundance;
 	int nucleons;
 	string symbol;
-	pair<depth_t,concentration_t> depth_profile;
+// 	pair<depth_t,concentration_t> depth_profile;
 	substance_amount_t substance_amount;
-	const string to_string() const;
+	const string to_string(const string del=" ") const;
 	
 	///NOT checking abundance
 	const bool operator==(const isotope_t& obj) const;

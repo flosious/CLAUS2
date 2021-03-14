@@ -22,7 +22,7 @@ sample_t::chip_t::chip_t(const int x, const int y) : x(x), y(y)
 {
 }
 
-bool sample_t::chip_t::is_set()
+bool sample_t::chip_t::is_set() const
 {
 	if (x>=0 && y>=0) return true;
 	return false;
@@ -31,6 +31,29 @@ bool sample_t::chip_t::is_set()
 void sample_t::chip_t::to_screen(string prefix)
 {
 	cout << prefix << "chip\t" << "X:"<< x << ", Y:"<< y << endl;
+}
+
+bool sample_t::chip_t::operator<(const sample_t::chip_t& obj) const
+{
+	if (x < obj.x) return true;
+	if (x > obj.x) return false;
+	
+	if (y < obj.y) return true;
+	if (y > obj.y) return false;
+	return false;
+}
+
+bool sample_t::chip_t::operator>(const chip_t& obj) const
+{
+	if (!operator<(obj) && operator!=(obj)) return true;
+	return false;
+}
+
+const std::__cxx11::string sample_t::chip_t::to_string(const std::__cxx11::string del) const
+{
+	stringstream out;
+	out << "X"<<x << "Y" << y;
+	return out.str();
 }
 
 
@@ -105,104 +128,40 @@ matrix_t& sample_t::matrix()
 	return matrix_p;
 }
 
-// void sample_t::to_screen(std::__cxx11::string prefix)
-// {
-// 	cout << prefix << "lot\t" << lot() << endl;
-// 	cout << prefix << "lot_split\t" << lot_split() << endl;
-// 	cout << prefix << "wafer\t" << wafer() << endl;
-// 	chip().to_screen(prefix);
-// 	cout << prefix << "monitor\t" << monitor() << endl;
-// 	cout << prefix << "simple_name\t" << simple_name() << endl;
-// 	cout << prefix << "matrix\t" << matrix().to_string() << endl;
-// }
-
-/*
-bool sample_t::operator<(sample_t& obj)
-{	
-	if (use_lot)
-	{
-		if (lot()<obj.lot()) return true;
-		if (lot()>obj.lot()) return false;
-	}
-	
-	if (use_lot_split)
-	{
-		if (lot_split()<obj.lot_split()) return true;
-		if (lot_split()>obj.lot_split()) return false;
-	}
-	
-	if (use_wafer)
-	{
-		if (wafer()<obj.wafer()) return true;
-		if (wafer()>obj.wafer()) return false;
-	}
-	
-	if (use_monitor)
-	{
-		if (monitor()<obj.monitor()) return true;
-		if (monitor()>obj.monitor()) return false;
-	}
-	
-	if (use_chip)
-	{
-		if (chip().x<obj.chip().x) return true;
-		if (chip().x>obj.chip().x) return false;
-		if (chip().y<obj.chip().y) return true;
-		if (chip().y>obj.chip().y) return false;
-	}
-	
-	if (use_simple_name)
-	{
-		if (simple_name()<obj.simple_name()) return true;
-		if (simple_name()>obj.simple_name()) return false;
-	}
-	
-	return false;
-}*/
-
 bool sample_t::operator==(sample_t& obj)
 {
 // 	to_screen();
 // 	obj.to_screen();
+	if (use_simple_name)
+	{
+		if (simple_name!=obj.simple_name) return false;
+	}
 	if (use_lot)
 	{
-// 		cout << "use_lot" << endl;
-		if (lot!=obj.lot)
-		{
-// 			cout << "sample lot different" << endl;
-			return false;
-		}
+		if (lot!=obj.lot)	return false;
 	}
 	
 	if (use_lot_split)
 	{
-// 		cout << "use_lot_split" << endl;
 		if (lot_split!=obj.lot_split) return false;
 	}
 	
 	if (use_wafer)
 	{
-// 		cout << "use_wafer" << endl;
 		if (wafer!=obj.wafer) return false;
 	}
 	
 	if (use_monitor)
 	{
-// 		cout << "use_monitor" << endl;
 		if (monitor!=obj.monitor) return false;
 	}
 	
 	if (use_chip)
 	{
-// 		cout << "use_chip" << endl;
 		if (chip!=obj.chip) return false;
 	}
 	
-	if (use_simple_name)
-	{
-// 		cout << "use_simple_name" << endl;
-		if (simple_name!=obj.simple_name) return false;
-	}
+	
 	return true;
 }
 
@@ -217,7 +176,7 @@ std::__cxx11::string sample_t::to_string(const string del)
 	ss << "lot: " << lot << ",";
 	ss << "lot_split: " << lot_split << ",";
 	ss << "wafer: " << wafer << ",";
-	ss << "chip: " << "x:" << chip.x << " y:" <<chip.y << ",";
+	ss << "chip: " << chip.to_string() << ",";
 	ss << "monitor: " << monitor << ",";
 	ss << "simple_name: " << simple_name << ",";
 	ss << "matrix: ";
@@ -227,6 +186,50 @@ std::__cxx11::string sample_t::to_string(const string del)
 		ss << "uknown";
 	return ss.str();
 }
+
+bool sample_t::operator<(sample_t& obj)
+{	
+	if (use_simple_name)
+	{
+		if (simple_name < obj.simple_name) return true;
+		if (simple_name > obj.simple_name) return false;
+	}
+	if (use_lot)
+	{
+		if (lot < obj.lot) return true;
+		if (lot > obj.lot) return false;
+	}
+	if (use_lot_split)
+	{
+		if (lot_split < obj.lot_split) return true;
+		if (lot_split > obj.lot_split) return false;
+	}
+	if (use_wafer)
+	{
+		if (wafer < obj.wafer) return true;
+		if (wafer > obj.wafer) return false;
+	}
+	if (use_monitor)
+	{
+		if (monitor < obj.monitor) return true;
+		if (monitor > obj.monitor) return false;
+	}
+	if (use_chip)
+	{
+		if (chip < obj.chip) return true;
+		if (chip > obj.chip) return false;
+	}
+	
+	return false;
+}
+
+bool sample_t::operator>(sample_t& obj)
+{
+	if (!operator<(obj) && operator!=(obj)) return true;
+	return false;
+}
+
+
 
 // const string sample_t::db_tablename {"samples"};
 // bool sample_t::create_table()

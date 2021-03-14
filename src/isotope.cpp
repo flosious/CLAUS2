@@ -44,14 +44,16 @@ const mass_t isotope_t::mass() const
 // 	return PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
 // }
 
-const std::__cxx11::string isotope_t::to_string() const
+const std::__cxx11::string isotope_t::to_string(const string del) const
 {
 	stringstream out;
 	out << nucleons << symbol;
-	if (abundance.is_set())
-		out << ":" << abundance.data.at(0) << abundance.unit().to_string();
-	if (substance_amount.is_set())
-		out << ":" << substance_amount.data.at(0) << substance_amount.unit().to_string();
+// 	cout << "IN" << endl;
+// 	if (abundance.is_set())
+// 		out << ":" << abundance.data.at(0) << abundance.unit().to_string();
+	if (substance_amount.is_set() && substance_amount.data.at(0) != 1)
+		out << "" << substance_amount.data.at(0)/* << substance_amount.unit().to_string()*/;
+// 	cout << out.str() << endl;
 	return out.str();
 }
 

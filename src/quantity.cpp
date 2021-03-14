@@ -391,7 +391,7 @@ unit_t quantity_t::unit() const
 }
 
 
-const quantity_t quantity_t::change_unit(unit_t target_unit) const
+quantity_t quantity_t::change_unit(unit_t target_unit)
 {	
 	quantity_t copy = *this;
 	double factor = copy.unit().change_unit(target_unit);
@@ -415,7 +415,7 @@ bool quantity_t::operator!=(const quantity_t& obj) const
 	return !(operator==(obj));
 }
 
-void quantity_t::operator<<(const quantity_t& obj)
+void quantity_t::operator<<(quantity_t obj)
 {
 	if (!obj.is_set()) return;
 	if (!is_set())

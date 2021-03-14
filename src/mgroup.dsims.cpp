@@ -39,10 +39,6 @@ mgroups::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measureme
 	}
 }
 
-
-
-
-
 bool mgroups::dsims_t::operator==(const mgroups::dsims_t& obj) const
 {
 	if (sims_t::operator!=(obj)) return false;

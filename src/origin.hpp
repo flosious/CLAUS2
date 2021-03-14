@@ -16,41 +16,41 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef CALC_HPP
-#define CALC_HPP
+#ifndef ORIGIN_T_HPP
+#define ORIGIN_T_HPP
 
 #include <vector>
 #include <string>
+#include <regex>
+#include "tools.hpp"
+#include "quantity.hpp"
+#include "cluster.hpp"
 
-#include "measurement.hpp"
+using namespace std;
 
-///calculation methods
-class calc
+
+
+class origin_t
 {
+private:
 public:
-	///jiangs protocoll
-	class jiang_t
+	class column_t
 	{
 	public:
-		jiang_t(vector<measurements_::sims_t> Ms);
+		string longname="";
+		string unit="";
+		string comment="";
+		vector<string> data;
+		vector<string> vec();
+		column_t(const vector<double>& data_s, string longname="",string unit="", string comment="");
+		column_t(const quantity_t& quantity, string prefix="", string suffix="");
+		/// superscript "^30Si" --> "\+(30)Si"
+		/// subscript "Si_2" --> "Si\-(2)"
+		void apply_origin_conform_replacements(string& in_here);
 	};
-	///point by point calculation
-	class pbp_t
-	{
-		public:
-		pbp_t(vector<measurements_::sims_t> Ms);
-	};
-	///constant reference calculation
-	class const_ref_t
-	{
-		public:
-		const_ref_t(vector<measurements_::sims_t> Ms);
-	};
-	class test_t
-	{
-		public:
-		test_t(vector<measurements_::sims_t> Ms);
-	};
+	origin_t(column_t cols);
+	origin_t(vector<cluster_t>& clusters);
+	string to_string();
 };
 
-#endif // CALC_HPP
+#endif // ORIGIN_T_HPP

@@ -31,19 +31,22 @@ files::sims_t::name_t::name_t(std::__cxx11::string& filename_with_path_s,
 {
 }
 
-const total_sputter_depth_t files::sims_t::name_t::total_sputter_depths()
+total_sputter_depth_t files::sims_t::name_t::total_sputter_depths()
 {
 	if (total_sputter_depths_p.size()==0)
 	{
-		for (auto& filename_part : not_parseable_filename_parts())
+// 		for (auto& filename_part : not_parseable_filename_parts())
+		for (vector<string>::iterator FNp=not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
 		{
 			smatch match;
 			regex reg ("^([0-9]{2,})(nm|A)$"); 
-			if (regex_search(filename_part,match,reg)) 
+			if (regex_search(*FNp,match,reg)) 
 			{
 				string value = match[1];
 				string unit = match[2];
 				total_sputter_depths_p.push_back({{tools::str::str_to_double(value)},unit});
+				not_parseable_filename_parts_p.erase(FNp);
+				FNp--;
 			}
 		}
 	}
@@ -126,6 +129,7 @@ const vector<std::__cxx11::string>& files::sims_t::name_t::not_parseable_filenam
 {
 	files::file_t::name_t::not_parseable_filename_parts();
 	sputter_energy(); // parse_sputter_energy_element_polarity();
+	total_sputter_depths();
 	return not_parseable_filename_parts_p;
 }
 

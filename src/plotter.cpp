@@ -16,23 +16,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef DEPENDENCY_T_HPP
-#define DEPENDENCY_T_HPP
+#include "plotter.hpp"
 
-#include "quantity.hpp"
-
-using namespace std;
-
-class dependency_t
+int plotter_t::Draw(mglGraph* gr)
 {
-private:
-	quantity_t X_p;
-	quantity_t Y_p;
-public:
-	dependency_t(const quantity_t& X_s, const quantity_t& Y_s);
-	///maps the data vecs to < X, *this>
-	const map<double,double> data() const;
-
-};
-
-#endif // DEPENDENCY_T_HPP
+	mglData y0(50);
+	y0.Modify("sin(pi*(2*x-1))");
+	gr->Plot(y0);
+	gr->Box();
+	return 0;
+}

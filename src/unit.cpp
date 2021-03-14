@@ -24,33 +24,9 @@ const map<string,map<string,double>> unit_t::current_unit_to_new_unit=
 
 double unit_t::change_unit(unit_t new_unit)
 {
-// 	if (current_unit_to_new_unit.find(name())==current_unit_to_new_unit.end()) return 1;
-// 	if (current_unit_to_new_unit.at(name()).find(new_unit.name())==current_unit_to_new_unit.at(name()).end()) return 1;
 	double factor = -1;
 	double divisor = -1;
 	
-// 	///current unit is in the 1st map and new_unit in the 2nd map
-// 	if (current_unit_to_new_unit.find(name())!=current_unit_to_new_unit.end())
-// 	{
-// 		map<string,double> unit_to_double=current_unit_to_new_unit.at(name());
-// 		if (unit_to_double.find(new_unit.name()) != unit_to_double.end())
-// 		{
-// 			name_p = new_unit.name();
-// 			return unit_to_double.at(new_unit.name());
-// 		}
-// 	}
-// 		
-// 	///current unit is in the 2nd map and new_unit in the 1st map
-// 	if (current_unit_to_new_unit.find(new_unit.name())!=current_unit_to_new_unit.end())
-// 	{
-// 		map<string,double> unit_to_double=current_unit_to_new_unit.at(new_unit.name());
-// 		if (unit_to_double.find(name()) != unit_to_double.end())
-// 		{
-// 			name_p = new_unit.name();
-// 			return 1/unit_to_double.at(new_unit.name());
-// 		}
-// 	}
-		
 	///current unit and new_unit are both in the 2nd map
 	for (auto& s : current_unit_to_new_unit)
 	{
@@ -88,7 +64,7 @@ const std::__cxx11::string unit_t::name() const
 	return name_p;
 }
 
-bool unit_t::is_set()
+bool unit_t::is_set() const
 {
 	if (name()=="") return false;
 	return true;

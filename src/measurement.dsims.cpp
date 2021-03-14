@@ -17,7 +17,7 @@
 */
 
 #include "measurement.hpp"
-#include <chrono>
+
 
 measurements_::dsims_t::dsims_t(files::dsims_t& dsims_file, 
 								list<sample_t>& samples_list,
@@ -28,37 +28,40 @@ measurements_::dsims_t::dsims_t(files::dsims_t& dsims_file,
 {
 }
 
-// measurements_::dsims_t::dsims_t(vector<files::dsims_t>& dsims_files, 
-// 								list<sample_t>& samples_list, 
-// 								vector<files::jpg_t>* jpg_files, 
-// 								vector<files::profiler_t>* profiler_files) : 
-// 				dsims_t(dsims_files.back(),samples_list,jpg_files)
-// {
-// // 	vector<files::dsims_t> not_selected(dsims_files.size()-1);
-// 	dsims_files.pop_back(); // --> is *this
-// 	//starting from end of vector maybe more efficient (if last element will be erased)
-// // 	for (vector<files::dsims_t>::reverse_iterator df = dsims_files.rbegin();df!=dsims_files.rend();df++)
+/*needs sorted dsims_files input*/
+measurements_::dsims_t::dsims_t(vector<files::dsims_t>& dsims_files, 
+								list<sample_t>& samples_list, 
+								vector<files::jpg_t>* jpg_files, 
+								vector<files::profiler_t>* profiler_files) : 
+				dsims_t(dsims_files.back(),samples_list,jpg_files)	
+{
+	
+	//starting from end of vector maybe more efficient (if last element will be erased)
+// 	for (vector<files::dsims_t>::reverse_iterator df = dsims_files.rbegin();df!=dsims_files.rend();df++)
 // 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 // 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 // 	vector<dsims_t> Ms;
 // 	for (auto& F : dsims_files)
 // 		Ms.push_back({F,samples_list});
-// 	
-// 	
-// 	for (vector<files::dsims_t>::iterator df = dsims_files.begin();df!=dsims_files.end();df++)
-// 	{
-// 		end = std::chrono::steady_clock::now();
-// 		std::cout << "\t\tM deltaT\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
-// 		begin = std::chrono::steady_clock::now();
-// 		dsims_t M(*df,samples_list);
-// 		if (*this!=M)	
-// 		{
-// 			continue;
-// 		}
-// 		//copy useful information from M into this measurement
-// 		crater.total_sputter_depths << M.crater.total_sputter_depths; 
-// 		dsims_files.erase(df);
-// 		df--; // or df++ ?
-// 	}
-// // 	dsims_files = not_selected;
-// }
+	
+	dsims_files.pop_back(); // --> is *this
+	
+	for (int i=dsims_files.size()-1;i>=0;i--)
+// 	for (vector<files::dsims_t>::reverse_iterator df = dsims_files.rbegin();df!=dsims_files.rend();df++)
+	{
+		dsims_t M(dsims_files.at(i),samples_list,jpg_files,profiler_files);
+		if (*this!=M)	
+		{
+			break; //sorted data
+// 			continue; //unsorted data
+		}
+		//copy useful information from M into this measurement
+		if (M.crater.total_sputter_depths.is_set()) 
+			crater.total_sputter_depths << M.crater.total_sputter_depths; 
+		if (M.crater.linescans.size()>0)
+			crater.linescans.insert(crater.linescans.end(),M.crater.linescans.begin(),M.crater.linescans.end());
+		dsims_files.erase(dsims_files.begin()+i);
+// 		i--; // or df++ ?
+	}
+// 	dsims_files = not_selected;
+}

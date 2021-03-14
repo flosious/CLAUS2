@@ -20,11 +20,15 @@
 #define PROCESSOR_HPP
 
 #include <chrono>
-// #include "hash_functions.hpp"
+#include <iostream>
 #include <list>
 #include <string>
 #include <vector>
+#include <set>
 
+#include <mgl2/mgl.h>
+#include <mgl2/fltk.h>
+// #include <omp.h>
 #include "tools.hpp"
 // #include "sample.hpp"
 // #include "lists.hpp"
@@ -32,8 +36,12 @@
 // #include "measurement_group.hpp"
 // #include "measurement.hpp"
 // #include <unordered_set>
-// #include "quantity.hpp"
+#include "quantity.hpp"
 #include "files.hpp"
+#include "plotter.hpp"
+
+// #include "plc++demos.h"
+
 
 using namespace std;
 
@@ -41,6 +49,9 @@ using namespace std;
 class processor 
 {
 private:
+// 	static int sample(mglGraph *gr);
+	
+	
 	vector<string> filenames;
 	
 	/*SAMPLES*/
@@ -84,6 +95,9 @@ public:
 	
 	/*MGROUPS*/
 	vector<mgroups::dsims_t>& dsims_mgroups();
+	
+	/*TESTS*/
+// 	void plot(quantity_t X, quantity_t Y);
 };
 
 

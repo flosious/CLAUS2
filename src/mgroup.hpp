@@ -101,6 +101,12 @@ public:
 	protected:
 	public:
 		sims_t(measurements_::sims_t& measurement);
+		// calc.jiang(measurements& belonging to one/this group) ctor
+		// calc.jiang.SR.median
+		// calc.jiang.concentration(isotope/cluster) --> isotope with set concentration, but for wich measurement?
+		// calc.jiang.concentrations() --> vector<isotope> with set concentrations
+		// calc.jiang.reference.intensity this is a function of intensities of matrix signals
+// 		SR_t SR();
 	};
 
 	class dsims_t: public sims_t

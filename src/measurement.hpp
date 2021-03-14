@@ -29,7 +29,10 @@
 #include "msettings.hpp"
 #include <map>
 #include "files.hpp"
-
+#include <mgl2/mgl.h>
+#include <mgl2/fltk.h>
+#include <unistd.h>
+#include "origin.hpp"
 
 /************************/
 
@@ -61,13 +64,21 @@ public:
 		sample_t* sample=nullptr;
 		bool operator==(measurement_t& obj);
 		bool operator!=(measurement_t& obj);
+		bool operator<(measurement_t& obj);
+		bool operator>(measurement_t& obj);
 	};
 	
-	class sims_t : public measurement_t
+	class sims_t : public measurement_t, public mglDraw
 	{
 	protected:
 		void add_clusters(vector<cluster_t>& clusters_s);
-	public:
+	public: 
+		//creates instantly a plot
+		void plot_now(double sleep_sec=1);
+		///origin ready for import
+		void export_origin_ascii(string path="/tmp/", const string delimiter="\t");
+		
+		int Draw(mglGraph * gr) override;
 		sims_t(files::sims_t::name_t& filename, files::sims_t::contents_t& filecontents, list<sample_t>& samples_list, 
 			   vector<files::jpg_t>* jpg_files=nullptr,vector<files::profiler_t>* profiler_files=nullptr);
 		sims_t(files::sims_t::name_t& filename, list<sample_t>& samples_list);	
@@ -89,7 +100,8 @@ public:
 		msettings::dsims_t settings;
 		dsims_t(files::dsims_t& dsims_file, list<sample_t>& samples_list,vector<files::jpg_t>* jpg_files=nullptr,vector<files::profiler_t>* profiler_files=nullptr);
 		///loads all matching files into the measurement and clears the elements from the list(s)
-// 		dsims_t(vector<files::dsims_t>& dsims_files, list<sample_t>& samples_list,vector<files::jpg_t>* jpg_files=nullptr,vector<files::profiler_t>* profiler_files=nullptr);
+		dsims_t(vector<files::dsims_t>& dsims_files, list<sample_t>& samples_list,vector<files::jpg_t>* jpg_files=nullptr,vector<files::profiler_t>* profiler_files=nullptr);
+// 		bool operator<(dsims_t& obj);
 	};
 	
 	class tofsims_t : public sims_t

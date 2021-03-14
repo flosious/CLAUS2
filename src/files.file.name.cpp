@@ -238,7 +238,7 @@ bool files::file_t::name_t::parse_chip(string filename_part)
 {
 	smatch match;
 	regex reg1 ("^x([0-9]{1,2})y([0-9]{1,2})$", std::regex_constants::icase); 
-	regex reg2 ("^chip-([0-9]{1,2})-([0-9]{1,2})$"); 
+	regex reg2 ("^cX([0-9]{1,2})Y([0-9]{1,2})$"); 
 	regex reg3 ("^c([0-9]{1,2})-([0-9]{1,2})$"); 
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) || regex_search(filename_part,match,reg3)) 
 	{
@@ -397,14 +397,13 @@ bool files::file_t::name_t::operator!=(files::file_t::name_t& obj)
 	return !operator==(obj);
 }
 
-
-
-
-
-
-
-
-
+// bool files::file_t::name_t::operator<(files::file_t::name_t& obj)
+// {
+// 	if (olcdb() < obj.olcdb()) return true;
+// 	if (olcdb() > obj.olcdb()) return false;
+// 	return false;
+// }
+// 
 
 
 

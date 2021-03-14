@@ -155,12 +155,7 @@ vector<cluster_t> files::dsims_t::contents_t::clusters()
 			if (col.dimension=="C") concentration_s = concentration_t(col.data,col.unit);
 			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
 		}
-		
 		cluster_t cluster(clustername,sputter_time_s,intensity_s,sputter_depth_s,concentration_s);
-// 		cluster.sputter_time_p=sputter_time_s;
-// 		cluster.intensity_p=intensity_s;
-// 		cluster.sputter_depth_p=sputter_depth_s;
-// 		cluster.concentration_p=concentration_s;
 		if (cluster.is_set()) collected_clusters.push_back(cluster);
 		else
 			logger::error("files::dsims_t::contents_t::clusters() cluster.is_set()", false);
@@ -171,6 +166,8 @@ vector<cluster_t> files::dsims_t::contents_t::clusters()
 const vector<files::dsims_t::contents_t::column_t> files::dsims_t::contents_t::columns()
 {
 	if (check_Ipr()) ipr_shift_correction();
+	if (!parse_units_dimensions_clusternames())
+		return {};
 	remove_corrupted_lines();
 	if (cluster_names().size()<1 && !parse_units_dimensions_clusternames())
 	{
@@ -268,8 +265,7 @@ bool files::dsims_t::contents_t::parse_units_dimensions_clusternames()
 	}
 	if (samples.size()!=1) 
 	{
-// 		error=true;
-		logger::debug("files::dsims_t::contents_t::parse_raw_header_tensor(): samples.size()!=1");
+		logger::error("files::dsims_t::contents_t::parse_raw_header_tensor(): samples.size()!=1");
 		return false;
 	}
 	

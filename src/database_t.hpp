@@ -25,10 +25,25 @@
 #include <sqlite3.h> 
 #include <regex>
 
+#include "measurement.hpp"
 #include "tools.hpp"
 #include "log.hpp"
 #include "isotope.hpp"
 #include "sample.hpp"
+#include "matrix.hpp"
+#include "quantity.hpp"
+#include "element.hpp"
+#include "isotope.hpp"
+#include "ion.hpp"
+#include "msettings.hpp"
+#include "cluster.hpp"
+
+
+/*FORWARD DECLARATIONS*/
+class sample_t;
+// class measurements_;
+// class measurements_::dsims_t;
+/**********************/
 
 // Check out this link. The easiest way is to do the locking yourself, 
 // and to avoid sharing the connection between threads. 
@@ -46,8 +61,12 @@
 //     modify the database file, like INSERT, UPDATE, DELETE, and others.
 // 
 
-
 using namespace std;
+
+
+/***********************/
+/***   database_t    ***/
+/***********************/
 
 class database_t {
 	friend class config_t;
@@ -56,11 +75,9 @@ private:
 	bool openend=false;
     sqlite3* DB;
     bool close();
-    
+	
 	bool create_tables();
-	
 	bool create_table_everything();
-	
 	bool create_table_samples();
 	bool create_table_sample_implants();
 	bool create_table_sample_layers();
@@ -84,20 +101,23 @@ private:
     ///\brief the callback function for get_implanted_references
 //     static int callback_implanted_reference_samples(void *ptr, int argc, char **argv, char **azColName);
 public:
-	
-// 	sampl
-	
 	bool open();
-    
 	bool execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr);
 	database_t();
 	~database_t();
-// 	vector<string> get_error_messages();
+
 	/*call backs*/
 	///general callback function -> populates *ptr -> matrix(vector(vector(string)))
 	static int callback_lines_cols(void *ptr, int argc, char **argv, char **azColName);
 	///general callback function -> populates *ptr -> map(colname,vector(string) lines ))
 	static int callback_lines_map(void *ptr, int argc, char **argv, char **azColName);
+	
+	matrix_t matrix(sample_t& sample);
+	pair<depth_t,concentration_t> matrix_depth_profile(sample_t& sample);
+	pair<depth_t,concentration_t> isotope_depth_profile(isotope_t& isotope,msettings::dsims_t& settings); // dsims
+	pair<depth_t,concentration_t> isotope_depth_profile(isotope_t& isotope,msettings::sims_t& settings); // tofsims
+	vector<cluster_t> reference_clusters(string clustername, msettings::dsims_t& settings);
+	cluster_t reference_cluster(string clustername, msettings::dsims_t& settings);
 };
 
 /// sqlite3

@@ -16,20 +16,17 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef EXPORT_T_HPP
-#define EXPORT_T_HPP
+#ifndef PLOTTER_HPP
+#define PLOTTER_HPP
 
-#include "mgroup.hpp"
+#include <mgl2/mgl.h>
+#include <mgl2/fltk.h>
+#include "quantity.hpp"
 
-class export_t
+class plotter_t : public mglDraw
 {
 public:
-	export_t(mgroups::mgroup_t& MG);
-	void graphs_to_file();
-	void graphs_to_screen();
-	
-	void measurements_to_file();
-	void measurements_to_screen();
+	int Draw(mglGraph* gr) override;
 };
 
-#endif // EXPORT_T_HPP
+#endif // PLOTTER_HPP

@@ -27,3 +27,11 @@
 files::jpg_t::jpg_t(string& filename) : name(name_t(filename))
 {
 }
+
+bool files::jpg_t::operator<(jpg_t& obj)
+{
+	if (name.filename() < obj.name.filename()) return true;
+	if (name.filename() > obj.name.filename()) return false;
+	
+	return false;
+}
