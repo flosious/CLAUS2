@@ -81,8 +81,8 @@ public:
 // 	set<measurements::profiler_t*> profiler;
 	
 	
-	sample_t(files::file_t::name_t& fn,files::file_t::contents_t& f);
-	sample_t(files::file_t::name_t& fn);
+	sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f);
+	sample_t(files_::file_t::name_t& fn);
 // 	sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix);
 
 	string to_string(const string del=", ");

@@ -22,8 +22,8 @@
 /*********************************/
 /****       profiler_t       *****/
 /*********************************/
-files::profiler_t::name_t::name_t(string& filename_with_path_s) :
-										files::sims_t::name_t(filename_with_path_s,"_",{".txt"},{})
+files_::profiler_t::name_t::name_t(string& filename_with_path_s) :
+										files_::sims_t::name_t(filename_with_path_s,"_",{".txt"},{})
 {
 }
 // filenames::dsims_profiler_t::dsims_profiler_t(std::__cxx11::string& filename_with_path_s) :

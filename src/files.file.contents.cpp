@@ -19,24 +19,24 @@
 
 #include "files.hpp"
 
-files::file_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : filename_with_path(filename_with_path), delimiter(delimiter),identifiers(identifiers)
+files_::file_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : filename_with_path(filename_with_path), delimiter(delimiter),identifiers(identifiers)
 {
 }
 
-const string files::file_t::contents_t::creation_date_time() const
+const string files_::file_t::contents_t::creation_date_time() const
 {
 	time_t cdt = tools::file::creation_date(filename_with_path);
 	return tools::time::time_t_to_string(cdt);
 }
 
-bool files::file_t::contents_t::operator<(const files::file_t::contents_t& obj) const
+bool files_::file_t::contents_t::operator<(const files_::file_t::contents_t& obj) const
 {
 	if (filename_with_path >= obj.filename_with_path) 
 		return false;
 	return true;
 }
 
-bool files::file_t::contents_t::operator==(const files::file_t::contents_t& obj) const
+bool files_::file_t::contents_t::operator==(const files_::file_t::contents_t& obj) const
 {
 	if (filename_with_path == obj.filename_with_path)
 	{
@@ -45,7 +45,7 @@ bool files::file_t::contents_t::operator==(const files::file_t::contents_t& obj)
 	return false;
 }
 
-string files::file_t::contents_t::value_by_key(string key)
+string files_::file_t::contents_t::value_by_key(string key)
 {
 	if (raw_header_tensor().size()==0) return "";
 	if (raw_header_tensor()[0].size()==0) return "";
@@ -62,12 +62,12 @@ string files::file_t::contents_t::value_by_key(string key)
 	return "";
 }
 
-matrix_t files::file_t::contents_t::matrix()
+matrix_t files_::file_t::contents_t::matrix()
 {
 	return value_by_key("matrix");
 }
 
-const string& files::file_t::contents_t::contents_string()
+const string& files_::file_t::contents_t::contents_string()
 {
 	if (contents_p.size()==0)
 	{
@@ -82,7 +82,7 @@ const string& files::file_t::contents_t::contents_string()
 	return contents_p;
 }
 
-const bool files::file_t::contents_t::is_correct_type()
+const bool files_::file_t::contents_t::is_correct_type()
 {
 	if (contents_string()=="") return false;
 	for (auto& fci : identifiers)
@@ -95,7 +95,7 @@ const bool files::file_t::contents_t::is_correct_type()
 	return true;
 }
 
-bool files::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
+bool files_::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
 {
 	raw_data_tensor->clear();
 	raw_header_tensor->clear();
@@ -145,36 +145,36 @@ bool files::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vect
 	contents_p.clear();
 	return true;
 }
-vector<vector<vector<std::__cxx11::string> > >& files::file_t::contents_t::raw_header_tensor()
+vector<vector<vector<std::__cxx11::string> > >& files_::file_t::contents_t::raw_header_tensor()
 {
 	if (raw_header_tensor_p.size()>0) return raw_header_tensor_p;
 	
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
-		logger::debug("files::file_t::contents_t::raw_header_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+		logger::debug("files_::file_t::contents_t::raw_header_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
 	}
 	return raw_header_tensor_p;
 }
-vector<vector<vector<std::__cxx11::string> > >& files::file_t::contents_t::raw_data_tensor()
+vector<vector<vector<std::__cxx11::string> > >& files_::file_t::contents_t::raw_data_tensor()
 {
 
 	if (raw_data_tensor_p.size()>0) return raw_data_tensor_p;
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
-		logger::debug("files::file_t::contents_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+		logger::debug("files_::file_t::contents_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
 // 		return {};
 	}
 	return raw_data_tensor_p;
 }
 
-void files::file_t::contents_t::to_screen(string prefix)
+void files_::file_t::contents_t::to_screen(string prefix)
 {
 	cout << prefix << "delimiter:\t'" << delimiter <<"'" << endl;
 	if (identifiers.size()==1) cout << prefix << "identifiers:\t" << *identifiers.begin() << endl;
 	else cout << prefix << "identifiers:\t<" << identifiers.size() << ">" << endl;
 }
 
-std::__cxx11::string files::file_t::contents_t::to_string()
+std::__cxx11::string files_::file_t::contents_t::to_string()
 {
 	return "";
 }

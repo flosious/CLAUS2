@@ -20,11 +20,11 @@
 // {
 // }
 // 
-// msettings::sims_t::sims_t(files::sims_t* file_p) : files_p({file_p})
+// msettings::sims_t::sims_t(files_::sims_t* file_p) : files_p({file_p})
 // {
 // }
 // 
-// msettings::sims_t::sims_t(set<files::sims_t *> file_p) : files_p(file_p)
+// msettings::sims_t::sims_t(set<files_::sims_t *> file_p) : files_p(file_p)
 // {
 // }
 // 
@@ -54,7 +54,7 @@
 // {
 // 	if (secondary_polarity_p!="")
 // 		return secondary_polarity_p;
-// 	for (files::sims_t* f: files_p)
+// 	for (files_::sims_t* f: files_p)
 // 		if (f->name.secondary_polarity()!="") 
 // 		{
 // 			secondary_polarity_p= f->name.secondary_polarity();
@@ -67,7 +67,7 @@
 // {
 // 	if (secondary_voltage_p.is_set())
 // 		return secondary_voltage_p;
-// 	for (files::sims_t* f: files_p)
+// 	for (files_::sims_t* f: files_p)
 // 		if (f->name.secondary_voltage().is_set()) 
 // 		{
 // 			secondary_voltage_p=f->name.secondary_voltage();
@@ -80,7 +80,7 @@
 // {
 // 	if (sputter_ion_p.is_set())
 // 		return sputter_ion_p;
-// 	for (files::sims_t* f: files_p)
+// 	for (files_::sims_t* f: files_p)
 // 		if (f->name.sputter_element().is_set()) 
 // 		{
 // 			element_t ele = f->name.sputter_element();

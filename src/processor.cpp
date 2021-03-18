@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2020 Florian Bärwolf
+	Copyright (C) 2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -30,35 +30,49 @@ processor::processor(vector<string> args_p)
 // 	for (auto& DM : dsims_measurements())
 // 		cout << "DM.crater.linescans.size()=" << DM.crater.linescans.size() << endl;
 
+	
+	
+	list<sample_t> samples_list;
+	profiler_t profiler(filenames,samples_list);
+	camera_t camera(filenames);
+	dsims_t dsims(filenames,samples_list,profiler,camera);
+	
 	cout << "filenames.size()=" << filenames.size() << endl;
-	cout << "dsims_files().size()=" << dsims_files().size() << endl;
-	cout << "dsims_measurements.size()=" << dsims_measurements().size() << endl;
-	cout << "dsims_mgroups.size()=" << dsims_mgroups().size() << endl;
-	cout << "samples_list.size()=" << samples_list.size() << endl;
+	cout << "dsims.files().size()=" << dsims.files().size() << endl;
+	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
+	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
 	
 // 	mglFLTK* gr2;
 	
-	for (auto& MG : dsims_mgroups())
+	for (auto& MG : dsims.mgroups())
 	{
-		cout << MG.to_string() << endl;
-		for (auto& M:MG.measurements)
+// 		cout << MG.to_string() << endl;
+		for (auto& cR : MG.reference_clusters())
+// 			cR->to_string();
+			cout << "common ref_clusters: " << cR.to_string() << endl;
+		for (auto& M:MG.measurements())
 		{
+			
+// 			for (auto& R : M->reference_clusters())
+// 				cout << "ref_cluster: " << R->to_string() << endl;
 // 			for (auto& C:M.clusters)
 // 			{
 // 				cout << C.intensity().to_string() << endl;
 // 			}
 // 			gr2 = new mglFLTK(&M, "test plotter2");
 // 			M.export_origin_ascii();
-// 			M.plot_now();
+// 			M.plot_now(2);
 		}
 	}
-// 	gr2->Run();
-	samples_list.sort();
-	cout << "samples_list"<<endl;
-	for (auto& S : samples_list)
-		cout << "\t" << S.to_string() << endl;
 	
-// 	logger::to_screen();
+	
+// 	gr2->Run();
+// 	samples_list.sort();
+// 	cout << "samples_list"<<endl;
+// 	for (auto& S : samples_list)
+// 		cout << "\t" << S.to_string() << endl;
+	
+	logger::to_screen();
 // 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
@@ -67,204 +81,181 @@ processor::processor(vector<string> args_p)
 	
 }
 
-vector<mgroups::dsims_t>& processor::dsims_mgroups()
+/*****************************/
+/***  processor::dsims_t  ****/
+/*****************************/
+
+processor::dsims_t::dsims_t(vector<std::__cxx11::string>& filenames, 
+							list<sample_t>& samples_list, 
+							processor::profiler_t& profiler, 
+							processor::camera_t& cam) : filenames(filenames),samples_list(samples_list),profiler(profiler),camera(cam)
 {
-	if (dsims_mgroups_p.size()>0)
-		return dsims_mgroups_p;
-	
-	int old_size = 0;
-	dsims_measurements();
-	while (old_size!=dsims_measurements_p.size() && dsims_measurements_p.size() > 0)
-	{
-		dsims_mgroups_p.push_back(mgroups::dsims_t(dsims_measurements_p));
-	}
-	return dsims_mgroups_p;
 }
 
-void processor::populate_profiler_files()
+vector<files_::dsims_t> & processor::dsims_t::files()
 {
+	if (files_p.size()>0)
+		return files_p;
+	
+// 	#pragma omp declare reduction (merge : std::vector<files_::dsims_t> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))	
+// 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+// 	#pragma omp parallel for reduction(merge: dsims_files_p)
+	for (int f=0;f<filenames.size();f++)
+	{
+		files_::dsims_t::name_t dFN(filenames.at(f));
+		if (dFN.is_correct_type())
+		{
+			files_::dsims_t::contents_t F(filenames.at(f));
+			if (F.is_correct_type())
+			{
+				files_::dsims_t D{dFN,F};
+				files_p.push_back(D);
+				filenames.erase(filenames.begin()+f); // dont allow doubles
+				f--;
+			}
+		}
+	}
+	sort(files_p.begin(),files_p.end());
+	return files_p;
+}
+
+vector<measurements_::dsims_t>& processor::dsims_t::measurements()
+{
+	if (measurements_p.size()>0)
+		return measurements_p;
+	if (files().size()==0) // populate files_p
+		return measurements_p;
+	
+	for (vector<files_::dsims_t>::iterator DF=files_p.begin();DF!=files_p.end();DF++)
+	{
+		measurements_p.push_back({*DF,samples_list,&camera.files(),&profiler.files()});
+	}
+	
+	if (measurements_p.size()<2)
+		return measurements_p;
+	
+	/*clear duplicates*/
+	sort(measurements_p.begin(),measurements_p.end());
+	for (vector<measurements_::dsims_t>::iterator DM=measurements_p.begin();DM!=measurements_p.end();DM++)
+	{
+		for (vector<measurements_::dsims_t>::iterator DM2=DM+1;DM2!=measurements_p.end();DM2++)
+		{
+			if (*DM == *DM2)
+			{
+				DM->crater.total_sputter_depths << DM2->crater.total_sputter_depths;
+				DM->crater.linescans.insert(DM->crater.linescans.end(),DM2->crater.linescans.begin(),DM2->crater.linescans.end());
+				measurements_p.erase(DM2);
+				DM2--;
+			}
+		}
+	}
+	
+	return measurements_p;
+}
+
+vector<mgroups_::dsims_t>& processor::dsims_t::mgroups()
+{
+	if (mgroups_p.size()>0)
+		return mgroups_p;
+	
+	int old_size = 0;
+	measurements();
+	//populate groups with measurements, until measurement_p is empty
+	while (old_size!=measurements_p.size() && measurements_p.size() > 0)
+	{
+		mgroups_p.push_back(mgroups_::dsims_t(measurements_p));
+	}
+	return mgroups_p;
+}
+
+
+
+/*****************************/
+/**  processor::camera_t  ****/
+/*****************************/
+
+processor::camera_t::camera_t(vector<std::__cxx11::string>& filenames) : filenames(filenames)
+{
+}
+
+
+vector<files_::jpg_t>& processor::camera_t::files()
+{
+	if (files_p.size()>0)
+		return files_p;
+	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
+	{
+		files_::jpg_t::name_t djFN(*f);
+		if (djFN.is_correct_type())
+		{
+			files_p.push_back(djFN);
+			filenames.erase(f);
+			f--;
+		}
+	}
+	/*check for distinguishability*/
+	set<string> different_methods;
+	for (auto& PF : files_p)
+	{
+		different_methods.insert(PF.name.method());
+	}
+	different_methods.erase("");
+	if (different_methods.size()>1)
+		logger::error("can not distinguish dsims / tofsims jpg files","expect wrong results");
+	return files_p;
+}
+
+/**********************************/
+/***   processor::profiler_t   ****/
+/**********************************/
+
+processor::profiler_t::profiler_t(vector<std::__cxx11::string>& filenames, list<sample_t>& samples_list) : filenames(filenames), samples_list(samples_list)
+{
+}
+
+vector<files_::profiler_t>& processor::profiler_t::files()
+{
+	if (files_p.size()>0)
+		return files_p;
 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
 	{
 		/*dsims_profiler_t*/
-		files::profiler_t::name_t dpFN(*f);
+		files_::profiler_t::name_t dpFN(*f);
 		if (dpFN.is_correct_type())
 		{
-			files::profiler_t::contents_t F(*f);
+			files_::profiler_t::contents_t F(*f);
 			if (F.is_correct_type())
 			{
-				if (dpFN.method()=="dsims")
-					dsims_profiler_files_p.push_back({dpFN,F});
-				else if (dpFN.method()=="tofsims")
-					tofsims_profiler_files_p.push_back({dpFN,F});
-				else if (dpFN.method()=="")
-				{
-					tofsims_profiler_files_p.push_back({dpFN,F});
-					dsims_profiler_files_p.push_back({dpFN,F});
-				}
-				else 
-					logger::error("can not distinguish dsims / tofsims profiler measurements","expect wrong results");
+				files_p.push_back({dpFN,F});
 				filenames.erase(f);
 				f--;
 			}
 		}
 	}
-	sort(dsims_profiler_files_p.begin(),dsims_profiler_files_p.end());
-	sort(tofsims_profiler_files_p.begin(),tofsims_profiler_files_p.end());
-}
-
-vector<files::profiler_t>& processor::dsims_profiler_files()
-{
-	if (dsims_profiler_files_p.size()==0) populate_profiler_files();
-	return dsims_profiler_files_p;
-}
-
-vector<files::profiler_t>& processor::tofsims_profiler_files()
-{
-	if (tofsims_profiler_files_p.size()==0) populate_profiler_files();
-	return tofsims_profiler_files_p;
-}
-
-vector<measurements_::dsims_t>& processor::dsims_measurements()
-{
-	if (dsims_measurements_p.size()>0)
-		return dsims_measurements_p;
-	dsims_files(); // populate dsims_files_p
-	int old_size = 0;
-	while (old_size!=dsims_files_p.size() && dsims_files_p.size() > 0)
+	/*check for distinguishability*/
+	set<string> different_methods;
+	for (auto& PF : files_p)
 	{
-		dsims_measurements_p.push_back(measurements_::dsims_t(dsims_files_p,samples_list,&dsims_jpg_files(),&dsims_profiler_files_p));
+		different_methods.insert(PF.name.method());
 	}
-	return dsims_measurements_p;
-	
-// 	for (vector<files::dsims_t>::iterator DF=dsims_files_p.begin();DF!=dsims_files_p.end();DF++)
-// 	{
-// 		dsims_measurements_p.push_back({*DF,samples_list,&dsims_jpg_files(),&dsims_profiler_files()});
-// 		dsims_files_p.erase(DF);
-// 		DF--;
-// 	}
-	
-// 	/*
-// 	 * remove duplicates
-// 	 * this will also remove crater depth of doubles
-// 	 */
-// 	sort(dsims_measurements_p.begin(),dsims_measurements_p.end());
-// 	/*filter*/
-// 	dsims_measurements_p.erase(unique(dsims_measurements_p.begin(),dsims_measurements_p.end()),dsims_measurements_p.end());
-// 	return dsims_measurements_p;
+	different_methods.erase("");
+	if (different_methods.size()>1)
+		logger::error("can not distinguish dsims / tofsims profiler files","expect wrong results");
+	return files_p;
 }
 
-vector<files::dsims_t> & processor::dsims_files()
+vector<measurements_::profiler_t> & processor::profiler_t::measurements()
 {
-	if (dsims_files_p.size()>0)
-		return dsims_files_p;
+	if (measurements_p.size()>0)
+		return measurements_p;
+	if (files().size()==0) 
+		return measurements_p;
 	
-// 	#pragma omp declare reduction (merge : std::vector<files::dsims_t> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))	
-// 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
-// 	#pragma omp parallel for reduction(merge: dsims_files_p)
-	for (int f=0;f<filenames.size();f++)
+	for (vector<files_::profiler_t>::iterator PM=files_p.begin();PM!=files_p.end();PM++)
 	{
-		files::dsims_t::name_t dFN(filenames.at(f));
-		if (dFN.is_correct_type())
-		{
-			files::dsims_t::contents_t F(filenames.at(f));
-			if (F.is_correct_type())
-			{
-				files::dsims_t D{dFN,F};
-				dsims_files_p.push_back(D);
-// 				filenames.erase(f); // dont allow doubles
-// 				f--;
-			}
-		}
+		measurements_p.push_back({*PM,samples_list});
+		files_p.erase(PM);
+		PM--;
 	}
-	sort(dsims_files_p.begin(),dsims_files_p.end());
-	return dsims_files_p;
+	return measurements_p;
 }
-
-
-void processor::populate_jpg_files()
-{
-	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
-	{
-		files::jpg_t::name_t djFN(*f);
-		if (djFN.is_correct_type())
-		{
-			if (djFN.method()=="dsims") dsims_jpg_files_p.push_back(*f);
-			else if (djFN.method()=="tofsims") tofsims_jpg_files_p.push_back(*f);
-			else
-			{
-				dsims_jpg_files_p.push_back(*f);
-				tofsims_jpg_files_p.push_back(*f);
-			}
-// 			filenames.erase(f);
-// 			f--;
-		}
-	}
-	sort(dsims_jpg_files_p.begin(),dsims_jpg_files_p.end());
-	sort(tofsims_jpg_files_p.begin(),tofsims_jpg_files_p.end());
-}
-
-vector<files::jpg_t>& processor::dsims_jpg_files()
-{
-	if (dsims_jpg_files_p.size()==0) populate_jpg_files();
-	return dsims_jpg_files_p;
-}
-
-vector<files::jpg_t>& processor::tofsims_jpg_files()
-{
-	if (tofsims_jpg_files_p.size()==0) populate_jpg_files();
-	return tofsims_jpg_files_p;
-}
-
-// vector<measurements_::profiler_t> & processor::dsims_profiler_measurements()
-// {
-// 	if (dsims_profiler_measurements_p.size()>0)
-// 		return dsims_profiler_measurements_p;
-// 	populate_profiler_measurements();
-// 	
-// 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
-// 	{
-// 		/*profiler_t*/
-// 		filenames::profiler_t pFN(*f);
-// 		if (pFN.is_correct_type())
-// 		{
-// 			filecontents::profiler_t F(pFN);
-// 			if (F.is_correct_type())
-// 			{
-// 				if (tofsims_profiler_measurements_p.size()>0)
-// 					logger::error("tofsims_profiler_measurements_p.size()>0: can not distinguish between dsims and tofsims profiler measurements","expect wrong results");
-// 				dsims_profiler_measurements_p.push_back({pFN,F,samples_list});
-// 				filenames.erase(f);
-// 				f--;
-// 			}
-// 		}
-// 	}
-// 	return dsims_profiler_measurements_p;
-// }
-// 
-// vector<measurements_::profiler_t> & processor::tofsims_profiler_measurements()
-// {
-// 	if (tofsims_profiler_measurements_p.size()>0)
-// 		return tofsims_profiler_measurements_p;
-// 	populate_profiler_measurements();
-// 	
-// 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
-// 	{
-// 		/*profiler_t*/
-// 		filenames::profiler_t pFN(*f);
-// 		if (pFN.is_correct_type())
-// 		{
-// 			filecontents::profiler_t F(pFN);
-// 			if (F.is_correct_type())
-// 			{
-// 				if (dsims_profiler_measurements_p.size()>0)
-// 					logger::error("tofsims_profiler_measurements_p.size()>0: can not distinguish between dsims and tofsims profiler measurements","expect wrong results");
-// 				tofsims_profiler_measurements_p.push_back({pFN,F,samples_list});
-// 				filenames.erase(f);
-// 				f--;
-// 			}
-// 		}
-// 	}
-// 	return tofsims_profiler_measurements_p;
-// }
-
-

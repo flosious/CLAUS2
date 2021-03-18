@@ -23,29 +23,26 @@ bool measurements_::measurement_t::use_sample=true;
 bool measurements_::measurement_t::use_olcdb=true;
 bool measurements_::measurement_t::use_group=true;
 
-measurements_::measurement_t::measurement_t(files::file_t::name_t& filename, files::file_t::contents_t& filecontents, list<sample_t>& samples_list) : 
-												repetition(filename.repetition()), olcdb(filename.olcdb()),group(filename.group())
+measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, list<sample_t>& samples_list, string method) : 
+												repetition(filename.repetition()), olcdb(filename.olcdb()),group(filename.group()), method(method), filename_with_path(filename.filename_with_path)
 {
+	sample_t s(filename,filecontents);
+	sample = tools::find_in_V(s,samples_list); 
 	if (sample==nullptr)
 	{
-		sample_t s(filename,filecontents);
-		sample = tools::find_in_V(s,samples_list); 
-		if (sample==nullptr)
-		{
-			samples_list.push_back(s);
-// 			cout << "inserting: " << s.to_string() << endl;
-			sample = &samples_list.back();
-		}
-		else
-		{
-			if (!sample->matrix().is_set())
-				sample->matrix() = s.matrix(); 
-		}
+		samples_list.push_back(s);
+		sample = &samples_list.back();
 	}
-// 	cout << "inserting measurement_t: " << filename.filename_with_path << endl;
+
+	if (!sample->matrix().is_set())
+	{
+// 		cout << "MATRIX = " << s.matrix().to_string() << endl;
+		sample->matrix() = s.matrix(); 
+	}
 }
 
-measurements_::measurement_t::measurement_t(files::file_t::name_t& filename, list<sample_t>& samples_list) : repetition(filename.repetition()), olcdb(filename.olcdb()), group(filename.group())
+measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, list<sample_t>& samples_list, string method) : 
+			repetition(filename.repetition()), olcdb(filename.olcdb()), group(filename.group()), method(method), filename_with_path(filename.filename_with_path)
 {
 	if (sample==nullptr)
 	{
@@ -54,11 +51,9 @@ measurements_::measurement_t::measurement_t(files::file_t::name_t& filename, lis
 		if (sample==nullptr)
 		{
 			samples_list.push_back(s);
-// 			cout << "inserting: " << s.to_string() << endl;
 			sample = &samples_list.back();
 		}
 	}
-// 	cout << "inserting measurement_t: " << filename.filename_with_path << endl;
 }
 
 

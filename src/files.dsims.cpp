@@ -18,15 +18,16 @@
 
 #include "files.hpp"
 
-files::dsims_t::dsims_t(string& filename) : name(filename),contents(filename)
+files_::dsims_t::dsims_t(string& filename) : name(filename),contents(filename)
 {
 }
 
-files::dsims_t::dsims_t(files::dsims_t::name_t& name_s, files::dsims_t::contents_t& contents_s) : name(name_s), contents(contents_s)
+files_::dsims_t::dsims_t(files_::dsims_t::name_t& name_s, files_::dsims_t::contents_t& contents_s) : 
+			name(name_s), contents(contents_s)
 {
 }
 
-bool files::dsims_t::operator<(files::dsims_t& obj)
+bool files_::dsims_t::operator<(files_::dsims_t& obj)
 {
 	if (name.filename() < obj.name.filename()) return true;
 	if (name.filename() > obj.name.filename()) return false;

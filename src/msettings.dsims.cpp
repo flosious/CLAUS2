@@ -23,11 +23,11 @@
 /****  Dsims_t  *****/
 /********************/
 
-msettings::dsims_t::dsims_t(files::dsims_t& file) : dsims_t(file.name,file.contents)
+msettings::dsims_t::dsims_t(files_::dsims_t& file) : dsims_t(file.name,file.contents)
 {
 }
 
-msettings::dsims_t::dsims_t(files::dsims_t::name_t& filename, files::dsims_t::contents_t& filecontents) : sims_t(filename)
+msettings::dsims_t::dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents) : sims_t(filename)
 {
 	ion_t sputter_ion_from_file = ion_t(filecontents.sputter_element(),{{1}}); // Cs + or O2 +
 	/*overwrite values from filename with contents*/

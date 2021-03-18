@@ -21,8 +21,12 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include "measurement.hpp"
+#include "quantity.hpp"
+#include "isotope.hpp"
+#include "cluster.hpp"
 
 ///calculation methods
 class calc
@@ -32,24 +36,28 @@ public:
 	class jiang_t
 	{
 	public:
-		jiang_t(vector<measurements_::sims_t> Ms);
+		jiang_t(vector<measurements_::sims_t>& Ms);
+		///maps isotope -> depth profile (.first->depth, .second -> concentration)
+		map<isotope_t,pair<sputter_depth_t,concentration_t>> depth_profiles(measurements_::sims_t& M);
+		pair<sputter_depth_t,concentration_t> depth_profile(measurements_::sims_t& M, isotope_t& isotope);
+		pair<sputter_depth_t,concentration_t> depth_profile(measurements_::sims_t& M, cluster_t& cluster);
 	};
 	///point by point calculation
 	class pbp_t
 	{
-		public:
-		pbp_t(vector<measurements_::sims_t> Ms);
+	public:
+		pbp_t(vector<measurements_::sims_t>& Ms);
 	};
 	///constant reference calculation
 	class const_ref_t
 	{
-		public:
-		const_ref_t(vector<measurements_::sims_t> Ms);
+	public:
+		const_ref_t(vector<measurements_::sims_t>& Ms);
 	};
 	class test_t
 	{
-		public:
-		test_t(vector<measurements_::sims_t> Ms);
+	public:
+		test_t(vector<measurements_::sims_t>& Ms);
 	};
 };
 

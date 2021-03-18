@@ -53,19 +53,33 @@ public:
 		static bool use_olcdb;
 		static bool use_sample;
 	public:
-		measurement_t(files::file_t::name_t& filename, files::file_t::contents_t& filecontents, list<sample_t>& samples_list);
-		measurement_t(files::file_t::name_t& filename, list<sample_t>& samples_list);
+		measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, list<sample_t>& samples_list, string method);
+		measurement_t(files_::file_t::name_t& filename, list<sample_t>& samples_list, string method);
 		
+		string filename_with_path;
 		string to_string(const string del = ", ") const;
 		bool is_set() const;
 		string group;
 		string repetition;
 		int olcdb;
 		sample_t* sample=nullptr;
+		/// dsims, tofsims, xps, profiler, ...
+		string method;
 		bool operator==(measurement_t& obj);
 		bool operator!=(measurement_t& obj);
 		bool operator<(measurement_t& obj);
 		bool operator>(measurement_t& obj);
+	};
+	
+	class profiler_t : public measurement_t
+	{
+	private:
+		string primary_method_p="";
+	public:
+		const string& primary_method();
+		total_sputter_depth_t total_sputter_depths;
+		linescan_t linescan;
+		profiler_t(files_::profiler_t& file, list<sample_t>& samples_list);
 	};
 	
 	class sims_t : public measurement_t, public mglDraw
@@ -73,15 +87,21 @@ public:
 	protected:
 		void add_clusters(vector<cluster_t>& clusters_s);
 	public: 
+		set<cluster_t*> reference_clusters();
+		bool load_reference();
+		bool load_reference_parameters();
+		///pointer to its measurement reference cluster
+		cluster_t* reference_cluster=nullptr;
+		
 		//creates instantly a plot
 		void plot_now(double sleep_sec=1);
 		///origin ready for import
 		void export_origin_ascii(string path="/tmp/", const string delimiter="\t");
 		
 		int Draw(mglGraph * gr) override;
-		sims_t(files::sims_t::name_t& filename, files::sims_t::contents_t& filecontents, list<sample_t>& samples_list, 
-			   vector<files::jpg_t>* jpg_files=nullptr,vector<files::profiler_t>* profiler_files=nullptr);
-		sims_t(files::sims_t::name_t& filename, list<sample_t>& samples_list);	
+		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, 
+			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
+		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method);	
 		crater_t crater;
 		string to_string(const string del = ", ") const;
 		vector<cluster_t> clusters;
@@ -98,9 +118,11 @@ public:
 	{
 	public:
 		msettings::dsims_t settings;
-		dsims_t(files::dsims_t& dsims_file, list<sample_t>& samples_list,vector<files::jpg_t>* jpg_files=nullptr,vector<files::profiler_t>* profiler_files=nullptr);
+		dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profiler_t>* profiler_files=nullptr);
 		///loads all matching files into the measurement and clears the elements from the list(s)
-		dsims_t(vector<files::dsims_t>& dsims_files, list<sample_t>& samples_list,vector<files::jpg_t>* jpg_files=nullptr,vector<files::profiler_t>* profiler_files=nullptr);
+// 		dsims_t(vector<files_::dsims_t>& dsims_files, list<sample_t>& samples_list,vector<files_::jpg_t>* jpg_files=nullptr);
+		bool operator==(dsims_t& obj);
+		bool operator!=(dsims_t& obj);
 // 		bool operator<(dsims_t& obj);
 	};
 	
@@ -108,17 +130,11 @@ public:
 	{
 	public:
 // 		const msettings::tofsims_t settings;
-// 		tofsims_t(vector<files::tofsims_t>& dsims_files, list<sample_t>& samples_list,vector<files::jpg_t>* jpg_files=nullptr);
+// 		tofsims_t(vector<files_::tofsims_t>& dsims_files, list<sample_t>& samples_list,vector<files_::jpg_t>* jpg_files=nullptr);
 	};
 	
 	
-	class profiler_t : public measurement_t
-	{
-	public:
-		linescan_t linescan;
-		profiler_t(files::profiler_t& file, list<sample_t>& samples_list);
-// 		profiler_t(vector<files::profiler_t>& files, list<sample_t>& samples_list);
-	};
+	
 };
 
 #endif // MEASUREMENT_T_HPP

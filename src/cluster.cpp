@@ -36,7 +36,7 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 				logger::error("cluster_t::cluster_t() symbol not parseable, skipping", iso_p);
 				continue;
 			}
-			if (match[3]!="") amount = tools::str::str_to_double(match[3]);
+			if (match[3]!="") amount = tools::str::str_to_double (match[3]);
 			else amount = 1;
 			isotopes.push_back({symbol,nucleons,-1,amount});
 		}
@@ -58,7 +58,7 @@ cluster_t::cluster_t(vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s)
 {
 }
 
-std::__cxx11::string cluster_t::to_string(const string del)
+std::__cxx11::string cluster_t::to_string(const string del) const
 {
 	const int max = isotopes.size();
 	if (max==0) return "";
@@ -71,15 +71,11 @@ std::__cxx11::string cluster_t::to_string(const string del)
 	return out.str();
 }
 
-
 const bool cluster_t::is_set() const
 {
 	if (isotopes.size()>0) return true;
 	return false;
 }
-
-
-
 
 const concentration_t& cluster_t::concentration()
 {

@@ -19,16 +19,20 @@
 #include "files.hpp"
 
 
-// files::profiler_t::profiler_t(files::profiler_t::name_t& name_s, files::profiler_t::contents_t& contents_s) : name(name_s), contents(contents_s)
+// files_::profiler_t::profiler_t(files_::profiler_t::name_t& name_s, files_::profiler_t::contents_t& contents_s) : name(name_s), contents(contents_s)
 // {
 // 	
 // }
 
-files::jpg_t::jpg_t(string& filename) : name(name_t(filename))
+files_::jpg_t::jpg_t(name_t& filename) : name(filename)
 {
 }
 
-bool files::jpg_t::operator<(jpg_t& obj)
+files_::jpg_t::jpg_t(string& filename) : name(name_t(filename))
+{
+}
+
+bool files_::jpg_t::operator<(jpg_t& obj)
 {
 	if (name.filename() < obj.name.filename()) return true;
 	if (name.filename() > obj.name.filename()) return false;

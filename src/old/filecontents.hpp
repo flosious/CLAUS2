@@ -50,7 +50,7 @@ using namespace std;
 /*
  * overview:
  * 
- * files::
+ * files_::
  * 		->file_t 								(contents_t ,name_t)
  * 				-> sims_t 						(contents_t:file_t_contents ,name_t:file_t::name_t)
  * 						-> dsims_dp_rpc_asc_t 	(contents_t:sims_t_contents ,name_t:sims_t::name_t)

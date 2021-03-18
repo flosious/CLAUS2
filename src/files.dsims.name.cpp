@@ -24,7 +24,7 @@
 /*********************************/
 
 /*rcognizing ckb_asc and dp_rpc_asc */
-files::dsims_t::name_t::name_t(string& filename_with_path_s) :
-										files::sims_t::name_t(filename_with_path_s,"_",{".ckb_asc",".dp_rpc_asc"},{})
+files_::dsims_t::name_t::name_t(string& filename_with_path_s) :
+										files_::sims_t::name_t(filename_with_path_s,"_",{".ckb_asc",".dp_rpc_asc"},{})
 {
 }

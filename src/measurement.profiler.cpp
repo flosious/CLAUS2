@@ -19,16 +19,23 @@
 #include "measurement.hpp"
 
 
-measurements_::profiler_t::profiler_t(files::profiler_t&  file, std::__cxx11::list< sample_t >& samples_list) : measurement_t(file.name,file.contents,samples_list)
+measurements_::profiler_t::profiler_t(files_::profiler_t&  file, std::__cxx11::list< sample_t >& samples_list) : 
+			measurement_t(file.name,file.contents,samples_list,"profiler"), primary_method_p(file.name.method())
 {
 	linescan = file.contents.linescan();
+	total_sputter_depths = file.name.total_sputter_depths();
 // 	cout << ">>>inserting profiler_t: " << filename.filename_with_path << endl;
 }
 
-bool files::profiler_t::operator<(profiler_t& obj)
+bool files_::profiler_t::operator<(profiler_t& obj)
 {
 	if (name.filename() < obj.name.filename()) return true;
 	if (name.filename() > obj.name.filename()) return false;
 	
 	return false;
+}
+
+const string& measurements_::profiler_t::primary_method()
+{
+	return primary_method_p;
 }

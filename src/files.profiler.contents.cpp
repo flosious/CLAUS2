@@ -23,11 +23,11 @@
 /***      profiler_t    ***/
 /**************************/
 
-files::profiler_t::contents_t::contents_t(string& filename_with_path) : files::sims_t::contents_t(filename_with_path,",",{"Scan Type,","Stylus Type"})
+files_::profiler_t::contents_t::contents_t(string& filename_with_path) : files_::sims_t::contents_t(filename_with_path,",",{"Scan Type,","Stylus Type"})
 {
 }
 
-linescan_t files::profiler_t::contents_t::linescan()
+linescan_t files_::profiler_t::contents_t::linescan()
 {
 	if (raw_data_tensor().size()==0) return linescan_t();
 	vector<vector<double>> data_cols_lines = tools::mat::transpose_matrix(tools::mat::str_matrix_to_double_matrix(raw_data_tensor()[0]));

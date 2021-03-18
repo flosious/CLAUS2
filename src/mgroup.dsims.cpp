@@ -19,13 +19,13 @@
 
 #include "mgroup.hpp"
 
-mgroups::dsims_t::dsims_t(measurements_::dsims_t& dsims_measurements) : 
+mgroups_::dsims_t::dsims_t(measurements_::dsims_t& dsims_measurements) : 
 				sims_t(dsims_measurements), settings(dsims_measurements.settings)
 {
-	measurements.push_back(dsims_measurements);
+	measurements_p.push_back(dsims_measurements);
 }
 
-mgroups::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurements) : 
+mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurements) : 
 									dsims_t(dsims_measurements.back())
 {
 	dsims_measurements.pop_back();
@@ -33,33 +33,33 @@ mgroups::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measureme
 	{
 		dsims_t MG(*DM);
 		if (*this != MG) continue;
-		measurements.push_back(*DM);
+		measurements_p.push_back(*DM);
 		dsims_measurements.erase(DM);
 		DM--;
 	}
 }
 
-bool mgroups::dsims_t::operator==(const mgroups::dsims_t& obj) const
+bool mgroups_::dsims_t::operator==(const mgroups_::dsims_t& obj) const
 {
 	if (sims_t::operator!=(obj)) return false;
 	if (settings != obj.settings) return false;
 	return true;
 }
 
-bool mgroups::dsims_t::operator!=(const mgroups::dsims_t& obj) const
+bool mgroups_::dsims_t::operator!=(const mgroups_::dsims_t& obj) const
 {
 	return !operator==(obj);
 }
 
-std::__cxx11::string mgroups::dsims_t::to_string(const string del)
+std::__cxx11::string mgroups_::dsims_t::to_string(const string del)
 {
 	stringstream ss;
 	ss << mgroup_t::to_string(del) << del;
 	if (use_settings) ss << settings.to_string(del) << del;
-	ss << "measurements: <" << measurements.size() << ">" << endl;
+	ss << "measurements: <" << measurements_p.size() << ">" << endl;
 	ss << "{" << endl;
 	int counter = 0;
-	for (auto& M : measurements)
+	for (auto& M : measurements_p)
 	{
 		ss << "\t" << "[" << counter << "] " << M.to_string(del) << endl;
 		counter++;
@@ -69,3 +69,12 @@ std::__cxx11::string mgroups::dsims_t::to_string(const string del)
 // 	out.erase(out.end()-del.length(),out.end()); // remove the las del
 	return out;
 }
+
+vector<measurements_::sims_t*> mgroups_::dsims_t::measurements()
+{
+	vector<measurements_::sims_t*> Ms(measurements_p.size());
+	for (int i=0;i<measurements_p.size();i++)
+		Ms.at(i)=&measurements_p.at(i);
+	return Ms;
+}
+

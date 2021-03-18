@@ -195,6 +195,8 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 			iso.abundance = abundance_t({iso.substance_amount.data.at(0)/symbol_to_total_amount.find(iso.symbol)->second});
 		}
 	}
+	
+	
 }
 
 

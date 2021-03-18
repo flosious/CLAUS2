@@ -22,7 +22,7 @@
 /*********************************/
 /****       tofsims_t        *****/
 /*********************************/
-files::tofsims_t::name_t::name_t(string& filename_with_path_s) :
-										files::sims_t::name_t(filename_with_path_s,"_",{".TXT"},{})
+files_::tofsims_t::name_t::name_t(string& filename_with_path_s) :
+										files_::sims_t::name_t(filename_with_path_s,"_",{".TXT"},{})
 {
 }

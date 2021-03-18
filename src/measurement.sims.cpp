@@ -30,71 +30,64 @@ void measurements_::sims_t::add_clusters(vector<cluster_t>& clusters_s)
 }
 
 
-measurements_::sims_t::sims_t(files::sims_t::name_t& filename, 
-							  files::sims_t::contents_t& filecontents, 
+
+
+measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, 
+							  files_::sims_t::contents_t& filecontents, 
 							  list<sample_t>& samples_list, 
-							  vector<files::jpg_t>* jpg_files,
-							  vector<files::profiler_t>* profiler_files) : 
-									measurement_t(filename,filecontents,samples_list)
+							  string method,
+							  vector<files_::jpg_t>* jpg_files,
+							  vector<files_::profiler_t>* profiler_files) : 
+									measurement_t(filename,filecontents,samples_list,method)
 {
 	clusters = filecontents.clusters();
 	
-// 	sort(jpg_files->begin(),jpg_files->end());
-// 	sort(profiler_files->begin(),profiler_files->end());
 	bool found_any=false;
-	
 	/*JPEG files*/
 	if (jpg_files!=nullptr)
 	{
+		sort(jpg_files->begin(),jpg_files->end());
 		found_any=false;
 		for (int i=jpg_files->size()-1;i>=0;i--)
 		{
-			measurement_t JM(jpg_files->at(i).name,samples_list);
-			if (*this != JM)
+			if ((jpg_files->at(i).name.method()==method || jpg_files->at(i).name.method()=="") && 
+					filename != jpg_files->at(i).name)
 			{
 				if (!found_any) continue;
 				else break;
 			}
 			found_any = true;
-
+			/*save essentials*/
 			crater.total_sputter_depths << jpg_files->at(i).name.total_sputter_depths();
+			/*delete*/
 			jpg_files->erase(jpg_files->begin()+i);
 		}
 	}
 	
 	/*PROFILER files*/
-// 	if (profiler_files!=nullptr)
-// 	{
-// 		for (vector<files::profiler_t>::iterator it=profiler_files->begin();it!=profiler_files->end();it++)
-// 		{
-// 			measurement_t PM(it->name,samples_list);
-// 			if (*this != PM) continue;
-// 			crater.linescans.push_back(it->contents.linescan());
-// 			crater.total_sputter_depths << it->name.total_sputter_depths();
-// 			profiler_files->erase(it);
-// 			it--;
-// 		}
-// 	}
 	if (profiler_files!=nullptr)
 	{
+		sort(profiler_files->begin(),profiler_files->end());
 		found_any=false;
 		for (int i=profiler_files->size()-1;i>=0;i--)
 		{
-			measurement_t JM(profiler_files->at(i).name,samples_list);
-			if (*this != JM)
+			if ((profiler_files->at(i).name.method()==method || profiler_files->at(i).name.method()=="") && 
+					filename != profiler_files->at(i).name)
 			{
 				if (!found_any) continue;
 				else break;
 			}
 			found_any = true;
-			crater.linescans.push_back(profiler_files->at(i).contents.linescan());
+			/*save essentials*/
 			crater.total_sputter_depths << profiler_files->at(i).name.total_sputter_depths();
+			crater.linescans.push_back(profiler_files->at(i).contents.linescan());
+			/*delete*/
 			profiler_files->erase(profiler_files->begin()+i);
 		}
 	}
 }
 
-measurements_::sims_t::sims_t(files::sims_t::name_t& filename, list<sample_t>& samples_list) : measurement_t(filename,samples_list)
+measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method) : measurement_t(filename,samples_list,method)
 {
 	crater.total_sputter_depths = filename.total_sputter_depths();
 }
@@ -105,8 +98,10 @@ std::__cxx11::string measurements_::sims_t::to_string(const std::__cxx11::string
 {
 	stringstream ss;
 	ss << measurement_t::to_string() << del;
-	ss << "crater: " << crater.total_sputter_depths.to_string() << del;
-	ss << "clusters: <" << clusters.size() << ">" ;
+	ss << "crater: ";
+	ss << crater.total_sputter_depths.to_string() << del;
+	ss << "linescans: <" << crater.linescans.size() <<">" << del;
+	ss << "clusters: <" << clusters.size() << ">" << del;
 	return ss.str();
 }
 
@@ -155,14 +150,15 @@ int measurements_::sims_t::Draw(mglGraph* gr)
 			
 			gr->SetRange('y',1,1E6);
 			gr->SetFunc("","lg(y)");
-			
+// 			gr->AddLegend(,"k");
 	// 		gr->SetOrigin(0,0,0);
 			gr->Axis("x");
 			gr->Axis("!Ey");
 	// 		gr->Label(y,"intensity T","E"); -> labes each data point
 			gr->Label('y',"intensity",0);
 	// 		gr->Plot(x,y);
-			gr->Plot(y,"k","legend 'intensity'");
+			string l = "legend '"+C.to_string()+" intensity'";
+			gr->Plot(y,"k",l.c_str());
 	// 		concentration_p = concentration_t((intensity()*1E17).data);
 		}
 		
@@ -182,21 +178,22 @@ int measurements_::sims_t::Draw(mglGraph* gr)
 			y.Set(C.concentration().data);
 			
 			gr->SetRange('y',1E15,1E21);
-			
+// 			gr->AddLegend(C.to_string().c_str(),"k");
 			gr->SetOrigin(statistics::get_max_from_Y(C.sputter_time().data),0);
 			
 			gr->Axis("!yUE","B");
 	// 		gr->SetFunc("","lg(y)");
 			gr->Label('y',"#B{concentration}",0);
 	// 		gr->SetTickShift(mglPoint(100,10,0,0)); // does not work?
-			gr->Plot(y,"B","legend 'concentration'");
+			string l = "legend '"+C.to_string()+" concentration'";
+			gr->Plot(y,"B",l.c_str());
 		}
 	}
 	string title = "\n"+to_string();
 // 	gr->Title(title.c_str(),"",3);
 	gr->Grid();
 	gr->Box();
-	
+	gr->Legend(3,"^#");
 	return 0;
 }
 
@@ -259,4 +256,59 @@ void measurements_::sims_t::export_origin_ascii(std::__cxx11::string path, const
 	tools::file::write_to_file(path+filename.str(),&out,false);
 }
 
+/*"30Si" can be a reference cluster for elemental Si or isotopical purified Si*/
+/*"30Si 28Si" can be a reference cluster for elemental Si or isotopical purified Si*/
+/*"74Ge 28Si" can be a reference cluster for elemental Si+Ge or isotopical purified Si+Ge*/
+/// reference_cluster: does NOT contain isotopes, which are NOT found in matrix->isotopes
+set<cluster_t*> measurements_::sims_t::reference_clusters()
+{
+	set<cluster_t*> ref_clusters;
+	if (reference_cluster!=nullptr)
+		ref_clusters.insert(reference_cluster);
+	if (!sample->matrix().is_set())
+		return ref_clusters;
+	
+// 	set<string> element_symbols_in_matrix;
+// 	for (auto& I : sample->matrix().isotopes)
+// 		element_symbols_in_matrix.insert(I.symbol);
+	
+	bool insert=false;
+	//
+	for (auto& C : clusters)
+	{
+		insert = true;
+		for (auto& I : C.isotopes)
+			if (find(sample->matrix().isotopes.begin(),sample->matrix().isotopes.end(),I)==sample->matrix().isotopes.end())
+			{
+				insert=false;
+				break;
+			}
+		if (insert) ref_clusters.insert(&C);
+	}
+	
+	return ref_clusters;
+}
 
+// bool measurements_::sims_t::operator==(measurements_::sims_t& obj)
+// {
+// 	if (measurement_t::operator!=(obj)) return false;
+// 	if (settings!=nullptr && obj.settings!=nullptr)
+// 		if (*settings!=*obj.settings) return false;
+// 	return true;
+// }
+// 
+// bool measurements_::sims_t::operator!=(measurements_::sims_t& obj)
+// {
+// 	return !operator==(obj);
+// }
+// 
+// bool measurements_::sims_t::operator<(measurements_::sims_t& obj)
+// {
+// 	if (measurement_t::operator<(obj)) return true;
+// 	if (*this == obj && settings!=nullptr && obj.settings!=nullptr)
+// 		if (settings < obj.settings) return true;
+// 	return false;
+// }
+// 
+// 
+// 

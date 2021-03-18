@@ -75,7 +75,7 @@ bool sample_t::use_simple_name=true;
 // vector<sample_t>* sample_t::samples_list()
 // {
 // 	bool inserted;
-// 	for (auto& f: files::files_list())
+// 	for (auto& f: files_::files_list())
 // 	{
 // 		sample_t sample(f);
 // 		inserted = false;
@@ -101,7 +101,7 @@ bool sample_t::use_simple_name=true;
 // {	
 // }
 
-sample_t::sample_t(files::file_t::name_t& fn,files::file_t::contents_t& f) : 
+sample_t::sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f) : 
 																wafer(fn.wafer()), 
 																monitor(fn.monitor()),
 																lot(fn.lot()),
@@ -110,9 +110,10 @@ sample_t::sample_t(files::file_t::name_t& fn,files::file_t::contents_t& f) :
 																simple_name(fn.simple_name()),
 																matrix_p(f.matrix())
 {
+// 	cout << "f.matrix() = " << f.matrix().to_string() << endl;
 }
 
-sample_t::sample_t(files::file_t::name_t& fn) : wafer(fn.wafer()), 
+sample_t::sample_t(files_::file_t::name_t& fn) : wafer(fn.wafer()), 
 																monitor(fn.monitor()),
 																lot(fn.lot()),
 																lot_split(fn.lot_split()),

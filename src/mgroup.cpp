@@ -19,20 +19,21 @@
 
 #include "mgroup.hpp"
 
-bool mgroups::mgroup_t::use_olcdb=true;
-bool mgroups::mgroup_t::use_group=true;
-bool mgroups::mgroup_t::use_settings=true;
+bool mgroups_::mgroup_t::use_olcdb=true;
+bool mgroups_::mgroup_t::use_group=true;
+bool mgroups_::mgroup_t::use_settings=true;
 
-// mgroups::mgroup_t::mgroup_t(filenames::filename_t& fn, files::file_t& f, list<sample_t>& samples_list) : olcdb(fn.olcdb()), group(fn.group())
+// mgroups_::mgroup_t::mgroup_t(filenames::filename_t& fn, files_::file_t& f, list<sample_t>& samples_list) : olcdb(fn.olcdb()), group(fn.group())
 // {
 // }
 
-mgroups::mgroup_t::mgroup_t(measurements_::measurement_t& measurement) : olcdb(measurement.olcdb), group(measurement.group)
+mgroups_::mgroup_t::mgroup_t(measurements_::measurement_t& measurement) : 
+							olcdb(measurement.olcdb), group(measurement.group)
 {
 }
 
 
-std::__cxx11::string mgroups::mgroup_t::to_string(const string del)
+std::__cxx11::string mgroups_::mgroup_t::to_string(const string del)
 {
 	stringstream ss;
 	if (use_olcdb) ss << "olcdb: " << olcdb << del;
@@ -40,7 +41,7 @@ std::__cxx11::string mgroups::mgroup_t::to_string(const string del)
 	return ss.str();
 }
 
-bool mgroups::mgroup_t::operator==(const mgroups::mgroup_t& obj) const
+bool mgroups_::mgroup_t::operator==(const mgroups_::mgroup_t& obj) const
 {
 	if (use_olcdb)
 		if (olcdb!=obj.olcdb) return false;
@@ -51,7 +52,7 @@ bool mgroups::mgroup_t::operator==(const mgroups::mgroup_t& obj) const
 	return true;
 }
 
-bool mgroups::mgroup_t::operator!=(const mgroups::mgroup_t& obj) const
+bool mgroups_::mgroup_t::operator!=(const mgroups_::mgroup_t& obj) const
 {
 	return !operator==(obj);
 }

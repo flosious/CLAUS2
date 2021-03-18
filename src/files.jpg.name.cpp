@@ -18,6 +18,6 @@
 
 #include "files.hpp"
 
-files::jpg_t::name_t::name_t(string& filename_with_path_s) : files::sims_t::name_t(filename_with_path_s,"_",{".jpg",".jpeg"},{})
+files_::jpg_t::name_t::name_t(string& filename_with_path_s) : files_::sims_t::name_t(filename_with_path_s,"_",{".jpg",".jpeg"},{})
 {
 }

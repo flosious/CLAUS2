@@ -55,7 +55,7 @@ void logger::error(std::__cxx11::string message, string variable)
 	stringstream crit;
 	crit << "*** ERROR ***"  << "\t\t" << message << "\t\t" << variable ;
 	log_messages.push_back(crit.str());
-	cout << crit.str();
+// 	cout << crit.str();
 // 	log::log_message("*** ERROR ***",message, variable);
 }
 void logger::error(std::__cxx11::string message, int variable)

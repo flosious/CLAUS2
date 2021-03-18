@@ -49,55 +49,52 @@ using namespace std;
 class processor 
 {
 private:
-// 	static int sample(mglGraph *gr);
-	
-	
-	vector<string> filenames;
-	
 	/*SAMPLES*/
-	list<sample_t> samples_list;
 	
-	/*FILES*/
-	vector<files::jpg_t> dsims_jpg_files_p;
-	vector<files::jpg_t> tofsims_jpg_files_p;
+	class camera_t
+	{
+	private:
+		vector<string>& filenames;
+		vector<files_::jpg_t> files_p;
+	public:
+		camera_t(vector<string>& filenames);
+		vector<files_::jpg_t>& files();
+	};
 	
-	vector<files::profiler_t> dsims_profiler_files_p;
-	vector<files::profiler_t> tofsims_profiler_files_p;
+	class profiler_t
+	{
+	private:
+		vector<string>& filenames;
+		vector<files_::profiler_t> files_p;
+		vector<measurements_::profiler_t> measurements_p;
+		list<sample_t>& samples_list;
+	public:
+		profiler_t(vector<string>& filenames, list<sample_t>& samples_list);
+		vector<files_::profiler_t>& files();
+		vector<measurements_::profiler_t>& measurements();
+	};
 	
-	vector<files::dsims_t> dsims_files_p;
-	/*MEASUREMENTS*/
-	vector<measurements_::profiler_t> dsims_profiler_measurements_p;
-	vector<measurements_::profiler_t> tofsims_profiler_measurements_p;
-	vector<measurements_::dsims_t> dsims_measurements_p;
-	
-	/*MGROUPS*/
-	vector<mgroups::dsims_t> dsims_mgroups_p;
-	
-	void populate_jpg_files();
-	void populate_profiler_files();
+	class dsims_t
+	{
+	private:
+		vector<string>& filenames;
+		vector<files_::dsims_t> files_p;
+		vector<measurements_::dsims_t> measurements_p;
+		vector<mgroups_::dsims_t> mgroups_p;
+		list<sample_t>& samples_list;
+		profiler_t& profiler;
+		camera_t& camera;
+	public:
+		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, profiler_t& profiler, camera_t& cam);
+		vector<files_::dsims_t>& files();
+		vector<measurements_::dsims_t>& measurements();
+		vector<mgroups_::dsims_t>& mgroups();
+	};
+		
+private:
+	vector<string> filenames;
 public:
 	processor(vector<string> args_p);
-	/*FILENAMES*/
-	vector<files::jpg_t>& dsims_jpg_files();
-	vector<files::jpg_t>& tofsims_jpg_files();
-	
-	vector<files::profiler_t>& dsims_profiler_files();
-	vector<files::profiler_t>& tofsims_profiler_files();
-	/*MEASUREMENTS*/
-	vector<measurements_::profiler_t>& dsims_profiler_measurements();
-	vector<measurements_::profiler_t>& tofsims_profiler_measurements();
-	
-	/*DSIMS*/
-	///removes matching filenames and populates dsims_files_p
-	vector<files::dsims_t>& dsims_files();
-	///removes matching dsims_files_p and populates dsims_measurements_p
-	vector<measurements_::dsims_t>& dsims_measurements();
-	
-	/*MGROUPS*/
-	vector<mgroups::dsims_t>& dsims_mgroups();
-	
-	/*TESTS*/
-// 	void plot(quantity_t X, quantity_t Y);
 };
 
 

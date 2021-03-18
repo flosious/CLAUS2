@@ -30,7 +30,7 @@
 #include "crater.hpp"
 #include "matrix.hpp"
 
-class files
+class files_
 {
 public:
 	class file_t
@@ -118,7 +118,7 @@ public:
 		public:
 			matrix_t matrix();
 			const bool is_correct_type(); 
-// 			files::file_t::name_t& name;
+// 			files_::file_t::name_t& name;
 			string to_string();
 			///this does not work as intended for some reason
 			bool operator< (const contents_t& obj) const;
@@ -158,7 +158,7 @@ public:
 			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
 		public:
 			virtual vector<cluster_t> clusters();
-// 			files::sims_t::name_t& name;
+// 			files_::sims_t::name_t& name;
 			string to_string();
 			///content column
 			class column_t
@@ -239,12 +239,12 @@ public:
 			const quantity_t energy_window(const string find_this="Energy window (eV)");
 			const quantity_t em_yield(const string find_this="EM yield (%)");
 			const quantity_t em_voltage(const string find_this="EM HV (V)");
-// 			files::dsims_t::name_t& name;
+// 			files_::dsims_t::name_t& name;
 			void to_screen(string prefix="");
 			contents_t(string& filename_with_path);
 		};	
 		dsims_t(string& filename);
-		dsims_t(files::dsims_t::name_t& name_s, files::dsims_t::contents_t& contents_s);
+		dsims_t(files_::dsims_t::name_t& name_s, files_::dsims_t::contents_t& contents_s);
 		bool operator<(dsims_t& obj);
 		name_t name;
 		contents_t contents;
@@ -273,10 +273,10 @@ public:
 			const energy_t analysis_energy();
 		
 			contents_t(string& filename_with_path);
-// 			files::tofsims_t::name_t& name;
+// 			files_::tofsims_t::name_t& name;
 		};
 		tofsims_t(string& filename);
-		tofsims_t(files::tofsims_t::name_t& name_s, files::tofsims_t::contents_t& contents_s);
+		tofsims_t(files_::tofsims_t::name_t& name_s, files_::tofsims_t::contents_t& contents_s);
 		name_t name;
 		contents_t contents;
 	};
@@ -297,7 +297,7 @@ public:
 			contents_t(string& filename_with_path);
 		};
 		profiler_t(string& filename);
-		profiler_t(files::profiler_t::name_t& name_s, files::profiler_t::contents_t& contents_s);
+		profiler_t(files_::profiler_t::name_t& name_s, files_::profiler_t::contents_t& contents_s);
 		bool operator<(profiler_t& obj);
 		name_t name;
 		contents_t contents;
@@ -313,6 +313,7 @@ public:
 // 			virtual ~name_t();
 		};
 		jpg_t(string& filename);
+		jpg_t(name_t& filename);
 		bool operator<(jpg_t& obj);
 		name_t name;
 	};

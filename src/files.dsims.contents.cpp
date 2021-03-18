@@ -24,25 +24,25 @@
 
 
 /***************************************/
-/*****  files::dsims_t::contents_t::Ipr_t       ****/
+/*****  files_::dsims_t::contents_t::Ipr_t       ****/
 /***************************************/
 
-// const sputter_depth_t files::dsims_t::contents_t::Ipr_t::sputter_depth() const
+// const sputter_depth_t files_::dsims_t::contents_t::Ipr_t::sputter_depth() const
 // {
 // 	return sputter_depth_p;
 // }
 // 
-// const sputter_time_t files::dsims_t::contents_t::Ipr_t::sputter_time() const
+// const sputter_time_t files_::dsims_t::contents_t::Ipr_t::sputter_time() const
 // {
 // 	return sputter_time_p;
 // }
 // 
-// const sputter_current_t files::dsims_t::contents_t::Ipr_t::sputter_current() const
+// const sputter_current_t files_::dsims_t::contents_t::Ipr_t::sputter_current() const
 // {
 // 	return sputter_current_p;
 // }
 
-files::dsims_t::contents_t::Ipr_t::Ipr_t(sputter_current_t sputter_current_s, 
+files_::dsims_t::contents_t::Ipr_t::Ipr_t(sputter_current_t sputter_current_s, 
 							 sputter_time_t sputter_time_s, 
 							 sputter_depth_t sputter_depth_s) 
 																	: 	sputter_current(sputter_current_s), 
@@ -51,7 +51,7 @@ files::dsims_t::contents_t::Ipr_t::Ipr_t(sputter_current_t sputter_current_s,
 {
 }
 
-const std::__cxx11::string files::dsims_t::contents_t::Ipr_t::to_string(const string del) const
+const std::__cxx11::string files_::dsims_t::contents_t::Ipr_t::to_string(const string del) const
 {
 	stringstream out;
 	out << sputter_time.to_string() << del << sputter_depth.to_string() << del << sputter_current.to_string();
@@ -60,14 +60,14 @@ const std::__cxx11::string files::dsims_t::contents_t::Ipr_t::to_string(const st
 
 
 /***************************************/
-/*****  files::dsims_t::contents_t  ****/
+/*****  files_::dsims_t::contents_t  ****/
 /***************************************/
 
-files::dsims_t::contents_t::contents_t(string& filename_with_path) : files::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"})
+files_::dsims_t::contents_t::contents_t(string& filename_with_path) : files_::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"})
 {
 }
 
-void files::dsims_t::contents_t::to_screen(string prefix)
+void files_::dsims_t::contents_t::to_screen(string prefix)
 {
 // 	cout << prefix << "name:" << endl;
 // 	cout << prefix << "\t"<<"filename_with_path:\t" << name.filename_with_path << endl;
@@ -136,7 +136,7 @@ void files::dsims_t::contents_t::to_screen(string prefix)
 
 
 
-vector<cluster_t> files::dsims_t::contents_t::clusters()
+vector<cluster_t> files_::dsims_t::contents_t::clusters()
 {
 	vector<cluster_t> collected_clusters;
 	for (auto& clustername : cluster_names())
@@ -158,12 +158,12 @@ vector<cluster_t> files::dsims_t::contents_t::clusters()
 		cluster_t cluster(clustername,sputter_time_s,intensity_s,sputter_depth_s,concentration_s);
 		if (cluster.is_set()) collected_clusters.push_back(cluster);
 		else
-			logger::error("files::dsims_t::contents_t::clusters() cluster.is_set()", false);
+			logger::error("files_::dsims_t::contents_t::clusters() cluster.is_set()", false);
 	}
 	return collected_clusters;
 }
 
-const vector<files::dsims_t::contents_t::column_t> files::dsims_t::contents_t::columns()
+const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t::columns()
 {
 	if (check_Ipr()) ipr_shift_correction();
 	if (!parse_units_dimensions_clusternames())
@@ -171,11 +171,11 @@ const vector<files::dsims_t::contents_t::column_t> files::dsims_t::contents_t::c
 	remove_corrupted_lines();
 	if (cluster_names().size()<1 && !parse_units_dimensions_clusternames())
 	{
-		logger::debug("files::dsims_t::contents_t::columns(): !parse_units_dimensions_clusternames");
+		logger::debug("files_::dsims_t::contents_t::columns(): !parse_units_dimensions_clusternames");
 		return {};
 	}
 	
-	vector<files::sims_t::contents_t::column_t> cols;
+	vector<files_::sims_t::contents_t::column_t> cols;
 	vector<vector<string>> data_cols_lines = tools::mat::transpose_matrix(raw_data_tensor()[0]);
 	const int cols_per_element = dimensions().size()/cluster_names().size();
 // 	cout << "dimensions().size()=" << dimensions().size() << endl;
@@ -185,7 +185,7 @@ const vector<files::dsims_t::contents_t::column_t> files::dsims_t::contents_t::c
 	
 	for (int i=0;i<dimensions().size() && i<data_cols_lines.size() ;i++)
 	{
-		files::sims_t::contents_t::column_t col;
+		files_::sims_t::contents_t::column_t col;
 		col.cluster_name=cluster_names()[i/cols_per_element];
 		col.dimension=dimensions()[i];
 		col.unit=units()[i];
@@ -209,7 +209,7 @@ const vector<files::dsims_t::contents_t::column_t> files::dsims_t::contents_t::c
 	return cols;
 }
 
-const files::dsims_t::contents_t::Ipr_t files::dsims_t::contents_t::Ipr()
+const files_::dsims_t::contents_t::Ipr_t files_::dsims_t::contents_t::Ipr()
 {
 	sputter_current_t sputter_current_s;
 	sputter_time_t sputter_time_s;
@@ -224,26 +224,26 @@ const files::dsims_t::contents_t::Ipr_t files::dsims_t::contents_t::Ipr()
 	return {sputter_current_s,sputter_time_s,sputter_depth_s};
 }
 
-const vector<std::__cxx11::string>& files::dsims_t::contents_t::dimensions()
+const vector<std::__cxx11::string>& files_::dsims_t::contents_t::dimensions()
 {
 	if (dimensions_p.size()>0) return dimensions_p;
 	parse_units_dimensions_clusternames();
 	return dimensions_p;
 }
-const vector<std::__cxx11::string>& files::dsims_t::contents_t::units()
+const vector<std::__cxx11::string>& files_::dsims_t::contents_t::units()
 {
 	if (units_p.size()>0) return units_p;
 	parse_units_dimensions_clusternames();
 	return units_p;
 }
-const vector<std::__cxx11::string>& files::dsims_t::contents_t::cluster_names()
+const vector<std::__cxx11::string>& files_::dsims_t::contents_t::cluster_names()
 {
 	if (cluster_names_p.size()>0) return cluster_names_p;
 	parse_units_dimensions_clusternames();
 	return cluster_names_p;
 }
 
-bool files::dsims_t::contents_t::parse_units_dimensions_clusternames()
+bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 {
 	cluster_names_p.clear();
 	units_p.clear();
@@ -265,7 +265,7 @@ bool files::dsims_t::contents_t::parse_units_dimensions_clusternames()
 	}
 	if (samples.size()!=1) 
 	{
-		logger::error("files::dsims_t::contents_t::parse_raw_header_tensor(): samples.size()!=1");
+		logger::error("files_::dsims_t::contents_t::parse_raw_header_tensor(): samples.size()!=1");
 		return false;
 	}
 	
@@ -286,7 +286,7 @@ bool files::dsims_t::contents_t::parse_units_dimensions_clusternames()
 	}
         
 	if (units_p.size()!=dimensions_p.size()) {
-		logger::fatal("files::dsims_t::contents_t::parse_raw_header_tensor(): units.size()!=dimensions.size()");
+		logger::fatal("files_::dsims_t::contents_t::parse_raw_header_tensor(): units.size()!=dimensions.size()");
 		return false;
 	}
 		
@@ -306,7 +306,7 @@ bool files::dsims_t::contents_t::parse_units_dimensions_clusternames()
 // 	print(dimensions_p);
 // 	print(units_p);
 // 	if (units_p.size()!=dimensions_p.size()) {
-// 		logger::fatal("files::dsims_t::contents_t::parse_raw_header_tensor(): units.size()!=dimensions.size()");
+// 		logger::fatal("files_::dsims_t::contents_t::parse_raw_header_tensor(): units.size()!=dimensions.size()");
 // 		return false;
 // 	}
 
@@ -314,14 +314,14 @@ bool files::dsims_t::contents_t::parse_units_dimensions_clusternames()
     return true;
 }
 
-bool files::dsims_t::contents_t::check_Ipr() 
+bool files_::dsims_t::contents_t::check_Ipr() 
 {
 	is_Ipr=false;
 	is_Ipr = tools::mat::find_str_in_mat(cluster_names(),"Ipr");
 	return is_Ipr;
 }
 
-set<int> files::dsims_t::contents_t::corrupted_lines()
+set<int> files_::dsims_t::contents_t::corrupted_lines()
 {
 	set<int> corrupted_lines_p;
 	vector<vector<string>> cols_lines = tools::mat::transpose_matrix(raw_data_tensor().at(0));
@@ -354,14 +354,13 @@ set<int> files::dsims_t::contents_t::corrupted_lines()
 	return corrupted_lines_p;
 }
 
-void files::dsims_t::contents_t::remove_corrupted_lines()
+void files_::dsims_t::contents_t::remove_corrupted_lines()
 {
 	set<int> corrupted_lines_p=corrupted_lines();
 	if (raw_data_tensor().size()==0) return;
-	
 	for (set<int>::reverse_iterator it=corrupted_lines_p.rbegin();it!=corrupted_lines_p.rend();++it)
 	{
-		logger::info("files::dsims_t::contents_t::remove_corrupted_lines()", *it);
+		logger::info("files_::dsims_t::contents_t::remove_corrupted_lines() " + std::to_string(*it), filename_with_path);
 		raw_data_tensor_p.at(0).erase(raw_data_tensor_p.at(0).begin()+*it);
 	}
 }
@@ -369,13 +368,13 @@ void files::dsims_t::contents_t::remove_corrupted_lines()
 /*
  * exported data is bugged, there are to many "\t" in the lines, where there is no cluster data, but Ipr data
  */
-bool files::dsims_t::contents_t::ipr_shift_correction() 
+bool files_::dsims_t::contents_t::ipr_shift_correction() 
 {
 	raw_data_tensor();
 	vector<vector<string>>* mat = &raw_data_tensor_p.at(0);
     if (mat->size()==0) 
 	{
-		logger::error("files::dsims_t::contents_t::ipr_shift_correction(): raw_data_tensor_p.at(0).size()==0", (int)mat->size());
+		logger::error("files_::dsims_t::contents_t::ipr_shift_correction(): raw_data_tensor_p.at(0).size()==0", (int)mat->size());
 		return false;
 	}
 	int cols_per_element = dimensions().size()/cluster_names().size();
@@ -407,7 +406,7 @@ bool files::dsims_t::contents_t::ipr_shift_correction()
     return true;
 }
 
-const quantity_t files::dsims_t::contents_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
+const quantity_t files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
 {
 	string unit="";
 	vector<vector<double>> data_vecs;
@@ -420,13 +419,13 @@ const quantity_t files::dsims_t::contents_t::get_quantity_from_dimension_and_clu
 	}
 	if (unit=="") 
 	{
-		logger::error("files::dsims_t::contents_t::sputter_time() unit",unit);
+		logger::error("files_::dsims_t::contents_t::sputter_time() unit",unit);
 		return {};
 	}
 	return quantity_t{statistics::common_vector(data_vecs),unit};
 }
 
-const map<string,string>& files::dsims_t::contents_t::infos_and_settings()
+const map<string,string>& files_::dsims_t::contents_t::infos_and_settings()
 {
 	if (infos_and_settings_p.size()>0) return infos_and_settings_p;
 	string key, value;
@@ -451,7 +450,7 @@ const map<string,string>& files::dsims_t::contents_t::infos_and_settings()
 	return infos_and_settings_p;
 }
 
-const tm files::dsims_t::contents_t::start_date_time()
+const tm files_::dsims_t::contents_t::start_date_time()
 {
 	// Analysis date   03/06/2020    
 	// Analysis time   10:43
@@ -461,7 +460,7 @@ const tm files::dsims_t::contents_t::start_date_time()
 	return tools::time::string_time_to_tm_structure(time.str(),"%m/%d/%Y %H:%M:%S");
 }
 
-const tm files::dsims_t::contents_t::creation_date_time()
+const tm files_::dsims_t::contents_t::creation_date_time()
 {
 	// Creation date   03/06/2020    
 	// Creation time   10:43
@@ -471,20 +470,20 @@ const tm files::dsims_t::contents_t::creation_date_time()
 	return tools::time::string_time_to_tm_structure(time.str(),"%m/%d/%Y %H:%M:%S");
 }
 
-const string files::dsims_t::contents_t::secondary_polarity(const string find_this)
+const string files_::dsims_t::contents_t::secondary_polarity(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	return infos_and_settings().at(find_this);
 }
 
-const energy_t files::dsims_t::contents_t::sputter_energy(const string find_this)
+const energy_t files_::dsims_t::contents_t::sputter_energy(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return energy_t({data},{"eV"});
 }
 
-const element_t files::dsims_t::contents_t::sputter_element(const string find_this)
+const element_t files_::dsims_t::contents_t::sputter_element(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	string ele = infos_and_settings().at(find_this);
@@ -494,91 +493,91 @@ const element_t files::dsims_t::contents_t::sputter_element(const string find_th
 	return element_t({ele});
 }
 
-const secondary_voltage_t files::dsims_t::contents_t::secondary_voltage(const string find_this)
+const secondary_voltage_t files_::dsims_t::contents_t::secondary_voltage(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return secondary_voltage_t({data},{"V"});
 }
 
-const rastersize_t files::dsims_t::contents_t::sputter_rastersize(const string find_this)
+const rastersize_t files_::dsims_t::contents_t::sputter_rastersize(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return rastersize_t({data},{"um"});
 }
 
-const rastersize_t files::dsims_t::contents_t::analyzed_area(const string find_this)
+const rastersize_t files_::dsims_t::contents_t::analyzed_area(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return rastersize_t({data},{"um"});
 }
 
-const quantity_t files::dsims_t::contents_t::chamber_pressure(const string find_this)
+const quantity_t files_::dsims_t::contents_t::chamber_pressure(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("chamber_pressure",{data},{"mbar"});
 }
 
-const quantity_t files::dsims_t::contents_t::contrast_aperture(const string find_this)
+const quantity_t files_::dsims_t::contents_t::contrast_aperture(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("contrast_aperture",{data},{"um"});
 }
 
-const quantity_t files::dsims_t::contents_t::egate(const string find_this)
+const quantity_t files_::dsims_t::contents_t::egate(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("egate",{data},{"%"});
 }
 
-const quantity_t files::dsims_t::contents_t::em_voltage(const string find_this)
+const quantity_t files_::dsims_t::contents_t::em_voltage(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("em_voltage",{data},{"V"});
 }
 
-const quantity_t files::dsims_t::contents_t::em_yield(const string find_this)
+const quantity_t files_::dsims_t::contents_t::em_yield(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("em_yield",{data},{"%"});
 }
 
-const quantity_t files::dsims_t::contents_t::entrance_slit(const string find_this)
+const quantity_t files_::dsims_t::contents_t::entrance_slit(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("entrance_slit",{data},{"um"});
 }
 
-const quantity_t files::dsims_t::contents_t::energy_window(const string find_this)
+const quantity_t files_::dsims_t::contents_t::energy_window(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("energy_window",{data},{"eV"});
 }
 
-const quantity_t files::dsims_t::contents_t::exit_slit(const string find_this)
+const quantity_t files_::dsims_t::contents_t::exit_slit(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("exit_slit",{data},{"um"});
 }
 
-const quantity_t files::dsims_t::contents_t::field_aperture(const string find_this)
+const quantity_t files_::dsims_t::contents_t::field_aperture(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity_t("field_aperture",{data},{"um"});
 }
 
-const quantity_t files::dsims_t::contents_t::mass_resolution(const string find_this)
+const quantity_t files_::dsims_t::contents_t::mass_resolution(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));

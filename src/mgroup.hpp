@@ -20,7 +20,7 @@
 #define MEASUREMENT_GROUP_T_HPP
 
 
-
+#include <algorithm>
 #include <set>
 #include <vector>
 #include <string>
@@ -40,7 +40,7 @@ using namespace std;
 /************************/
 
 
-class mgroups
+class mgroups_
 {
 public:
 	/*
@@ -57,7 +57,7 @@ public:
 		static bool use_settings;
 	protected:
 		///measurements belonging to this group
-// 		mgroup_t(filenames::filename_t& fn, files::file_t& f, list<sample_t>& samples_list);
+// 		mgroup_t(filenames::filename_t& fn, files_::file_t& f, list<sample_t>& samples_list);
 		
 	public:
 		mgroup_t(measurements_::measurement_t& measurement);
@@ -101,6 +101,9 @@ public:
 	protected:
 	public:
 		sims_t(measurements_::sims_t& measurement);
+		///looks up for common cluster in all measurements corresponding to the matrices
+		vector<cluster_t> reference_clusters();
+		virtual vector<measurements_::sims_t*> measurements();
 		// calc.jiang(measurements& belonging to one/this group) ctor
 		// calc.jiang.SR.median
 		// calc.jiang.concentration(isotope/cluster) --> isotope with set concentration, but for wich measurement?
@@ -112,12 +115,13 @@ public:
 	class dsims_t: public sims_t
 	{
 	private:
-		
+		vector<measurements_::dsims_t> measurements_p;
 	public:
 		dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
 		dsims_t(measurements_::dsims_t& dsims_measurements);
+		vector<measurements_::sims_t*> measurements() override;
 		string to_string(const string del=", ");
-		vector<measurements_::dsims_t> measurements;
+		
 		const msettings::dsims_t settings;
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;

@@ -19,11 +19,11 @@
 #include "files.hpp"
 
 
-files::profiler_t::profiler_t(files::profiler_t::name_t& name_s, files::profiler_t::contents_t& contents_s) : name(name_s), contents(contents_s)
+files_::profiler_t::profiler_t(files_::profiler_t::name_t& name_s, files_::profiler_t::contents_t& contents_s) : name(name_s), contents(contents_s)
 {
 	
 }
 
-files::profiler_t::profiler_t(string& filename) : name(name_t(filename)), contents(contents_t(filename))
+files_::profiler_t::profiler_t(string& filename) : name(name_t(filename)), contents(contents_t(filename))
 {
 }

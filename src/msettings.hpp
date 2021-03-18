@@ -36,7 +36,7 @@ public:
 	class sims_t
 	{
 	public:
-		sims_t(files::sims_t::name_t& filename);
+		sims_t(files_::sims_t::name_t& filename);
 		const std::__cxx11::string to_string(const std::__cxx11::string del = ", ") const;
 		string secondary_polarity;
 		energy_t sputter_energy;
@@ -49,8 +49,8 @@ public:
 	class dsims_t : public sims_t
 	{
 	public:
-		dsims_t(files::dsims_t::name_t& filename, files::dsims_t::contents_t& filecontents);
-		dsims_t(files::dsims_t& file);
+		dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents);
+		dsims_t(files_::dsims_t& file);
 		const string to_string(const string del=", ") const;
 		
 		rastersize_t sputter_rastersize;
@@ -75,7 +75,7 @@ public:
 // 	public:
 // 		tofsims_t();
 // 	// 	const beam_settings_t analysis_beam();
-// 		tofsims_t(set<files::tofsims_t*> files_p);
+// 		tofsims_t(set<files_::tofsims_t*> files_p);
 // 		string to_string();
 // 	};
 };

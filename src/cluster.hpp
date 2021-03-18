@@ -50,7 +50,7 @@ private:
 	sputter_depth_t sputter_depth_p;
 // 	const crater_t* crater();
 // 	const sample_t::matrix_t* matrix();
-	const cluster_t* reference_cluster();
+// 	const cluster_t* reference_cluster();
 	///put this in the measurement_t class
 // 	vector<element_t>* matrix_elements; 
 
@@ -63,20 +63,16 @@ public:
 			  intensity_t intensity={},
 			  sputter_depth_t sputter_depth={},
 			  concentration_t concentration={});
-	
 	cluster_t(string clustername);
-// 	cluster_t(string clustername, sputter_time_t sputter_time_s,intensity_t intensity_s,sputter_depth_t sputter_depth_s={},concentration_t concentration_s={});
 	cluster_t(vector<isotope_t>& isotopes_s);
-// 	cluster_t(map<isotope_t,int>& isotopes_amount_s);
 	
-	string to_string(const string del=" ");
+	string to_string(const string del=" ") const;
 	const bool is_set() const;
-	///isotopes which define this cluster
+	///isotopes which define this cluster-
 	const concentration_t& concentration();
 	const intensity_t& intensity();
 	const sputter_time_t& sputter_time();
 	const sputter_depth_t& sputter_depth();
-	const SF_t SF();
 	///sputter equilibrium state of this cluster
 // 	cluster_t equilibrium();
 	// 	const map<isotope_t,int>& isotopes_amount() const;
@@ -86,6 +82,13 @@ public:
 	bool operator==(const cluster_t& obj) const;
 	bool operator<(const cluster_t& obj) const;
 	bool operator!=(const cluster_t& obj) const;
+	
+	/*TEST*/
+// 	calc_t calc(RSF,reference_intensity/ies)
+// 	calc_t calc(SF)
+//	cluster -> model.concentration
+//	cluster -> model.SR
+//	cluster -> model.depth
 };
 
 #endif // CLUSTER_T_HPP

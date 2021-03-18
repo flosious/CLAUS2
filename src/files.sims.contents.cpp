@@ -21,19 +21,19 @@
 /**************/
 /*** sims_t ***/
 /**************/
-files::sims_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : files::file_t::contents_t(filename_with_path,delimiter,identifiers)
+files_::sims_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : files_::file_t::contents_t(filename_with_path,delimiter,identifiers)
 {
 }
 
 
-vector<cluster_t> files::sims_t::contents_t::clusters()
+vector<cluster_t> files_::sims_t::contents_t::clusters()
 {
 	logger::fatal("you should never be able to read this","virtual const vector<cluster_t> filecontents::sims_t::clusters()");
 	return {};
 }
 
 
-void files::sims_t::contents_t::column_t::to_screen()
+void files_::sims_t::contents_t::column_t::to_screen()
 {
 	cout << "unit="<<unit<<"\tcluster_name="<<cluster_name<<"\tdimension="<<dimension<<"\tdata.size()="<<data.size()<<endl;
 }

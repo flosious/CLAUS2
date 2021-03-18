@@ -20,7 +20,7 @@
 #include "files.hpp"
 
 
-files::file_t::name_t::name_t(string& filename_with_path_s, 
+files_::file_t::name_t::name_t(string& filename_with_path_s, 
 								  const string delimiter_s, 
 								  const std::set< std::__cxx11::string > OR_identifiers_s, 
 								  const std::set< std::__cxx11::string > AND_identifiers_s) :
@@ -31,9 +31,9 @@ files::file_t::name_t::name_t(string& filename_with_path_s,
 {	
 }
 
-const vector<string> files::file_t::name_t::methods = {"dsims","tofsims","xps"};
+const vector<string> files_::file_t::name_t::methods = {"dsims","tofsims","xps"};
 
-const string files::file_t::name_t::method() const
+const string files_::file_t::name_t::method() const
 {
 	for (auto& m : methods)
 	{
@@ -43,16 +43,18 @@ const string files::file_t::name_t::method() const
 	return "";
 }
 
-const string files::file_t::name_t::simple_name()
+const string files_::file_t::name_t::simple_name()
 {
 	string simple_name_p;
 	if ((lot()=="") && not_parseable_filename_parts().size()>0) simple_name_p=tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
 	else if ((wafer()<0)) simple_name_p=lot() +lot_split() + tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
 	else simple_name_p="";
+	if (simple_name_p=="" && lot()=="")
+		logger::error("simple_name and lot unknown",filename_with_path);
 	return simple_name_p;
 }
 
-const bool files::file_t::name_t::is_correct_type()
+const bool files_::file_t::name_t::is_correct_type()
 {
 	if (filename()=="") return false;
 	
@@ -77,75 +79,75 @@ const bool files::file_t::name_t::is_correct_type()
 	return false;
 }
 
-int files::file_t::name_t::chip_x()
+int files_::file_t::name_t::chip_x()
 {
 	parse_filename_parts();
 // 	if (chip_x_p<0)
-// 		logger::info("files::file_t::chip_x() " ,chip_x_p);
+// 		logger::info("files_::file_t::chip_x() " ,chip_x_p);
 	return chip_x_p;
 }
-int files::file_t::name_t::chip_y()
+int files_::file_t::name_t::chip_y()
 {
 	parse_filename_parts();
 // 	if (chip_y_p<0)
-// 		logger::info("files::file_t::chip_y() " +filename(), chip_y_p);
+// 		logger::info("files_::file_t::chip_y() " +filename(), chip_y_p);
 	return chip_y_p;
 }
-std::__cxx11::string files::file_t::name_t::group()
+std::__cxx11::string files_::file_t::name_t::group()
 {
 	parse_filename_parts();
 	if (group_p=="")
-		logger::info("files::file_t::group() " +filename(),group_p);
+		logger::info("files_::file_t::group() unkown" ,filename_with_path);
 	return group_p;
 }
-std::__cxx11::string files::file_t::name_t::lot()
+std::__cxx11::string files_::file_t::name_t::lot()
 {
 	parse_filename_parts();
-	if (lot_p=="")
-		logger::warning("files::file_t::lot() " +filename(), lot_p);
+// 	if (lot_p=="")
+// 		logger::warning("files_::file_t::lot() unkown", filename_with_path);
 	return lot_p;
 }
-std::__cxx11::string files::file_t::name_t::lot_split()
+std::__cxx11::string files_::file_t::name_t::lot_split()
 {
 	parse_filename_parts();
 // 	if (lot_split_p=="")
-// 		logger::info("files::file_t::lot_split() " +filename(), lot_split_p);
+// 		logger::info("files_::file_t::lot_split() " +filename(), lot_split_p);
 	return lot_split_p;
 }
-std::__cxx11::string files::file_t::name_t::monitor()
+std::__cxx11::string files_::file_t::name_t::monitor()
 {
 	parse_filename_parts();
 // 	if (monitor_p=="")
-// 		logger::info("files::file_t::monitor() " +filename(),monitor_p);
+// 		logger::info("files_::file_t::monitor() " +filename(),monitor_p);
 	return monitor_p;
 }
-const int files::file_t::name_t::olcdb()
+const int files_::file_t::name_t::olcdb()
 {
 	parse_filename_parts();
 	if (olcdb_p<0)
-		logger::warning("files::file_t::olcdb() ",olcdb_p);
+		logger::warning("files_::file_t::olcdb() unkown",filename_with_path);
 	return olcdb_p;
 }
-const vector<std::__cxx11::string>& files::file_t::name_t::not_parseable_filename_parts()
+const vector<std::__cxx11::string>& files_::file_t::name_t::not_parseable_filename_parts()
 {
 	parse_filename_parts();
 	return not_parseable_filename_parts_p;
 }
 
-int files::file_t::name_t::wafer()
+int files_::file_t::name_t::wafer()
 {
 	parse_filename_parts();
-	if (wafer_p<0)
-		logger::warning("files::file_t::wafer() ",wafer_p);
+// 	if (wafer_p<0)
+// 		logger::warning("files_::file_t::wafer() unkown",filename_with_path);
 	return wafer_p;
 }
-std::__cxx11::string files::file_t::name_t::repetition()
+std::__cxx11::string files_::file_t::name_t::repetition()
 {
 	parse_filename_parts();
 	return repetition_p;
 }
 
-void files::file_t::name_t::to_screen(string prefix)
+void files_::file_t::name_t::to_screen(string prefix)
 {
 	cout << prefix <<"delimiter\t'" << delimiter << "'" << endl;
 	cout << prefix << "OR-identifiers\t";
@@ -175,7 +177,7 @@ void files::file_t::name_t::to_screen(string prefix)
 	cout << prefix<< "not_parseable_filename_parts:\t<" << not_parseable_filename_parts().size()  << ">" << endl;
 }
 
-void files::file_t::name_t::parse_all_parts_at_once()
+void files_::file_t::name_t::parse_all_parts_at_once()
 {
 	smatch match;
 	regex reg ("^([0-9]{4,})_([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)_[wW]?([0-9]{1,2})(_.*?)([0-9]*?)([a-z]*?)$"); 
@@ -191,11 +193,11 @@ void files::file_t::name_t::parse_all_parts_at_once()
 		not_parseable_filename_parts_p = tools::str::get_strings_between_delimiter(filename(),delimiter);
 		for (auto& m:match)
 			not_parseable_filename_parts_p.erase(remove(not_parseable_filename_parts_p.begin(),not_parseable_filename_parts_p.end(),m), not_parseable_filename_parts_p.end());
-// 		logger::info("files::file_t::name_t::parse_all_parts_at_once()");
+// 		logger::info("files_::file_t::name_t::parse_all_parts_at_once()");
 	}
 }
 
-void files::file_t::name_t::parse_filename_parts()
+void files_::file_t::name_t::parse_filename_parts()
 {
 	if (parsed_filename_parts) return;
 	vector<string> filename_parts = tools::str::get_strings_between_delimiter(filename(),delimiter);
@@ -220,7 +222,7 @@ void files::file_t::name_t::parse_filename_parts()
 // 	if (lot=="" && not_parseable_filename_parts.size()>0) lot=not_parseable_filename_parts[0];
 }
 
-bool files::file_t::name_t::parse_monitor(string filename_part) 
+bool files_::file_t::name_t::parse_monitor(string filename_part) 
 {
 	smatch match;
 	regex reg1 ("^m-*([a-zA-Z0-9]+)$"); 
@@ -234,7 +236,7 @@ bool files::file_t::name_t::parse_monitor(string filename_part)
 	return false;
 }
 
-bool files::file_t::name_t::parse_chip(string filename_part)
+bool files_::file_t::name_t::parse_chip(string filename_part)
 {
 	smatch match;
 	regex reg1 ("^x([0-9]{1,2})y([0-9]{1,2})$", std::regex_constants::icase); 
@@ -249,7 +251,7 @@ bool files::file_t::name_t::parse_chip(string filename_part)
 	return false;
 }
 
-bool files::file_t::name_t::parse_olcdb(string filename_part)
+bool files_::file_t::name_t::parse_olcdb(string filename_part)
 {
 	smatch match;
 	regex reg ("^([0-9]{4,})$"); 
@@ -261,7 +263,7 @@ bool files::file_t::name_t::parse_olcdb(string filename_part)
 	return false;
 }
 
-bool files::file_t::name_t::parse_lot(string filename_part)
+bool files_::file_t::name_t::parse_lot(string filename_part)
 {
 	smatch match;
 	regex reg ("^([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)$"); 
@@ -274,7 +276,7 @@ bool files::file_t::name_t::parse_lot(string filename_part)
 	return false;
 }
 
-bool files::file_t::name_t::parse_wafer(string filename_part)
+bool files_::file_t::name_t::parse_wafer(string filename_part)
 {
 	smatch match;
 	regex reg ("^[wW]([0-9]{1,2})$"); 
@@ -286,7 +288,7 @@ bool files::file_t::name_t::parse_wafer(string filename_part)
 	return false;
 }
 
-bool files::file_t::name_t::parse_group(string filename_part)
+bool files_::file_t::name_t::parse_group(string filename_part)
 {
 	smatch match;
 	regex reg1 ("^g-?*([0-9]+?)([a-z]*?)$"); 
@@ -305,7 +307,7 @@ bool files::file_t::name_t::parse_group(string filename_part)
 	return false;
 }
 
-bool files::file_t::name_t::parse_repetitor(string filename_part)
+bool files_::file_t::name_t::parse_repetitor(string filename_part)
 {
 	smatch match;
 	regex reg1 ("^r-?*([0-9]+?)$"); 
@@ -318,32 +320,32 @@ bool files::file_t::name_t::parse_repetitor(string filename_part)
 	return false;
 }
 
-std::__cxx11::string files::file_t::name_t::filename_type_ending() const
+std::__cxx11::string files_::file_t::name_t::filename_type_ending() const
 {
 	string filename_type_ending_p =tools::file::extract_filetype_ending(filename_with_path,".");
 // 	if (filename_type_ending_p=="")
-// 		logger::error("files::file_t::filename_type_ending()",filename_type_ending_p);
+// 		logger::error("files_::file_t::filename_type_ending()",filename_type_ending_p);
 	return filename_type_ending_p;
 }
 
-// std::__cxx11::string& files::file_t::name_t::filename_with_path() const
+// std::__cxx11::string& files_::file_t::name_t::filename_with_path() const
 // {
 // 	return filename_with_path;
 // }
 
-const string files::file_t::name_t::filename() const
+const string files_::file_t::name_t::filename() const
 {
 	return tools::file::extract_filename(filename_with_path);
 }
 
-const string files::file_t::name_t::directory() const
+const string files_::file_t::name_t::directory() const
 {
 	return tools::file::extract_directory_from_filename(filename_with_path);
 }
 
 
 
-std::__cxx11::string files::file_t::name_t::to_string(const string del)
+std::__cxx11::string files_::file_t::name_t::to_string(const string del)
 {
 	stringstream ss;
 	ss <<"delimiter '" << delimiter << "'" << del;
@@ -377,8 +379,11 @@ std::__cxx11::string files::file_t::name_t::to_string(const string del)
 
 
 
-bool files::file_t::name_t::operator==(files::file_t::name_t& obj)
+bool files_::file_t::name_t::operator==(files_::file_t::name_t& obj)
 {
+	if (filename_with_path == obj.filename_with_path) 
+		logger::error("comparing identical filenames, you should never read this","tell florian");
+	
 	if (olcdb() != obj.olcdb()) return false;
 	if (lot() != obj.lot()) return false;
 	if (lot_split() != obj.lot_split()) return false;
@@ -392,12 +397,12 @@ bool files::file_t::name_t::operator==(files::file_t::name_t& obj)
 	return true;
 }
 
-bool files::file_t::name_t::operator!=(files::file_t::name_t& obj)
+bool files_::file_t::name_t::operator!=(files_::file_t::name_t& obj)
 {
 	return !operator==(obj);
 }
 
-// bool files::file_t::name_t::operator<(files::file_t::name_t& obj)
+// bool files_::file_t::name_t::operator<(files_::file_t::name_t& obj)
 // {
 // 	if (olcdb() < obj.olcdb()) return true;
 // 	if (olcdb() > obj.olcdb()) return false;

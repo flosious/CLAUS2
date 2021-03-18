@@ -18,7 +18,7 @@
 
 #include "msettings.hpp"
 
-msettings::sims_t::sims_t(files::sims_t::name_t& filename) : 
+msettings::sims_t::sims_t(files_::sims_t::name_t& filename) : 
 		sputter_ion(ion_t(filename.sputter_element(),{{1}})), secondary_polarity(filename.secondary_polarity()), sputter_energy(filename.sputter_energy())
 {
 // 	secondary_polarity = filename.secondary_polarity();
@@ -52,6 +52,6 @@ const std::__cxx11::string msettings::sims_t::to_string(const string del) const
 	stringstream ss;
 	ss << sputter_energy.to_string() << del;
 	ss << sputter_ion.to_string() << del;
-	ss << secondary_polarity;
+	ss << "secondary_polarity: " << secondary_polarity;
 	return ss.str();
 }
