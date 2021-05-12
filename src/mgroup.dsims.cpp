@@ -29,7 +29,7 @@ mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurem
 									dsims_t(dsims_measurements.back())
 {
 	dsims_measurements.pop_back();
-	for (vector<measurements_::dsims_t>::iterator DM=dsims_measurements.begin();DM!=dsims_measurements.end();DM++)
+	for (auto DM=dsims_measurements.begin();DM!=dsims_measurements.end();DM++)
 	{
 		dsims_t MG(*DM);
 		if (*this != MG) continue;

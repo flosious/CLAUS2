@@ -126,7 +126,8 @@ const pse_t::pse_isotope_t* pse_t::pse_element_t::isotope_with_highest_abundance
 	const pse_t::pse_isotope_t* iso_w_max_abundance=nullptr;
 	if (isotopes.size()==0)
 	{
-		logger::error("pse_t::element_t::isotope_with_highest_abundance() isotopes.size()==0","abort");
+// 		logger::error("pse_t::element_t::isotope_with_highest_abundance() isotopes.size()==0","abort");
+		logger::error("pse_t::pse_element_t::isotope_with_highest_abundance","isotopes.size()==0",to_string(isotopes.size()),"skipping");
 		return nullptr;
 	}
 	
@@ -208,7 +209,7 @@ bool pse_t::load_file()
 	vector<vector<string>> contents = tools::file::load(filename,delimiter);
 	if (contents.size()==0)
 	{
-		logger::fatal("PSE file could not be loaded", "dying...");
+		logger::fatal("pse_t::load_file()",filename,"lot loadable", "dying...");
 		exit (EXIT_FAILURE);
 		return false;
 	}
@@ -234,7 +235,7 @@ bool pse_t::load_file()
 			if (abundance=="") abundance = "0";
 			if (mass == "")
 			{
-				logger::error("pse_t::load_file() could not parse line: ", i+1);
+				logger::error("pse_t::load_file()","mass(line("+to_string(i+1)+"))","","skipping");
 				continue;
 			}
 			 pse_isotope_t iso(	 tools::str::str_to_double(abundance),
@@ -248,7 +249,8 @@ bool pse_t::load_file()
 				symbols_to_eles.at(symbol).push_back(ele);
 		}
 		else
-			logger::error("pse_t::load_file() could not read line (to less entries): ", i+1);
+			logger::error("pse_t::load_file()","line("+to_string(i+1)+")","not readable","skipping");
+// 			logger::error("pse_t::load_file() could not read line (to less entries): ", i+1);
 	}
 	set<pse_element_t> elements_s;
 	for (auto& symbol_to_eles : symbols_to_eles)
@@ -264,6 +266,6 @@ bool pse_t::load_file()
 	}
 	elements_p = {elements_s.begin(),elements_s.end()};
 	
-	logger::info("PSE loaded");
+	logger::info(1,"pse_t::load_file()",filename,"loaded");
 	return true;
 }

@@ -66,6 +66,14 @@ using namespace std;
 class tools{
 private:  
 public:
+	
+	template<typename O>
+	static string to_string(O object)
+	{
+		stringstream out;
+		out << object;
+		return out.str();
+	}
 	///returns the pointer to key in V<keys>
 	template <typename F,typename V>
 	static F* find_in_V(F& f,V& keys)
@@ -128,7 +136,7 @@ public:
 		static string time_t_to_string(time_t ttime, string time_format="%Y-%m-%d %H:%M:%S");
         static string seconds_to_human_readable(double secs);
         static time_t string_to_time_t(string time,string time_format="%Y-%m-%d %H:%M:%S");
-        static string get_time_now(string time_format="%Y-%M-%d %H-%M-%S");
+        static string get_time_now(string time_format="%Y-%m-%d %H:%M:%S");
     };
     class file {
     public:
@@ -195,10 +203,12 @@ public:
 		static void add(vector<double> *result_vec,vector<double> adder);
 		static void remove(vector<double> *result_vec,vector<double> subtractors);
 		
+		static vector<string> double_to_string(const vector<double>& D);
+		
 		static void split_map_to_vecs(const map<double,double>& XY_mat, vector<double> *X, vector<double>* Y);
-		static void combine_vecs_to_map(vector<double> *X, vector<double>* Y, map<double,double>* XY_mat);
-		static void combine_vecs_to_map(vector<double> *X, vector<double> Y, map<double,double>* XY_mat);
-		static void combine_vecs_to_map(vector<double> X, vector<double> *Y, map<double,double>* XY_mat);
+		static void combine_vecs_to_map(const vector<double> *X, const vector<double>* Y, map<double,double>* XY_mat);
+		static void combine_vecs_to_map(const vector<double> *X, vector<double> Y, map<double,double>* XY_mat);
+		static void combine_vecs_to_map(vector<double> X, const vector<double> *Y, map<double,double>* XY_mat);
 		static void combine_vecs_to_map(vector<double> X, vector<double> Y, map<double,double>* XY_mat);
 		static string combine_vec_to_string(const vector<string>& vec, string delimiter="");
 // 		static string combine_vec_to_string(vector<string> vec, string delimiter="");

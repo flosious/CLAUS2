@@ -69,6 +69,19 @@ void tools::vec::remove(vector<double> *result_vec,vector<double> subtractors)
 	}
 }
 
+vector<string> tools::vec::double_to_string(const vector<double>& D)
+{
+	ostringstream sst;
+	vector<string> out(D.size());
+	for (int i=0;i<D.size();i++)
+	{
+		sst << D.at(i);
+		out.at(i) = sst.str();
+		sst.str("");
+	}
+	return out;
+}
+
 void tools::vec::split_map_to_vecs(const map<double,double>& XY_mat, vector<double> *X, vector<double>* Y)
 {
 	if (X!=nullptr && Y!=nullptr)
@@ -109,7 +122,7 @@ void tools::vec::split_map_to_vecs(const map<double,double>& XY_mat, vector<doub
 }
 
 
-void tools::vec::combine_vecs_to_map(vector<double> *X, vector<double>* Y, map<double,double>* XY_mat)
+void tools::vec::combine_vecs_to_map(const vector<double> *X, const vector<double>* Y, map<double,double>* XY_mat)
 {
 	int size=X->size();
 	if (Y->size()<size) size = Y->size();
@@ -129,11 +142,11 @@ void tools::vec::combine_vecs_to_map(vector<double> *X, vector<double>* Y, map<d
 	return;
 }
 
-void tools::vec::combine_vecs_to_map(vector<double> X, vector<double>* Y, map<double,double>* XY_mat)
+void tools::vec::combine_vecs_to_map(vector<double> X, const vector<double>* Y, map<double,double>* XY_mat)
 {
 	combine_vecs_to_map(&X,Y,XY_mat);
 }
-void tools::vec::combine_vecs_to_map(vector<double> *X, vector<double> Y, map<double,double>* XY_mat)
+void tools::vec::combine_vecs_to_map(const vector<double> *X, vector<double> Y, map<double,double>* XY_mat)
 {
 	combine_vecs_to_map(X,&Y,XY_mat);
 }

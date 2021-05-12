@@ -122,6 +122,17 @@ sample_t::sample_t(files_::file_t::name_t& fn) : wafer(fn.wafer()),
 {
 }
 
+string sample_t::wafer_string()
+{
+	stringstream ss;
+	if (wafer<1)
+		return "";
+	if (wafer<10)
+		ss << "0";
+	ss << wafer;
+	return ss.str();
+}
+
 matrix_t& sample_t::matrix()
 {
 	if (matrix_p.is_set()) return matrix_p;

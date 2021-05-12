@@ -32,7 +32,7 @@ origin_t::column_t::column_t(const quantity_t& quantity, std::__cxx11::string pr
 }
 
 origin_t::column_t::column_t(const vector<double>& data_s, std::__cxx11::string longname, std::__cxx11::string unit, std::__cxx11::string comment) :
-	data(tools::vec::to_string(data_s)),
+	data(tools::vec::double_to_string(data_s)),
 	longname(longname),
 	unit(unit),
 	comment(comment)

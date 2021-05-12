@@ -88,7 +88,7 @@ int config_t::parse(vector<string> config_lines) {
 // 		else if (key=="use_mass_interference_filter" || key=="mass_interference_filter") { if (value.find("1")!=string::npos) processor::use_mass_interference_filter=true;}
 // 		else if (key=="force_RSF_to_foreign_matrix" || key=="force_RSF") { if (value.find("1")!=string::npos) 				processor::force_RSF_to_foreign_matrix=true;}
 		
-		else if (key=="debug") { if (value.find("1")!=string::npos) 								logger::activate_debug=true;}
+// 		else if (key=="debug") { if (value.find("1")!=string::npos) 								logger::activate_debug=true;}
 		
 // 		else if (key=="use_directory_files_list") { if (value.find("1")!=string::npos) 				files_t::use_directory_files_list=true;}
 //         else if (key=="use_wildcards_in_filenames") { if (value.find("1")!=string::npos) 			files_t::use_wildcards_in_filenames=true; }
@@ -205,12 +205,12 @@ void config_t::save_sample_definition(std::__cxx11::string value)
 		}
 		else 
 		{
-			logger::error("config_t::save_sample_definition: unknown input value", definition);
+			logger::error("config_t::save_sample_definition()", "unknown input value", definition,"continue");
 			continue;
 		}
 		new_definition << definition << " ";
 	}
-	logger::info("updated sample definition:",new_definition.str());
+	logger::info(2,"config_t::save_sample_definition()",new_definition.str());
 }
 
 

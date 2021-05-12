@@ -118,8 +118,7 @@ public:
 		public:
 			matrix_t matrix();
 			const bool is_correct_type(); 
-// 			files_::file_t::name_t& name;
-			string to_string();
+			string to_string(const string del = ",");
 			///this does not work as intended for some reason
 			bool operator< (const contents_t& obj) const;
 			bool operator== (const contents_t& obj) const;
@@ -133,6 +132,7 @@ public:
 		class name_t : public file_t::name_t
 		{
 		private:
+			string filename_without_crater_depths_s="";
 			vector<total_sputter_depth_t> total_sputter_depths_p;
 			bool parse_sputter_energy_element_polarity();
 			string secondary_polarity_p="";
@@ -147,6 +147,7 @@ public:
 			const energy_t sputter_energy();
 			element_t sputter_element();
 			const string secondary_polarity();
+			///parses crater depths and populates filename_wo_crater
 			total_sputter_depth_t total_sputter_depths();
 			const string filename_without_crater_depths();
 			bool operator==(name_t& obj);
@@ -158,8 +159,7 @@ public:
 			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
 		public:
 			virtual vector<cluster_t> clusters();
-// 			files_::sims_t::name_t& name;
-			string to_string();
+			string to_string(const string del = ",");
 			///content column
 			class column_t
 			{
@@ -209,20 +209,20 @@ public:
 			const vector<column_t> columns();
 			const vector<string>& cluster_names();
 		public:
-			class Ipr_t
-			{
-			public:
-				sputter_current_t sputter_current;
-				sputter_time_t sputter_time;
-				sputter_depth_t sputter_depth;
-				Ipr_t(sputter_current_t sputter_current_s={}, sputter_time_t sputter_time_s={}, sputter_depth_t sputter_depth_s={});
-				const string to_string(const string del=", ") const;
-			};
+// 			class Ipr_t
+// 			{
+// 			public:
+// 				sputter_current_t sputter_current;
+// 				sputter_time_t sputter_time;
+// 				sputter_depth_t sputter_depth;
+// 				Ipr_t(sputter_current_t sputter_current_s={}, sputter_time_t sputter_time_s={}, sputter_depth_t sputter_depth_s={});
+// 				const string to_string(const string del=", ") const;
+// 			};
 			vector<cluster_t> clusters();
 			const tm start_date_time();
 			const tm creation_date_time();
 			///primary current (sputter_current vs time/depth)
-			const Ipr_t Ipr();
+			const crater_t::sputter_beam_t Ipr();
 			const energy_t sputter_energy(const string find_this="Impact energy (eV)");
 			const secondary_voltage_t secondary_voltage(const string find_this="Secondary ion energy (V)");
 			const element_t sputter_element(const string find_this="Primary ions");
@@ -239,7 +239,7 @@ public:
 			const quantity_t energy_window(const string find_this="Energy window (eV)");
 			const quantity_t em_yield(const string find_this="EM yield (%)");
 			const quantity_t em_voltage(const string find_this="EM HV (V)");
-// 			files_::dsims_t::name_t& name;
+			const crater_t crater();
 			void to_screen(string prefix="");
 			contents_t(string& filename_with_path);
 		};	
@@ -271,9 +271,7 @@ public:
 		public:
 			const element_t analysis_element();
 			const energy_t analysis_energy();
-		
 			contents_t(string& filename_with_path);
-// 			files_::tofsims_t::name_t& name;
 		};
 		tofsims_t(string& filename);
 		tofsims_t(files_::tofsims_t::name_t& name_s, files_::tofsims_t::contents_t& contents_s);
@@ -293,7 +291,7 @@ public:
 		class contents_t : public sims_t::contents_t
 		{
 		public:
-			linescan_t linescan();
+			crater_t::linescan_t linescan();
 			contents_t(string& filename_with_path);
 		};
 		profiler_t(string& filename);
@@ -310,7 +308,6 @@ public:
 		{
 		public:
 			name_t(string& filename_with_path_s);
-// 			virtual ~name_t();
 		};
 		jpg_t(string& filename);
 		jpg_t(name_t& filename);

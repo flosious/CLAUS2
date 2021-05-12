@@ -26,7 +26,62 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file,
    							) : 
 				sims_t(dsims_file.name,dsims_file.contents,samples_list,"dsims",jpg_files,profiler_files), 
 				settings(dsims_file.name,dsims_file.contents)
+// 				clusters(dsims_file.contents.clusters())
 {
+	crater().sputter_beam = dsims_file.contents.Ipr();
+	
+	/*regularize data*/
+	if (clusters().begin()->sputter_depth().is_set())
+	{
+		crater().sputter_depth() = crater().common_sputter_depth(clusters());
+		logger::debug(7,"measurements_::dsims_t::dsims_t","crater().sputter_depth()=" + crater().sputter_depth().to_string());
+	}
+	if (!crater().sputter_depth().is_set())
+	{
+		crater().sputter_time() = crater().common_sputter_time(clusters());
+		logger::debug(7,"measurements_::dsims_t::dsims_t","crater().sputter_time()=" + crater().sputter_time().to_string());
+	}
+	
+	if (!crater().sputter_time().is_set() && !crater().sputter_depth().is_set())
+	{
+		logger::error("measurements_::dsims_t::dsims_t","!crater().sputter_time().is_set() && !crater().sputter_depth().is_set()","check all clusters for sputter_time or depth","returning");
+		return;
+	}
+	quantity_t N;
+	if (crater().sputter_beam.sputter_current.is_set())
+	{
+		if (crater().sputter_beam.sputter_depth.is_set() && crater().sputter_depth().is_set())
+		{
+			crater().sputter_beam.sputter_current = crater().sputter_beam.sputter_current.interp(crater().sputter_beam.sputter_depth,crater().sputter_depth());
+			crater().sputter_beam.sputter_depth.clear();
+		}
+		else if (crater().sputter_beam.sputter_time.is_set() && crater().sputter_time().is_set())
+		{
+			logger::debug(10,"measurements_::dsims_t::dsims_t()","crater().sputter_beam.sputter_current.interp(crater().sputter_beam.sputter_time,crater().sputter_time())=",crater().sputter_beam.sputter_current.interp(crater().sputter_beam.sputter_time,crater().sputter_time()).to_string());
+			crater_s.sputter_beam.sputter_current = crater().sputter_beam.sputter_current.interp(crater().sputter_beam.sputter_time,crater().sputter_time());
+			crater().sputter_beam.sputter_time.clear();
+		}
+		else
+			logger::warning(2,"measurements_::dsims_t::dsims_t","could not interp crater().sputter_beam.sputter_current","","skipping");
+	}
+	
+	for (auto& C: clusters())
+	{
+		if (C.sputter_time().is_set() && crater().sputter_time().is_set())
+		{
+			C = C.interpolate(crater().sputter_time(),C.sputter_time());
+			logger::debug(7,"measurements_::dsims_t::dsims_t","C.change_sputter_time="+tools::to_string(C.intensity().to_string()));
+			C.sputter_time().clear();
+		}
+		else if (C.sputter_depth().is_set() && crater().sputter_depth().is_set())
+		{
+			C = C.interpolate(crater().sputter_depth(),C.sputter_depth());
+			logger::debug(7,"measurements_::dsims_t::dsims_t","C.change_sputter_depth="+tools::to_string(C.intensity().to_string()));
+			C.sputter_depth().clear();
+		}
+		else
+			logger::error("measurements_::dsims_t::dsims_t","could not change sputter_time or sputter_depth for cluster",C.to_string(),"skipping");
+	}
 }
 
 bool measurements_::dsims_t::operator!=(measurements_::dsims_t& obj)

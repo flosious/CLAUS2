@@ -73,7 +73,8 @@ bool measurements_::measurement_t::operator==(measurements_::measurement_t& obj)
 	if (use_sample)
 		if (*sample!=*obj.sample) return false; // pointer comparison
 	if (sample==nullptr)
-		logger::error("sample is null","this should never happen");
+// 		logger::error("sample is null","this should never happen");
+		logger::error("measurements_::measurement_t::operator==","sample==nullptr",to_string(),"returning TRUE");
 	
 	return true;	
 }
@@ -119,6 +120,53 @@ bool measurements_::measurement_t::operator>(measurements_::measurement_t& obj)
 {
 	if (!operator<(obj) && operator!=(obj)) return true;
 	return false;
+}
+
+measurements_::sims_t::calc_t measurements_::sims_t::calc()
+{
+	return calc_t(*this);
+}
+
+/*******************************/
+/***        calc_t         *****/
+/*******************************/
+
+measurements_::sims_t::calc_t::calc_t(measurements_::sims_t& measurement) : measurement(measurement)
+{
+}
+
+measurements_::sims_t::calc_t::SR_c measurements_::sims_t::calc_t::SR()
+{
+	return SR_c(measurement);
+}
+
+
+/*******************************/
+/***     calc_t::SR_c      *****/
+/*******************************/
+
+measurements_::sims_t::calc_t::SR_c::SR_c(measurements_::sims_t& measurement) : measurement(measurement)
+{
+}
+
+bool measurements_::sims_t::calc_t::SR_c::from_crater_depth()
+{
+	if (!measurement.crater().total_sputter_depth().is_set())
+	{
+// 		logger::warning("measurements_::sims_t::calc_t::SR_c::from_crater_depth: !measurement.crater.total_sputter_depth().is_set()");
+		logger::warning(1,"measurements_::sims_t::calc_t::SR_c::from_crater_depth()","!measurement.crater.total_sputter_depth().is_set()",measurement.to_string(),"returning FALSE");
+		return false;
+	}
+	if (!measurement.crater().total_sputter_time(&measurement.clusters()).is_set())
+	{
+// 		logger::warning("measurements_::sims_t::calc_t::SR_c::from_crater_depth: !measurement.crater.total_sputter_time().is_set()");
+		logger::warning(1,"measurements_::sims_t::calc_t::SR_c::from_crater_depth()","!measurement.crater.total_sputter_time(&measurement.clusters).is_set()",measurement.to_string(),"returning FALSE");
+		return false;
+	}
+	measurement.crater().SR = (measurement.crater().total_sputter_depth() / measurement.crater().total_sputter_time()); // skalar value
+// 	for (auto& C : measurement.clusters)
+// 		C.SR = measurement.crater.SR; // skalars
+	return true;
 }
 
 

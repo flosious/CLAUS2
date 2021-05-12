@@ -92,6 +92,7 @@ public:
 	string lot_split;
 	string monitor;
 	string simple_name;
+	string wafer_string();
 	
 	matrix_t& matrix();
 	

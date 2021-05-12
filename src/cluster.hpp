@@ -39,6 +39,7 @@ using namespace std;
 
 class cluster_t : public mglDraw
 {
+	friend class crater_t;
 private:
 	static vector<isotope_t> parse_clustername(const string clustername);
 	int equilibrium_starting_position=-1;
@@ -48,6 +49,7 @@ private:
 	intensity_t intensity_p;
 	sputter_time_t sputter_time_p;
 	sputter_depth_t sputter_depth_p;
+
 // 	const crater_t* crater();
 // 	const sample_t::matrix_t* matrix();
 // 	const cluster_t* reference_cluster();
@@ -63,16 +65,30 @@ public:
 			  intensity_t intensity={},
 			  sputter_depth_t sputter_depth={},
 			  concentration_t concentration={});
-	cluster_t(string clustername);
-	cluster_t(vector<isotope_t>& isotopes_s);
-	
+	cluster_t(set<isotope_t> isotopes, 
+			  sputter_time_t sputter_time={},
+			  intensity_t intensity={},
+			  sputter_depth_t sputter_depth={},
+			  concentration_t concentration={});
+	cluster_t();
+	cluster_t(const vector<isotope_t>& isotopes_s);
+	string name() const;
 	string to_string(const string del=" ") const;
 	const bool is_set() const;
 	///isotopes which define this cluster-
-	const concentration_t& concentration();
-	const intensity_t& intensity();
-	const sputter_time_t& sputter_time();
-	const sputter_depth_t& sputter_depth();
+	concentration_t& concentration();
+	intensity_t& intensity();
+	sputter_time_t& sputter_time();
+	sputter_depth_t& sputter_depth();
+// 	SR_t SR;
+	SF_t SF;
+	RSF_t RSF;
+	///cahnges resolution of all
+// 	cluster_t change_sputter_depth_resolution(sputter_depth_t sputter_depth_res);
+// 	cluster_t change_sputter_time_resolution(sputter_time_t sputter_time_res);
+// 	cluster_t interpolate(sputter_time_t& new_sputter_time, sputter_time_t& old_sputter_time);
+	cluster_t interpolate(quantity_t& new_Q, quantity_t& old_Q) const;
+	
 	///sputter equilibrium state of this cluster
 // 	cluster_t equilibrium();
 	// 	const map<isotope_t,int>& isotopes_amount() const;

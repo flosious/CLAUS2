@@ -19,7 +19,7 @@
 #ifndef MEASUREMENT_GROUP_T_HPP
 #define MEASUREMENT_GROUP_T_HPP
 
-
+#include <map>
 #include <algorithm>
 #include <set>
 #include <vector>
@@ -31,7 +31,6 @@
 // #include "sample.hpp"
 #include "definitions.hpp"
 #include "measurement.hpp"
-
 
 using namespace std;
 
@@ -98,22 +97,112 @@ public:
 	class sims_t: public mgroup_t
 	{
 	private:
+		///if true, will save all calculated results (more RAM usage, but faster)
+		static bool save_results;
 	protected:
+// 		class pbp_t
+// 		{
+// 		private:
+// 			vector<measurements_::sims_t> measurements_s;
+// 		public:
+// 			pbp_t(sims_t& MG);
+// 			vector<measurements_::sims_t*> measurements();
+// 			const map<matrix_t,SR_t> SRs();
+// 			const SR_t SR(matrix_t& matrix);
+// 			const map<matrix_t,RSF_t> RSFs(cluster_t& cluster);
+// 			const RSF_t RSF(cluster_t& cluster, matrix_t& matrix);
+// 		};
+// 		pbp_t pbp_s;
+		
+		
+		class calc_t
+		{
+		public:
+			class SR_c
+			{
+			private:
+				sims_t& MG_r;
+			public:
+				///sputter_rate calculation methods
+				SR_c(sims_t& MG);
+				sims_t from_crater_depth();
+				sims_t from_implant_max();
+				sims_t polynom_interpolation_from_matrix(const int max_rank=2);
+				///tries to find the best calculation method under given boundary conditions
+				sims_t best();
+			};
+			class RSF_c
+			{
+			private:
+				sims_t& MG_r;
+			public:
+				RSF_c(sims_t& MG);
+				sims_t from_dose(); // SF
+				sims_t from_implant_max(); // SF
+				sims_t polynom_interpolation_from_matrix(const int max_rank=2);
+				sims_t from_mean();
+				sims_t from_median();
+				///tries to find the best calculation method under given boundary conditions
+				sims_t best();
+			};
+			///matrix calibration
+			class matrix_c
+			{
+				private:
+				sims_t& MG_r;
+			public:
+				///calculation of matrix concentrations
+				matrix_c(sims_t& MG);
+				///rank{0,1,0} -> 0*a0+1*a1*x+0*a2*x*x == 0*a0+1*a1*x =rank{0,1}
+				sims_t from_jiangs_protocol(vector<int> rank = {0,1,0});
+				sims_t from_point_by_point();
+				sims_t from_mean();
+				sims_t from_median();
+				sims_t best();
+			};
+		};
+		
+		///check if all measurements belong in this group
+		void check();
 	public:
 		sims_t(measurements_::sims_t& measurement);
 		///looks up for common cluster in all measurements corresponding to the matrices
 		vector<cluster_t> reference_clusters();
 		virtual vector<measurements_::sims_t*> measurements();
+		///listed RSF to coressponding cluster and matrix
+		RSF_t RSF(cluster_t cluster, matrix_t matrix);
+		///listed RSFs to coressponding cluster and matrix
+		map<cluster_t,RSF_t> RSFs(matrix_t matrix);
+// 		calc::RSFs_t RSFs();
+		
+		///point by point calculation
+		
+		///point by point calculation
+// 		pbp_t& pbp();
+// 		calc::pbp_t pbp();
+		
 		// calc.jiang(measurements& belonging to one/this group) ctor
 		// calc.jiang.SR.median
 		// calc.jiang.concentration(isotope/cluster) --> isotope with set concentration, but for wich measurement?
 		// calc.jiang.concentrations() --> vector<isotope> with set concentrations
 		// calc.jiang.reference.intensity this is a function of intensities of matrix signals
+		// 
+		// calc_t calc(&MRs) as references OUTside of MG_t
+		// calc_t calc(&Ms) as references in MG_t
+		// calc.jiang.measurements[].isotopes[]
+		// calc.jiang.measurements[].elements[]
+		// calc.jiang.measurements[].clusters[]
+		// calc.jiang.RSFs
+		// calc.jiang.SRs
+		// calc.jiang.measurements[].clusters[].RSF
+		// calc.jiang.measurements[].clusters[].SF
+		// calc.jiang.measurements[].clusters[].isotopes[].concentration
 // 		SR_t SR();
 	};
 
 	class dsims_t: public sims_t
 	{
+		friend class processor;
 	private:
 		vector<measurements_::dsims_t> measurements_p;
 	public:
@@ -121,6 +210,9 @@ public:
 		dsims_t(measurements_::dsims_t& dsims_measurements);
 		vector<measurements_::sims_t*> measurements() override;
 		string to_string(const string del=", ");
+		
+		/*normalize to primary current*/
+		dsims_t normalize_to_Iprimary();
 		
 		const msettings::dsims_t settings;
 		bool operator==(const dsims_t& obj) const;

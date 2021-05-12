@@ -25,12 +25,11 @@ processor::processor(vector<string> args_p)
 {	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	cout << "processor start" << endl;
+	
+	/*tests*/
+	/*******/
+	
 	filenames=args_p;
-	
-// 	for (auto& DM : dsims_measurements())
-// 		cout << "DM.crater.linescans.size()=" << DM.crater.linescans.size() << endl;
-
-	
 	
 	list<sample_t> samples_list;
 	profiler_t profiler(filenames,samples_list);
@@ -42,42 +41,32 @@ processor::processor(vector<string> args_p)
 	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
 	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
 	
-// 	mglFLTK* gr2;
 	
 	for (auto& MG : dsims.mgroups())
 	{
-// 		cout << MG.to_string() << endl;
 		for (auto& cR : MG.reference_clusters())
-// 			cR->to_string();
 			cout << "common ref_clusters: " << cR.to_string() << endl;
-		for (auto& M:MG.measurements())
+		for (auto& M:MG.measurements_p)
 		{
-			
-// 			for (auto& R : M->reference_clusters())
-// 				cout << "ref_cluster: " << R->to_string() << endl;
-// 			for (auto& C:M.clusters)
-// 			{
-// 				cout << C.intensity().to_string() << endl;
-// 			}
-// 			gr2 = new mglFLTK(&M, "test plotter2");
-// 			M.export_origin_ascii();
-// 			M.plot_now(2);
+// 			if (M.calc().SR().from_crater_depth())
+// 				cout << M.crater.SR.to_string() << endl;
+// 			if (M.crater.sputter_depth().is_set())
+// 				cout << M.crater.sputter_depth().to_string()<<endl;
+// 			M.plot_now(0);
+// 			sputter_time_t ST_res({0.1} ,M.crater.sputter_time().unit());
+// 			M.crater = M.crater.change_sputter_time(M.crater.sputter_time().resolution(ST_res),M.clusters);
+// 			M.crater.sputter_time() = M.crater.sputter_time(&M.clusters).change_unit({"min"});
+// 			M.plot_now(0);
+// 			cout << M.crater().sputter_time().resolution().to_string() << endl;
+			M.plot_now();
+			M.change_resolution(sputter_time_t({1},{"s"})).plot_now();
+// 			M.change_resolution(sputter_time_t({1},{"s"})).export_origin_ascii();
 		}
 	}
-	
-	
-// 	gr2->Run();
-// 	samples_list.sort();
-// 	cout << "samples_list"<<endl;
-// 	for (auto& S : samples_list)
-// 		cout << "\t" << S.to_string() << endl;
-	
+
 	logger::to_screen();
-// 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
-// 	getchar();
-// 	delete gr2;
 	
 }
 
@@ -97,9 +86,6 @@ vector<files_::dsims_t> & processor::dsims_t::files()
 	if (files_p.size()>0)
 		return files_p;
 	
-// 	#pragma omp declare reduction (merge : std::vector<files_::dsims_t> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))	
-// 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
-// 	#pragma omp parallel for reduction(merge: dsims_files_p)
 	for (int f=0;f<filenames.size();f++)
 	{
 		files_::dsims_t::name_t dFN(filenames.at(f));
@@ -140,10 +126,8 @@ vector<measurements_::dsims_t>& processor::dsims_t::measurements()
 	{
 		for (vector<measurements_::dsims_t>::iterator DM2=DM+1;DM2!=measurements_p.end();DM2++)
 		{
-			if (*DM == *DM2)
+			if (DM->add(*DM2))
 			{
-				DM->crater.total_sputter_depths << DM2->crater.total_sputter_depths;
-				DM->crater.linescans.insert(DM->crater.linescans.end(),DM2->crater.linescans.begin(),DM2->crater.linescans.end());
 				measurements_p.erase(DM2);
 				DM2--;
 			}

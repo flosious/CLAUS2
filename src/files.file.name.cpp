@@ -50,7 +50,7 @@ const string files_::file_t::name_t::simple_name()
 	else if ((wafer()<0)) simple_name_p=lot() +lot_split() + tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
 	else simple_name_p="";
 	if (simple_name_p=="" && lot()=="")
-		logger::error("simple_name and lot unknown",filename_with_path);
+		logger::warning(1,"files_::file_t::name_t::simple_name()","simple_name_p=='' && lot()==''",filename_with_path,"using " + simple_name_p);
 	return simple_name_p;
 }
 
@@ -97,7 +97,9 @@ std::__cxx11::string files_::file_t::name_t::group()
 {
 	parse_filename_parts();
 	if (group_p=="")
-		logger::info("files_::file_t::group() unkown" ,filename_with_path);
+		logger::warning(1,"files_::file_t::name_t::group()","group_p==''",filename_with_path,"using " + group_p);
+// 		logger::info("files_::file_t::group() unkown" ,filename_with_path);
+		
 	return group_p;
 }
 std::__cxx11::string files_::file_t::name_t::lot()
@@ -125,7 +127,8 @@ const int files_::file_t::name_t::olcdb()
 {
 	parse_filename_parts();
 	if (olcdb_p<0)
-		logger::warning("files_::file_t::olcdb() unkown",filename_with_path);
+		logger::warning(1,"files_::file_t::name_t::olcdb()","olcdb_p<0",filename_with_path,"using " + tools::to_string(olcdb_p));
+// 		logger::warning("files_::file_t::olcdb() unkown",filename_with_path);
 	return olcdb_p;
 }
 const vector<std::__cxx11::string>& files_::file_t::name_t::not_parseable_filename_parts()
@@ -382,7 +385,8 @@ std::__cxx11::string files_::file_t::name_t::to_string(const string del)
 bool files_::file_t::name_t::operator==(files_::file_t::name_t& obj)
 {
 	if (filename_with_path == obj.filename_with_path) 
-		logger::error("comparing identical filenames, you should never read this","tell florian");
+// 		logger::error("comparing identical filenames, you should never read this","tell florian");
+		logger::error("files_::file_t::name_t::operator==","filename_with_path == obj.filename_with_path",tools::to_string(filename_with_path)+"=="+tools::to_string(obj.filename_with_path),"you should never read this, tell florian");
 	
 	if (olcdb() != obj.olcdb()) return false;
 	if (lot() != obj.lot()) return false;

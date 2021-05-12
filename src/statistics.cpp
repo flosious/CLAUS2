@@ -292,8 +292,9 @@ vector<double> statistics::impulse_filter(vector<double> Y, int window_size, flo
 	/// THIS IS NOT WORKING IN WINDOWS 32BIT FOR SOME INPUT VALUES
 //     gsl_filter_impulse(GSL_FILTER_END_TRUNCATE, GSL_FILTER_SCALE_QN, t, x, y,
 //                      xmedian, xsigma, &noutlier, ioutlier, w);
-	gsl_filter_impulse(GSL_FILTER_END_PADVALUE, GSL_FILTER_SCALE_MAD, t, x, y, xmedian, xsigma, &noutlier, ioutlier, w);
-// 	gsl_filter_impulse(GSL_FILTER_END_TRUNCATE, GSL_FILTER_SCALE_QN, t, x, y, xmedian, xsigma, &noutlier, ioutlier, w);
+//	GSL_FILTER_SCALE_QN very slow
+// 	gsl_filter_impulse(GSL_FILTER_END_PADVALUE, GSL_FILTER_SCALE_MAD, t, x, y, xmedian, xsigma, &noutlier, ioutlier, w);
+	gsl_filter_impulse(GSL_FILTER_END_TRUNCATE, GSL_FILTER_SCALE_MAD, t, x, y, xmedian, xsigma, &noutlier, ioutlier, w); 
     for (int i=0;i<y->size;i++) 
 		Y_filtered.push_back(y->data[i]);
     gsl_vector_free(x);
@@ -399,6 +400,12 @@ bool statistics::std_vec_to_gsl_vec(vector<double> *std_vec, gsl_vector ** vec) 
     for (size_t i=0;i<std_vec->size();i++)gsl_vector_set (*vec, i, std_vec->at(i));
     return true;
 }
+bool statistics::std_vec_to_gsl_vec(const vector<double>& std_vec, gsl_vector ** vec) {
+    *vec = gsl_vector_alloc(std_vec.size());
+    for (size_t i=0;i<std_vec.size();i++)gsl_vector_set (*vec, i, std_vec.at(i));
+    return true;
+}
+
 
 vector<double> statistics::gsl_vec_to_std_vec(gsl_vector ** vec) {
     vector<double> Y;
@@ -680,6 +687,17 @@ double statistics::get_correlation_from_dataXY(vector<vector<double>> *data_XY1,
     statistics::std_mat_to_gsl_vec(data_XY1,&vec1,1);
     statistics::std_mat_to_gsl_vec(data_XY2,&vec2,1);    
     double corr = gsl_stats_correlation(vec1->data,1,vec2->data,1,data_XY2->size());
+    gsl_vector_free(vec1);
+    gsl_vector_free(vec2);
+    return corr;
+}
+
+double statistics::get_correlation_Y1_Y2(const vector<double>& Y1, const vector<double>& Y2) 
+{
+    gsl_vector *vec1, *vec2;
+	statistics::std_vec_to_gsl_vec(Y1,&vec1);
+	statistics::std_vec_to_gsl_vec(Y2,&vec2);
+    double corr = gsl_stats_correlation(vec1->data,1,vec2->data,1,Y1.size());
     gsl_vector_free(vec1);
     gsl_vector_free(vec2);
     return corr;
@@ -1369,7 +1387,7 @@ vector<double> statistics::interpolate_bspline(map<double, double>& data_XY,vect
 
 
 
-vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY, vector<double>& X) 
+vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY, const vector<double>& X) 
 {
 
     vector<double> Y,xv,yv;

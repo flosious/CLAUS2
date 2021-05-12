@@ -74,7 +74,7 @@ const string& files_::file_t::contents_t::contents_string()
 		
 		if (!tools::file::file_exists(filename_with_path)) 
 		{
-			logger::warning("file does not exist - skipping", filename_with_path);
+			logger::error("files_::file_t::contents_t::contents_string()", "!tools::file::file_exists(filename_with_path)", filename_with_path,"skipping file");
 			return contents_p;
 		}
 		contents_p = tools::file::load_file_to_string(filename_with_path);
@@ -151,7 +151,7 @@ vector<vector<vector<std::__cxx11::string> > >& files_::file_t::contents_t::raw_
 	
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
-		logger::debug("files_::file_t::contents_t::raw_header_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+		logger::debug(3,"files_::file_t::contents_t::raw_header_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no header");
 	}
 	return raw_header_tensor_p;
 }
@@ -161,7 +161,8 @@ vector<vector<vector<std::__cxx11::string> > >& files_::file_t::contents_t::raw_
 	if (raw_data_tensor_p.size()>0) return raw_data_tensor_p;
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
-		logger::debug("files_::file_t::contents_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+// 		logger::debug("files_::file_t::contents_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
+		logger::debug(3,"files_::file_t::contents_t::raw_data_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no data");
 // 		return {};
 	}
 	return raw_data_tensor_p;
@@ -174,8 +175,11 @@ void files_::file_t::contents_t::to_screen(string prefix)
 	else cout << prefix << "identifiers:\t<" << identifiers.size() << ">" << endl;
 }
 
-std::__cxx11::string files_::file_t::contents_t::to_string()
+std::__cxx11::string files_::file_t::contents_t::to_string(const string del)
 {
-	return "";
+	stringstream out;
+	out << "contents_string().size()="<< contents_string().size() << del;
+	out << "creation_date_time(): " << creation_date_time();
+	return out.str();
 }
 

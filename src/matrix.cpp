@@ -231,7 +231,7 @@ bool matrix_t::operator!=(matrix_t& obj)
 	return !operator==(obj);
 }
 
-bool matrix_t::operator<(matrix_t& obj)
+bool matrix_t::operator<(const matrix_t& obj) const
 {
 	if (isotopes.size()<obj.isotopes.size()) return true;
 	if (isotopes.size()>obj.isotopes.size()) return false;

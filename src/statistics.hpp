@@ -108,6 +108,7 @@ public:
 //     static statis get_statistics(vector<double> Y);
     static bool std_mat_to_gsl_vec(vector<vector<double>> *std_mat, gsl_vector ** vec, int col);
     static bool std_vec_to_gsl_vec(vector<double> *std_vec, gsl_vector ** vec);
+	static bool std_vec_to_gsl_vec(const vector<double>& std_vec, gsl_vector ** vec);
     ///\brief returns {X_min,X_max,Y_min,Y_max}
     static vector<double> get_minmax_from_dataXY_tensor(vector<vector<vector<double>>> dataXY_tensor);
     static int get_index_from_upper_limit_in_vec(vector<double> vec, double upper_limit);
@@ -121,6 +122,7 @@ public:
     static int get_index_for_next_value_within_treshold(vector<double> Y,double treshold_bottom, double treshold_top, int start=0, int ende=0);
     
     static double get_correlation_from_dataXY(vector<vector<double>> *data_XY1, vector<vector<double>> *data_XY2);
+	static double get_correlation_Y1_Y2(const vector<double>& Y1, const vector<double>& Y2);
 //     static statis get_statistics_from_dataXY_transposed(vector<vector<double>> *data_XY_transposed);
     static double polynom_integrator (double x, void * params);
     static double get_area_under_dataXY_transposed(vector<vector<double>> data_XY_transposed,double lower_X, double upper_X);
@@ -142,7 +144,7 @@ public:
 	/****************/
 	static vector<double> interpolate_bspline(map<double, double>& data_XY,vector<double> X_new={}, int bspline_degree=3);
 	/// akima splines
-	static vector<double> interpolate_data_XY(const map<double,double>& data_XY, vector<double>& X);
+	static vector<double> interpolate_data_XY(const map<double,double>& data_XY,const vector<double>& X);
 	
 	static double integrate(map<double,double>& data_XY, double lower_limit_X=0, double upper_limit_X=0) ;
 	

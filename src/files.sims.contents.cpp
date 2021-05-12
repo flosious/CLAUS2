@@ -37,3 +37,11 @@ void files_::sims_t::contents_t::column_t::to_screen()
 {
 	cout << "unit="<<unit<<"\tcluster_name="<<cluster_name<<"\tdimension="<<dimension<<"\tdata.size()="<<data.size()<<endl;
 }
+
+std::__cxx11::string files_::sims_t::contents_t::to_string(const std::__cxx11::string del)
+{
+	stringstream out;
+	out << files_::file_t::contents_t::to_string(del) << del;
+	out << "clusters().size()=" << clusters().size();
+	return out.str();
+}

@@ -49,7 +49,7 @@ public:
 	const concentration_t concentration(isotope_t& iso) const;
 	bool operator==(matrix_t& obj) ;
 	bool operator!=(matrix_t& obj) ;
-	bool operator<(matrix_t& obj) ;
+	bool operator<(const matrix_t& obj) const;
 };
 	
 

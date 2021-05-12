@@ -55,13 +55,13 @@ bool database_t::create_tables()
 {
    
 	if (!create_table_everything()) 
-		logger::error("database_t::database_t: !create_table_everything()");
+		logger::error("database_t::create_tables()","!create_table_everything()");
 	if (!create_table_samples()) 
-		logger::error("database_t::database_t: !create_table_samples()");
+		logger::error("database_t::create_tables()","!create_table_samples()");
 // 		if (!create_table_sample_implants()) error_messages.push_back("database_t::database_t: !create_table_sample_implants()");
 // 		if (!create_table_sample_layers()) error_messages.push_back("database_t::database_t: !create_table_sample_layers()");
 	if (!create_table_measurements()) 
-		logger::error("database_t::database_t: !create_table_measurements()");
+		logger::error("database_t::create_tables()","!create_table_measurements()");
 // 		if (!create_table_measurement_settings()) error_messages.push_back("database_t::database_t: !create_table_measurement_settings()");
 // 		if (!create_table_reference_measurement_isotopes()) error_messages.push_back("database_t::database_t: !create_table_reference_measurement_isotopes()");
 // 		if (!create_table_measurement_statistics()) error_messages.push_back("database_t::database_t: !create_table_measurement_statistics()");
@@ -241,10 +241,10 @@ bool database_t::execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int
     char *zErrMsg = 0;
 	int rc = sqlite3_exec(this->DB, sql.c_str(), func_ptr, func_arg, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		logger::error(string("sql-command: ") + sql);
-		logger::error(string("database_t::execute_sql() SQL error: ") + zErrMsg);
-		std::cout << "execute_sql() SQL error: "<< zErrMsg << std::endl;
-		std::cout << "sql-command: " << sql << "\n";
+		logger::error("database_t::execute_sql()","sql-command: " + sql,zErrMsg,"returning false");
+// 		logger::error("database_t::execute_sql()", "SQL error: ") + zErrMsg);
+// 		std::cout << "execute_sql() SQL error: "<< zErrMsg << std::endl;
+// 		std::cout << "sql-command: " << sql << "\n";
 		sqlite3_free(zErrMsg);
 		return false;
 	}

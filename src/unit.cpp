@@ -1,79 +1,373 @@
 #include "unit.hpp"
 
-const map<string,map<string,double>> unit_t::current_unit_to_new_unit=
+/****************************************/
+/*****  unit_t::base_exponents_t  *******/
+/****************************************/
+
+
+// const map<unit_t, std::string> unit_t::base_unit_to_symbol
+// {
+// 	{units::SI::meter,"m"},
+// 	{units::SI::kilogram,"kg"},
+// 	{units::SI::second,"s"},
+// 	{units::SI::Ampere,"A"},
+// 	{units::SI::mol,"mol"},
+// 	{units::SI::Kelvin,"K"},
+// 	{units::SI::Candela,"cd"}
+// };
+
+const map<std::string,unit_t> unit_t::symbol_to_base_unit
 {
-	{"m", {
-		{"A", 1E-10},
-		{"nm", 1E-9},
-		{"um", 1E-6}
-	}},
-	{"A", {
-		{"nA", 1E-9},
-		{"uA", 1E-6}
-	}},
-	{"J", {
-		{"keV", 1E3/1.602177E-19},
-		{"eV", 1/1.602177E-19},
-		{"kJ", 1E3}
-	}},
-	{"amu", {
-		{"kg", 1.660539066E-27},
-		{"g", 1.660539066E-27*1E3}
-	}}
+	{"m",units::SI::meter},
+	{"kg",units::SI::kilogram},
+	{"s",units::SI::second},
+	{"A",units::SI::Ampere},
+	{"mol",units::SI::mol},
+	{"K",units::SI::Kelvin},
+	{"cd",units::SI::Candela}
 };
 
-double unit_t::change_unit(unit_t new_unit)
+const std::unordered_map<std::string, unit_t> unit_t::symbol_prefix_unit 
 {
-	double factor = -1;
-	double divisor = -1;
+	{"d",units::prefixes::deci},
+	{"c",units::prefixes::centi},
+	{"m",units::prefixes::milli},
+	{"u",units::prefixes::micro},
+	{"n",units::prefixes::nano},
+	{"p",units::prefixes::pico},
+	{"f",units::prefixes::femto},
+	{"a",units::prefixes::atto},
+	{"z",units::prefixes::zepto},
+	{"y",units::prefixes::yocto},
 	
-	///current unit and new_unit are both in the 2nd map
-	for (auto& s : current_unit_to_new_unit)
-	{
-		if (s.first == name()) factor = 1;
-		if (s.first == new_unit.name()) divisor = 1;
-		for (auto& t : s.second)
-		{
-			if (factor>0 && divisor>0)
-			{
-				name_p = new_unit.name();
-				return factor/divisor;
-			}
-			if (t.first == name()) factor = t.second;
-			if (t.first == new_unit.name()) divisor = t.second;
-		}
-	}
-	return 1;
+	{"da",units::prefixes::deca},
+	{"h",units::prefixes::hecto},
+	{"k",units::prefixes::kilo},
+	{"M",units::prefixes::mega},
+	{"G",units::prefixes::giga},
+	{"T",units::prefixes::terra},
+	{"P",units::prefixes::peta},
+	{"E",units::prefixes::exa},
+	{"Z",units::prefixes::zetta},
+	{"Y",units::prefixes::yotta}
+};
+
+const map<std::string, unit_t> unit_t::symbol_to_unit 
+{
+	{"%",units::suffixes::percent},
+	{"bar",units::derived::bar},
+	{"cnt/s",units::derived::counts/units::SI::second},
+	{"e",constants::elementary_charge},
+	{"V",units::derived::volt},
+	{"eV",units::derived::electron_volt},
+	/*atoms*/
+	{"at",units::derived::atoms},
+	{"at%",units::derived::atom_percent},
+	{"at/ccm",units::derived::atoms/units::SI::meter.pow(3)*units::prefixes::centi.pow(3)},
+	{"at/scm",units::derived::atoms/units::SI::meter.pow(2)*units::prefixes::centi.pow(2)},
+	{"at/cm^3",units::derived::atoms/units::SI::meter.pow(3)*units::prefixes::centi.pow(3)},
+	{"at/cm^2",units::derived::atoms/units::SI::meter.pow(2)*units::prefixes::centi.pow(2)},
+	/*time*/
+	{"sec",{units::SI::second}},
+	{"min",{units::SI::second,60}},
+	{"h",{units::SI::second,60*60}},
+	{"hour",{units::SI::second,60*60}},
+	{"d",{units::SI::second,60*60*24}},
+	{"day",{units::SI::second,60*60*24}},
+	{"week",{units::SI::second,60*60*24*7}},
+	{"y",{units::SI::second,60*60*24*365.25}},
+	{"year",{units::SI::second,60*60*24*365.25}},
+	{"w",{units::SI::second,60*60*24*7}}
+};
+
+bool unit_t::base_exponents_t::operator==(const unit_t::base_exponents_t& obj) const
+{
+	if (meters != obj.meters) return false;
+	if (kilograms != obj.kilograms) return false;
+	if (seconds != obj.seconds) return false;
+	if (amperes != obj.amperes) return false;
+	if (moles != obj.moles) return false;
+	if (kelvins != obj.kelvins) return false;
+	if (candelas != obj.candelas) return false;
+	
+	return true;
 }
 
-unit_t::unit_t(std::__cxx11::string name_s)
+bool unit_t::base_exponents_t::operator!=(const unit_t::base_exponents_t& obj) const
 {
-	name_p = name_s;
+	return !operator==(obj);
 }
+
+unit_t::base_exponents_t unit_t::base_exponents_t::operator/(const unit_t::base_exponents_t& obj) const
+{
+	return {obj.meters-meters,obj.kilograms-kilograms,seconds-obj.seconds,obj.amperes-amperes,moles-obj.moles,kelvins-obj.kelvins,candelas-obj.candelas,relative};
+}
+
+
+unit_t::base_exponents_t unit_t::base_exponents_t::operator*(const unit_t::base_exponents_t& obj) const
+{
+	return {obj.meters+meters,obj.kilograms+kilograms,seconds+obj.seconds,obj.amperes+amperes,moles+obj.moles,kelvins+obj.kelvins,candelas+obj.candelas,relative};
+}
+
+
+bool unit_t::base_exponents_t::is_set() const
+{
+	return set;
+}
+
+const std::__cxx11::string unit_t::base_exponents_t::to_string() const
+{
+	stringstream out;
+// 	vector<string> counter_, denominator;
+	
+	if (meters!=0)
+	{
+		logger::debug(11,"unit_t::base_exponents_t::to_string()","meters","set");
+// 		out << base_unit_to_symbol.at(units::SI::meter);
+		out << "m";
+		if (meters!=1)
+			out << "^" << meters << " ";
+		else 
+			out << " ";
+	}
+	if (kilograms!=0)
+	{
+		logger::debug(11,"unit_t::base_exponents_t::to_string()","kilograms","set");
+// 		out << base_unit_to_symbol.at(units::SI::kilogram);
+		out << "kg";
+		if (kilograms!=1)
+			out << "^" << kilograms << " ";
+		else 
+			out << " ";
+	}
+	if (seconds!=0)
+	{
+		logger::debug(11,"unit_t::base_exponents_t::to_string()","seconds","set");
+// 		out << base_unit_to_symbol.at(units::SI::second);
+		out << "s";
+		if (seconds!=1)
+			out << "^" << seconds << " ";
+		else 
+			out << " ";
+	}
+	if (amperes!=0)
+	{
+		logger::debug(11,"unit_t::base_exponents_t::to_string()","amperes","set");
+// 		out << base_unit_to_symbol.at(units::SI::Ampere);
+		out << "A";
+		if (amperes!=1)
+			out << "^" << amperes << " ";
+		else 
+			out << " ";
+	}
+	if (kelvins!=0)
+	{
+		logger::debug(11,"unit_t::base_exponents_t::to_string()","kelvins","set");
+// 		out << base_unit_to_symbol.at(units::SI::Kelvin);
+		out << "K";
+		if (kelvins!=1)
+			out << "^" << kelvins << " ";
+		else 
+			out << " ";
+	}
+	if (moles!=0)
+	{
+		logger::debug(11,"unit_t::base_exponents_t::to_string()","moles","set");
+// 		out << base_unit_to_symbol.at(units::SI::mol);
+		out << "mol";
+		if (moles!=1)
+			out << "^" << moles << " ";
+		else 
+			out << " ";
+	}
+	if (candelas!=0)
+	{
+		logger::debug(11,"unit_t::base_exponents_t::to_string()","candelas","set");
+// 		out << base_unit_to_symbol.at(units::SI::Candela);
+		out << "cd";
+		if (candelas!=1)
+			out << "^" << candelas << " ";
+		else 
+			out << " ";
+	}
+	string out_ = out.str();
+// 	tools::str::remove_spaces_from_string_end(&out_);
+	return out_.substr(0,out_.size()-1);
+}
+
+// int* unit_t::base_exponents_t::get_base(unit_t::base_exponents_t::base_t B)
+// {
+// 	switch (B)
+// 	{
+// 		case Meter: return &meters;
+// 		case Kilogram: return &kilograms;
+// 		case Second: return &seconds;
+// 		case Ampere: return &amperes;
+// 		case Mole: return &moles;
+// 		case Kelvin: return &kelvins;
+// 		case Candela: return &candelas;
+// 		default: return nullptr;
+// 	}
+// 	return nullptr;
+// }
+
+/***********************/
+/*****  unit_t   *******/
+/***********************/
+
+unit_t::unit_t(std::__cxx11::string symbols)
+{
+	
+	tools::str::remove_spaces(&symbols);
+	
+	/*symbols is a derived unit*/
+	if (symbol_to_unit.size()>0 && symbol_to_unit.find(symbols)!=symbol_to_unit.end())
+	{
+		logger::debug(11,"unit_t::unit_t","symbol_to_unit.at("+symbols+")",symbol_to_unit.at(symbols).base_units_exponents.to_string());
+		*this=symbol_to_unit.at(symbols);
+		logger::debug(11,"unit_t::unit_t","symbols is a derived unit",symbols,base_units_exponents.to_string());
+		return;
+	}
+	/*symbols is a combination of prefix and derived unit*/
+	for (auto& us : symbol_to_unit)
+	{
+		for (auto& prefix_symbol : symbol_prefix_unit)
+		{
+			if ((prefix_symbol.first + us.first) == symbols)
+			{
+				*this = us.second*prefix_symbol.second;
+				logger::debug(11,"unit_t::unit_t","symbols is a combination of prefix and derived unit",symbols,base_units_exponents.to_string());
+				return;
+			}
+		}
+	}
+	
+	/*symbols is a base unit*/
+	if (symbol_to_base_unit.size()>0 && symbol_to_base_unit.find(symbols)!=symbol_to_base_unit.end())
+	{
+		logger::debug(11,"unit_t::unit_t","symbol_to_base_unit.at("+symbols+")",symbol_to_base_unit.at(symbols).base_units_exponents.to_string());
+		*this=symbol_to_base_unit.at(symbols);
+		logger::debug(11,"unit_t::unit_t","symbols is a base unit",symbols,base_units_exponents.to_string());
+		return;
+	}
+	/*symbols is a combination of prefix and base unit*/
+	for (auto& is : symbol_to_base_unit)
+	{
+		for (auto& prefix_symbol : symbol_prefix_unit)
+		{
+			if ((prefix_symbol.first + is.first) == symbols)
+			{
+// 				logger::debug("symbols is a combination of prefix and base unit",symbols);
+				*this = is.second*prefix_symbol.second;
+				logger::debug(11,"unit_t::unit_t","symbols is a combination of prefix and base unit",symbols,base_units_exponents.to_string());
+				return;
+			}
+		}
+	}
+	
+	logger::error("unit_t::unit_t: symbols unknown","'"+symbols+"'");
+}
+
+// const std::__cxx11::string unit_t::to_string(std::__cxx11::string symbol) const
+// {
+// 	if (symbol=="")
+// 		return to_string();
+// 	
+// 	if (unit_t(symbol)==*this)
+// 		return symbol;
+// 	//fallback to any symbol
+// 	return to_string();
+// }
 
 const std::__cxx11::string unit_t::to_string() const
 {
-	stringstream out;
-	out << "[" << name() << "]";
-	return out.str();
+	if (!is_set()) return "";
+	logger::debug(11,"unit_t::to_string()","base_units_exponents: "+ base_units_exponents.to_string(), "multiplier: " + tools::to_string(multiplier));
+	/*check SI*/
+	for (auto it=symbol_to_base_unit.begin();it!=symbol_to_base_unit.end();it++)
+	{
+		if (*this == it->second)
+		{
+			logger::debug(11,"unit_t::to_string()","just base",it->first);
+			return it->first;
+		}
+		for (auto pre=symbol_prefix_unit.begin();pre!=symbol_prefix_unit.end();pre++)
+		{
+			if (pre->second*it->second==*this)
+			{
+				logger::debug(11,"unit_t::to_string()","prefix+base",it->first);
+				return pre->first+it->first;
+			}
+		}
+	}
+	
+	/*check known derived units*/
+	for (auto it=symbol_to_unit.begin();it!=symbol_to_unit.end();it++)
+	{
+		if (it->second!=*this) continue;
+		logger::debug(11,"unit_t::to_string()","just derived",it->first);
+		return it->first;
+	}
+	/* just check base units and multiplier separately
+	   and add prefix */
+	for (auto it=symbol_to_unit.begin();it!=symbol_to_unit.end();it++)
+	{
+		if (it->second.base_units_exponents != base_units_exponents) continue;
+		/*multipliers match, no need for prefix*/
+		double pref_multiplier = multiplier / it->second.multiplier;
+		if (pref_multiplier == 1)
+		{
+			logger::debug(7,"unit_t::to_string()","just derived(2)",it->first);
+			return it->first;
+		}
+		for (auto const& prefix : symbol_prefix_unit)
+		{
+			if (pref_multiplier != prefix.second.multiplier) continue;
+			logger::debug(11,"unit_t::to_string()","prefix+derived",prefix.first + it->first);
+			return prefix.first + it->first;
+		}
+	}
+	
+	/*unknown SI derivative*/
+// 	vector<string> counter, denominator;
+// 	if (base_units_exponents.Ampere==1)			counter.push_back(units::SI::Ampere.to_string());
+// 	else if (base_units_exponents.Ampere>0) 	counter.push_back(units::SI::Ampere.to_string() + string("^") + base_units_exponents.Ampere);
+// 	else if (base_units_exponents.Ampere<0) 	denominator << units::SI::Ampere.to_string() << "^" << base_units_exponents.Ampere << " ";
+	
+// 	if (base_units_exponents.Candela==1)		counter << units::SI::Candela.to_string() << " ";
+// 	else if (base_units_exponents.Candela>0) 	counter << units::SI::Candela.to_string() << "^" << base_units_exponents.Candela << " ";
+	
+
+		
+// 	logger::debug(5,"unit_t::to_string()","not found","");
+	logger::fatal("unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));
+	exit (EXIT_FAILURE);
+	return "unknown"; // will never be called
 }
 
-
-const std::__cxx11::string unit_t::name() const
+unit_t unit_t::pow(int pot) const
 {
-	return name_p;
+	unit_t powed = *this;
+	powed.base_units_exponents.meters = pot * base_units_exponents.meters;
+	powed.base_units_exponents.kilograms = pot * base_units_exponents.kilograms;
+	powed.base_units_exponents.seconds = pot * base_units_exponents.seconds;
+	powed.base_units_exponents.amperes = pot * base_units_exponents.amperes;
+	powed.base_units_exponents.moles = pot * base_units_exponents.moles;
+	powed.base_units_exponents.kelvins = pot * base_units_exponents.kelvins;
+	powed.base_units_exponents.candelas = pot * base_units_exponents.candelas;
+	powed.multiplier = std::pow(multiplier,pot);
+	return powed;
 }
 
 bool unit_t::is_set() const
 {
-	if (name()=="") return false;
-	return true;
+	return base_units_exponents.is_set();
 }
-
 
 bool unit_t::operator==(const unit_t& obj) const
 {
-	if (name()!=obj.name()) return false;
+	if (base_units_exponents != obj.base_units_exponents) return false;
+	if (multiplier != obj.multiplier) return false;
 	return true;
 }
 
@@ -82,17 +376,27 @@ bool unit_t::operator!=(const unit_t& obj) const
 	return !(operator==(obj));
 }
 
-
 unit_t unit_t::operator*(const unit_t& obj) const
 {
-	if (name()=="") return obj.name();
-	if (obj.name()=="") return name();
-	return unit_t{name() + "*" + obj.name()};
+	if (!is_set() || !obj.is_set()) return {};
+	return unit_t{base_units_exponents * obj.base_units_exponents, multiplier * obj.multiplier};
 }
 
 unit_t unit_t::operator/(const unit_t& obj) const
 {
-	if (name()=="") return unit_t{"1/(" + obj.name()+")"};
-	if (obj.name()=="") return name();
-	return unit_t{name() + " / (" + obj.name()+")"};
+	if (!is_set() || !obj.is_set()) return {};
+	return unit_t{base_units_exponents / obj.base_units_exponents, multiplier / obj.multiplier};
+}
+
+bool unit_t::operator<(const unit_t& obj) const
+{
+	if (base_units_exponents.meters > obj.base_units_exponents.meters) return false;
+	if (base_units_exponents.kilograms > obj.base_units_exponents.kilograms) return false;
+	if (base_units_exponents.seconds > obj.base_units_exponents.seconds) return false;
+	if (base_units_exponents.amperes > obj.base_units_exponents.amperes) return false;
+	if (base_units_exponents.moles > obj.base_units_exponents.moles) return false;
+	if (base_units_exponents.kelvins > obj.base_units_exponents.kelvins) return false;
+	if (base_units_exponents.candelas > obj.base_units_exponents.candelas) return false;
+// 	if (multiplier < obj.multiplier) return true;
+	return true;
 }

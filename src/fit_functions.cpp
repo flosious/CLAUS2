@@ -182,13 +182,16 @@ bool fit_functions::asym2sig_t::fit(map<double, double> data_XY, double y0_s, do
 	fitted_p = true;
 	
 	/*calc gof_p*/
-	gof_p=0;
-	for (auto& i:data_XY)
-	{
-		double Y = fitted_y_data({i.first})[0];
-		gof_p = gof_p + pow(i.second-Y,2)/abs(Y);
-	}
-	gof_p = 1-sqrt(gof_p)/N;
+// 	gof_p=0;
+// 	for (auto& i:data_XY)
+// 	{
+// 		double Y = fitted_y_data({i.first})[0];
+// 		gof_p = gof_p + abs((i.second-Y)/Y);
+// 	}
+// 	gof_p = gof_p/N;
+// 	gof_p = 1-pow(gof_p,1/2)/N;
+	
+	gof_p = pow(statistics::get_correlation_Y1_Y2(y_,fitted_y_data(x_)),50);
 
 	gsl_multifit_nlinear_free (w);
 	gsl_matrix_free (covar);
