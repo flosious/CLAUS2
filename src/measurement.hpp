@@ -107,6 +107,7 @@ public:
 				bool from_const_RSF();
 				bool from_dose();
 				bool from_implant_max();
+				bool from_database_parameters();
 			};
 			class SR_c
 			{
@@ -117,6 +118,7 @@ public:
 				SR_c(sims_t& measurement);
 				bool from_crater_depth();
 				bool from_implant_max();
+				bool from_database_parameters();
 			};
 			calc_t(sims_t& measurement);
 			SR_c SR();
@@ -124,16 +126,17 @@ public:
 			
 		};
 		void add_clusters(vector<cluster_t>& clusters_s);
+		///has to be regular to clusters
+		crater_t crater_s;
+		///has to be regular to crater
+		vector<cluster_t> clusters_s;
 	public: 
 		calc_t calc();
 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, 
 			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
 		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method);	
 		string to_string(const string del = ", ");
-		///has to be regular to clusters
-		crater_t crater_s;
-		///has to be regular to crater
-		vector<cluster_t> clusters_s;
+		
 		///returns the cluster corresponding isotope
 // 		isotope_t* isotope(cluster_t& cluster);
 		///isotopes collected from clusters

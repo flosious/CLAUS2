@@ -58,9 +58,9 @@ processor::processor(vector<string> args_p)
 // 			M.crater.sputter_time() = M.crater.sputter_time(&M.clusters).change_unit({"min"});
 // 			M.plot_now(0);
 // 			cout << M.crater().sputter_time().resolution().to_string() << endl;
-			M.plot_now();
-			M.change_resolution(sputter_time_t({1},{"s"})).plot_now();
-// 			M.change_resolution(sputter_time_t({1},{"s"})).export_origin_ascii();
+			M.plot_now(2);
+			M.change_resolution(sputter_time_t({0.001},{"min"})).plot_now(2);
+			M.change_resolution(sputter_time_t({0.0001},{"h"})).plot_now(2);
 		}
 	}
 

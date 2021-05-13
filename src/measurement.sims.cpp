@@ -149,11 +149,26 @@ int measurements_::sims_t::Draw(mglGraph* gr)
 			gr->Label('x',x_label.c_str(),0);
 // 			gr->Plot(x);
 		}
+		else if (crater().sputter_time().is_set() && !set)
+		{
+			gr->SetRange('x',0,statistics::get_max_from_Y(crater().sputter_time().data));
+			x.Set(crater().sputter_time().data);
+			string x_label = "sputter time ["+crater().sputter_time().unit().to_string()+"]";
+			gr->Label('x',x_label.c_str(),0);
+			set=true;
+		}
+		else if (crater().sputter_depth().is_set() && !set)
+		{
+			gr->SetRange('x',0,statistics::get_max_from_Y(crater().sputter_depth().data));
+			x.Set(crater().sputter_depth().data);
+			string x_label = "sputter depth ["+crater().sputter_depth().unit().to_string()+"]";
+			gr->Label('x',x_label.c_str(),0);
+			set=true;
+		}
 			
 		if (C.intensity().is_set())
 		{
 			y.Set(C.intensity().data);
-			
 			gr->SetRange('y',1,1E6);
 			gr->SetFunc("","lg(y)");
 // 			gr->AddLegend(,"k");
