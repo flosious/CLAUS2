@@ -43,6 +43,7 @@ class logger
 	friend class config_t;
 private:
 	static bool activate_debug;
+	
 // 	static void log_message(string type, string message, T variable={});
 	class message_t
 	{
@@ -73,6 +74,7 @@ private:
 		const string to_string() const;
 	};
 public:
+	static const bool instant_print_messages=true;
 	///strong type: mtype should contain a strong map fatal->"fatal", error->"error", ...
 // 	struct mtype {string type;};
 // 	static const mtype fatal{"fatal"};

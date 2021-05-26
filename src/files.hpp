@@ -155,8 +155,6 @@ public:
 		};
 		class contents_t : public file_t::contents_t
 		{
-		protected:
-			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
 		public:
 			virtual vector<cluster_t> clusters();
 			string to_string(const string del = ",");
@@ -170,6 +168,9 @@ public:
 				vector<double> data;
 				void to_screen();
 			};
+		protected:
+			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
+			vector<column_t> columns_s;
 		};
 	};
 	
@@ -204,6 +205,7 @@ public:
 			bool is_Ipr;
 			///e.g. < sputter_time > = get_quantity_from_dimension_and_clustername("Time","Ipr")
 			const quantity_t get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername="");
+			
 			const vector<string>& units();
 			const vector<string>& dimensions();
 			const vector<column_t> columns();
@@ -215,7 +217,7 @@ public:
 // 				sputter_current_t sputter_current;
 // 				sputter_time_t sputter_time;
 // 				sputter_depth_t sputter_depth;
-// 				Ipr_t(sputter_current_t sputter_current_s={}, sputter_time_t sputter_time_s={}, sputter_depth_t sputter_depth_s={});
+// 				Ipr_t(sputter_current_t sputter_current_s={}, sputter_time_t sputter_time={}, sputter_depth_t sputter_depth_s={});
 // 				const string to_string(const string del=", ") const;
 // 			};
 			vector<cluster_t> clusters();

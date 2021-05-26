@@ -45,10 +45,10 @@ private:
 	int equilibrium_starting_position=-1;
 // 	map<isotope_t,int> isotopes_amount_p;
 // 	vector<isotope_t> isotopes_p;
-	concentration_t concentration_p;
-	intensity_t intensity_p;
-	sputter_time_t sputter_time_p;
-	sputter_depth_t sputter_depth_p;
+// 	concentration_t concentration_p;
+// 	intensity_t intensity_p;
+// 	sputter_time_t sputter_time_p;
+// 	sputter_depth_t sputter_depth_p;
 
 // 	const crater_t* crater();
 // 	const sample_t::matrix_t* matrix();
@@ -72,29 +72,31 @@ public:
 			  concentration_t concentration={});
 	cluster_t();
 	cluster_t(const vector<isotope_t>& isotopes_s);
+	quantity_t mass();
+	quantity_t abundance();
 	string name() const;
 	string to_string(const string del=" ") const;
 	const bool is_set() const;
 	///isotopes which define this cluster-
-	concentration_t& concentration();
-	intensity_t& intensity();
-	sputter_time_t& sputter_time();
-	sputter_depth_t& sputter_depth();
+	concentration_t concentration;
+	intensity_t intensity;
+	sputter_time_t sputter_time;
+	sputter_depth_t sputter_depth;
 // 	SR_t SR;
 	SF_t SF;
-	RSF_t RSF;
+// 	RSF_t RSF; // besser in die mgroup, da nicht charakteristisch für ein cluster
 	///cahnges resolution of all
-// 	cluster_t change_sputter_depth_resolution(sputter_depth_t sputter_depth_res);
-// 	cluster_t change_sputter_time_resolution(sputter_time_t sputter_time_res);
-// 	cluster_t interpolate(sputter_time_t& new_sputter_time, sputter_time_t& old_sputter_time);
 	cluster_t interpolate(quantity_t& new_Q, quantity_t& old_Q) const;
+	cluster_t filter_impulse(int window_size=0, float factor=5);
+	///
+// 	unsigned int sputter_equilibrium_starting_index() const;
 	
 	///sputter equilibrium state of this cluster
 // 	cluster_t equilibrium();
 	// 	const map<isotope_t,int>& isotopes_amount() const;
 	vector<isotope_t> isotopes;
 	///pointer to the isotope within this cluster, where matrix isotopes have been removed
-	const isotope_t* corsseponding_isotope() const; 
+// 	const isotope_t* corsseponding_isotope() const; 
 	bool operator==(const cluster_t& obj) const;
 	bool operator<(const cluster_t& obj) const;
 	bool operator!=(const cluster_t& obj) const;

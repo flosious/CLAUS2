@@ -1,10 +1,98 @@
 #include "sample.hpp"
 
+/******************************/
+/***   sample_t::database   ***/
+/******************************/
+
+const string sample_t::database::tablename = "implanted_samples";
+
+sample_t::database::database(sample_t& sample, database_t& sql_wrapper) : sample(sample), sql_wrapper(sql_wrapper)
+{
+// 	if (!create_table())
+// 		logger::error("sample_t::database::database()","could not create sql table","","");
+// 	else
+// 		table_exists=true;
+}
+
+bool sample_t::database::create_table(database_t& sql_wrapper)
+{
+	std::string sql;
+	sql = "CREATE TABLE IF NOT EXISTS " + tablename + "(" \
+        "id INTEGER PRIMARY KEY, " \
+        "lot                   	 TEXT, " \
+        "wafer                  	 INT, " \
+        "lot_split            	 TEXT, " \
+        "chip_x                  	 INT, " \
+        "chip_y                  	 INT, " \
+        "monitor                	 TEXT, " \
+        "matrix			      	 TEXT, " \
+        // 31P1
+        "implanted_isotope          	 TEXT, " \
+        // 2E15 in at/scm
+        "dose	           	 INT, " \
+        "maximum_concentration                 INT, " \
+        "depth_at_maximum_concentration	INT, "  \
+		"comments         			 TEXT);";
+   return sql_wrapper.execute_sql(sql);
+}
+
+map<string,vector<string>> sample_t::database::load_from_table(isotope_t isotope)
+{
+	if (!table_exists)
+		return {};
+	map<string,vector<string>> matching_table_entries;
+	string sql1 = "SELECT * FROM " +tablename+ 	" WHERE " \
+			"lot='" + sample.lot + "' AND " \
+			"wafer=" +std::to_string(sample.wafer)+ " AND " \
+			"chip_x=" +std::to_string(sample.chip.x)+ " AND " \
+			"chip_y=" +std::to_string(sample.chip.y)+ " AND ";
+	if (isotope.symbol=="")
+		sql1 += "monitor=" + sample.monitor+"';";
+	else
+	{
+		sql1 += "monitor=" + sample.monitor+" AND " \
+				"implanted_isotope=" + isotope.to_string() +	"';";
+	}
+	if (!sql_wrapper.execute_sql(sql1,database_t::callback_lines_map,&matching_table_entries)) 
+		logger::error("sample_t::database::load_from_table()","could not load database table to local map","","returning empty");
+	return matching_table_entries;
+}
+
+matrix_t sample_t::database::matrix()
+{
+	map<string,vector<string>> table_entries = load_from_table();
+	if (table_entries.size()==0)
+	{
+		logger::error("sample_t::database::matrix()","table_entries.size()==0","could not find sample in database table " +tablename,"returning empty");
+		return  {};
+	}
+// 	if (table_entries.size()>1)
+// 		logger::warning(3,"sample_t::database::matrix()","table_entries.size()>1","multiple entries of same sample in table " +tablename,"using 1st entry");
+	return matrix_t(table_entries.at("matrix").at(1));
+}
+
+/***************************************************/
+/****  sample_t::database::implant_parameters_t ****/
+/***************************************************/
+
+dose_t sample_t::database::dose(const isotope_t isotope)
+{
+	map<string,vector<string>> table_entries = load_from_table();
+	if (table_entries.size()==0)
+	{
+		logger::error("sample_t::database::dose()","table_entries.size()==0","could not find sample " +sample.to_string()+ " and isotope " +isotope.to_string()+  " in database table " +tablename,"returning empty");
+		return  {};
+	}
+	if (table_entries.size()>1)
+		logger::error("sample_t::database::dose()","table_entries.size()>1",sample.to_string() + " " + isotope.to_string(),"returning empty");
+	
+	return dose_t({tools::str::str_to_double(table_entries.at("dose").at(1))});
+}
 
 
-/****************************/
-/***   sample_t::chip_t   ***/
-/****************************/
+/******************************/
+/***   sample_t::database   ***/
+/******************************/
 
 
 bool sample_t::chip_t::operator==(const sample_t::chip_t& obj) const
@@ -70,30 +158,6 @@ bool sample_t::use_monitor=true;
 bool sample_t::use_chip=true;
 bool sample_t::use_simple_name=true;
 
-// vector<sample_t> sample_t::samples_list_p;
-// 
-// vector<sample_t>* sample_t::samples_list()
-// {
-// 	bool inserted;
-// 	for (auto& f: files_::files_list())
-// 	{
-// 		sample_t sample(f);
-// 		inserted = false;
-// 		for (auto& s : samples_list_p)
-// 		{
-// 			if (s==sample)
-// 			{
-// 				s.files.insert(f);
-// 				inserted = true;
-// 			}
-// 		}
-// 		if (!inserted) samples_list_p.push_back(sample);
-// 	}
-// 	if (samples_list_p.size()==0) return nullptr;
-// 	return &samples_list_p;
-// }
-
-
 /***********************/
 
 // sample_t::sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix) :
@@ -101,24 +165,26 @@ bool sample_t::use_simple_name=true;
 // {	
 // }
 
-sample_t::sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f) : 
+sample_t::sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f,database_t& sql_wrapper) : 
 																wafer(fn.wafer()), 
 																monitor(fn.monitor()),
 																lot(fn.lot()),
 																lot_split(fn.lot_split()),
 																chip(fn.chip_x(),fn.chip_y()),
 																simple_name(fn.simple_name()),
-																matrix_p(f.matrix())
+																matrix_p(f.matrix()),
+																DB(*this,sql_wrapper)
 {
 // 	cout << "f.matrix() = " << f.matrix().to_string() << endl;
 }
 
-sample_t::sample_t(files_::file_t::name_t& fn) : wafer(fn.wafer()), 
+sample_t::sample_t(files_::file_t::name_t& fn, database_t& sql_wrapper) : wafer(fn.wafer()), 
 																monitor(fn.monitor()),
 																lot(fn.lot()),
 																lot_split(fn.lot_split()),
 																chip(fn.chip_x(),fn.chip_y()),
-																simple_name(fn.simple_name())
+																simple_name(fn.simple_name()),
+																DB(*this,sql_wrapper)
 {
 }
 
@@ -137,6 +203,8 @@ matrix_t& sample_t::matrix()
 {
 	if (matrix_p.is_set()) return matrix_p;
 	// do something to populate matrix_p --> look up Database
+	if (DB.matrix().is_set())
+		matrix_p = DB.matrix();
 	return matrix_p;
 }
 

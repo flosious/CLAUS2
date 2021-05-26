@@ -23,10 +23,10 @@ bool measurements_::measurement_t::use_sample=true;
 bool measurements_::measurement_t::use_olcdb=true;
 bool measurements_::measurement_t::use_group=true;
 
-measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, list<sample_t>& samples_list, string method) : 
-												repetition(filename.repetition()), olcdb(filename.olcdb()),group(filename.group()), method(method), filename_with_path(filename.filename_with_path)
+measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper) : 
+												repetition(filename.repetition()), olcdb(filename.olcdb()),group(filename.group()), method(method), filename_with_path(filename.filename_with_path), sql_wrapper(&sql_wrapper)
 {
-	sample_t s(filename,filecontents);
+	sample_t s(filename,filecontents,sql_wrapper);
 	sample = tools::find_in_V(s,samples_list); 
 	if (sample==nullptr)
 	{
@@ -41,12 +41,12 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, fi
 	}
 }
 
-measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, list<sample_t>& samples_list, string method) : 
-			repetition(filename.repetition()), olcdb(filename.olcdb()), group(filename.group()), method(method), filename_with_path(filename.filename_with_path)
+measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper) : 
+			repetition(filename.repetition()), olcdb(filename.olcdb()), group(filename.group()), method(method), filename_with_path(filename.filename_with_path), sql_wrapper(&sql_wrapper)
 {
 	if (sample==nullptr)
 	{
-		sample_t s(filename);
+		sample_t s(filename,sql_wrapper);
 		sample = tools::find_in_V(s,samples_list); 
 		if (sample==nullptr)
 		{
@@ -120,53 +120,6 @@ bool measurements_::measurement_t::operator>(measurements_::measurement_t& obj)
 {
 	if (!operator<(obj) && operator!=(obj)) return true;
 	return false;
-}
-
-measurements_::sims_t::calc_t measurements_::sims_t::calc()
-{
-	return calc_t(*this);
-}
-
-/*******************************/
-/***        calc_t         *****/
-/*******************************/
-
-measurements_::sims_t::calc_t::calc_t(measurements_::sims_t& measurement) : measurement(measurement)
-{
-}
-
-measurements_::sims_t::calc_t::SR_c measurements_::sims_t::calc_t::SR()
-{
-	return SR_c(measurement);
-}
-
-
-/*******************************/
-/***     calc_t::SR_c      *****/
-/*******************************/
-
-measurements_::sims_t::calc_t::SR_c::SR_c(measurements_::sims_t& measurement) : measurement(measurement)
-{
-}
-
-bool measurements_::sims_t::calc_t::SR_c::from_crater_depth()
-{
-	if (!measurement.crater().total_sputter_depth().is_set())
-	{
-// 		logger::warning("measurements_::sims_t::calc_t::SR_c::from_crater_depth: !measurement.crater.total_sputter_depth().is_set()");
-		logger::warning(1,"measurements_::sims_t::calc_t::SR_c::from_crater_depth()","!measurement.crater.total_sputter_depth().is_set()",measurement.to_string(),"returning FALSE");
-		return false;
-	}
-	if (!measurement.crater().total_sputter_time(&measurement.clusters()).is_set())
-	{
-// 		logger::warning("measurements_::sims_t::calc_t::SR_c::from_crater_depth: !measurement.crater.total_sputter_time().is_set()");
-		logger::warning(1,"measurements_::sims_t::calc_t::SR_c::from_crater_depth()","!measurement.crater.total_sputter_time(&measurement.clusters).is_set()",measurement.to_string(),"returning FALSE");
-		return false;
-	}
-	measurement.crater().SR = (measurement.crater().total_sputter_depth() / measurement.crater().total_sputter_time()); // skalar value
-// 	for (auto& C : measurement.clusters)
-// 		C.SR = measurement.crater.SR; // skalars
-	return true;
 }
 
 

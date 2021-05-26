@@ -81,8 +81,8 @@ origin_t::origin_t(vector<cluster_t>& clusters, std::__cxx11::string path, std::
 		else
 			comment << sample->lot << sample->lot_split << "_w" << sample->wafer;
 		
-		if (C.sputter_time().is_set()) 
-			cols.push_back({C.sputter_time().data,longname.str() + " sputter_time",C.sputter_time().unit().to_string(),comment.str()});
+		if (C.sputter_time.is_set()) 
+			cols.push_back({C.sputter_time.data,longname.str() + " sputter_time",C.sputter_time.unit().to_string(),comment.str()});
 		if (C.intensity().is_set()) 
 			cols.push_back({C.intensity().data,longname.str() + " intensity",C.intensity().unit().to_string(),comment.str()});
 		if (C.sputter_depth().is_set())

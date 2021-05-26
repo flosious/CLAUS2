@@ -31,7 +31,7 @@
 #include "definitions.hpp"
 // #include "measurement.hpp"
 #include "files.hpp"
-// #include "database_t.hpp"
+#include "database_t.hpp"
 
 using namespace std;
 
@@ -59,8 +59,24 @@ private:
 	///all samples from all loaded files
 // 	static vector<sample_t> samples_list_p;
 protected:
-	///local matrix its necessary, because we have to work in it (concentrations)
+
 public:
+	///just for implants at the moment
+	class database
+	{
+	private:
+		database_t& sql_wrapper;
+		bool table_exists=false;
+		static const string tablename;
+		
+		map<string,vector<string>> load_from_table(isotope_t isotope={});
+		sample_t& sample;
+	public:
+		static bool create_table(database_t& sql_wrapper);
+		database(sample_t& sample, database_t& sql_wrapper);
+		matrix_t matrix();
+		dose_t dose(const isotope_t isotope);
+	};
 	class chip_t
 	{
 	public:
@@ -79,10 +95,10 @@ public:
 // 	set<measurements::dsims_t*> dsims;
 // 	set<measurements::tofsims_t*> tofsims;
 // 	set<measurements::profiler_t*> profiler;
+	database DB;
 	
-	
-	sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f);
-	sample_t(files_::file_t::name_t& fn);
+	sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f, database_t& sql_wrapper);
+	sample_t(files_::file_t::name_t& fn,database_t& sql_wrapper);
 // 	sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix);
 
 	string to_string(const string del=", ");
@@ -110,6 +126,6 @@ public:
 	/***********/
 };
 
-
+// extern database_t db;
 
 #endif // SAMPLE_T_HPP

@@ -113,10 +113,10 @@ std::__cxx11::string crater_t::linescan_t::to_string(std::__cxx11::string prefix
 /** sputter_beam_t **/
 /********************/
 crater_t::sputter_beam_t::sputter_beam_t(sputter_current_t sputter_current_s, 
-							 sputter_time_t sputter_time_s, 
+							 sputter_time_t sputter_time, 
 							 sputter_depth_t sputter_depth_s) 
 																	: 	sputter_current(sputter_current_s), 
-																		sputter_time(sputter_time_s), 
+																		sputter_time(sputter_time), 
 																		sputter_depth(sputter_depth_s)
 {
 }
@@ -153,8 +153,8 @@ crater_t::crater_t()
 // 	{
 // 		if (clusters.at(i).sputter_depth().is_set())
 // 			sputter_depths.push_back(clusters.at(i).sputter_depth());
-// 		if (clusters.at(i).sputter_time().is_set())
-// 			sputter_times.push_back(clusters.at(i).sputter_time());
+// 		if (clusters.at(i).sputter_time.is_set())
+// 			sputter_times.push_back(clusters.at(i).sputter_time);
 // 	}
 // 	
 // 	if (sputter_times.size() < clusters.size() && sputter_depths.size() < clusters.size())
@@ -231,13 +231,13 @@ crater_t::crater_t()
 // 	
 // // 	sputter_time_t common_ST;
 // // 	sputter_depth_t common_SD;
-// // 	if (sputter_time_s.name() == X.name())
-// // 		sputter_time_s = X;
+// // 	if (sputter_time.name() == X.name())
+// // 		sputter_time = X;
 // // 	else if (sputter_depth_s.name() == X.name())
 // // 		sputter_depth_s = X;
 // // 	else
 // // 	{
-// // 		logger::error("crater_t::set_common_base_points()","sputter_time_s.name() != sputter_depth_s.name() != X.name()","could not recognize X axis","returning false");
+// // 		logger::error("crater_t::set_common_base_points()","sputter_time.name() != sputter_depth_s.name() != X.name()","could not recognize X axis","returning false");
 // // 		return {};
 // // 	}
 // 	logger::debug(5,"crater_t::set_common_base_points()","","","SUCCESS");
@@ -246,24 +246,24 @@ crater_t::crater_t()
 
 total_sputter_time_t crater_t::total_sputter_time(vector<cluster_t>* clusters)
 {
-	if (total_sputter_time_s.is_set())
-		return total_sputter_time_s;
+	if (total_sputter_time().is_set())
+		return total_sputter_time();
 	
-	if (sputter_time_s.is_set())
-		total_sputter_time_s = total_sputter_time_t(sputter_time_s.max());
+	if (sputter_time.is_set())
+		total_sputter_time() = total_sputter_time_t(sputter_time.max());
 	
 	if (clusters==nullptr || clusters->size()==0) 
-		return total_sputter_time_s;
+		return total_sputter_time();
 	
 	for (auto& C : *clusters)
 	{
-		if (!C.sputter_time().is_set()) continue;
-		total_sputter_time_t TST(C.sputter_time().max());
-		if (TST > total_sputter_time_s || !total_sputter_time_s.is_set())
-			total_sputter_time_s = TST;
+		if (!C.sputter_time.is_set()) continue;
+		total_sputter_time_t TST(C.sputter_time.max());
+		if (TST > total_sputter_time() || !total_sputter_time().is_set())
+			total_sputter_time() = TST;
 	}
 	
-	return total_sputter_time_s;
+	return total_sputter_time();
 }
 
 total_sputter_depth_t crater_t::total_sputter_depth()
@@ -343,8 +343,8 @@ sputter_depth_t crater_t::common_sputter_depth(vector<cluster_t>& clusters)
 	vector<quantity_t> sputter_depths; 
 	for (int i=0;i<clusters.size();i++)
 	{
-		if (clusters.at(i).sputter_depth().is_set())
-			sputter_depths.push_back(clusters.at(i).sputter_depth());
+		if (clusters.at(i).sputter_depth.is_set())
+			sputter_depths.push_back(clusters.at(i).sputter_depth);
 	}
 	logger::debug(7,"crater_t::common_sputter_depth","sputter_depths.size()="+tools::to_string(sputter_depths.size()) + " clusters.size()="+tools::to_string(clusters.size()));
 	if (sputter_depths.size() != clusters.size() )
@@ -359,55 +359,55 @@ sputter_time_t crater_t::common_sputter_time(vector<cluster_t>& clusters)
 {
 	if(clusters.size()==0)
 	{
-		logger::error("crater_t::common_sputter_time()","clusters.size()==0","","returning empty");
+		logger::error("crater_t::common_sputter_time","clusters.size()==0","","returning empty");
 		return {};
 	}
 	vector<quantity_t> sputter_times; 
 	for (int i=0;i<clusters.size();i++)
 	{
-		if (clusters.at(i).sputter_time().is_set())
-			sputter_times.push_back(clusters.at(i).sputter_time());
+		if (clusters.at(i).sputter_time.is_set())
+			sputter_times.push_back(clusters.at(i).sputter_time);
 	}
 	if (sputter_times.size() != clusters.size() )
 	{
-		logger::error("crater_t::common_sputter_time()","sputter_times.size() != clusters.size()","check exported clusters for sputter_time","returning empty");
+		logger::error("crater_t::common_sputter_time","sputter_times.size() != clusters.size()","check exported clusters for sputter_time","returning empty");
 		return {};
 	}
 	return sputter_time_t{common_X_quantity(sputter_times)};
 }
 
 
-sputter_time_t& crater_t::sputter_time()
-{
-	if (sputter_time_s.is_set())
-		return sputter_time_s;
-// 	if (clusters == nullptr || !set_common_base_points(*clusters))
-// 		logger::error("crater_t::sputter_time()","clusters == nullptr || !set_common_base_points(*clusters)","","returning empty");
-// 	if (clusters == nullptr)
-// 		logger::debug(5,"crater_t::sputter_time()","clusters == nullptr");
-// 	else if (!set_common_base_points(*clusters))
-// 		logger::debug(5,"crater_t::sputter_time()","!set_common_base_points(*clusters)");
-	return sputter_time_s;
-}
+// sputter_time_t& crater_t::sputter_time
+// {
+// 	if (sputter_time.is_set())
+// 		return sputter_time;
+// // 	if (clusters == nullptr || !set_common_base_points(*clusters))
+// // 		logger::error("crater_t::sputter_time","clusters == nullptr || !set_common_base_points(*clusters)","","returning empty");
+// // 	if (clusters == nullptr)
+// // 		logger::debug(5,"crater_t::sputter_time","clusters == nullptr");
+// // 	else if (!set_common_base_points(*clusters))
+// // 		logger::debug(5,"crater_t::sputter_time","!set_common_base_points(*clusters)");
+// 	return sputter_time;
+// }
 
-sputter_depth_t& crater_t::sputter_depth()
-{
-	if (sputter_depth_s.is_set())
-		return sputter_depth_s;
-// 	if (sputter_time(clusters).is_set() && SR.is_set())
-// 	{
-// 		if (SR.data.size()==1)
-// 			sputter_depth_s = SR * sputter_time();
-// 		else
-// 			sputter_depth_s = (sputter_time().diff() * SR).sum();
+// sputter_depth_t& crater_t::sputter_depth()
+// {
+// 	if (sputter_depth_s.is_set())
 // 		return sputter_depth_s;
-// 	}
-	return sputter_depth_s;
-}
+// // 	if (sputter_time(clusters).is_set() && SR.is_set())
+// // 	{
+// // 		if (SR.data.size()==1)
+// // 			sputter_depth_s = SR * sputter_time;
+// // 		else
+// // 			sputter_depth_s = (sputter_time.diff() * SR).sum();
+// // 		return sputter_depth_s;
+// // 	}
+// 	return sputter_depth_s;
+// }
 
 crater_t crater_t::change_resolution(sputter_depth_t sputter_depth_res)
 {
-	if (!sputter_depth().is_set())
+	if (!sputter_depth.is_set())
 	{
 		logger::error("crater_t::change_resolution","!sputter_depth().is_set()","","returning this");
 		return *this;
@@ -423,19 +423,19 @@ crater_t crater_t::change_resolution(sputter_depth_t sputter_depth_res)
 		return *this;
 	}
 	crater_t copy_C = *this;
-	copy_C.sputter_depth() = sputter_depth().resolution(sputter_depth_res);
-	if (sputter_time().is_set())
-		copy_C.sputter_time() = sputter_time().interp(sputter_depth(),copy_C.sputter_depth());
+	copy_C.sputter_depth = sputter_depth.resolution(sputter_depth_res);
+	if (sputter_time.is_set())
+		copy_C.sputter_time = sputter_time.interp(sputter_depth,copy_C.sputter_depth);
 	if (SR.is_set())
-		copy_C.SR = SR.interp(sputter_depth(),copy_C.sputter_depth());
+		copy_C.SR = SR.interp(sputter_depth,copy_C.sputter_depth);
 	if (sputter_current().is_set())
-		copy_C.sputter_current() = sputter_current().interp(sputter_depth(),copy_C.sputter_depth());
+		copy_C.sputter_current() = sputter_current().interp(sputter_depth,copy_C.sputter_depth);
 	return copy_C;
 }
 
 crater_t crater_t::change_resolution(sputter_time_t sputter_time_res)
 {
-	if (!sputter_time().is_set())
+	if (!sputter_time.is_set())
 	{
 		logger::error("crater_t::change_resolution","!sputter_depth().is_set()","","returning this");
 		return *this;
@@ -451,27 +451,27 @@ crater_t crater_t::change_resolution(sputter_time_t sputter_time_res)
 		return *this;
 	}
 	crater_t copy_C = *this;
-	copy_C.sputter_time() = sputter_time().resolution(sputter_time_res);
-	if (sputter_depth().is_set())
-		copy_C.sputter_depth() = sputter_depth().interp(sputter_time(),copy_C.sputter_time());
+	copy_C.sputter_time = sputter_time.resolution(sputter_time_res);
+	if (sputter_depth.is_set())
+		copy_C.sputter_depth = sputter_depth.interp(sputter_time,copy_C.sputter_time);
 	if (SR.is_set())
-		copy_C.SR = SR.interp(sputter_time(),copy_C.sputter_time());
+		copy_C.SR = SR.interp(sputter_time,copy_C.sputter_time);
 	if (sputter_current().is_set())
-		copy_C.sputter_current() = sputter_current().interp(sputter_time(),copy_C.sputter_time());
+		copy_C.sputter_current() = sputter_current().interp(sputter_time,copy_C.sputter_time);
 	return copy_C;
 }
 
 sputter_current_t& crater_t::sputter_current()
 {
 	logger::debug(10,"crater_t::sputter_current()","sputter_beam.sputter_current()",sputter_beam.sputter_current.to_string());
-	if (sputter_beam.sputter_time.is_set() && sputter_time().is_set())
+	if (sputter_beam.sputter_time.is_set() && sputter_time.is_set())
 	{
-		sputter_beam.sputter_current = sputter_beam.sputter_current.interp(sputter_beam.sputter_time,sputter_time());
+		sputter_beam.sputter_current = sputter_beam.sputter_current.interp(sputter_beam.sputter_time,sputter_time);
 		sputter_beam.sputter_time.clear();
 	}
-	else if (sputter_beam.sputter_depth.is_set() && sputter_depth().is_set())
+	else if (sputter_beam.sputter_depth.is_set() && sputter_depth.is_set())
 	{
-		sputter_beam.sputter_current = sputter_beam.sputter_current.interp(sputter_beam.sputter_depth,sputter_depth());
+		sputter_beam.sputter_current = sputter_beam.sputter_current.interp(sputter_beam.sputter_depth,sputter_depth);
 		sputter_beam.sputter_depth.clear();
 	}
 	else if (sputter_beam.sputter_depth.is_set() || sputter_beam.sputter_time.is_set())
@@ -489,7 +489,7 @@ sputter_current_t& crater_t::sputter_current()
 // 		logger::error("crater_t::change_sputter_depth()", "!new_sputter_depth.is_set()","","returning empty");
 // 		return {};
 // 	}
-// 	quantity_t old_sputter_depth = sputter_time().change_unit(new_sputter_depth.unit()); 
+// 	quantity_t old_sputter_depth = sputter_time.change_unit(new_sputter_depth.unit()); 
 // 	if (old_sputter_depth.unit() != new_sputter_depth.unit())// same units?
 // 	{
 // 		logger::error("crater_t::change_sputter_depth","old_sputter_depth.unit() != new_sputter_depth.unit()");
@@ -498,11 +498,11 @@ sputter_current_t& crater_t::sputter_current()
 // 	crater_t new_crater;
 // 	new_crater.sputter_depth_s = new_sputter_depth;
 // 	map<double,double> XY_data;
-// 	if (sputter_time().is_set())
+// 	if (sputter_time.is_set())
 // 	{
 // 		XY_data.clear();
-// 		tools::vec::combine_vecs_to_map(&old_sputter_depth.data,&sputter_time().data,&XY_data);
-// 		new_crater.sputter_time_s = sputter_time_t(statistics::interpolate_data_XY(XY_data,new_sputter_depth.data),sputter_depth().unit());
+// 		tools::vec::combine_vecs_to_map(&old_sputter_depth.data,&sputter_time.data,&XY_data);
+// 		new_crater.sputter_time = sputter_time_t(statistics::interpolate_data_XY(XY_data,new_sputter_depth.data),sputter_depth().unit());
 // 	}
 // 	if (SR.is_set())
 // 	{
@@ -526,7 +526,7 @@ sputter_current_t& crater_t::sputter_current()
 // 			C = C.change_sputter_depth(new_crater.sputter_depth());
 // 			continue;
 // 		}
-// 		if (C.sputter_time().is_set())
+// 		if (C.sputter_time.is_set())
 // 		{
 // 			//do nothing
 // 			continue;
@@ -540,20 +540,20 @@ sputter_current_t& crater_t::sputter_current()
 // 
 // crater_t crater_t::change_sputter_time(sputter_time_t new_sputter_time, vector<cluster_t>& clusters)
 // {
-// 	if (!sputter_time().is_set()) return {};
+// 	if (!sputter_time.is_set()) return {};
 // 	if (!new_sputter_time.is_set()) 
 // 	{
-// 		logger::error("crater_t::change_sputter_time()","!new_sputter_time.is_set()","","returning empty");
+// 		logger::error("crater_t::change_sputter_time","!new_sputter_time.is_set()","","returning empty");
 // 		return {};
 // 	}
-// 	quantity_t old_sputter_time = sputter_time().change_unit(new_sputter_time.unit()); 
+// 	quantity_t old_sputter_time = sputter_time.change_unit(new_sputter_time.unit()); 
 // 	if (old_sputter_time.unit() != new_sputter_time.unit())// same units?
 // 	{
-// 		logger::error("crater_t::change_sputter_time()","old_sputter_time.unit() != new_sputter_time.unit()",old_sputter_time.unit().to_string()+"!="+new_sputter_time.unit().to_string(),"returning empty");
+// 		logger::error("crater_t::change_sputter_time","old_sputter_time.unit() != new_sputter_time.unit()",old_sputter_time.unit().to_string()+"!="+new_sputter_time.unit().to_string(),"returning empty");
 // 		return {};
 // 	}
 // 	crater_t new_crater;
-// 	new_crater.sputter_time_s = new_sputter_time;
+// 	new_crater.sputter_time = new_sputter_time;
 // 	map<double,double> XY_data;
 // 	if (sputter_depth().is_set())
 // 	{
@@ -575,12 +575,12 @@ sputter_current_t& crater_t::sputter_current()
 // 	{
 // 		if (!C.concentration().is_set() && !C.intensity().is_set())
 // 		{
-// 			logger::error("crater_t::change_sputter_time()","!C.concentration().is_set() && !C.intensity().is_set()","","skipping");
+// 			logger::error("crater_t::change_sputter_time","!C.concentration().is_set() && !C.intensity().is_set()","","skipping");
 // 			continue;
 // 		}
-// 		if (C.sputter_time().is_set())
+// 		if (C.sputter_time.is_set())
 // 		{
-// 			C = C.change_sputter_time(new_crater.sputter_time());
+// 			C = C.change_sputter_time(new_crater.sputter_time);
 // 			continue;
 // 		}
 // 		if (C.sputter_depth().is_set())
@@ -589,7 +589,7 @@ sputter_current_t& crater_t::sputter_current()
 // 			continue;
 // 		}
 // 		C.sputter_time_p = old_sputter_time;
-// 		C = C.change_sputter_time(new_crater.sputter_time());
+// 		C = C.change_sputter_time(new_crater.sputter_time);
 // 	}
 // 	
 // 	return new_crater;

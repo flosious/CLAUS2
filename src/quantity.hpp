@@ -101,6 +101,7 @@ public:
 	
 	//skalars
 	///
+	quantity_t remove_data_by_index(unsigned int start, unsigned int stop) const;
 	quantity_t absolute() const;
 	quantity_t invert() const;
 	quantity_t sum() const;

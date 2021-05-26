@@ -7,6 +7,11 @@
 /*********     isotope_t       ******/
 /************************************/
 
+isotope_t::isotope_t() : symbol(""),nucleons(0)
+{
+}
+
+
 isotope_t::isotope_t(std::__cxx11::string symbol_s, int nucleons_s, double abundance_s, double amount_s) :							 symbol(symbol_s), 
 																																   nucleons(nucleons_s),
 																																   abundance({abundance_s}),

@@ -47,7 +47,7 @@ const string logger::message_t::to_string() const
 /*********************/
 
 //default 0 -> no record
-int logger::verbosity_level = 10;
+int logger::verbosity_level = 11;
 vector<logger::message_t> logger::messages;
 // bool logger::log_debug=true;
 
@@ -66,6 +66,7 @@ void logger::fatal(std::__cxx11::string class_func_name, std::__cxx11::string va
 void logger::error(std::__cxx11::string class_func_name, std::__cxx11::string variable_condition, std::__cxx11::string variable_contents, std::__cxx11::string solution)
 {
 	messages.push_back({"ERROR",class_func_name,variable_condition,variable_contents, solution});
+	if (instant_print_messages) cout << messages.back().to_string() << endl;
 }
 
 void logger::warning(unsigned int verbosity, std::__cxx11::string class_func_name, std::__cxx11::string variable_condition, std::__cxx11::string variable_contents, std::__cxx11::string solution)
@@ -87,7 +88,10 @@ void logger::debug(unsigned int verbosity, std::__cxx11::string class_func_name,
 {
 	//just record if verbosity is high enough
 	if (verbosity_level>=verbosity)
+	{
 		messages.push_back({"debug",class_func_name,variable_condition,variable_contents,solution});
+		if (instant_print_messages) cout << messages.back().to_string() << endl;
+	}
 }
 
 

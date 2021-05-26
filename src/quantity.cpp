@@ -27,7 +27,7 @@ quantity_t::quantity_t()
 
 }
 
-quantity_t::quantity_t(const quantity_t& quant_s, const unit_t& unit_s) : unit_p(unit_s), data(quant_s.data)
+quantity_t::quantity_t(const quantity_t& quant_s, const unit_t& unit_s) : unit_p(unit_s), data(quant_s.data), name_p(quant_s.name())
 {
 }
 
@@ -302,8 +302,9 @@ quantity_t quantity_t::moving_window_mad(int window_size) const
 	if (window_size==0) return quantity_t();
 
 	stringstream n;
-	n << "moving_window" << window_size <<"_mad" << name() << ")";
+	n << "mw" << window_size <<"_mad(" << name() << ")";
 	quantity_t mad(n.str(),{statistics::get_moving_window_MAD_from_Y(data,window_size)},unit());
+// 	quantity_t mad(name(),{statistics::get_moving_window_MAD_from_Y(data,window_size)},unit());
 	return mad;
 }
 
@@ -313,7 +314,7 @@ quantity_t quantity_t::moving_window_mean(int window_size) const
 	if (window_size==0) return quantity_t();
 
 	stringstream n;
-	n << "moving_window" << window_size <<"_mean" << name() << ")";
+	n << "mw" << window_size <<"_mean(" << name() << ")";
 	quantity_t _mean(n.str(),{statistics::get_moving_window_mean_from_Y(data,window_size)},unit());
 	return _mean;
 }
@@ -324,7 +325,7 @@ quantity_t quantity_t::moving_window_median(int window_size) const
 	if (window_size==0) return quantity_t();
 
 	stringstream n;
-	n << "moving_window" << window_size <<"_median" << name() << ")";
+	n << "mw" << window_size <<"_median(" << name() << ")";
 	quantity_t _median(n.str(),{statistics::get_moving_window_median_from_Y(data,window_size)},unit());
 	return _median;
 }
@@ -335,7 +336,7 @@ quantity_t quantity_t::moving_window_sd(int window_size) const
 	if (window_size==0) return quantity_t();
 
 	stringstream n;
-	n << "moving_window" << window_size <<"_sd" << name() << ")";
+	n << "mw" << window_size <<"_sd(" << name() << ")";
 	quantity_t _sd(n.str(),{statistics::get_moving_window_sd_from_Y(data,window_size)},unit());
 	return _sd;
 }
@@ -373,7 +374,7 @@ quantity_t quantity_t::min() const
 
 bool quantity_t::is_set() const
 {
-	if (data.size()==0) return false;
+	if (data.size()<3) return false;
 // 	if (dimension.length()==0) return false;
 	if (!unit().is_set()) return false;
 	return true;
@@ -422,17 +423,17 @@ quantity_t quantity_t::resolution(quantity_t new_res) const
 		return {};
 	}
 	if (new_res.data.size()!=1)
-		logger::debug(3,"quantity_t::resolution()","new_res.data.size()!=1",tools::to_string(new_res.data.size()));
+		logger::debug(4,"quantity_t::resolution()","new_res.data.size()!=1",tools::to_string(new_res.data.size()));
 // 	new_res = new_res.change_unit(unit());
 	if (!new_res.is_set())
 	{
-		logger::debug(3,"quantity_t::resolution()","!new_res.is_set()","","returning empty");
+		logger::debug(4,"quantity_t::resolution()","!new_res.is_set()","","returning empty");
 		return {};
 	}
 	quantity_t old_Q = change_unit(new_res.unit());
 	if (!old_Q.is_set())
 	{
-		logger::debug(3,"quantity_t::resolution()","!old_Q.is_set()","","returning empty");
+		logger::debug(4,"quantity_t::resolution()","!old_Q.is_set()","","returning empty");
 		return {};
 	}
 	logger::debug(5,"quantity_t::resolution()","new_res",new_res.to_string());
@@ -497,6 +498,8 @@ unit_t quantity_t::unit() const
 
 quantity_t quantity_t::change_unit(unit_t target_unit) const
 {	
+	if (!is_set())
+		return {};
 	if (unit().base_units_exponents != target_unit.base_units_exponents) 
 	{
 		logger::warning(1,"quantity_t::change_unit","unit().base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
@@ -506,8 +509,8 @@ quantity_t quantity_t::change_unit(unit_t target_unit) const
 	double factor = unit().multiplier / target_unit.multiplier;
 // 	for (int i=0;i<data.size();i++)
 // 		copy.data[i] *= factor ;
-	logger::debug(7,"quantity_t::change_unit",unit().to_string(),target_unit.to_string(),"changed");
-	return {*this*factor,target_unit};
+	logger::debug(11,"quantity_t::change_unit",unit().to_string(),target_unit.to_string(),"changed");
+	return quantity_t{*this * factor,target_unit};
 }
 
 quantity_t quantity_t::invert() const
@@ -523,6 +526,25 @@ quantity_t quantity_t::invert() const
 	ss << "1/" << unit().to_string();
 	unit_t u(ss.str());
 	return {inv.name(),inv.data,u};
+}
+
+quantity_t quantity_t::remove_data_by_index(unsigned int start, unsigned int stop) const
+{
+	if (!is_set())
+		return {};
+	if (start>=data.size())
+	{
+		logger::error("quantity_t::remove_data_by_index()","start>=data.size()","","return empty");
+		return {};
+	}
+	if (stop>=data.size())
+	{
+		logger::error("quantity_t::remove_data_by_index()","stop>=data.size()","","return empty");
+		return {};
+	}
+	quantity_t copy = *this;
+	copy.data.erase(data.begin()+start,data.begin()+stop);
+	return copy;
 }
 
 quantity_t quantity_t::absolute() const
@@ -728,13 +750,12 @@ quantity_t quantity_t::operator/ (const double divisor) const
 
 quantity_t quantity_t::operator * (const double factor) const
 {
-	quantity_t quotient=*this;
+	quantity_t multiplier=*this;
 	for (int i=0;i<data.size();i++)
 	{
-		quotient.data[i] *= factor;
+		multiplier.data[i] *= factor;
 	}
-
-	return quotient;
+	return multiplier;
 }
 
 void quantity_t::operator+=(const double summand)

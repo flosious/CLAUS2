@@ -18,130 +18,119 @@
 
 #include "database_t.hpp"
 
-#define TABLENAME_everything "everything"
-#define TABLENAME_samples "samples"
-#define TABLENAME_sample_implants "sample_implants"
-#define TABLENAME_sample_layers "sample_layers"
-#define TABLENAME_reference_measurement_isotopes "reference_measurement_isotopes"
-#define TABLENAME_measurements "measurements"
-#define TABLENAME_measurement_settings "measurement_settings"
-#define TABLENAME_measurement_statistics "measurement_statistics"
-
-
-/// global variable
-database_t db;
+/*globally defined*/
+// sqlite3* sql_handle;
 
 string database_t::file_location="database.sqlite3";
 
-database_t::database_t() 
+database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle)
 { 
-	return;
 } 
 
 bool database_t::open() {
     int exit = 0; 
 
-    exit = sqlite3_open(file_location.c_str(), &this->DB);
+	if (sql_handle!=nullptr)
+	{
+		logger::debug(11,"database_t::open()","database already opened","","return true");
+		return true;
+	}
+    exit = sqlite3_open(file_location.c_str(), &this->sql_handle);
   
-    if (exit)      return false;  
-	
-	if (!create_tables()) return false;
+    if (exit) 
+	{
+		logger::error("database_t::open()","could not open database",file_location,"returning false");
+		return false;  
+		
+	}
 	execute_sql("PRAGMA secure_delete = true");
-	openend=true;
+	logger::debug(11,"database_t::open()","database successfully opened","","return true");
     return true; 
 }
 
-bool database_t::create_tables() 
-{
-   
-	if (!create_table_everything()) 
-		logger::error("database_t::create_tables()","!create_table_everything()");
-	if (!create_table_samples()) 
-		logger::error("database_t::create_tables()","!create_table_samples()");
-// 		if (!create_table_sample_implants()) error_messages.push_back("database_t::database_t: !create_table_sample_implants()");
-// 		if (!create_table_sample_layers()) error_messages.push_back("database_t::database_t: !create_table_sample_layers()");
-	if (!create_table_measurements()) 
-		logger::error("database_t::create_tables()","!create_table_measurements()");
-// 		if (!create_table_measurement_settings()) error_messages.push_back("database_t::database_t: !create_table_measurement_settings()");
-// 		if (!create_table_reference_measurement_isotopes()) error_messages.push_back("database_t::database_t: !create_table_reference_measurement_isotopes()");
-// 		if (!create_table_measurement_statistics()) error_messages.push_back("database_t::database_t: !create_table_measurement_statistics()");
-
-		
-	return true;
-}
+// bool database_t::create_tables() 
+// {
+// 	if (!create_table_everything()) 
+// 		logger::error("database_t::create_tables()","!create_table_everything()");
+// 	if (!create_table_samples()) 
+// 		logger::error("database_t::create_tables()","!create_table_samples()");
+// 	if (!create_table_measurements()) 
+// 		logger::error("database_t::create_tables()","!create_table_measurements()");
+// 	return true;
+// }
 
 /***********	TABLE DEFINITIONS	******************/
 //TODO INT UND TEXT eins von beiden muss noch in '' gesetzt werden
-bool database_t::create_table_everything()
-{
-    std::string sql;
-    sql = "CREATE TABLE IF NOT EXISTS " + string(TABLENAME_everything) + "(" \
-         "id INTEGER PRIMARY KEY, " \
-         "lot                   	 TEXT, " \
-         "wafer                  	 INT, " \
-         "lot_split            	 TEXT, " \
-         "chip_x                  	 INT, " \
-         "chip_y                  	 INT, " \
-         "monitor                	 TEXT, " \
-         
-         "matrix_elements      	 TEXT, " \
-         // 31P1
-         "implant_isotope          	 TEXT, " \
-         // 2E15 in at/scm
-         "dose	           	 INT, " \
-         "maximum_concentration                 INT, " \
-         "depth_at_maximum_concentration	INT, " \
-         
-         "tool_name                	 TEXT, " \
-         
-         /*O2+, Cs+*/
-         "sputter_element            TEXT, " \
-         "sputter_energy           	 INT, " \
-         /* +/- */
-		 "polarity         			 TEXT, " \
-		 "olcdb						 INT, " \
-		 "reference_calculation_method					 TEXT, " \
-         "filename_with_path         TEXT, " \
-		 "comments         			 TEXT);";
-    return execute_sql(sql);
-}
+// bool database_t::create_table_everything()
+// {
+//     std::string sql;
+//     sql = "CREATE TABLE IF NOT EXISTS " + string(TABLENAME_everything) + "(" \
+//          "id INTEGER PRIMARY KEY, " \
+//          "lot                   	 TEXT, " \
+//          "wafer                  	 INT, " \
+//          "lot_split            	 TEXT, " \
+//          "chip_x                  	 INT, " \
+//          "chip_y                  	 INT, " \
+//          "monitor                	 TEXT, " \
+//          
+//          "matrix_elements      	 TEXT, " \
+//          // 31P1
+//          "implant_isotope          	 TEXT, " \
+//          // 2E15 in at/scm
+//          "dose	           	 INT, " \
+//          "maximum_concentration                 INT, " \
+//          "depth_at_maximum_concentration	INT, " \
+//          
+//          "tool_name                	 TEXT, " \
+//          
+//          /*O2+, Cs+*/
+//          "sputter_element            TEXT, " \
+//          "sputter_energy           	 INT, " \
+//          /* +/- */
+// 		 "polarity         			 TEXT, " \
+// 		 "olcdb						 INT, " \
+// 		 "reference_calculation_method					 TEXT, " \
+//          "filename_with_path         TEXT, " \
+// 		 "comments         			 TEXT);";
+//     return execute_sql(sql);
+// }
 
-bool database_t::create_table_samples()
-{
-    std::string sql;
-    sql = "CREATE TABLE IF NOT EXISTS " + string(TABLENAME_samples) + "(" \
-         "sample_id 						 INTEGER PRIMARY KEY, " \
-         "lot                   			 TEXT, " \
-         "wafer                 		 	 INT, " \
-         "lot_split            			     TEXT, " \
-         "chip_x                		  	 INT, " \
-         "chip_y                		  	 INT, " \
-         "monitor             			   	 TEXT, " \
-		 "matrix                		     TEXT, " \
-		 "matrix_depth_profile_location    	 TEXT, " \
-         "isotope                  			 TEXT, " \
-         "isotope_depth_profile_location  	 TEXT, " \
-         // 2E15 in at/scm
-         "isotope_dose	             		 INT);";
-    return execute_sql(sql);
-}
-
-bool database_t::create_table_measurements()
-{
-    std::string sql;
-    sql = "CREATE TABLE IF NOT EXISTS " + string(TABLENAME_measurements) + "(" \
-         "measurement_id INTEGER PRIMARY KEY, " \
-         "sample_id					 INT, " \
-         "tool_name                  TEXT, " \
-         /* +/- */
-         "polarity           		TEXT, " \
-         /*O2+, Cs+*/
-         "sputter_element            TEXT, " \
-         "sputter_energy           	 INT);";
-         
-         "filename_with_path         TEXT);";
-    return execute_sql(sql);
-}
+// bool database_t::create_table_samples()
+// {
+//     std::string sql;
+//     sql = "CREATE TABLE IF NOT EXISTS " + string(TABLENAME_samples) + "(" \
+//          "sample_id 						 INTEGER PRIMARY KEY, " \
+//          "lot                   			 TEXT, " \
+//          "wafer                 		 	 INT, " \
+//          "lot_split            			     TEXT, " \
+//          "chip_x                		  	 INT, " \
+//          "chip_y                		  	 INT, " \
+//          "monitor             			   	 TEXT, " \
+// 		 "matrix                		     TEXT, " \
+// 		 "matrix_depth_profile_location    	 TEXT, " \
+//          "isotope                  			 TEXT, " \
+//          "isotope_depth_profile_location  	 TEXT, " \
+//          // 2E15 in at/scm
+//          "isotope_dose	             		 INT);";
+//     return execute_sql(sql);
+// }
+// 
+// bool database_t::create_table_measurements()
+// {
+//     std::string sql;
+//     sql = "CREATE TABLE IF NOT EXISTS " + string(TABLENAME_measurements) + "(" \
+//          "measurement_id INTEGER PRIMARY KEY, " \
+//          "sample_id					 INT, " \
+//          "tool_name                  TEXT, " \
+//          /* +/- */
+//          "polarity           		TEXT, " \
+//          /*O2+, Cs+*/
+//          "sputter_element            TEXT, " \
+//          "sputter_energy           	 INT);";
+//          
+//          "filename_with_path         TEXT);";
+//     return execute_sql(sql);
+// }
 
 /*********BELOW NOT IN USE***********/ 
 
@@ -198,16 +187,16 @@ bool database_t::create_table_measurements()
 //     return execute_sql(sql);
 // }
 
-bool database_t::create_table_reference_measurement_isotopes()
-{
-    std::string sql;
-    sql = "CREATE TABLE IF NOT EXISTS " + string(TABLENAME_reference_measurement_isotopes) + "(" \
-         "isotope_id INTEGER PRIMARY KEY, " \
-         "maximum_concentration                 	 INT, " \
-         "depth_at_maximum_concentration                  	 INT, " \
-         "isotope                	 TEXT);";
-    return execute_sql(sql);
-}
+// bool database_t::create_table_reference_measurement_isotopes()
+// {
+//     std::string sql;
+//     sql = "CREATE TABLE IF NOT EXISTS " + string(TABLENAME_reference_measurement_isotopes) + "(" \
+//          "isotope_id INTEGER PRIMARY KEY, " \
+//          "maximum_concentration                 	 INT, " \
+//          "depth_at_maximum_concentration                  	 INT, " \
+//          "isotope                	 TEXT);";
+//     return execute_sql(sql);
+// }
 
 // bool database_t::create_table_measurement_statistics()
 // {
@@ -231,15 +220,14 @@ database_t::~database_t()
 
 
 bool database_t::close() {
-    sqlite3_close(this->DB); 
-	openend=false;
+    sqlite3_close(this->sql_handle); 
     return true; 
 }
 
 bool database_t::execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**), void* func_arg)
 {
     char *zErrMsg = 0;
-	int rc = sqlite3_exec(this->DB, sql.c_str(), func_ptr, func_arg, &zErrMsg);
+	int rc = sqlite3_exec(this->sql_handle, sql.c_str(), func_ptr, func_arg, &zErrMsg);
 	if( rc != SQLITE_OK ){
 		logger::error("database_t::execute_sql()","sql-command: " + sql,zErrMsg,"returning false");
 // 		logger::error("database_t::execute_sql()", "SQL error: ") + zErrMsg);
@@ -248,6 +236,7 @@ bool database_t::execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int
 		sqlite3_free(zErrMsg);
 		return false;
 	}
+	logger::debug(10,"database_t::execute_sql()","sql command executed successfully",sql,"returning true");
 	return true;
 }
 
@@ -540,7 +529,7 @@ int database_t::get_last_autoID_from_table(string table)
 // 	if (!execute_sql(sql)) return false;
 // 	
 // // 	int sample_ID = (get_last_autoID_from_table(TABLENAME_samples));
-// 	int sample_ID = sqlite3_last_insert_rowid(this->DB);
+// 	int sample_ID = sqlite3_last_insert_rowid(this->sql_handle);
 // 	sql = "INSERT INTO " \
 //             TABLENAME_measurements \
 //             " (sample_id, olcdb, filename_wo_crater_depths, directory, repition, tool, " \

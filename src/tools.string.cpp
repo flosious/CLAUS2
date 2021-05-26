@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2020 Florian Bärwolf
+	Copyright (C) 2020-2021 Florian Bärwolf
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,6 +15,34 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "tools.hpp"
+
+
+/********************************/
+/****  tools::str::filter_t  ****/
+/********************************/
+
+
+set<string> tools::str::filter_t::special_characters{"_","#"};
+
+string tools::str::filter_t::escape_special_characters(std::__cxx11::string prefix_escape_string)
+{
+	for (auto& s : special_characters)
+		tools::str::replace_chars(&filter_this,s,prefix_escape_string+s);
+
+	return filter_this;
+}
+
+tools::str::filter_t::filter_t(const std::__cxx11::string& filter_this) : filter_this(filter_this)
+{
+}
+
+
+
+
+/********************************/
+/*****   tools::str   ******/
+/********************************/
+
 
 bool tools::str::is_empty(string input) {
 	input = remove_linebreakers_from_string(input);

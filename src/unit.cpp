@@ -57,6 +57,7 @@ const map<std::string, unit_t> unit_t::symbol_to_unit
 	{"%",units::suffixes::percent},
 	{"bar",units::derived::bar},
 	{"cnt/s",units::derived::counts/units::SI::second},
+	{"c/s",units::derived::counts/units::SI::second},
 	{"e",constants::elementary_charge},
 	{"V",units::derived::volt},
 	{"eV",units::derived::electron_volt},
@@ -66,6 +67,7 @@ const map<std::string, unit_t> unit_t::symbol_to_unit
 	{"at/ccm",units::derived::atoms/units::SI::meter.pow(3)*units::prefixes::centi.pow(3)},
 	{"at/scm",units::derived::atoms/units::SI::meter.pow(2)*units::prefixes::centi.pow(2)},
 	{"at/cm^3",units::derived::atoms/units::SI::meter.pow(3)*units::prefixes::centi.pow(3)},
+	{"atom/cm3",units::derived::atoms/units::SI::meter.pow(3)*units::prefixes::centi.pow(3)},
 	{"at/cm^2",units::derived::atoms/units::SI::meter.pow(2)*units::prefixes::centi.pow(2)},
 	/*time*/
 	{"sec",{units::SI::second}},
@@ -122,7 +124,7 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 	
 	if (meters!=0)
 	{
-		logger::debug(11,"unit_t::base_exponents_t::to_string()","meters","set");
+		logger::debug(21,"unit_t::base_exponents_t::to_string()","meters","set");
 // 		out << base_unit_to_symbol.at(units::SI::meter);
 		out << "m";
 		if (meters!=1)
@@ -132,7 +134,7 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 	}
 	if (kilograms!=0)
 	{
-		logger::debug(11,"unit_t::base_exponents_t::to_string()","kilograms","set");
+		logger::debug(21,"unit_t::base_exponents_t::to_string()","kilograms","set");
 // 		out << base_unit_to_symbol.at(units::SI::kilogram);
 		out << "kg";
 		if (kilograms!=1)
@@ -142,7 +144,7 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 	}
 	if (seconds!=0)
 	{
-		logger::debug(11,"unit_t::base_exponents_t::to_string()","seconds","set");
+		logger::debug(21,"unit_t::base_exponents_t::to_string()","seconds","set");
 // 		out << base_unit_to_symbol.at(units::SI::second);
 		out << "s";
 		if (seconds!=1)
@@ -152,7 +154,7 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 	}
 	if (amperes!=0)
 	{
-		logger::debug(11,"unit_t::base_exponents_t::to_string()","amperes","set");
+		logger::debug(21,"unit_t::base_exponents_t::to_string()","amperes","set");
 // 		out << base_unit_to_symbol.at(units::SI::Ampere);
 		out << "A";
 		if (amperes!=1)
@@ -162,7 +164,7 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 	}
 	if (kelvins!=0)
 	{
-		logger::debug(11,"unit_t::base_exponents_t::to_string()","kelvins","set");
+		logger::debug(21,"unit_t::base_exponents_t::to_string()","kelvins","set");
 // 		out << base_unit_to_symbol.at(units::SI::Kelvin);
 		out << "K";
 		if (kelvins!=1)
@@ -172,7 +174,7 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 	}
 	if (moles!=0)
 	{
-		logger::debug(11,"unit_t::base_exponents_t::to_string()","moles","set");
+		logger::debug(21,"unit_t::base_exponents_t::to_string()","moles","set");
 // 		out << base_unit_to_symbol.at(units::SI::mol);
 		out << "mol";
 		if (moles!=1)
@@ -182,7 +184,7 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 	}
 	if (candelas!=0)
 	{
-		logger::debug(11,"unit_t::base_exponents_t::to_string()","candelas","set");
+		logger::debug(21,"unit_t::base_exponents_t::to_string()","candelas","set");
 // 		out << base_unit_to_symbol.at(units::SI::Candela);
 		out << "cd";
 		if (candelas!=1)
@@ -223,9 +225,9 @@ unit_t::unit_t(std::__cxx11::string symbols)
 	/*symbols is a derived unit*/
 	if (symbol_to_unit.size()>0 && symbol_to_unit.find(symbols)!=symbol_to_unit.end())
 	{
-		logger::debug(11,"unit_t::unit_t","symbol_to_unit.at("+symbols+")",symbol_to_unit.at(symbols).base_units_exponents.to_string());
+		logger::debug(21,"unit_t::unit_t","symbol_to_unit.at("+symbols+")",symbol_to_unit.at(symbols).base_units_exponents.to_string());
 		*this=symbol_to_unit.at(symbols);
-		logger::debug(11,"unit_t::unit_t","symbols is a derived unit",symbols,base_units_exponents.to_string());
+		logger::debug(21,"unit_t::unit_t","symbols is a derived unit",symbols,base_units_exponents.to_string());
 		return;
 	}
 	/*symbols is a combination of prefix and derived unit*/
@@ -236,7 +238,7 @@ unit_t::unit_t(std::__cxx11::string symbols)
 			if ((prefix_symbol.first + us.first) == symbols)
 			{
 				*this = us.second*prefix_symbol.second;
-				logger::debug(11,"unit_t::unit_t","symbols is a combination of prefix and derived unit",symbols,base_units_exponents.to_string());
+				logger::debug(21,"unit_t::unit_t","symbols is a combination of prefix and derived unit",symbols,base_units_exponents.to_string());
 				return;
 			}
 		}
@@ -245,9 +247,9 @@ unit_t::unit_t(std::__cxx11::string symbols)
 	/*symbols is a base unit*/
 	if (symbol_to_base_unit.size()>0 && symbol_to_base_unit.find(symbols)!=symbol_to_base_unit.end())
 	{
-		logger::debug(11,"unit_t::unit_t","symbol_to_base_unit.at("+symbols+")",symbol_to_base_unit.at(symbols).base_units_exponents.to_string());
+		logger::debug(21,"unit_t::unit_t","symbol_to_base_unit.at("+symbols+")",symbol_to_base_unit.at(symbols).base_units_exponents.to_string());
 		*this=symbol_to_base_unit.at(symbols);
-		logger::debug(11,"unit_t::unit_t","symbols is a base unit",symbols,base_units_exponents.to_string());
+		logger::debug(21,"unit_t::unit_t","symbols is a base unit",symbols,base_units_exponents.to_string());
 		return;
 	}
 	/*symbols is a combination of prefix and base unit*/
@@ -259,7 +261,7 @@ unit_t::unit_t(std::__cxx11::string symbols)
 			{
 // 				logger::debug("symbols is a combination of prefix and base unit",symbols);
 				*this = is.second*prefix_symbol.second;
-				logger::debug(11,"unit_t::unit_t","symbols is a combination of prefix and base unit",symbols,base_units_exponents.to_string());
+				logger::debug(21,"unit_t::unit_t","symbols is a combination of prefix and base unit",symbols,base_units_exponents.to_string());
 				return;
 			}
 		}
@@ -282,20 +284,20 @@ unit_t::unit_t(std::__cxx11::string symbols)
 const std::__cxx11::string unit_t::to_string() const
 {
 	if (!is_set()) return "";
-	logger::debug(11,"unit_t::to_string()","base_units_exponents: "+ base_units_exponents.to_string(), "multiplier: " + tools::to_string(multiplier));
+	logger::debug(21,"unit_t::to_string()","base_units_exponents: "+ base_units_exponents.to_string(), "multiplier: " + tools::to_string(multiplier));
 	/*check SI*/
 	for (auto it=symbol_to_base_unit.begin();it!=symbol_to_base_unit.end();it++)
 	{
 		if (*this == it->second)
 		{
-			logger::debug(11,"unit_t::to_string()","just base",it->first);
+			logger::debug(21,"unit_t::to_string()","just base",it->first);
 			return it->first;
 		}
 		for (auto pre=symbol_prefix_unit.begin();pre!=symbol_prefix_unit.end();pre++)
 		{
 			if (pre->second*it->second==*this)
 			{
-				logger::debug(11,"unit_t::to_string()","prefix+base",it->first);
+				logger::debug(21,"unit_t::to_string()","prefix+base",it->first);
 				return pre->first+it->first;
 			}
 		}
@@ -305,7 +307,7 @@ const std::__cxx11::string unit_t::to_string() const
 	for (auto it=symbol_to_unit.begin();it!=symbol_to_unit.end();it++)
 	{
 		if (it->second!=*this) continue;
-		logger::debug(11,"unit_t::to_string()","just derived",it->first);
+		logger::debug(21,"unit_t::to_string()","just derived",it->first);
 		return it->first;
 	}
 	/* just check base units and multiplier separately
@@ -317,13 +319,13 @@ const std::__cxx11::string unit_t::to_string() const
 		double pref_multiplier = multiplier / it->second.multiplier;
 		if (pref_multiplier == 1)
 		{
-			logger::debug(7,"unit_t::to_string()","just derived(2)",it->first);
+			logger::debug(21,"unit_t::to_string()","just derived(2)",it->first);
 			return it->first;
 		}
 		for (auto const& prefix : symbol_prefix_unit)
 		{
 			if (pref_multiplier != prefix.second.multiplier) continue;
-			logger::debug(11,"unit_t::to_string()","prefix+derived",prefix.first + it->first);
+			logger::debug(21,"unit_t::to_string()","prefix+derived",prefix.first + it->first);
 			return prefix.first + it->first;
 		}
 	}

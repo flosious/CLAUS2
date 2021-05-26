@@ -22,12 +22,12 @@
 #include "quantity.hpp"
 #include "fit_functions.hpp"
 #include "cluster.hpp"
+
 // #include "filename.hpp"
 // #include "filecontents.hpp"
 
 
-
-
+/*data storage regarding everything about the sputter crater*/
 class crater_t
 {
 	friend class measurements_;
@@ -63,26 +63,35 @@ public:
 		sputter_current_t sputter_current;
 		sputter_time_t sputter_time;
 		sputter_depth_t sputter_depth;
-		sputter_beam_t(sputter_current_t sputter_current_s={}, sputter_time_t sputter_time_s={}, sputter_depth_t sputter_depth_s={});
+		sputter_beam_t(sputter_current_t sputter_current_s={}, sputter_time_t sputter_time={}, sputter_depth_t sputter_depth_s={});
 		const string to_string(const string del=", ") const;
+	};
+	class calc_t
+	{
+// 		SR_c
+// 		ST_c
+// 		SD_c
 	};
 /***********/	
 	friend class processor;
 private:
-	sputter_depth_t sputter_depth_s;
-	sputter_time_t sputter_time_s;
+// 	sputter_depth_t sputter_depth_s;
+// 	sputter_time_t sputter_time;
 // 	sputter_current_t sputter_current_s;
 	total_sputter_time_t total_sputter_time_s;
-	///calculates common X points from all clusters and sets sputter_depth_s and/or sputter_time_s
+	///calculates common X points from all clusters and sets sputter_depth_s and/or sputter_time
 	total_sputter_depth_t total_sputter_depths;
 	vector<linescan_t> linescans;
 	///called by common_sputter_depth or common_sputter_time
 	quantity_t common_X_quantity(const vector<quantity_t>& X_quantities);
+	
 public:
 	crater_t();
 	sputter_beam_t sputter_beam;
-	sputter_depth_t& sputter_depth();
-	sputter_time_t& sputter_time();
+	sputter_depth_t sputter_depth;
+	sputter_time_t sputter_time;
+	///resolution is 1s
+	sputter_time_t unix_sputter_time(string date_time_start);
 	sputter_current_t& sputter_current();
 	total_sputter_time_t total_sputter_time(vector<cluster_t>* clusters=nullptr);
 	total_sputter_depth_t total_sputter_depth();

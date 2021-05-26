@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #ifndef database_HPP
 #define database_HPP
 
@@ -25,22 +27,22 @@
 #include <sqlite3.h> 
 #include <regex>
 
-#include "measurement.hpp"
 #include "tools.hpp"
 #include "log.hpp"
-#include "isotope.hpp"
-#include "sample.hpp"
-#include "matrix.hpp"
-#include "quantity.hpp"
-#include "element.hpp"
-#include "isotope.hpp"
-#include "ion.hpp"
-#include "msettings.hpp"
-#include "cluster.hpp"
+// #include "measurement.hpp"
+// #include "isotope.hpp"
+// #include "sample.hpp"
+// #include "matrix.hpp"
+// #include "quantity.hpp"
+// #include "element.hpp"
+// #include "isotope.hpp"
+// #include "ion.hpp"
+// #include "msettings.hpp"
+// #include "cluster.hpp"
 
 
 /*FORWARD DECLARATIONS*/
-class sample_t;
+// class sample_t;
 // class measurements_;
 // class measurements_::dsims_t;
 /**********************/
@@ -68,58 +70,31 @@ using namespace std;
 /***   database_t    ***/
 /***********************/
 
+///this is a warpper for sqlite3
 class database_t {
 	friend class config_t;
+	friend class processor;
 private:
 	static string file_location;
-	bool openend=false;
-    sqlite3* DB;
+    sqlite3* sql_handle=nullptr;
     bool close();
-	
-	bool create_tables();
-	bool create_table_everything();
-	bool create_table_samples();
-	bool create_table_sample_implants();
-	bool create_table_sample_layers();
-	
-	bool create_table_measurements();
-	bool create_table_measurement_settings();
-	bool create_table_reference_measurement_isotopes();
-	bool create_table_measurement_statistics();
-	
 	/// returns -1 if error, or the id of the last entry in the table
     int get_last_autoID_from_table(string table);
-	///
-// 	map<string, string> get_sample(int sample_id);
-// 	map<string, string> get_measurement(int measurement_id);
-// 	map<string, vector<string>> get_measurements(int sample_id);
-	
-// 	vector<string> error_messages;
-	
-    ///\brief the callback function for get_implanted_references
-//     static int callback_measurements(void *ptr, int argc, char **argv, char **azColName);
-    ///\brief the callback function for get_implanted_references
-//     static int callback_implanted_reference_samples(void *ptr, int argc, char **argv, char **azColName);
+	///just allow the processor to open and close
+	database_t(sqlite3* sql_handle);
+	///just allow the processor to open and close
+	~database_t();
 public:
 	bool open();
 	bool execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr);
-	database_t();
-	~database_t();
-
+	
 	/*call backs*/
 	///general callback function -> populates *ptr -> matrix(vector(vector(string)))
 	static int callback_lines_cols(void *ptr, int argc, char **argv, char **azColName);
 	///general callback function -> populates *ptr -> map(colname,vector(string) lines ))
 	static int callback_lines_map(void *ptr, int argc, char **argv, char **azColName);
-	
-	matrix_t matrix(sample_t& sample);
-	pair<depth_t,concentration_t> matrix_depth_profile(sample_t& sample);
-	pair<depth_t,concentration_t> isotope_depth_profile(isotope_t& isotope,msettings::dsims_t& settings); // dsims
-	pair<depth_t,concentration_t> isotope_depth_profile(isotope_t& isotope,msettings::sims_t& settings); // tofsims
-	vector<cluster_t> reference_clusters(string clustername, msettings::dsims_t& settings);
-	cluster_t reference_cluster(string clustername, msettings::dsims_t& settings);
 };
 
 /// sqlite3
-extern database_t db;
+// extern database_t db;
 #endif // database_HPP

@@ -38,7 +38,8 @@
 // #include <unordered_set>
 #include "quantity.hpp"
 #include "files.hpp"
-#include "plotter.hpp"
+#include "plot.hpp"
+#include "database_t.hpp"
 
 // #include "plc++demos.h"
 
@@ -49,15 +50,17 @@ using namespace std;
 class processor 
 {
 private:
+	sqlite3* sql = nullptr;
+	database_t sql_wrapper;
 	/*SAMPLES*/
-	
 	class camera_t
 	{
 	private:
 		vector<string>& filenames;
 		vector<files_::jpg_t> files_p;
+		database_t& sql_wrapper;
 	public:
-		camera_t(vector<string>& filenames);
+		camera_t(vector<string>& filenames,database_t& sql_wrapper );
 		vector<files_::jpg_t>& files();
 	};
 	
@@ -68,8 +71,9 @@ private:
 		vector<files_::profiler_t> files_p;
 		vector<measurements_::profiler_t> measurements_p;
 		list<sample_t>& samples_list;
+		database_t& sql_wrapper;
 	public:
-		profiler_t(vector<string>& filenames, list<sample_t>& samples_list);
+		profiler_t(vector<string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper);
 		vector<files_::profiler_t>& files();
 		vector<measurements_::profiler_t>& measurements();
 	};
@@ -84,8 +88,9 @@ private:
 		list<sample_t>& samples_list;
 		profiler_t& profiler;
 		camera_t& camera;
+		database_t& sql_wrapper;
 	public:
-		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, profiler_t& profiler, camera_t& cam);
+		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, profiler_t& profiler, camera_t& cam, database_t& sql_wrapper);
 		vector<files_::dsims_t>& files();
 		vector<measurements_::dsims_t>& measurements();
 		vector<mgroups_::dsims_t>& mgroups();
@@ -97,5 +102,6 @@ public:
 	processor(vector<string> args_p);
 };
 
+// extern database_t db;
 
 #endif // PROCESSOR_HPP

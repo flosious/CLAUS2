@@ -87,10 +87,20 @@ public:
 	}
 	class web {
 	public:
-		static string get_contents(string url);
+		static const string get_contents(string url);
 	};
     class str {
     public:
+		///filter within strings for substrings / chars
+		class filter_t
+		{
+		private:
+			string filter_this;
+			static set<string> special_characters;
+		public:
+			filter_t(const string& filter_this);
+			string escape_special_characters(string prefix_escape_string="\\");
+		};
 		static string to_ascii(string mainstring);
 		static string remove_NOTchars_from_string(string mainstring, string NOTchars);
 		/// checks wheter the input contains just empty strings ("") --> true or not --> false

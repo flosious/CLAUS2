@@ -17,11 +17,12 @@
 */
 
 #include "processor.hpp"
-// #include "gnuplot_i.hpp"
 
+//global var
 
+// database_t db(sql_handle);
 
-processor::processor(vector<string> args_p)
+processor::processor(vector<string> args_p) : sql_wrapper(sql)
 {	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	cout << "processor start" << endl;
@@ -31,16 +32,24 @@ processor::processor(vector<string> args_p)
 	
 	filenames=args_p;
 	
+	/*connect to sqlite3 database*/
+	if (!sql_wrapper.open())
+		logger::error("processor::processor","could not connecto to database");
+	else // create tables
+	{
+		sample_t::database::create_table(sql_wrapper);
+	}
+	/*****************************/
+	
 	list<sample_t> samples_list;
-	profiler_t profiler(filenames,samples_list);
-	camera_t camera(filenames);
-	dsims_t dsims(filenames,samples_list,profiler,camera);
+	profiler_t profiler(filenames,samples_list,sql_wrapper);
+	camera_t camera(filenames,sql_wrapper);
+	dsims_t dsims(filenames,samples_list,profiler,camera,sql_wrapper);
 	
 	cout << "filenames.size()=" << filenames.size() << endl;
 	cout << "dsims.files().size()=" << dsims.files().size() << endl;
 	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
 	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
-	
 	
 	for (auto& MG : dsims.mgroups())
 	{
@@ -48,23 +57,11 @@ processor::processor(vector<string> args_p)
 			cout << "common ref_clusters: " << cR.to_string() << endl;
 		for (auto& M:MG.measurements_p)
 		{
-// 			if (M.calc().SR().from_crater_depth())
-// 				cout << M.crater.SR.to_string() << endl;
-// 			if (M.crater.sputter_depth().is_set())
-// 				cout << M.crater.sputter_depth().to_string()<<endl;
-// 			M.plot_now(0);
-// 			sputter_time_t ST_res({0.1} ,M.crater.sputter_time().unit());
-// 			M.crater = M.crater.change_sputter_time(M.crater.sputter_time().resolution(ST_res),M.clusters);
-// 			M.crater.sputter_time() = M.crater.sputter_time(&M.clusters).change_unit({"min"});
-// 			M.plot_now(0);
-// 			cout << M.crater().sputter_time().resolution().to_string() << endl;
-			M.plot_now(2);
-			M.change_resolution(sputter_time_t({0.001},{"min"})).plot_now(2);
-			M.change_resolution(sputter_time_t({0.0001},{"h"})).plot_now(2);
+			M.plot_now();
 		}
 	}
-
-	logger::to_screen();
+	if (!logger::instant_print_messages)
+		logger::to_screen();
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
 	
@@ -77,7 +74,8 @@ processor::processor(vector<string> args_p)
 processor::dsims_t::dsims_t(vector<std::__cxx11::string>& filenames, 
 							list<sample_t>& samples_list, 
 							processor::profiler_t& profiler, 
-							processor::camera_t& cam) : filenames(filenames),samples_list(samples_list),profiler(profiler),camera(cam)
+							processor::camera_t& cam,
+							database_t& sql_wrapper	) : filenames(filenames),samples_list(samples_list),profiler(profiler),camera(cam), sql_wrapper(sql_wrapper)
 {
 }
 
@@ -114,7 +112,7 @@ vector<measurements_::dsims_t>& processor::dsims_t::measurements()
 	
 	for (vector<files_::dsims_t>::iterator DF=files_p.begin();DF!=files_p.end();DF++)
 	{
-		measurements_p.push_back({*DF,samples_list,&camera.files(),&profiler.files()});
+		measurements_p.push_back({*DF,samples_list,sql_wrapper,&camera.files(),&profiler.files()});
 	}
 	
 	if (measurements_p.size()<2)
@@ -158,7 +156,7 @@ vector<mgroups_::dsims_t>& processor::dsims_t::mgroups()
 /**  processor::camera_t  ****/
 /*****************************/
 
-processor::camera_t::camera_t(vector<std::__cxx11::string>& filenames) : filenames(filenames)
+processor::camera_t::camera_t(vector<std::__cxx11::string>& filenames, database_t& sql_wrapper) : filenames(filenames), sql_wrapper(sql_wrapper)
 {
 }
 
@@ -193,7 +191,7 @@ vector<files_::jpg_t>& processor::camera_t::files()
 /***   processor::profiler_t   ****/
 /**********************************/
 
-processor::profiler_t::profiler_t(vector<std::__cxx11::string>& filenames, list<sample_t>& samples_list) : filenames(filenames), samples_list(samples_list)
+processor::profiler_t::profiler_t(vector<std::__cxx11::string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper) : filenames(filenames), samples_list(samples_list), sql_wrapper(sql_wrapper)
 {
 }
 
@@ -237,7 +235,7 @@ vector<measurements_::profiler_t> & processor::profiler_t::measurements()
 	
 	for (vector<files_::profiler_t>::iterator PM=files_p.begin();PM!=files_p.end();PM++)
 	{
-		measurements_p.push_back({*PM,samples_list});
+		measurements_p.push_back({*PM,samples_list,sql_wrapper});
 		files_p.erase(PM);
 		PM--;
 	}

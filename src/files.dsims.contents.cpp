@@ -32,7 +32,7 @@
 // 	return sputter_depth_p;
 // }
 // 
-// const sputter_time_t files_::dsims_t::contents_t::Ipr_t::sputter_time() const
+// const sputter_time_t files_::dsims_t::contents_t::Ipr_t::sputter_time const
 // {
 // 	return sputter_time_p;
 // }
@@ -120,24 +120,27 @@ void files_::dsims_t::contents_t::to_screen(string prefix)
 
 vector<cluster_t> files_::dsims_t::contents_t::clusters()
 {
+	if (columns().size()==0)
+		return {};
 	vector<cluster_t> collected_clusters;
 	for (auto& clustername : cluster_names())
 	{
 		
 		if (clustername=="Ipr") continue;
-		sputter_time_t sputter_time_s;
+		sputter_time_t sputter_time;
 		sputter_depth_t sputter_depth_s;
 		concentration_t concentration_s;
 		intensity_t intensity_s;
+		
 		for (auto& col:columns())
 		{
 			if (col.cluster_name != clustername) continue;
-			if (col.dimension=="Time") sputter_time_s = sputter_time_t(col.data,col.unit);
+			if (col.dimension=="Time") sputter_time = sputter_time_t(col.data,col.unit);
 			if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
 			if (col.dimension=="C") concentration_s = concentration_t(col.data,col.unit);
 			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
 		}
-		cluster_t cluster(clustername,sputter_time_s,intensity_s,sputter_depth_s,concentration_s);
+		cluster_t cluster(clustername,sputter_time,intensity_s,sputter_depth_s,concentration_s);
 		if (cluster.is_set()) collected_clusters.push_back(cluster);
 		else
 			logger::error("files_::dsims_t::contents_t::clusters()", "!cluster.is_set()",to_string());
@@ -147,23 +150,24 @@ vector<cluster_t> files_::dsims_t::contents_t::clusters()
 
 const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t::columns()
 {
+	if (columns_s.size()>0)
+		return columns_s;
 	if (check_Ipr()) ipr_shift_correction();
 	if (!parse_units_dimensions_clusternames())
-		return {};
-	remove_corrupted_lines();
-	if (cluster_names().size()<1 && !parse_units_dimensions_clusternames())
 	{
-		logger::debug(3,"files_::dsims_t::contents_t::columns()", "cluster_names().size()<1 && !parse_units_dimensions_clusternames()");
+		logger::error("files_::dsims_t::contents_t::columns()","could not parse_units_dimensions_clusternames","","return empty");
+		return {};
+	}
+	remove_corrupted_lines();
+	if (cluster_names().size()<1)
+	{
+		logger::error("files_::dsims_t::contents_t::columns()", "cluster_names().size()<1 && !parse_units_dimensions_clusternames()","","returning empty");
 		return {};
 	}
 	
-	vector<files_::sims_t::contents_t::column_t> cols;
+// 	vector<files_::sims_t::contents_t::column_t> cols;
 	vector<vector<string>> data_cols_lines = tools::mat::transpose_matrix(raw_data_tensor()[0]);
 	const int cols_per_element = dimensions().size()/cluster_names().size();
-// 	cout << "dimensions().size()=" << dimensions().size() << endl;
-// 	cout << "cluster_names().size()=" << cluster_names().size() << endl;
-// 	cout << "units().size()=" << units().size() << endl;
-// 	cout << "data_cols_lines().size()=" << data_cols_lines.size() << endl;
 	
 	for (int i=0;i<dimensions().size() && i<data_cols_lines.size() ;i++)
 	{
@@ -175,7 +179,18 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 		vector<string> col_data_string = data_cols_lines[i];
 		col.data=tools::mat::str_vec_to_double_vec(col_data_string);
 		if (col.data.size()==0) continue;
-		cols.push_back(col);
+		columns_s.push_back(col);
+	}
+	
+	if (dimensions().size() != data_cols_lines.size())
+	{
+		logger::warning(3,"files_::dsims_t::contents_t::columns()","dimensions().size() != data_cols_lines.size()","bug in ckb_asc Cs+","fixed using last unit in line");
+		columns_s.back().unit = units().back();
+		logger::debug(6,"files_::dsims_t::contents_t::columns()","cols_per_element=",tools::to_string(cols_per_element));
+		logger::debug(6,"files_::dsims_t::contents_t::columns()","dimensions().size()=",tools::to_string(dimensions().size()));
+		logger::debug(6,"files_::dsims_t::contents_t::columns()","cluster_names().size()=",tools::to_string(cluster_names().size()));
+		logger::debug(6,"files_::dsims_t::contents_t::columns()","units().size()=",tools::to_string(units().size()));
+		logger::debug(6,"files_::dsims_t::contents_t::columns()","data_cols_lines.size()=",tools::to_string(data_cols_lines.size()));
 	}
 // 	cout << "START"<<endl;
 // 	print(cluster_names());
@@ -188,23 +203,27 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 // 		cout << "col.unit=" << col.unit << endl;
 // 	}
 // 	cout << "STOP"<<endl;
-	return cols;
+	return columns_s;
 }
 
 const crater_t::sputter_beam_t files_::dsims_t::contents_t::Ipr()
 {
 	sputter_current_t sputter_current_s;
-	sputter_time_t sputter_time_s;
+	sputter_time_t sputter_time;
 	sputter_depth_t sputter_depth_s;
+// 	if (columns().size()==0)
+// 		logger::error("files_::dsims_t::contents_t::Ipr()","columns().size()==0","","return empty");
 	for (auto& col:columns())
 	{
 		if (col.cluster_name != "Ipr") continue;
-		if (col.dimension=="Time") sputter_time_s = sputter_time_t(col.data,col.unit);
+		if (col.dimension=="Time") sputter_time = sputter_time_t(col.data,col.unit);
 		if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
 		if (col.dimension=="I") sputter_current_s = sputter_current_t(col.data,col.unit);
+		
+		
 	}
 	logger::debug(10,"files_::dsims_t::contents_t::Ipr()","sputter_current_s.to_string()",sputter_current_s.to_string());
-	return {sputter_current_s,sputter_time_s,sputter_depth_s};
+	return {sputter_current_s,sputter_time,sputter_depth_s};
 }
 
 const vector<std::__cxx11::string>& files_::dsims_t::contents_t::dimensions()
@@ -228,6 +247,7 @@ const vector<std::__cxx11::string>& files_::dsims_t::contents_t::cluster_names()
 
 bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 {
+	logger::debug(6,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","entering","");
 	cluster_names_p.clear();
 	units_p.clear();
 	dimensions_p.clear();
@@ -240,18 +260,22 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 	
 	
 	vector<string> samples;
-	for (int i=0;i<((raw_header_tensor().at(c))[sample_names_line_number]).size();i++) {
-		if (( (raw_header_tensor().at(c))[sample_names_line_number][i]).size()>0 ) {
+	for (int i=0;i<((raw_header_tensor().at(c))[sample_names_line_number]).size();i++) 
+	{
+		
+		if (( (raw_header_tensor().at(c))[sample_names_line_number][i]).size()>0 ) 
+		{
+			
 			string result = ((raw_header_tensor().at(c))[sample_names_line_number][i]);
 			samples.push_back(result);
+// 			cout << "samples.size()="<< samples.size() << endl;
 		}
 	}
 	if (samples.size()!=1) 
 	{
-		logger::error("files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","samples.size()!=1",to_string(),"returning false");
+		logger::error("files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","samples.size()!=1",filename_with_path,"returning false");
 		return false;
 	}
-	
 	for (int i=0;i<((raw_header_tensor().at(c))[elements_line_number]).size();i++) {
         string result = ((raw_header_tensor().at(c))[elements_line_number][i]);
 
@@ -272,7 +296,6 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 		logger::error("files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","units_p.size()!=dimensions_p.size()", tools::to_string(units_p.size())+"!="+tools::to_string(dimensions_p.size()));
 		return false;
 	}
-		
 	int cols_per_element = dimensions_p.size()/cluster_names_p.size();
 	if (cols_per_element!=3)
 	{
@@ -293,7 +316,7 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 // 		return false;
 // 	}
 
-
+	logger::debug(6,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","exiting","");
     return true;
 }
 
