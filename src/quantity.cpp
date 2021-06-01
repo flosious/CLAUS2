@@ -374,9 +374,9 @@ quantity_t quantity_t::min() const
 
 bool quantity_t::is_set() const
 {
-	if (data.size()<3) return false;
+	if (data.size()==0) return false;
 // 	if (dimension.length()==0) return false;
-	if (!unit().is_set()) return false;
+// 	if (!unit().is_set()) return false;
 	return true;
 }
 

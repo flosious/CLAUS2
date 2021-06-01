@@ -39,7 +39,6 @@ public:
 	class base_exponents_t
 	{
 	private:
-		bool set = true;
 	public:
 		enum base_t
 		{

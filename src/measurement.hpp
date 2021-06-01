@@ -224,7 +224,7 @@ public:
 	{
 	private:
 		///for references
-		class database
+		class db_t
 		{
 		private:
 // 			database_t& sql_wrapper;

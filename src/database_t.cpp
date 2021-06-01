@@ -21,7 +21,7 @@
 /*globally defined*/
 // sqlite3* sql_handle;
 
-string database_t::file_location="database.sqlite3";
+string database_t::file_location="build/database.sqlite3";
 
 database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle)
 { 
@@ -224,7 +224,7 @@ bool database_t::close() {
     return true; 
 }
 
-bool database_t::execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**), void* func_arg)
+bool database_t::execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**), void* func_arg) const
 {
     char *zErrMsg = 0;
 	int rc = sqlite3_exec(this->sql_handle, sql.c_str(), func_ptr, func_arg, &zErrMsg);

@@ -18,6 +18,30 @@ isotope_t::isotope_t(std::__cxx11::string symbol_s, int nucleons_s, double abund
 																																   substance_amount({amount_s})
 {}
 
+isotope_t::isotope_t(std::__cxx11::string str, double abundance_s, double amount_s)
+{
+	smatch match;
+	if (regex_search(str,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)"))) 
+	{
+		if (match[1]!="") nucleons = tools::str::str_to_int(match[1]);
+		else 
+		{
+			nucleons=PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
+		}
+		if (match[2]!="") symbol = match[2];
+		else
+		{
+			logger::error("isotope_t::isotope_t()","symbol=''", "iso:'"+str + "'","returning");
+			return;
+		}
+		if (match[3]!="") amount_s = tools::str::str_to_double (match[3]);
+			else amount_s = 1;
+		*this = isotope_t{symbol,nucleons,abundance_s,amount_s};
+	}
+	else
+		logger::error("isotope_t::isotope_t()","regex_search(iso_p,match,regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",str,"returning");
+}
+
 const mass_t isotope_t::mass() const
 {
 	if (symbol=="")

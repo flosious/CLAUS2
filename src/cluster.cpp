@@ -40,26 +40,11 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 	vector<string> clustername_parts = tools::str::get_strings_between_delimiter(clustername, " ");
 	for (auto& iso_p : clustername_parts)
 	{
-		if (regex_search(iso_p,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)"))) 
-		{
-			if (match[1]!="") nucleons = tools::str::str_to_int(match[1]);
-			else 
-			{
-				nucleons=PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
-			}
-			if (match[2]!="") symbol = match[2];
-			else
-			{
-				logger::error("cluster_t::parse_clustername()","symbol=''", "iso:'"+iso_p + "' cluster='"+clustername+"'","continue");
-				continue;
-			}
-			if (match[3]!="") amount = tools::str::str_to_double (match[3]);
-			else amount = 1;
-			isotopes.push_back({symbol,nucleons,-1,amount});
-		}
+		isotope_t iso(iso_p);
+		if (iso.symbol!="" && iso.nucleons>0)
+			isotopes.push_back(iso);
 		else
 		{
-// 			logger::error("cluster_t::cluster_t() cluster not parseable, skipping", iso_p);
 			logger::error("cluster_t::parse_clustername()","regex_search(iso_p,match,regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",clustername,"return {}");
 			return {};
 		}

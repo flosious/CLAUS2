@@ -86,7 +86,7 @@ private:
 	~database_t();
 public:
 	bool open();
-	bool execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr);
+	bool execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr) const;
 	
 	/*call backs*/
 	///general callback function -> populates *ptr -> matrix(vector(vector(string)))

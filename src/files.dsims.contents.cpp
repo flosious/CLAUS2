@@ -218,9 +218,8 @@ const crater_t::sputter_beam_t files_::dsims_t::contents_t::Ipr()
 		if (col.cluster_name != "Ipr") continue;
 		if (col.dimension=="Time") sputter_time = sputter_time_t(col.data,col.unit);
 		if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
-		if (col.dimension=="I") sputter_current_s = sputter_current_t(col.data,col.unit);
-		
-		
+		if (col.dimension=="I") 
+		sputter_current_s = sputter_current_t(col.data,col.unit);
 	}
 	logger::debug(10,"files_::dsims_t::contents_t::Ipr()","sputter_current_s.to_string()",sputter_current_s.to_string());
 	return {sputter_current_s,sputter_time,sputter_depth_s};

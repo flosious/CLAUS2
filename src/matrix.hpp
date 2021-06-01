@@ -37,14 +37,14 @@ private:
 	///isotope mapping to its absolute concentration in amount of atoms or mole
 	/// OR relative concentration in at%; enforcing always 100at% within a matrix
 // 	map<isotope_t,double> isotopes_amount;
-	
+	void abs_to_relative();
 public:
 	matrix_t();
 	matrix_t(const vector<string> elements_or_isotopes_s);
 	matrix_t(const string matrix_elements_s);
 	vector<isotope_t> isotopes;
 	const bool is_set() const;
-	const string to_string();
+	const string to_string() const;
 	///RELATIVE! in at%
 	const concentration_t concentration(isotope_t& iso) const;
 	bool operator==(matrix_t& obj) ;

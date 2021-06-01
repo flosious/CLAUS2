@@ -37,7 +37,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		logger::error("processor::processor","could not connecto to database");
 	else // create tables
 	{
-		sample_t::database::create_table(sql_wrapper);
+		sample_t::db_t::create_table(sql_wrapper);
 	}
 	/*****************************/
 	
@@ -46,22 +46,27 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	camera_t camera(filenames,sql_wrapper);
 	dsims_t dsims(filenames,samples_list,profiler,camera,sql_wrapper);
 	
-	cout << "filenames.size()=" << filenames.size() << endl;
-	cout << "dsims.files().size()=" << dsims.files().size() << endl;
-	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
-	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
+// 	cout << "filenames.size()=" << filenames.size() << endl;
+// 	cout << "dsims.files().size()=" << dsims.files().size() << endl;
+// 	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
+// 	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
 	
 	for (auto& MG : dsims.mgroups())
 	{
-		for (auto& cR : MG.reference_clusters())
-			cout << "common ref_clusters: " << cR.to_string() << endl;
+// 		for (auto& cR : MG.reference_clusters())
+// 			cout << "common ref_clusters: " << cR.to_string() << endl;
 		for (auto& M:MG.measurements_p)
 		{
 			M.plot_now();
 		}
 	}
+	
+	for (auto& s:samples_list)
+		cout << s.database().matrix().to_string() << endl;
+	
 	if (!logger::instant_print_messages)
 		logger::to_screen();
+	
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
 	

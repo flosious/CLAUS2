@@ -114,7 +114,14 @@ unit_t::base_exponents_t unit_t::base_exponents_t::operator*(const unit_t::base_
 
 bool unit_t::base_exponents_t::is_set() const
 {
-	return set;
+	if (meters!=0) return true;
+	if (kilograms!=0) return true;
+	if (seconds!=0) return true;
+	if (amperes!=0) return true;
+	if (moles!=0) return true;
+	if (kelvins!=0) return true;
+	if (candelas!=0) return true;
+	return false;
 }
 
 const std::__cxx11::string unit_t::base_exponents_t::to_string() const
@@ -363,7 +370,9 @@ unit_t unit_t::pow(int pot) const
 
 bool unit_t::is_set() const
 {
-	return base_units_exponents.is_set();
+	if (base_units_exponents.is_set()) return true;
+	if (multiplier!=0) return true;
+	return false;
 }
 
 bool unit_t::operator==(const unit_t& obj) const
@@ -380,13 +389,13 @@ bool unit_t::operator!=(const unit_t& obj) const
 
 unit_t unit_t::operator*(const unit_t& obj) const
 {
-	if (!is_set() || !obj.is_set()) return {};
+// 	if (!is_set() || !obj.is_set()) return {};
 	return unit_t{base_units_exponents * obj.base_units_exponents, multiplier * obj.multiplier};
 }
 
 unit_t unit_t::operator/(const unit_t& obj) const
 {
-	if (!is_set() || !obj.is_set()) return {};
+// 	if (!is_set() || !obj.is_set()) return {};
 	return unit_t{base_units_exponents / obj.base_units_exponents, multiplier / obj.multiplier};
 }
 

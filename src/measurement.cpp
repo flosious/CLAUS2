@@ -36,8 +36,7 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, fi
 
 	if (!sample->matrix().is_set())
 	{
-// 		cout << "MATRIX = " << s.matrix().to_string() << endl;
-		sample->matrix() = s.matrix(); 
+		*sample = s;
 	}
 }
 

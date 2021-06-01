@@ -42,6 +42,7 @@ public:
 	isotope_t();
 	///nucleons_s=-1 -> isotope with highest natural abundance
 	isotope_t(string symbol_s, int nucleons_s, double abundance_s=-1, double amount_s=1);
+	isotope_t(string str, double abundance_s=-1, double amount_s=1);
 	const mass_t mass() const;
 	const string symbol_alternative() const;
 	abundance_t abundance;

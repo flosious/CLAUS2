@@ -168,6 +168,8 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 			iso.substance_amount =  iso.substance_amount * (total_amount - max_ ) ;
 	}
 	
+	
+	
 	/*calculate total substance_amount for each element/symbol*/
 	map<string,double> symbol_to_total_amount;
 	for (auto& iso : isotopes)
@@ -196,13 +198,37 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 		}
 	}
 	
+// 	abs_to_relative();
 	
+	/*sum of all isos subtance_amounts may be high*/
+// 	double sum=0, sum1=0;
+// 	for (auto& iso : isotopes)
+// 	{
+// 		sum += iso.substance_amount.data.at(0);
+// 		sum1 += iso.abundance.data.at(0);
+// 		cout << iso.to_string() << iso.abundance.to_string() << "\tsum=" << sum<< "\tsum1=" << sum1 <<  endl;;
+// 	}
+}
+
+void matrix_t::abs_to_relative()
+{
+	substance_amount_t sum({0});
+	for (auto& iso : isotopes)
+		sum += iso.substance_amount;
+	
+	for (auto& iso : isotopes)
+		iso.substance_amount = substance_amount_t( quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent));
+// 		iso.substance_amount = substance_amount_t( quantity_t(iso.substance_amount/sum*100));
+	
+	for (auto& iso : isotopes)
+		cout << iso.substance_amount.to_string() << endl;
 }
 
 
 const bool matrix_t::is_set() const
 {
-	if (isotopes.size()==0) return false;
+	if (isotopes.size()==0)
+		return false;
 	return true;
 }
 
@@ -246,7 +272,7 @@ bool matrix_t::operator<(const matrix_t& obj) const
 	return false;
 }
 
-const std::__cxx11::string matrix_t::to_string()
+const std::__cxx11::string matrix_t::to_string() const
 {
 	stringstream out;
 	if (!is_set()) return "";

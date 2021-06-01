@@ -56,26 +56,37 @@ private:
 	static bool use_simple_name;
 	
 	matrix_t matrix_p;
+	const database_t* sql_wrapper=nullptr;
 	///all samples from all loaded files
 // 	static vector<sample_t> samples_list_p;
 protected:
 
 public:
 	///just for implants at the moment
-	class database
+	class db_t
 	{
 	private:
-		database_t& sql_wrapper;
-		bool table_exists=false;
+		class implant_t
+		{
+		public:
+			implant_t();
+			implant_t(const isotope_t& isotope, const map<string,vector<string>>& table_entries_s);
+			dose_t dose;
+			concentration_t concentration_maximum;
+			sputter_depth_t depth_at_concentration_maxium;
+		};
+		const database_t& sql_wrapper;
+// 		bool table_exists=false;
 		static const string tablename;
-		
-		map<string,vector<string>> load_from_table(isotope_t isotope={});
-		sample_t& sample;
+		///saved load_from_table entries
+		map<string,vector<string>> table_entries_s;
+		const map<string,vector<string>>& load_from_table();
+		const sample_t& sample;
 	public:
 		static bool create_table(database_t& sql_wrapper);
-		database(sample_t& sample, database_t& sql_wrapper);
+		db_t(const sample_t& sample, const database_t& sql_wrapper);
 		matrix_t matrix();
-		dose_t dose(const isotope_t isotope);
+		implant_t implant(const isotope_t& isotope);
 	};
 	class chip_t
 	{
@@ -95,7 +106,7 @@ public:
 // 	set<measurements::dsims_t*> dsims;
 // 	set<measurements::tofsims_t*> tofsims;
 // 	set<measurements::profiler_t*> profiler;
-	database DB;
+	db_t database() const;
 	
 	sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f, database_t& sql_wrapper);
 	sample_t(files_::file_t::name_t& fn,database_t& sql_wrapper);
@@ -108,9 +119,9 @@ public:
 	string lot_split;
 	string monitor;
 	string simple_name;
-	string wafer_string();
+	const string wafer_string() const;
 	
-	matrix_t& matrix();
+	const matrix_t& matrix();
 	
 	/*database stuff*/
 	bool load_from_database();
