@@ -136,6 +136,11 @@ crater_t::crater_t()
 {
 }
 
+ const string crater_t::to_string(const string del) const
+ {
+	 return "not set at the mom";
+ }
+
 // quantity_t crater_t::set_common_base_points(vector<cluster_t>& clusters)
 // {
 // 	if(clusters.size()==0)

@@ -47,10 +47,10 @@ using namespace std;
 /************************/
 // FORWARD DECLARATIONS //
 
-namespace calc
-{
-	class SR_c;
-}
+// namespace calc
+// {
+// 	class SR_c;
+// }
 
 /************************/
 
@@ -101,6 +101,7 @@ public:
 	
 	class sims_t : public measurement_t
 	{
+		friend class processor;
 	protected:
 		///some general data filters
 		class filter_t
@@ -113,34 +114,41 @@ public:
 			sims_t impulses();
 		};
 		///determine sputter_equlibrium position (surface peak); maybe moved later on, when introducing other non cluster based measurement methods (e.g. XPS, AES)
-		class equlibrium_t
-		{
-		private:
-			const sims_t& M;
-			///just for MATRIX/Reference cluster C -> here we know the content should be constant (most of the time)
-			static const unsigned int equilibrium_start_index(const cluster_t& C);
-			///just for quantity Q
-			static const unsigned int equilibrium_start_index(const quantity_t& Q);
-			quantity_t& erase_inequilibrium_data(quantity_t& Q);
-			cluster_t& erase_inequilibrium_data(cluster_t& C);
-			crater_t& erase_inequilibrium_data(crater_t& C);
-			unsigned int& equilibrium_start_index_s;
-		public:
-			///if equilibrium_start_index_s>0 enforces to use this index
-			equlibrium_t(const sims_t& M, unsigned int& equilibrium_start_index_s);
-			///0 is equivalent to input measurement, so instant equilibrium
-			const unsigned int equilibrium_start_index();
-			sims_t measurement();
-			vector<cluster_t> clusters();
-		};
+// 		class equlibrium_t
+// 		{
+// 		private:
+// 			const sims_t& M;
+// 			///just for MATRIX/Reference cluster C -> here we know the content should be constant (most of the time)
+// 			static const unsigned int equilibrium_start_index(const cluster_t& C);
+// 			///just for quantity Q
+// 			static const unsigned int equilibrium_start_index(const quantity_t& Q);
+// 			quantity_t& erase_inequilibrium_data(quantity_t& Q);
+// 			cluster_t& erase_inequilibrium_data(cluster_t& C);
+// 			crater_t& erase_inequilibrium_data(crater_t& C);
+// 			unsigned int& equilibrium_start_index_s;
+// 		public:
+// 			///if equilibrium_start_index_s>0 enforces to use this index
+// 			equlibrium_t(const sims_t& M, unsigned int& equilibrium_start_index_s);
+// 			///0 is equivalent to input measurement, so instant equilibrium
+// 			const unsigned int equilibrium_start_index();
+// 			sims_t measurement();
+// 			vector<cluster_t> clusters();
+// 		};
 		class calc_t
 		{
 		protected:
-			sims_t& measurement;
+			const sims_t& measurement;
 		public:
+			/*fundamental functions*/
+			static SR_t sputter_rate(const total_sputter_time_t& total_sputter_time, const total_sputter_depth_t& total_sputter_depths);
+			static sputter_depth_t sputter_depth(const SR_t& SR, const sputter_time_t& ST);
+			static concentration_t concentration(const SF_t& SF, const intensity_t& intensity);
+// 			static SF_t SF(const dose_t& dose, const intensity_t& intensity, const sputter_depth_t& sputter_depth);
+			static RSF_t RSF(const SF_t& SF, const intensity_t& reference_intensity);
 			class from_crater_t
 			{
 				SR_t SR() const;
+				sputter_depth_t sputter_depth() const;
 			};
 			class fit_to_ref_t
 			{
@@ -149,31 +157,37 @@ public:
 				///SR and SF calculated once and returned within measurement
 				sims_t measurement() const;
 			};
-			class from_database_t
+			class implant_t
 			{
-				SR_t SR();
-				SF_t SF();
-			};
-			class SF_c
-			{
-			protected:
-				sims_t& measurement;
+			private:
+				const calc_t& calc;
+				static unsigned int minimum_starting_position(quantity_t Y);
 			public:
-				///sensitvity factor
-				SF_c(sims_t& measurement);
-				bool from_pbp_RSF();
-				bool from_const_RSF();
-				bool from_dose();
-				bool from_implant_max();
-				bool from_database_parameters();
+				implant_t(const calc_t& calc);
+				SR_t SR() const;
+				sputter_depth_t sputter_depth() const;
+				SF_t SF(const cluster_t& cluster) const;
+				static SF_t SF(const dose_t& dose, const intensity_t& intensity, const sputter_depth_t& sputter_depth);
+				RSF_t RSF(const cluster_t& cluster) const;
+				concentration_t concentration(const cluster_t& cluster) const;
+				sims_t measurement() const;
 			};
-			calc_t(sims_t& measurement);
-			calc::SR_c SR();
+			crater_t crater() const;
+			
+			SR_t sputter_rate() const;
+			
+			
+			sputter_depth_t sputter_depth() const;
+			vector<cluster_t> clusters() const;
+			///returns whole calculated measurement
+			sims_t calculat_everything() const;
+			calc_t(const sims_t& measurement);
+// 			calc::SR_c SR();
 		};
 		///adds more cluster to this measurement
 		void add_clusters(vector<cluster_t>& clusters_s);
 		///saved variable for faster recalculation of sputter_equlibrium
-		unsigned int equilibrium_start_index_s=0;
+// 		unsigned int equilibrium_start_index_s=0;
 	public: 
 		calc_t calc();
 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
@@ -181,7 +195,7 @@ public:
 		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
 		string to_string(const string del = ", ");
 		///returns the measurement without surface artefacts
-		sims_t sputter_equilibrium();
+// 		sims_t sputter_equilibrium();
 		filter_t filter() const;
 		///returns the cluster corresponding isotope
 // 		isotope_t* isotope(cluster_t& cluster);

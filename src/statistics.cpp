@@ -18,7 +18,7 @@
 #include "statistics.hpp"
 
 
-bool statistics::get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx, vector<double> Y, double treshold)
+bool statistics::get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx, const vector<double>& Y, double treshold)
 {
 	vector<int> local_extrema;
 	
@@ -1416,15 +1416,12 @@ vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY
 }
 
 
-double statistics::integrate(map<double,double>& data_XY, double lower_limit_X, double upper_limit_X) 
+double statistics::integrate(map<double,double>& data_XY, unsigned int start_idx, unsigned int stop_idx) 
 {
-	if (lower_limit_X<0 || upper_limit_X <0) return -1;
-    if (upper_limit_X<lower_limit_X) {
-        double temp;
-        temp=upper_limit_X;
-        upper_limit_X=lower_limit_X;
-        lower_limit_X=temp;
-    }
+	if (stop_idx==0)
+		stop_idx = data_XY.size();
+	if (stop_idx<start_idx)
+		return 0;
     double sum=0;
 	map<double,double>::iterator it,it_prev;
 	double dY,dX;
@@ -1432,12 +1429,13 @@ double statistics::integrate(map<double,double>& data_XY, double lower_limit_X, 
 	int i=1;
     for (++it;it!=data_XY.end();++it)
 	{
+		if (i > stop_idx)	break;
 		i++;
 		it_prev=it;
 		--it_prev;
         dY=abs(it->second+it_prev->second)/2;
         dX=abs(it->first-it_prev->first);
-        if (lower_limit_X==upper_limit_X || (it->first>=lower_limit_X && it->first<=upper_limit_X)) sum=sum+dX*dY;
+        if (start_idx>=i) sum=sum+dX*dY;
     }
     return sum;
 }

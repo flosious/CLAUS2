@@ -64,11 +64,11 @@ const map<std::string, unit_t> unit_t::symbol_to_unit
 	/*atoms*/
 	{"at",units::derived::atoms},
 	{"at%",units::derived::atom_percent},
-	{"at/ccm",units::derived::atoms/units::SI::meter.pow(3)*units::prefixes::centi.pow(3)},
-	{"at/scm",units::derived::atoms/units::SI::meter.pow(2)*units::prefixes::centi.pow(2)},
-	{"at/cm^3",units::derived::atoms/units::SI::meter.pow(3)*units::prefixes::centi.pow(3)},
-	{"atom/cm3",units::derived::atoms/units::SI::meter.pow(3)*units::prefixes::centi.pow(3)},
-	{"at/cm^2",units::derived::atoms/units::SI::meter.pow(2)*units::prefixes::centi.pow(2)},
+	{"at/ccm",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
+	{"at/scm",units::derived::atoms/units::SI::meter.pow(2)/units::prefixes::centi.pow(2)},
+	{"at/cm^3",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
+	{"atom/cm3",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
+	{"at/cm^2",units::derived::atoms/units::SI::meter.pow(2)/units::prefixes::centi.pow(2)},
 	/*time*/
 	{"sec",{units::SI::second}},
 	{"min",{units::SI::second,60}},
@@ -345,8 +345,6 @@ const std::__cxx11::string unit_t::to_string() const
 	
 // 	if (base_units_exponents.Candela==1)		counter << units::SI::Candela.to_string() << " ";
 // 	else if (base_units_exponents.Candela>0) 	counter << units::SI::Candela.to_string() << "^" << base_units_exponents.Candela << " ";
-	
-
 		
 // 	logger::debug(5,"unit_t::to_string()","not found","");
 	logger::fatal("unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));

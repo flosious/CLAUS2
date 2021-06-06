@@ -56,6 +56,113 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 // {
 // }
 
+// unsigned int cluster_t::equilibrium_index_pos(unsigned int start)
+// {
+// 	if (equilibrium_index_pos_s>=0)
+// 		return equilibrium_index_pos_s;
+// 	
+// 	/*copied from claus1*/
+// 	vector<double> Y;
+// 	
+// 	if (intensity.is_set())
+// 		Y = intensity.filter_gaussian(5,4).data; 
+// 	else if (concentration.is_set())
+// 		Y = concentration.filter_gaussian(5,4).data; 
+// 	else 
+// 	{
+// 		logger::error("cluster_t::equilibrium_index_pos()","neither intensity nor concentration in cluster set; this should never happen", to_string(),"returning 0");
+// 		return 0;
+// 	}
+// 	
+// 	/*remove first 5% of all data; this is dangerous and should be solved better*/
+// // 	if (measurement->settings.sputter_element() == "Cs" && Y.size()>20) 
+// // 		start = 20;
+// // 	else
+// // 		start = 1;
+// // 	equilibrium_starting_pos = start;
+// // 	cout << "Y.size(b4)=" << Y.size() << endl;
+// // 	Y.erase(Y.begin(),Y.begin()+start);
+// // 	cout << "Y.size(after)=" << Y.size() << endl;
+// 	/*****************************/
+// 			
+// 	double treshold = statistics::get_mad_from_Y(Y)/2;
+// 	double median = statistics::get_median_from_Y(Y);
+// 	set<int> extrema_idx;
+// 	vector<int> maxIdx, minIdx;
+// 		
+// // 	if (!statistics::get_extrema_indices(maxIdx,minIdx,Y,treshold))
+// // 		if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
+// // // 		else equilibrium_starting_pos = measurement->equilibrium_starting_pos();
+// // 		else equilibrium_starting_pos = 0;
+// // 	}
+// // 	//type C
+// // 	else if (minIdx.size()==0 && maxIdx.size()==1) // just the global maximum
+// // 	{
+// // // 		cout << name() << " type C2" << endl;
+// // 		if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
+// // // 		else equilibrium_starting_pos = measurement->equilibrium_starting_pos();
+// // 		else equilibrium_starting_pos = 0;
+// 	if (statistics::get_extrema_indices(maxIdx,minIdx,Y,treshold))
+// 	{
+// 		/*remove right sided*/
+// 		for (auto& m:maxIdx)
+// 			if (m>0.5*Y.size()) m=0;
+// 		for (auto& m:minIdx)
+// 			if (m>0.5*Y.size()) m=0;
+// 			
+// 		set<int> maxIdx_set (maxIdx.begin(),maxIdx.end());
+// 		set<int> minIdx_set (minIdx.begin(),minIdx.end());
+// 		
+// 		/*remove trivials*/
+// 		maxIdx_set.erase(0);
+// 		maxIdx_set.erase(1);
+// 		minIdx_set.erase(0);
+// 		minIdx_set.erase(1);
+// 		
+// // 		print("maxIdx_set: " + name());
+// // 		print(maxIdx_set);
+// // 		print("minIdx_set: " + name());
+// // 		print(minIdx_set);
+// 		
+// // 		//type E D
+// // 		if (minIdx_set.size()==0 && maxIdx_set.size()==0)
+// // 		{
+// // // 			cout << name() << " type E or D" << endl;
+// // 			if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
+// // // 			else equilibrium_starting_pos = measurement->equilibrium_starting_pos();
+// // 			else equilibrium_starting_pos = 0;
+// // 		}
+// 		// type G H
+// 		if (minIdx_set.size()==0 && maxIdx_set.size()!=0 )
+// 		{
+// // 			if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,*maxIdx_set.begin());
+// // 			else equilibrium_starting_pos = 0;
+// // 			equilibrium_starting_pos=*maxIdx_set.begin(); 
+// // 			cout << name() << " type G or H" << endl;
+// 		}
+// 		//type A B F --> implant
+// 		else 
+// 		{
+// 			start=*minIdx_set.begin(); 
+// 			/* check total signal sum for miss interpretation */
+// 			double sum=0;
+// 			double sum_equilibrium=0;
+// 			for (int i=0;i<Y.size();i++)
+// 				sum+=Y[i];
+// 			for (int i=start;i<Y.size();i++)
+// 				sum_equilibrium+=Y[i];
+// 			if ((sum_equilibrium-(Y.size()-start)*Y.back())/(sum-Y.size()*Y.back())<0.7)
+// 				start=0;
+// // 			cout << name() << " type A or B or F" << endl;
+// 		}
+// 	}
+// // 	cout << measurement->lot() << "_" << measurement->wafer()  << "_" << name() <<" equilibrium_starting_pos = " << equilibrium_starting_pos << endl;
+// // 	result.equilibrium_starting_pos=equilibrium_starting_pos+start;
+// // 	reduce_quantities_by_equlibrium_starting_pos(result);
+// 	equilibrium_index_pos_s = start;
+// 	return equilibrium_index_pos_s;
+// }
+
 
 cluster_t::cluster_t(const vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s)
 {

@@ -102,6 +102,7 @@ public:
 	//skalars
 	///
 	quantity_t remove_data_by_index(unsigned int start, unsigned int stop) const;
+	quantity_t remove_data_from_begin(unsigned int stop) const;
 	quantity_t absolute() const;
 	quantity_t invert() const;
 	quantity_t sum() const;
@@ -122,7 +123,7 @@ public:
 	/// returns x value at min(Y)
 	quantity_t min_at_x(quantity_t& X,double lower_X_limit=0, double upper_X_limit=0) const;
 // 	quantity_t integrate(quantity_t& x_data,double lower_X_limit=0, double upper_X_limit=0);
-	quantity_t integrate(quantity_t& x_data, double lower_X_limit = 0, double upper_X_limit = 0) const;
+	quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_limit=0, unsigned int upper_X_limit = 0) const;
 	/// point by point integration
 	quantity_t integrate_pbp(const quantity_t& x_data) const;
 	
@@ -131,7 +132,7 @@ public:
 	
 	quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
 	quantity_t fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade=-1 ) const;
-	quantity_t polyfit(int polynom_grade=-1) const;
+	quantity_t polyfit(unsigned int polynom_grade) const;
 	
 	
 	quantity_t filter_recursive_median(int window_size=0) const;

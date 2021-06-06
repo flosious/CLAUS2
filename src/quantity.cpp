@@ -89,10 +89,10 @@ quantity_t quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_
 	return fit;
 }
 
-quantity_t quantity_t::polyfit(int polynom_grade) const
+quantity_t quantity_t::polyfit(unsigned int polynom_grade) const
 {
 	if (!is_set()) return quantity_t();
-	if (polynom_grade==-1) polynom_grade=17; // seems to be good for implant profiles
+// 	if (polynom_grade==-1) polynom_grade=17; // seems to be good for implant profiles
 	
 	fit_functions::polynom_t polynom;
 	map<double,double> data_XY;
@@ -167,7 +167,7 @@ quantity_t quantity_t::integrate_pbp(const quantity_t& x_data) const
 // 	return integrate(x_data,lower_X_limit,upper_X_limit);
 // }
 
-quantity_t quantity_t::integrate(quantity_t& x_data, double lower_X_limit, double upper_X_limit) const
+quantity_t quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_limit, unsigned int upper_X_limit) const
 {
 	map<double,double> data_XY;
 	tools::vec::combine_vecs_to_map(&x_data.data,&data,&data_XY);
@@ -527,6 +527,12 @@ quantity_t quantity_t::invert() const
 	unit_t u(ss.str());
 	return {inv.name(),inv.data,u};
 }
+
+quantity_t quantity_t::remove_data_from_begin(unsigned int stop) const
+{
+	return remove_data_by_index(0,stop);
+}
+
 
 quantity_t quantity_t::remove_data_by_index(unsigned int start, unsigned int stop) const
 {

@@ -52,7 +52,7 @@ public:
 		starting with 0 index as global maximum resp. minimum
 		and going on with 1 .... n in decreasing treshold order
 	*/
-	static bool get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx, vector<double> Y, double treshold=-1);
+	static bool get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx,const vector<double>& Y, double treshold=-1);
     ///\brief returns indices of all local maxima for Y, where Y>treshold
     static vector<int> get_local_maxima_indices(vector<double> Y, double treshold=-1, int stepsize=1);
 	/// not tested!
@@ -146,7 +146,7 @@ public:
 	/// akima splines
 	static vector<double> interpolate_data_XY(const map<double,double>& data_XY,const vector<double>& X);
 	
-	static double integrate(map<double,double>& data_XY, double lower_limit_X=0, double upper_limit_X=0) ;
+	static double integrate(map<double,double>& data_XY, unsigned int start_idx=0, unsigned int stop_idx=0) ;
 	
 	static map<double, double> change_X_resolution(const map<double, double>& data_XY,const double new_resolution);
 };

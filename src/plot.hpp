@@ -79,11 +79,23 @@ private:
 // 		double x_stop();
 // 		double y_stop();
 	};
-	
-	
+	class line_t
+	{
+	public:
+		const double x_start;
+		const double y_start;
+		const double x_stop;
+		const double y_stop;
+		const string color;
+		///adds an arrow from start --> stop
+		line_t(double x_start, double y_start, double x_stop, double y_stop, string color="");
+	};
+	vector<line_t> lines;
 	int Draw(mglGraph * gr) override;
 public:
 	plot_t(bool Y1_log10=true, bool Y2_log10=true, bool Y3_log10=false);
+	void add_line(double x_start, double y_star, double x_stop, double y_stop, string color="");
+	void add_arrow(double x_start, double y_star, double x_stop, double y_stop, string color="rA");
 	axis_t Y1;
 	axis_t Y2;
 	axis_t Y3;

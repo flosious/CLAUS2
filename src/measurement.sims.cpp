@@ -23,168 +23,96 @@
 /* *measurements_::sims_t::equlibrium_t */
 /****************************************/
 
-measurements_::sims_t::equlibrium_t::equlibrium_t(const measurements_::sims_t& M, 
-												  unsigned int& equilibrium_start_index_s) : 
-												  M(M), equilibrium_start_index_s(equilibrium_start_index_s)
-{
-}
-
-quantity_t & measurements_::sims_t::equlibrium_t::erase_inequilibrium_data(quantity_t& Q)
-{
-	if (equilibrium_start_index()>0)
-		Q = Q.remove_data_by_index(0,equilibrium_start_index());
-	return Q;
-}
-
-cluster_t & measurements_::sims_t::equlibrium_t::erase_inequilibrium_data(cluster_t& C)
-{
-	C.intensity = erase_inequilibrium_data(C.intensity);
-	C.concentration = erase_inequilibrium_data(C.concentration);
-	C.SF = erase_inequilibrium_data(C.SF);
-	C.sputter_depth = erase_inequilibrium_data(C.sputter_depth);
-	C.sputter_time = erase_inequilibrium_data(C.sputter_time);
-	return C;
-}
-
-crater_t & measurements_::sims_t::equlibrium_t::erase_inequilibrium_data(crater_t& C)
-{
-	C.sputter_beam.sputter_current = erase_inequilibrium_data(C.sputter_beam.sputter_current);
-	C.sputter_beam.sputter_depth = erase_inequilibrium_data(C.sputter_beam.sputter_depth);
-	C.sputter_beam.sputter_time = erase_inequilibrium_data(C.sputter_beam.sputter_time);
-	
-	C.sputter_depth = erase_inequilibrium_data(C.sputter_depth);
-	C.sputter_time = erase_inequilibrium_data(C.sputter_time);
-	return C;
-}
-
-///TODO unvollständig!!
-measurements_::sims_t measurements_::sims_t::equlibrium_t::measurement()
-{
-	if (equilibrium_start_index()==0)
-		return M;
-	sims_t M_out = M;
-	for (auto& C:M_out.clusters)
-	{
-		if (!erase_inequilibrium_data(C).is_set())
-		{
-			logger::error("measurements_::sims_t::equlibrium_t::measurement()","could not delete cluster erase_inequilibrium_data",C.to_string(),"empty cluster");
-			C = {};
-		}
-	}
-	erase_inequilibrium_data(M_out.crater);
-// 	M_out.crater.
-	return M_out;
-}
-
-const unsigned int measurements_::sims_t::equlibrium_t::equilibrium_start_index()
-{
-	///use saved value
-	if (equilibrium_start_index_s>0)
-		return equilibrium_start_index_s;
-	unsigned int temp=0;
-	for (auto C:M.matrix_clusters())
-	{
-		temp = equilibrium_start_index(*C);
-		if (temp > equilibrium_start_index_s)
-			equilibrium_start_index_s=temp;
-	}
-	return equilibrium_start_index_s;
-}
-
-const unsigned int measurements_::sims_t::equlibrium_t::equilibrium_start_index(const cluster_t& C)
-{
-	unsigned int index1=0, index2=0;
-	if (C.intensity.is_set())
-		index1 = equilibrium_start_index(C.intensity);
-	
-	if (C.concentration.is_set())
-		index2 = equilibrium_start_index(C.concentration);
-	
-	if (index1>index2)
-		return index1;
-	return index2;
-}
-
-/*in here is the real magic*/
-const unsigned int measurements_::sims_t::equlibrium_t::equilibrium_start_index(const quantity_t& Q)
-{
-	cout << "measurements_::sims_t::equlibrium_t::equilibrium_start_index" << endl;
-	if (!Q.is_set())
-		return 0;
-	return 0;
-// 	double treshold = statistics::get_mad_from_Y(Y)/2;
-// 	double median = statistics::get_median_from_Y(Y);
+// measurements_::sims_t::equlibrium_t::equlibrium_t(const measurements_::sims_t& M, 
+// 												  unsigned int& equilibrium_start_index_s) : 
+// 												  M(M), equilibrium_start_index_s(equilibrium_start_index_s)
+// {
+// }
+// 
+// quantity_t & measurements_::sims_t::equlibrium_t::erase_inequilibrium_data(quantity_t& Q)
+// {
+// 	if (equilibrium_start_index()>0)
+// 		Q = Q.remove_data_by_index(0,equilibrium_start_index());
+// 	return Q;
+// }
+// 
+// cluster_t & measurements_::sims_t::equlibrium_t::erase_inequilibrium_data(cluster_t& C)
+// {
+// 	C.intensity = erase_inequilibrium_data(C.intensity);
+// 	C.concentration = erase_inequilibrium_data(C.concentration);
+// 	C.SF = erase_inequilibrium_data(C.SF);
+// 	C.sputter_depth = erase_inequilibrium_data(C.sputter_depth);
+// 	C.sputter_time = erase_inequilibrium_data(C.sputter_time);
+// 	return C;
+// }
+// 
+// crater_t & measurements_::sims_t::equlibrium_t::erase_inequilibrium_data(crater_t& C)
+// {
+// 	C.sputter_beam.sputter_current = erase_inequilibrium_data(C.sputter_beam.sputter_current);
+// 	C.sputter_beam.sputter_depth = erase_inequilibrium_data(C.sputter_beam.sputter_depth);
+// 	C.sputter_beam.sputter_time = erase_inequilibrium_data(C.sputter_beam.sputter_time);
 // 	
-// 		set<int> extrema_idx;
-// 		vector<int> maxIdx, minIdx;
-// 			
-// 		if (!statistics::get_extrema_indices(maxIdx,minIdx,Y,treshold))
-// 		{
-// 			if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
-// // 			else equilibrium_starting_pos = measurement->equilibrium_starting_pos();
-// 			else equilibrium_starting_pos = 0;
-// 		}
-// 		//type C
-// 		else if (minIdx.size()==0 && maxIdx.size()==1) // just the global maximum
-// 		{
-// // 			cout << name() << " type C2" << endl;
-// 			if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
-// // 			else equilibrium_starting_pos = measurement->equilibrium_starting_pos();
-// 			else equilibrium_starting_pos = 0;
-// 		}
-// 		else
-// 		{
-// 			/*remove right sided*/
-// 			for (auto& m:maxIdx)
-// 				if (m>0.5*Y.size()) m=0;
-// 			for (auto& m:minIdx)
-// 				if (m>0.5*Y.size()) m=0;
-// 				
-// 			set<int> maxIdx_set (maxIdx.begin(),maxIdx.end());
-// 			set<int> minIdx_set (minIdx.begin(),minIdx.end());
-// 			
-// 			/*remove trivials*/
-// 			maxIdx_set.erase(0);
-// 			maxIdx_set.erase(1);
-// 			minIdx_set.erase(0);
-// 			minIdx_set.erase(1);
-// 			
-// // 			print("maxIdx_set: " + name());
-// // 			print(maxIdx_set);
-// // 			print("minIdx_set: " + name());
-// // 			print(minIdx_set);
-// 			
-// 			//type E D
-// 			if (minIdx_set.size()==0 && maxIdx_set.size()==0)
-// 			{
+// 	C.sputter_depth = erase_inequilibrium_data(C.sputter_depth);
+// 	C.sputter_time = erase_inequilibrium_data(C.sputter_time);
+// 	return C;
+// }
 // 
-// 				if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
-// 
-// 				else equilibrium_starting_pos = 0;
-// 			}
-// 			// type G H
-// 			else if (minIdx_set.size()==0 && maxIdx_set.size()!=0 )
-// 			{
-// 				if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,*maxIdx_set.begin());
-// 				else equilibrium_starting_pos = 0;
-// 
-// 			}
-// 			else 
-// 			{
-// 				equilibrium_starting_pos=*minIdx_set.begin(); 
-// 				/* check total signal sum for miss interpretation */
-// 				double sum=0;
-// 				double sum_equilibrium=0;
-// 				for (int i=0;i<Y.size();i++)
-// 					sum+=Y[i];
-// 				for (int i=equilibrium_starting_pos;i<Y.size();i++)
-// 					sum_equilibrium+=Y[i];
-// 				if ((sum_equilibrium-(Y.size()-equilibrium_starting_pos)*Y.back())/(sum-Y.size()*Y.back())<0.7)
-// 					equilibrium_starting_pos=0;
-// 			}
+// ///TODO unvollständig!!
+// measurements_::sims_t measurements_::sims_t::equlibrium_t::measurement()
+// {
+// 	if (equilibrium_start_index()==0)
+// 		return M;
+// 	sims_t M_out = M;
+// 	for (auto& C:M_out.clusters)
+// 	{
+// 		if (!erase_inequilibrium_data(C).is_set())
+// 		{
+// 			logger::error("measurements_::sims_t::equlibrium_t::measurement()","could not delete cluster erase_inequilibrium_data",C.to_string(),"empty cluster");
+// 			C = {};
 // 		}
-// 		
-}
+// 	}
+// 	erase_inequilibrium_data(M_out.crater);
+// // 	M_out.crater.
+// 	return M_out;
+// }
+// 
+// const unsigned int measurements_::sims_t::equlibrium_t::equilibrium_start_index()
+// {
+// 	///use saved value
+// 	if (equilibrium_start_index_s>0)
+// 		return equilibrium_start_index_s;
+// 	unsigned int temp=0;
+// 	for (auto C:M.matrix_clusters())
+// 	{
+// 		temp = equilibrium_start_index(*C);
+// 		if (temp > equilibrium_start_index_s)
+// 			equilibrium_start_index_s=temp;
+// 	}
+// 	return equilibrium_start_index_s;
+// }
+// 
+// const unsigned int measurements_::sims_t::equlibrium_t::equilibrium_start_index(const cluster_t& C)
+// {
+// 	unsigned int index1=0, index2=0;
+// 	if (C.intensity.is_set())
+// 		index1 = equilibrium_start_index(C.intensity);
+// 	
+// 	if (C.concentration.is_set())
+// 		index2 = equilibrium_start_index(C.concentration);
+// 	
+// 	if (index1>index2)
+// 		return index1;
+// 	return index2;
+// }
+// 
+// /*in here is the real magic*/
+// const unsigned int measurements_::sims_t::equlibrium_t::equilibrium_start_index(const quantity_t& Q)
+// {
+// 	cout << "measurements_::sims_t::equlibrium_t::equilibrium_start_index" << endl;
+// 	if (!Q.is_set())
+// 		return 0;
+// 	return 0;
+// }
 
 
 /************************************/
@@ -208,11 +136,11 @@ measurements_::sims_t measurements_::sims_t::filter_t::impulses()
 /****** measurements_::sims_t ******/
 /***********************************/
 
-measurements_::sims_t measurements_::sims_t::sputter_equilibrium()
-{
-	equlibrium_t STE(*this,equilibrium_start_index_s);
-	return STE.measurement();
-}
+// measurements_::sims_t measurements_::sims_t::sputter_equilibrium()
+// {
+// 	equlibrium_t STE(*this,equilibrium_start_index_s);
+// 	return STE.measurement();
+// }
 
 measurements_::sims_t::filter_t measurements_::sims_t::filter() const
 {
@@ -302,7 +230,8 @@ std::__cxx11::string measurements_::sims_t::to_string(const std::__cxx11::string
 	ss << measurement_t::to_string() << del;
 	ss << "crater: ";
 	ss << crater.total_sputter_depths.to_string() << del;
-	ss << "linescans: <" << crater.linescans.size() <<">" << del;
+	if (crater.linescans.size()>0)
+		ss << "linescans: <" << crater.linescans.size() <<">" << del;
 	ss << "clusters: <" << clusters.size() << ">" << del;
 	logger::debug(11,"measurements_::sims_t::to_string","","","exiting");
 	return ss.str();

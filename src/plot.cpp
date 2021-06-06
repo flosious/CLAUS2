@@ -111,6 +111,9 @@ int plot_t::Draw(mglGraph* gr)
 		else Y3.draw(gr, X_range.stop);
 	}
 	
+	for (auto& line : lines)
+		gr->Line( mglPoint(line.x_start,line.y_start), mglPoint(line.x_stop,line.y_stop),line.color.c_str());
+	
 // 	gr->Grid();
 // 	gr->Box();
 // 	gr->Legend(0.49999,1.05,"^-");
@@ -153,6 +156,16 @@ int plot_t::Draw(mglGraph* gr)
 // 	}
 // 	
 // }
+
+void plot_t::add_line(double x_start, double y_start, double x_stop, double y_stop, std::__cxx11::string color)
+{
+	lines.push_back({x_start,y_start,x_stop,y_stop,color});
+}
+
+void plot_t::add_arrow(double x_start, double y_start, double x_stop, double y_stop, std::__cxx11::string color)
+{
+	lines.push_back({x_start,y_start,x_stop,y_stop,color});
+}
 
 
 void plot_t::to_screen(const std::__cxx11::string window_title, double sleep_sec)
@@ -220,13 +233,20 @@ void plot_t::axis_range_t::log10()
 
 
 /************************************************************************************/
+/*******************       plot_t::line_t              *****************************/
+/************************************************************************************/
+
+plot_t::line_t::line_t(double x_start, double y_star, double x_stop, double y_stop, std::__cxx11::string color) :
+						x_start(x_start), y_start(y_star),x_stop(x_stop),y_stop(y_stop), color(color)
+{
+}
+
+
+/************************************************************************************/
 /*******************       plot_t::axis_t              ******************************/
 /************************************************************************************/
 
 
-// plot_t::axis_t::axis_t(std::__cxx11::string label) : label(label)
-// {
-// }
 void plot_t::axis_t::add_curve(const quantity_t& X, const quantity_t& Y, const std::__cxx11::string legend)
 {
 	logger::debug(9,"plot_t::axis_t::add_curve()","");
@@ -251,8 +271,8 @@ bool plot_t::axis_t::check()
 		}
 		if (c.Y.name()!=curves.front().Y.name())
 		{
-			logger::error("plot_t::axis_t::check()","quantity name of Y axis do not match for all curves",c.Y.name(),"false");
-			return false;
+			logger::warning(3,"plot_t::axis_t::check()","quantity name of Y axis do not match for all curves",c.Y.name());
+// 			return false;
 		}
 		if (c.X.unit()!=curves.front().X.unit())
 		{
@@ -376,7 +396,7 @@ plot_t::axis_t::range_t::range_t(const vector<const quantity_t *> Ys)
 		if (start==-1 || temp < start)
 			start = temp;
 		if (y->name() != Ys.front()->name())
-			logger::error("plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity names",y->to_string(),"ignoring");
+			logger::warning(3,"plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity names",y->to_string());
 		
 		if (y->unit() != Ys.front()->unit())
 			logger::error("plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity units",y->to_string(),"ignoring");

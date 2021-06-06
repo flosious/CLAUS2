@@ -81,10 +81,10 @@ bool measurements_::measurement_t::operator==(measurements_::measurement_t& obj)
 std::__cxx11::string measurements_::measurement_t::to_string(const std::__cxx11::string del) const
 {
 	stringstream ss;
-	/*if (use_sample)*/ ss << "sample: " << sample->to_string(del) << del;
-	/*if (use_repetition)*/ ss << "olcdb: " << olcdb << del;
-	/*if (use_repetition)*/ ss << "group: " << group << del;
-	/*if (use_repetition)*/ ss << "repetition: " << repetition ;
+	ss << "olcdb: " << olcdb;
+	ss << del << sample->to_string(del);
+	if (group!="") ss << del << "group: " << group;
+	if (repetition!="") ss << del << "repetition: " << repetition ;
 	return ss.str();
 }
 

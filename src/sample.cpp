@@ -44,39 +44,16 @@ const map<string,vector<string>>& sample_t::db_t::load_from_table()
 		logger::debug(9,"sample_t::db_t::load_from_table()","table_entries_s.size()>0");
 		return table_entries_s;
 	}
-// 	logger::debug(9,"sample_t::db_t::load_from_table()","1");
-// 	if (table_entries_s.size()==0 || table_entries_s.at("lot").size()==0)
-// 	{
-// 		logger::error("sample_t::db_t::load_from_table()","table has no entries",tablename,"returning default");
-// 		return table_entries_s;
-// 	}
-// 	if (!table_exists)
-// 	{
-// 		logger::error("sample_t::db_t::load_from_table()","tables does not exist",tablename,"returning default");
-// 		return table_entries_s;
-// 	}
-// 	map<string,vector<string>> matching_table_entries;
-	
-// 	logger::debug(9,"sample_t::db_t::load_from_table()","sample.lot",sample.lot);
-// 	logger::debug(9,"sample_t::db_t::load_from_table()","sample.wafer",tools::to_string(sample.wafer));
-// 	logger::debug(9,"sample_t::db_t::load_from_table()","sample.chip.x",tools::to_string(sample.chip.x));
-// 	logger::debug(9,"sample_t::db_t::load_from_table()","sample.chip.y",tools::to_string(sample.chip.y));
-// 	logger::debug(9,"sample_t::db_t::load_from_table()","sample.monitor",sample.monitor);
+
 	string sql1 = "SELECT * FROM " +tablename+ 	" WHERE " \
 			"lot='" + sample.lot + "' AND " \
 			"wafer=" +std::to_string(sample.wafer)+ " AND " \
 			"chip_x=" +std::to_string(sample.chip.x)+ " AND " \
 			"chip_y=" +std::to_string(sample.chip.y)+ " AND " \
 			"monitor='" + sample.monitor+"';";
-// 	logger::debug(9,"sample_t::db_t::load_from_table()","4");
+
 	logger::debug(11,"sample_t::db_t::load_from_table()","sql1=",sql1);
-// 	if (isotope.symbol=="")
-// 		sql1 += "monitor=" + sample.monitor+"';";
-// 	else
-// 	{
-// 		sql1 += "monitor=" + sample.monitor+" AND " \
-// 				"implanted_isotope=" + isotope.to_string() +	"';";
-// 	}
+
 	if (!sql_wrapper.execute_sql(sql1,database_t::callback_lines_map,&table_entries_s)) 
 		logger::error("sample_t::db_t::load_from_table()","could not load db_t table to local map","","returning empty");
 	logger::debug(9,"sample_t::db_t::load_from_table()","exiting");
@@ -107,11 +84,11 @@ sample_t::db_t::implant_t sample_t::db_t::implant(const isotope_t& isotope)
 // 	map<string,vector<string>> table_entries = load_from_table();
 	if (load_from_table().size()==0)
 	{
-		logger::error("sample_t::database::dose()","table_entries.size()==0","could not find sample " +sample.lot + "w"+ sample.wafer_string()+ " and isotope " +isotope.to_string()+  " in database table " +tablename,"returning empty");
+		logger::error("sample_t::db_t::implant()","table_entries.size()==0","could not find sample " +sample.lot + "w"+ sample.wafer_string()+ " and isotope " +isotope.to_string()+  " in database table " +tablename,"returning empty");
 		return  {};
 	}
-	if (load_from_table().size()>1)
-		logger::error("sample_t::database::dose()","table_entries.size()>1",sample.lot + "w"+ sample.wafer_string() + " " + isotope.to_string(),"returning empty");
+	if (load_from_table().at("dose").size()>1)
+		logger::error("sample_t::db_t::implant()","load_from_table().at('dose').size()>1",sample.lot + "_w"+ sample.wafer_string() + " " + isotope.to_string(),"returning empty");
 	
 // 	implant.dose = dose_t({tools::str::str_to_double(table_entries.at("dose").at(1))});
 	
@@ -206,6 +183,8 @@ bool sample_t::chip_t::operator>(const chip_t& obj) const
 
 const std::__cxx11::string sample_t::chip_t::to_string(const std::__cxx11::string del) const
 {
+	if (x<0 && y < 0)
+		return "";
 	stringstream out;
 	out << "X"<<x << "Y" << y;
 	return out.str();
@@ -280,8 +259,8 @@ const matrix_t& sample_t::matrix()
 {
 	if (matrix_p.is_set()) return matrix_p;
 	// do something to populate matrix_p --> look up Database
-// 	if (database().matrix().is_set())
-// 		matrix_p = database().matrix();
+	if (database().matrix().is_set())
+		matrix_p = database().matrix();
 // 		return matrix_t(database.matrix());
 	return matrix_p;
 }
@@ -331,17 +310,19 @@ bool sample_t::operator!=(sample_t& obj)
 std::__cxx11::string sample_t::to_string(const string del)
 {
 	stringstream ss;
-	ss << "lot: " << lot << ",";
-	ss << "lot_split: " << lot_split << ",";
-	ss << "wafer: " << wafer << ",";
-	ss << "chip: " << chip.to_string() << ",";
-	ss << "monitor: " << monitor << ",";
-	ss << "simple_name: " << simple_name << ",";
-	ss << "matrix: ";
+	ss << "lot: " << lot;
+	if (lot_split!="")
+		ss << lot_split;
+	ss << ", wafer: " << wafer;
+	if (chip.to_string()!="")
+		ss << ", chip: " << chip.to_string();
+	if (monitor!="")
+		ss << ", monitor: " << monitor;
 	if (matrix().is_set())
-		ss << matrix().to_string();
-	else 
-		ss << "uknown";
+		ss << ", matrix: " << matrix().to_string();
+	if (simple_name!="")
+		return simple_name;
+// 		ss << "simple_name: " << simple_name << ",";
 	return ss.str();
 }
 

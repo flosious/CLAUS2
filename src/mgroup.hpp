@@ -118,18 +118,12 @@ public:
 		class calc_t
 		{
 		public:
-			class SR_c
+			class jiang_t
 			{
-			private:
-				sims_t& MG_r;
+				const sims_t& MG;
+				
 			public:
-				///sputter_rate calculation methods
-				SR_c(sims_t& MG);
-				sims_t from_crater_depth();
-				sims_t from_implant_max();
-				sims_t polynom_interpolation_from_matrix(const int max_rank=2);
-				///tries to find the best calculation method under given boundary conditions
-				sims_t best();
+				jiang_t(const sims_t& MG);
 			};
 			class RSF_c
 			{
@@ -160,6 +154,9 @@ public:
 				sims_t from_median();
 				sims_t best();
 			};
+			map<matrix_t,RSF_t> matrix_to_RSFs(const cluster_t& cluster);
+			map<matrix_t, SR_t> matrix_to_SRs();
+			map<matrix_t, quantity_t> matrix_to_intensity_ratio();
 		};
 		
 		///check if all measurements belong in this group
@@ -173,31 +170,6 @@ public:
 		RSF_t RSF(cluster_t cluster, matrix_t matrix);
 		///listed RSFs to coressponding cluster and matrix
 		map<cluster_t,RSF_t> RSFs(matrix_t matrix);
-// 		calc::RSFs_t RSFs();
-		
-		///point by point calculation
-		
-		///point by point calculation
-// 		pbp_t& pbp();
-// 		calc::pbp_t pbp();
-		
-		// calc.jiang(measurements& belonging to one/this group) ctor
-		// calc.jiang.SR.median
-		// calc.jiang.concentration(isotope/cluster) --> isotope with set concentration, but for wich measurement?
-		// calc.jiang.concentrations() --> vector<isotope> with set concentrations
-		// calc.jiang.reference.intensity this is a function of intensities of matrix signals
-		// 
-		// calc_t calc(&MRs) as references OUTside of MG_t
-		// calc_t calc(&Ms) as references in MG_t
-		// calc.jiang.measurements[].isotopes[]
-		// calc.jiang.measurements[].elements[]
-		// calc.jiang.measurements[].clusters[]
-		// calc.jiang.RSFs
-		// calc.jiang.SRs
-		// calc.jiang.measurements[].clusters[].RSF
-		// calc.jiang.measurements[].clusters[].SF
-		// calc.jiang.measurements[].clusters[].isotopes[].concentration
-// 		SR_t SR();
 	};
 
 	class dsims_t: public sims_t

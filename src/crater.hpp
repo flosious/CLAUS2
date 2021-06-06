@@ -86,7 +86,9 @@ private:
 	quantity_t common_X_quantity(const vector<quantity_t>& X_quantities);
 	
 public:
+	const string to_string(const string del=", ") const;
 	crater_t();
+	crater_t(const vector<cluster_t>& clusters, const sputter_beam_t& sputter_beam);
 	sputter_beam_t sputter_beam;
 	sputter_depth_t sputter_depth;
 	sputter_time_t sputter_time;

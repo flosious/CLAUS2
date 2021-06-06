@@ -66,6 +66,13 @@ public:
 	class db_t
 	{
 	private:
+		const database_t& sql_wrapper;
+		static const string tablename;
+		///saved load_from_table entries
+		map<string,vector<string>> table_entries_s;
+		const map<string,vector<string>>& load_from_table();
+		const sample_t& sample;
+	public:
 		class implant_t
 		{
 		public:
@@ -75,14 +82,6 @@ public:
 			concentration_t concentration_maximum;
 			sputter_depth_t depth_at_concentration_maxium;
 		};
-		const database_t& sql_wrapper;
-// 		bool table_exists=false;
-		static const string tablename;
-		///saved load_from_table entries
-		map<string,vector<string>> table_entries_s;
-		const map<string,vector<string>>& load_from_table();
-		const sample_t& sample;
-	public:
 		static bool create_table(database_t& sql_wrapper);
 		db_t(const sample_t& sample, const database_t& sql_wrapper);
 		matrix_t matrix();

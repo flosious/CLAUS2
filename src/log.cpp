@@ -47,7 +47,7 @@ const string logger::message_t::to_string() const
 /*********************/
 
 //default 0 -> no record
-int logger::verbosity_level = 11;
+int logger::verbosity_level = 22;
 vector<logger::message_t> logger::messages;
 // bool logger::log_debug=true;
 
