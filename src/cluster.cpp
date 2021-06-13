@@ -52,117 +52,6 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 	return isotopes;
 }
 
-// cluster_t::cluster_t(string clustername) : isotopes(parse_clustername(clustername))
-// {
-// }
-
-// unsigned int cluster_t::equilibrium_index_pos(unsigned int start)
-// {
-// 	if (equilibrium_index_pos_s>=0)
-// 		return equilibrium_index_pos_s;
-// 	
-// 	/*copied from claus1*/
-// 	vector<double> Y;
-// 	
-// 	if (intensity.is_set())
-// 		Y = intensity.filter_gaussian(5,4).data; 
-// 	else if (concentration.is_set())
-// 		Y = concentration.filter_gaussian(5,4).data; 
-// 	else 
-// 	{
-// 		logger::error("cluster_t::equilibrium_index_pos()","neither intensity nor concentration in cluster set; this should never happen", to_string(),"returning 0");
-// 		return 0;
-// 	}
-// 	
-// 	/*remove first 5% of all data; this is dangerous and should be solved better*/
-// // 	if (measurement->settings.sputter_element() == "Cs" && Y.size()>20) 
-// // 		start = 20;
-// // 	else
-// // 		start = 1;
-// // 	equilibrium_starting_pos = start;
-// // 	cout << "Y.size(b4)=" << Y.size() << endl;
-// // 	Y.erase(Y.begin(),Y.begin()+start);
-// // 	cout << "Y.size(after)=" << Y.size() << endl;
-// 	/*****************************/
-// 			
-// 	double treshold = statistics::get_mad_from_Y(Y)/2;
-// 	double median = statistics::get_median_from_Y(Y);
-// 	set<int> extrema_idx;
-// 	vector<int> maxIdx, minIdx;
-// 		
-// // 	if (!statistics::get_extrema_indices(maxIdx,minIdx,Y,treshold))
-// // 		if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
-// // // 		else equilibrium_starting_pos = measurement->equilibrium_starting_pos();
-// // 		else equilibrium_starting_pos = 0;
-// // 	}
-// // 	//type C
-// // 	else if (minIdx.size()==0 && maxIdx.size()==1) // just the global maximum
-// // 	{
-// // // 		cout << name() << " type C2" << endl;
-// // 		if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
-// // // 		else equilibrium_starting_pos = measurement->equilibrium_starting_pos();
-// // 		else equilibrium_starting_pos = 0;
-// 	if (statistics::get_extrema_indices(maxIdx,minIdx,Y,treshold))
-// 	{
-// 		/*remove right sided*/
-// 		for (auto& m:maxIdx)
-// 			if (m>0.5*Y.size()) m=0;
-// 		for (auto& m:minIdx)
-// 			if (m>0.5*Y.size()) m=0;
-// 			
-// 		set<int> maxIdx_set (maxIdx.begin(),maxIdx.end());
-// 		set<int> minIdx_set (minIdx.begin(),minIdx.end());
-// 		
-// 		/*remove trivials*/
-// 		maxIdx_set.erase(0);
-// 		maxIdx_set.erase(1);
-// 		minIdx_set.erase(0);
-// 		minIdx_set.erase(1);
-// 		
-// // 		print("maxIdx_set: " + name());
-// // 		print(maxIdx_set);
-// // 		print("minIdx_set: " + name());
-// // 		print(minIdx_set);
-// 		
-// // 		//type E D
-// // 		if (minIdx_set.size()==0 && maxIdx_set.size()==0)
-// // 		{
-// // // 			cout << name() << " type E or D" << endl;
-// // 			if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,1);
-// // // 			else equilibrium_starting_pos = measurement->equilibrium_starting_pos();
-// // 			else equilibrium_starting_pos = 0;
-// // 		}
-// 		// type G H
-// 		if (minIdx_set.size()==0 && maxIdx_set.size()!=0 )
-// 		{
-// // 			if (is_reference()) equilibrium_starting_pos = statistics::get_index_for_next_value_within_treshold(Y,median-treshold/2,median+treshold/2,*maxIdx_set.begin());
-// // 			else equilibrium_starting_pos = 0;
-// // 			equilibrium_starting_pos=*maxIdx_set.begin(); 
-// // 			cout << name() << " type G or H" << endl;
-// 		}
-// 		//type A B F --> implant
-// 		else 
-// 		{
-// 			start=*minIdx_set.begin(); 
-// 			/* check total signal sum for miss interpretation */
-// 			double sum=0;
-// 			double sum_equilibrium=0;
-// 			for (int i=0;i<Y.size();i++)
-// 				sum+=Y[i];
-// 			for (int i=start;i<Y.size();i++)
-// 				sum_equilibrium+=Y[i];
-// 			if ((sum_equilibrium-(Y.size()-start)*Y.back())/(sum-Y.size()*Y.back())<0.7)
-// 				start=0;
-// // 			cout << name() << " type A or B or F" << endl;
-// 		}
-// 	}
-// // 	cout << measurement->lot() << "_" << measurement->wafer()  << "_" << name() <<" equilibrium_starting_pos = " << equilibrium_starting_pos << endl;
-// // 	result.equilibrium_starting_pos=equilibrium_starting_pos+start;
-// // 	reduce_quantities_by_equlibrium_starting_pos(result);
-// 	equilibrium_index_pos_s = start;
-// 	return equilibrium_index_pos_s;
-// }
-
 
 cluster_t::cluster_t(const vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s)
 {
@@ -186,42 +75,6 @@ const bool cluster_t::is_set() const
 	if (isotopes.size()>0) return true;
 	return false;
 }
-
-// concentration_t& cluster_t::concentration()
-// {
-// 	if (concentration_p.is_set())
-// 		return concentration_p;
-// 	if (SF.is_set() && intensity().is_set())
-// 		concentration_p = SF*intensity();
-// 	return concentration_p;
-// }
-// 
-// intensity_t& cluster_t::intensity()
-// {
-// 	if (intensity.is_set())
-// 		return intensity;
-// 	if (concentration_p.is_set() && SF.is_set())
-// 		intensity = concentration_p / SF;
-// 	return intensity;
-// }
-// 
-// sputter_depth_t& cluster_t::sputter_depth()
-// {
-// 	if (sputter_depth_p.is_set())
-// 		return sputter_depth_p;
-// // 	if (sputter_time.is_set() && SR.is_set())
-// // 		sputter_depth_p = SR*sputter_time;
-// 	return sputter_depth_p;
-// }
-// 
-// sputter_time_t& cluster_t::sputter_time
-// {
-// 	if (sputter_time_p.is_set())
-// 		return sputter_time_p;
-// // 	if (sputter_depth_p.is_set() && SR.is_set())
-// // 		sputter_time_p = sputter_depth_p / SR ;
-// 	return sputter_time_p;
-// }
 
 bool cluster_t::operator!=(const cluster_t& obj) const
 {
@@ -323,76 +176,29 @@ string cluster_t::name() const
 	return to_string("");
 }
 
-// cluster_t cluster_t::change_sputter_time_resolution(sputter_time_t sputter_time_res)
-// {
-// 	return change_sputter_time(sputter_time.resolution(sputter_time_res));
-// }
-// 
-// cluster_t cluster_t::change_sputter_depth_resolution(sputter_depth_t sputter_depth_res)
-// {
-// 	return change_sputter_depth(sputter_depth().resolution(sputter_depth_res));
-// }
 
-// cluster_t cluster_t::interpolate(sputter_time_t& new_sputter_time, sputter_time_t& old_sputter_time)
-// {
-// 	if (!sputter_time.is_set() && !old_sputter_time.is_set())
-// 	{
-// 		logger::error("cluster_t::change_sputter_time","!sputter_time.is_set() && !old_sputter_time.is_set()","","returning empty");
-// 		return {};
-// 	}
-// 	if (!new_sputter_time.is_set()) 
-// 	{
-// 		logger::error("cluster_t::change_sputter_time","!new_sputter_time.is_set()","","returning empty");
-// 		return {};
-// 	}
-// 	if (!old_sputter_time.is_set())
-// 		old_sputter_time = sputter_time.change_unit(new_sputter_time.unit()); 
-// 	if (old_sputter_time.unit() != new_sputter_time.unit())// same units?
-// 	{
-// 		logger::error("cluster_t::change_sputter_time","old_sputter_time.unit() != new_sputter_time.unit()","","returning empty");
-// 		return {};
-// 	}
-// 	//new data is not allowed to be larger compared to old data
-// 	if (new_sputter_time.max() > old_sputter_time.max())
-// 	{
-// 		logger::error("cluster_t::change_sputter_time","new_sputter_time.max() > old_sputter_time->max()","","returning empty");
-// 		return {};
-// 	}
-// 	if (new_sputter_time.min() < old_sputter_time.min())
-// 	{
-// 		logger::error("cluster_t::change_sputter_time","new_sputter_time.min() < old_sputter_time->min()","","returning empty");
-// 		return {};
-// 	}
-// 	
-// 	cluster_t new_cluster(isotopes);
-// 	map<double,double> XY_data;
-// 	new_cluster.sputter_time_p = new_sputter_time;
-// 	if (sputter_depth().is_set())
-// 	{
-// 		new_cluster.sputter_depth() = sputter_depth().interp(old_sputter_time,new_sputter_time);
-// 	}
-// 	if (concentration().is_set())
-// 	{
-// 		new_cluster.concentration() = concentration().interp(old_sputter_time,new_sputter_time);
-// 	}
-// 	if (intensity().is_set())
-// 	{
-// 		new_cluster.intensity() = intensity().interp(old_sputter_time,new_sputter_time);
-// 	}
-// // 	if (SR.is_set() && SR.data.size()>1)
-// // 	{
-// // 		new_cluster.SR = SR.interp(old_sputter_time,new_sputter_time);
-// // 	}
-// 	if (SF.is_set() && SF.data.size()>1)
-// 	{
-// 		new_cluster.SF = SF.interp(old_sputter_time,new_sputter_time);
-// 	}
-// 	if (RSF.is_set() && RSF.data.size()>1)
-// 	{
-// 		new_cluster.RSF = RSF.interp(old_sputter_time,new_sputter_time);
-// 	}
-// 	return new_cluster;
-// }
+isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_isotopes) const
+{
+	if (isotopes.size()==1)
+		return isotopes.at(0);
+	set<isotope_t> isos;
+	for (auto& i:isotopes)
+	{
+		if (find(reference_isotopes.begin(),reference_isotopes.end(),i)==reference_isotopes.end())
+			isos.insert(i);
+	}
+	if (isos.size()==0)
+	{
+		logger::error("cluster_t::corresponding_isotope()","complex reference clusters are not supported","","returning empty");
+		return {};
+	}
+	if (isos.size()>1)
+	{
+		logger::error("cluster_t::corresponding_isotope()","detected more than 1 possible isotope in cluster; unknown matrix isotopes? check database",to_string(),"returning empty");
+		return {};
+	}
+	return *isos.begin();
+}
 
 cluster_t cluster_t::interpolate(quantity_t& new_Q, quantity_t& old_Q) const
 {

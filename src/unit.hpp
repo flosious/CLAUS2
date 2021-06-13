@@ -176,6 +176,7 @@ namespace units
 		constexpr unit_t counts(atoms);
 		constexpr unit_t atom_percent({0,0,0,0,1,0,0,true},0.01);
 		constexpr unit_t bar({-1,1,-2,0,0,0,0},1);
+		constexpr unit_t min({0,0,1,0,0,0,0},60);
 	}
 }
 

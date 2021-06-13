@@ -56,34 +56,25 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 		for (auto& cR : MG.reference_clusters())
 // 			cout << "common ref_clusters: " << cR.to_string() << endl;
 		for (auto& M:MG.measurements_p)
-		{
-			plot_t plotter;
-// 			plotter.Y3.log10_scale=false;
-			for (auto& C : M.clusters)
-			{
-// 				if (C.to_string()!="16O") continue;
-				plotter.Y1.add_curve(M.crater.sputter_time,C.intensity,C.to_string());
-// 				plotter.Y2.add_curve(M.crater.sputter_time,C.intensity,C.to_string());
-// 				plotter.Y3.add_curve(M.crater.sputter_time,C.intensity,C.to_string());
-// 				cout << C.to_string() << " size=" << C.intensity.data.size()  << endl;
-// 				measurements_::sims_t::calc_t::implant_t::minimum_starting_position(C.intensity);
-			}
-// 			plotter.lines.push_back({1000,1E2,1000,1E5,"bA"});
-// 			plotter.to_screen(M.to_string(),0);
+		{			
+// 			for (auto& d : M.calc().SR().from_implant_max().calc().SD().from_SR().crater.SR.data)
+// 				cout << d << endl;
+// 			cout << M.calc().SR().from_implant_max().crater.SR.to_string() << endl;
 			
-// 			M.plot_now(0);
+			M.calc().SR().from_implant_max().calc().SD().from_SR().calc().SF().from_db_dose().calc().concentration().from_SF().plot_now(2);
 		}
 	}
-	
-	for (auto& s:samples_list)
-	{
-		cout << s.database().matrix().to_string() << endl;
-		cout << s.matrix().to_string() << endl;
+// 	sample_t::db_t::migrate_claus1_db(sql_wrapper, "build/migrate.database.sqlite3");
+// 	for (auto& s:samples_list)
+// 	{
+// 		cout << s.database().matrix().to_string() << endl;
+// 		cout << s.matrix().to_string() << endl;
+// 		cout << s.implant({"12C"}).dose.to_string() << endl ;
 // 		sample_t::db_t::implant_t I=s.database().implant({"12C"});
 // 		cout << I.dose.to_string() << endl;
 // 		cout << I.concentration_maximum.to_string() << endl;
 // 		cout << I.depth_at_concentration_maxium.to_string() << endl;
-	}
+// 	}
 	
 	if (!logger::instant_print_messages)
 		logger::to_screen();

@@ -198,7 +198,7 @@ matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
 		}
 	}
 	
-// 	abs_to_relative();
+	abs_to_relative();
 	
 	/*sum of all isos subtance_amounts may be high*/
 // 	double sum=0, sum1=0;
@@ -220,8 +220,8 @@ void matrix_t::abs_to_relative()
 		iso.substance_amount = substance_amount_t( quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent));
 // 		iso.substance_amount = substance_amount_t( quantity_t(iso.substance_amount/sum*100));
 	
-	for (auto& iso : isotopes)
-		cout << iso.substance_amount.to_string() << endl;
+// 	for (auto& iso : isotopes)
+// 		cout << iso.substance_amount.to_string() << endl;
 }
 
 

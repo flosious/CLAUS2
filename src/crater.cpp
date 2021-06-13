@@ -287,6 +287,16 @@ total_sputter_depth_t crater_t::total_sputter_depth()
 	return {};
 }
 
+const quantity_t * crater_t::X() const
+{
+	const quantity_t* X;
+	if (sputter_depth.is_set())
+		return &sputter_depth;
+	if (sputter_time.is_set())
+		return &sputter_time;
+	return nullptr;
+}
+
 
 // sputter_time_t crater_t::common_sputter_time(vector<cluster_t>& clusters)
 quantity_t crater_t::common_X_quantity(const vector<quantity_t>& X_quantities)

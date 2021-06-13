@@ -73,18 +73,23 @@ using namespace std;
 ///this is a warpper for sqlite3
 class database_t {
 	friend class config_t;
-	friend class processor;
+// 	friend class processor;
 private:
-	static string file_location;
+	
     sqlite3* sql_handle=nullptr;
     bool close();
 	/// returns -1 if error, or the id of the last entry in the table
     int get_last_autoID_from_table(string table);
 	///just allow the processor to open and close
-	database_t(sqlite3* sql_handle);
+	
+	
 	///just allow the processor to open and close
-	~database_t();
+	
 public:
+	const string file_location = "build/database.sqlite3";
+	database_t(sqlite3* sql_handle);
+	database_t(sqlite3* sql_handle, string filename);
+	~database_t();
 	bool open();
 	bool execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr) const;
 	

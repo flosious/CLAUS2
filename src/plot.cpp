@@ -20,26 +20,6 @@
 #include <mgl2/mgl.h>
 #include <mgl2/fltk.h>
 
-// plot_t::plot_t(const quantity_t& X, const quantity_t& Y, std::__cxx11::string legend) : X(&X),Y1({std::make_pair(&Y,legend)})
-// {
-// }
-// 
-// plot_t::plot_t(const quantity_t& X, 
-// 			   const quantity_t& Y1, std::__cxx11::string Y1_legend, 
-// 			   const quantity_t& Y2, std::__cxx11::string Y2_legend)  : 
-// 			   X(&X),
-// 			   Y1({std::make_pair(&Y1,Y1_legend)}),
-// 			   Y2({std::make_pair(&Y2,Y2_legend)}) 
-// {
-// }
-// 
-// plot_t::plot_t(const quantity_t& X, 
-// 			   vector<pair<const quantity_t *, std::__cxx11::string> > Y1_quantities_to_legends, 
-// 			   vector<pair<const quantity_t *, std::__cxx11::string> > Y2_quantities_to_legends) :
-// 			   X(&X), Y1(Y1_quantities_to_legends), Y2(Y2_quantities_to_legends)
-// {
-// }
-
 plot_t::plot_t(bool Y1_log10, bool Y2_log10, bool Y3_log10) 
 {
 	Y1.log10_scale= Y1_log10;
@@ -84,6 +64,7 @@ int plot_t::Draw(mglGraph* gr)
 	stringstream x_l;
 	x_l << Xs.front()->name() << " [" << Xs.front()->unit().to_string() << "]";
 	tools::str::filter_t str_f(x_l.str());
+	//will escape special characters
 	gr->Label('x',str_f.escape_special_characters().c_str(),0);
 	/********/
 	
@@ -111,8 +92,7 @@ int plot_t::Draw(mglGraph* gr)
 		else Y3.draw(gr, X_range.stop);
 	}
 	
-	for (auto& line : lines)
-		gr->Line( mglPoint(line.x_start,line.y_start), mglPoint(line.x_stop,line.y_stop),line.color.c_str());
+	
 	
 // 	gr->Grid();
 // 	gr->Box();
@@ -122,49 +102,14 @@ int plot_t::Draw(mglGraph* gr)
 	return 0;
 }
 
-// bool plot_t::Draw_axis(mglGraph* gr, int axis_number, bool logarithmic_scale)
-// {
-// 	vector<pair<const quantity_t*,string>>* Y;
-// 	if (axis_number==1)
-// 		Y = &Y1;
-// 	else if (axis_number==2)
-// 		Y = &Y2;
-// 	else if (axis_number==3)
-// 		Y = &Y3;
-// 	else
-// 	{
-// 		logger::error("plot_t::Draw_axis","axis_number unknown ",tools::to_string(axis_number),"returning false");
-// 		return false;
-// 	}
-// 	
-// 	axis_range_t Y_range(*Y);
-// 	if (logarithmic_scale) 
-// 		Y_range.log10();
-// 	for (auto& y : *Y)
-// 	{
-// 		mglData y_data(X->data.size());
-// 		y_data.Set(y.first->data);
-// 		gr->SetRange('y',Y_range.start,Y_range.stop);
-// 		if (logarithmic_scale) gr->SetFunc("","lg(y)");
-// 		gr->SetOrigin(Y_range.stop,0);
-// 		gr->Axis("!Ey");
-// 		stringstream y_l;
-// 		y_l << "#B{" << y2.first->name() << " [" << y2.first->unit().to_string() << "]}";
-// 		gr->Label('y',y_l.str().c_str(),0);
-// 		string l = "legend '"+ y2.second +" "+y2.first->name()+"'";
-// 		gr->Plot(x,y,"B",l.c_str());
-// 	}
-// 	
-// }
-
-void plot_t::add_line(double x_start, double y_start, double x_stop, double y_stop, std::__cxx11::string color)
+void plot_t::axis_t::add_line(double x_start, double y_start, double x_stop, double y_stop, std::__cxx11::string color, string text)
 {
-	lines.push_back({x_start,y_start,x_stop,y_stop,color});
+	lines.push_back({x_start,y_start,x_stop,y_stop,color,text});
 }
 
-void plot_t::add_arrow(double x_start, double y_start, double x_stop, double y_stop, std::__cxx11::string color)
+void plot_t::axis_t::add_arrow(double x_start, double y_start, double x_stop, double y_stop, std::__cxx11::string color, string text)
 {
-	lines.push_back({x_start,y_start,x_stop,y_stop,color});
+	lines.push_back({x_start,y_start,x_stop,y_stop,color,text});
 }
 
 
@@ -200,44 +145,12 @@ void plot_t::to_file(const std::__cxx11::string filename)
 
 
 
-// plot_t::axis_range_t::axis_range_t(vector<pair<const quantity_t *, std::__cxx11::string> > Ys)
-// {
-// 	double temp=-1;
-// 	for (auto& y : Ys)
-// 	{
-// 		temp = statistics::get_max_from_Y(y.first->data);
-// 		if (stop==-1 || temp > stop)
-// 			stop = temp;
-// 		temp = statistics::get_min_from_Y(y.first->data);
-// 		if (start==-1 || temp < start)
-// 			start = temp;
-// 		
-// 		if (y.first->name() != Ys.front().first->name())
-// 			logger::error("plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity names",y.first->to_string() + " " + y.second,"ignoring");
-// 		
-// 		if (y.first->unit() != Ys.front().first->unit())
-// 			logger::error("plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity units",y.first->to_string()+" "+y.second,"ignoring");
-// 	}
-// }
-
-
-/*
-void plot_t::axis_range_t::log10()
-{
-	if (start<0) start=1;
-	if (stop<0) stop=1;
-	start =  pow(10,floor(std::log10(start)));
-	stop =  pow(10,ceil(std::log10(stop)));
-}*/
-
-
-
 /************************************************************************************/
 /*******************       plot_t::line_t              *****************************/
 /************************************************************************************/
 
-plot_t::line_t::line_t(double x_start, double y_star, double x_stop, double y_stop, std::__cxx11::string color) :
-						x_start(x_start), y_start(y_star),x_stop(x_stop),y_stop(y_stop), color(color)
+plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, double y_stop, std::__cxx11::string color, string text) :
+						x_start(x_start), y_start(y_star),x_stop(x_stop),y_stop(y_stop), color(color), text(text)
 {
 }
 
@@ -297,22 +210,12 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		logger::error("plot_t::axis_t::draw()","check returned false","","aboarting plot for this axis");
 		return;
 	}
-	
-// 	vector<const quantity_t*> Ys;
-// 	for (auto& c: curves)
-// 		Ys.push_back(c.Y);
-// 	range_t y_range(Ys);
-// 	if (log10_scale) y_range.log10();
 	gr->SetRange('y',range().start,range().stop);
-	
-// 	if (log10_scale) gr->SetOrigin(x_origin,1);
-// 	else gr->SetOrigin(x_origin);
 	gr->SetOrigin(x_origin,-1);
 	if (log10_scale) gr->SetFunc("","lg(y)");
 	if (log10_scale) gr->Axis("!Ey");
 	else gr->Axis("y",color.c_str());
 	
-// 	gr->Axis("y");
 	stringstream y_l;
 	y_l << curves.front().Y.name() << " [" << curves.front().Y.unit().to_string() << "]";
 	tools::str::filter_t y_f(y_l.str());
@@ -320,24 +223,10 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	
 	for (auto& c: curves)
 	{
-// 		gr->SetRange('x',x_start(),x_stop());
 		mglData x(c.X.data);
-// 		range_t y_range(c.Y);
-// 		if (log10_scale) y_range.log10();
 		mglData y(c.Y.data);
-// 		gr->SetRange('y',y_range.start,y_range.stop);
-// 		if (log10_scale) gr->SetFunc("","lg(y)");
-// 		gr->Axis("!Ey");
-		
-// 		string l = "legend '"+ c.legende +" "+ c.Y->name()+"'";
 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
-// 		gr->SetFontSize(2);
-		
 		gr->Plot(x,y,color.c_str(),l_f.escape_special_characters().c_str());
-		
-// 		if (log10_scale) gr->Puts(mglPoint(*c.X->max().data.begin()/6,*c.Y->median().data.begin()+1),c.legende.c_str(),"m");
-// 		else gr->Puts(mglPoint(*c.X->max().data.begin()/6,*c.Y->median().data.begin()),c.legende.c_str(),"c");
-		
 		if (c.Y.data.size()<11) continue;
 		int y_offset=0;
 		if (log10_scale)
@@ -345,32 +234,84 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		gr->SetFontSize(2);
 		gr->Puts(mglPoint(c.X.data.at(c.Y.data.size()*0.05),c.Y.data.at(c.Y.data.size()*0.05)+y_offset),c.legende.c_str(),"m");
 		gr->SetFontSize(3); // default
-		
 	}
+	for (auto& line : lines)
+	{
+		gr->Line( mglPoint(line.x_start,line.y_start), mglPoint(line.x_stop,line.y_stop),line.color.c_str());
+		if (line.text!="") // add text box below start
+		{
+			gr->SetFontSize(2);
+			gr->Puts(mglPoint(range().start-10,line.y_start), mglPoint(range().stop,line.y_start), line.text.c_str());
+// 			gr->Puts(mglPoint(line.x_start,line.y_start), mglPoint(line.x_stop,line.y_stop), line.text.c_str());
+			gr->SetFontSize(3);
+		}
+	}
+// 	gr->SetSize(1000,1000);
 	logger::debug(15,"plot_t::axis_t::draw()","exiting");
 }
 
 plot_t::axis_t::range_t plot_t::axis_t::range()
 {
+	if (start!=stop)
+	{
+		range_t R(start,stop);
+		if (log10_scale)
+			return R.log10();
+		return R;
+	}
+	
 	vector<const quantity_t*> Ys;
 	for (auto& c: curves)
 		Ys.push_back(&c.Y);
 	range_t range(Ys);
-	if (log10_scale) range.log10();
+	if (log10_scale) 
+	{
+		return range.log10();
+	}
 	return range;
+}
+
+void plot_t::axis_t::range(double start_s, double stop_s, bool log10_scale_s)
+{
+	start = start_s;
+	stop = stop_s;
+	log10_scale = log10_scale_s;
 }
 
 
 /***********************************************/
 /*******    plot_t::axis_t::range_t    *********/
 /***********************************************/
-void plot_t::axis_t::range_t::log10()
+
+std::__cxx11::string plot_t::axis_t::range_t::to_string() const
 {
-	if (start<0) start=1;
-	if (stop<0) stop=1;
-	start =  pow(10,floor(std::log10(start)));
-	stop =  pow(10,ceil(std::log10(stop)));
+	stringstream out;
+	out << "start= " << start << "\tstop= " << stop << endl;
+	return out.str();
 }
+
+
+plot_t::axis_t::range_t plot_t::axis_t::range_t::log10() const
+{
+	double log_start, log_stop;
+	if (start<0) 
+		log_start = 1;
+	else 
+		log_start =  pow(10,floor(std::log10(start)));
+	if (stop<0)
+	{
+		logger::error("plot_t::axis_t::range_t::log10()","stop range below 0",tools::to_string(stop),"using 1");
+		log_stop = 1;
+	}
+	else
+		log_stop =  pow(10,ceil(std::log10(stop)));
+	return range_t(log_start,log_stop);
+}
+
+plot_t::axis_t::range_t::range_t(double start, double stop) : start(start), stop(stop)
+{
+}
+
 
 plot_t::axis_t::range_t::range_t(const quantity_t* Ys)
 {

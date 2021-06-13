@@ -29,32 +29,32 @@ vector<measurements_::sims_t *> mgroups_::sims_t::measurements()
 	return {};
 }
 
-vector<cluster_t> mgroups_::sims_t::reference_clusters()
-{
-	
-	set<cluster_t> all_ref_clusters;
-	
-	for (auto& M : measurements())
-	{
-		for (auto& ref_c : M->reference_clusters())
-			all_ref_clusters.insert(ref_c->isotopes);
-	}
-
-	/*intersection of all reference clusters over all clusters in each measurement*/
-	for (auto& M : measurements())
-	{
-		for (auto ref_c=all_ref_clusters.begin();ref_c!=all_ref_clusters.end();ref_c++)
-			if(find(M->clusters.begin(),M->clusters.end(),*ref_c)==M->clusters.end())
-			{
-				all_ref_clusters.erase(ref_c);
-				ref_c--;
-// 				logger::error("mgroups_::sims_t::reference_clusters(): missing cluster in measurements", ref_c->name());
-				logger::error("mgroups_::sims_t::reference_clusters()","missing cluster",ref_c->to_string() + " in " + M->to_string(),"keep calculating, but results might be wrong");
-			}
-	}
-	
-	return {all_ref_clusters.begin(),all_ref_clusters.end()};
-}
+// vector<cluster_t> mgroups_::sims_t::reference_clusters()
+// {
+// 	
+// 	set<cluster_t> all_ref_clusters;
+// 	
+// 	for (auto& M : measurements())
+// 	{
+// 		for (auto& ref_c : M->reference_clusters())
+// 			all_ref_clusters.insert(ref_c->isotopes);
+// 	}
+// 
+// 	/*intersection of all reference clusters over all clusters in each measurement*/
+// 	for (auto& M : measurements())
+// 	{
+// 		for (auto ref_c=all_ref_clusters.begin();ref_c!=all_ref_clusters.end();ref_c++)
+// 			if(find(M->clusters.begin(),M->clusters.end(),*ref_c)==M->clusters.end())
+// 			{
+// 				all_ref_clusters.erase(ref_c);
+// 				ref_c--;
+// // 				logger::error("mgroups_::sims_t::reference_clusters(): missing cluster in measurements", ref_c->name());
+// 				logger::error("mgroups_::sims_t::reference_clusters()","missing cluster",ref_c->to_string() + " in " + M->to_string(),"keep calculating, but results might be wrong");
+// 			}
+// 	}
+// 	
+// 	return {all_ref_clusters.begin(),all_ref_clusters.end()};
+// }
 
 void mgroups_::sims_t::check()
 {

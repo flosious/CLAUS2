@@ -58,7 +58,7 @@ public:
 			  concentration_t concentration={});
 	cluster_t();
 	cluster_t(const vector<isotope_t>& isotopes_s);
-
+	isotope_t corresponding_isotope(const vector<isotope_t> reference_isotopes) const;
 	quantity_t mass();
 	quantity_t abundance();
 	string name() const;
@@ -70,6 +70,7 @@ public:
 	sputter_time_t sputter_time;
 	sputter_depth_t sputter_depth;
 	SF_t SF;
+	RSF_t RSF;
 	///cahnges resolution of all
 	cluster_t interpolate(quantity_t& new_Q, quantity_t& old_Q) const;
 	cluster_t filter_impulse(int window_size=0, float factor=5);

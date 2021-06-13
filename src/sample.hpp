@@ -25,6 +25,7 @@
 #include <string>
 #include <list>
 #include <set>
+#include <map>
 
 #include "element.hpp"
 #include "matrix.hpp"
@@ -59,10 +60,20 @@ private:
 	const database_t* sql_wrapper=nullptr;
 	///all samples from all loaded files
 // 	static vector<sample_t> samples_list_p;
+	
+	class implant_s
+	{
+	public:
+		dose_t dose;
+		concentration_t concentration_maximum;
+		sputter_depth_t depth_at_concentration_maxium;
+		implant_s(dose_t dose={}, concentration_t concentration_maximum={}, sputter_depth_t depth_at_concentration_maxium={});
+	};
+	map<const isotope_t,const implant_s> isos_to_implants;
 protected:
 
 public:
-	///just for implants at the moment
+	
 	class db_t
 	{
 	private:
@@ -73,19 +84,23 @@ public:
 		const map<string,vector<string>>& load_from_table();
 		const sample_t& sample;
 	public:
-		class implant_t
+		bool insert(const implant_s implant, const string comment="");
+		/*class implant_table_t
 		{
+		private:
+			const db_t& db;
+			static const string name;
+			bool create();
 		public:
-			implant_t();
-			implant_t(const isotope_t& isotope, const map<string,vector<string>>& table_entries_s);
-			dose_t dose;
-			concentration_t concentration_maximum;
-			sputter_depth_t depth_at_concentration_maxium;
+			implant_table_t(const db_t& db);
 		};
+		implant_table_t implants*/;
+		///load entries from old db into this(new)
+		static bool migrate_claus1_db(database_t& sql_wrapper, const string filename = "migrate.database.sqlite3");
 		static bool create_table(database_t& sql_wrapper);
 		db_t(const sample_t& sample, const database_t& sql_wrapper);
 		matrix_t matrix();
-		implant_t implant(const isotope_t& isotope);
+		implant_s implant(const isotope_t& isotope);
 	};
 	class chip_t
 	{
@@ -101,17 +116,18 @@ public:
 		void to_screen(string prefix="");
 		const string to_string(const string del=", ") const;
 	};
-	
 // 	set<measurements::dsims_t*> dsims;
 // 	set<measurements::tofsims_t*> tofsims;
 // 	set<measurements::profiler_t*> profiler;
 	db_t database() const;
+	const implant_s& implant(const isotope_t& isotope);
 	
 	sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f, database_t& sql_wrapper);
 	sample_t(files_::file_t::name_t& fn,database_t& sql_wrapper);
 // 	sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix);
 
 	string to_string(const string del=", ");
+	string to_name(const string del=", ") const;
 	chip_t chip;
 	int wafer;
 	string lot;

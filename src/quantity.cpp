@@ -3,6 +3,15 @@
 
 
 /*******************************/
+
+quantity_t::quantity_t(const quantity_t& quant_s, double data) : quantity_t(quant_s,vector<double>{data})
+{
+}
+
+quantity_t::quantity_t(const quantity_t& quant_s, vector<double> data) : name_p(quant_s.name()),unit_p(quant_s.unit()),data(data)
+{
+}
+
 quantity_t::quantity_t(std::__cxx11::string name_s, vector<double> data_s, unit_t unit_s)
 {
 	name_p = name_s;
@@ -43,6 +52,8 @@ quantity_t::quantity_t(double data_s, unit_t unit_s) : unit_p(unit_s), data(data
 
 quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) const
 {
+	if (!is_set())
+		return {};
 	if (!old_X.is_set() || !new_X.is_set() || !is_set()) 
 	{
 		logger::error("quantity_t::interp","!old_X.is_set() || !new_X.is_set() || !is_set()","","returning empty");
@@ -72,6 +83,8 @@ quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) 
 
 quantity_t quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade) const
 {
+	if (!is_set())
+		return {};
 	if (!x_data.is_set()) return quantity_t();
 	if (!is_set()) return quantity_t();
 	if (polynom_grade==-1) polynom_grade=17; // seems to be good for implant profiles
@@ -177,40 +190,39 @@ quantity_t quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_
 	return area;
 }
 
-quantity_t quantity_t::max_at_x(quantity_t& X) const
+quantity_t quantity_t::max_at_x(const quantity_t& X) const
 {
+	if (data.size()!=X.data.size())
+		return {};
+	if (data.size()==0)
+		return {};
+// 	stringstream n;
+// 	n << name()  << "(" << X.name() << ")at_max(" << name() << ")";
+// 	map<double,double> XY_data;
+// 	tools::vec::combine_vecs_to_map(&X.data,&data,&XY_data);
+// 	vector<double> X_data,Y_data;
+// 	tools::vec::split_map_to_vecs(XY_data,&X_data,&Y_data);
 	
-// 	x_at_max_p.dimension = X.dimension;
-// 	x_at_max_p.unit = X.unit;
-	stringstream n;
-	n << name()  << "(" << X.name() << ")at_max(" << name() << ")";
-// 	x_at_max_p.data.resize(1);
-// 	if (x_at_max_s.is_set() && x_at_max_s)
-	map<double,double> XY_data;
-	tools::vec::combine_vecs_to_map(&X.data,&data,&XY_data);
-	vector<double> X_data,Y_data;
-	tools::vec::split_map_to_vecs(XY_data,&X_data,&Y_data);
-	
-	if (X_data.size()==0) return {};
-	int vec_pos=statistics::get_max_index_from_Y(Y_data);
-// 	x_at_max_p.data[0] = X_data[vec_pos];
-	quantity_t x_at_max_p(n.str(),{X_data[vec_pos]},unit());
+// 	if (X_data.size()==0) return {};
+	int vec_pos=statistics::get_max_index_from_Y(data);
+	quantity_t x_at_max_p = X;
+	x_at_max_p.data = {X.data.at(vec_pos)};
 	return x_at_max_p;
 }
 
 /// TESTEN!!!
-quantity_t quantity_t::max_at_x(quantity_t& X, double lower_X_limit, double upper_X_limit) const
-{
-	for(int x=0;x<X.data.size();x++)
-	{
-		if (x<lower_X_limit || x>upper_X_limit) 
-		{
-			X.data.erase(X.data.begin()+x);
-			x--;
-		}
-	}
-	return max_at_x(X);
-}
+// quantity_t quantity_t::max_at_x(const quantity_t& X, double lower_X_limit, double upper_X_limit) const
+// {
+// 	for(int x=0;x<X.data.size();x++)
+// 	{
+// 		if (x<lower_X_limit || x>upper_X_limit) 
+// 		{
+// 			X.data.erase(X.data.begin()+x);
+// 			x--;
+// 		}
+// 	}
+// 	return max_at_x(X);
+// }
 
 quantity_t quantity_t::min_at_x(quantity_t& X, double lower_X_limit, double upper_X_limit) const
 {
@@ -244,6 +256,8 @@ quantity_t quantity_t::median() const
 
 quantity_t quantity_t::quantile(double percentile) const
 {
+	if (!is_set())
+		return {};
 	if (percentile>1 || percentile<0) percentile=0.75;
 	stringstream n;
 	n << "percentile" << percentile << "(" << name() << ")";
@@ -253,6 +267,8 @@ quantity_t quantity_t::quantile(double percentile) const
 
 quantity_t quantity_t::geo_mean() const
 {
+	if (!is_set())
+		return {};
 	stringstream n;
 	n << "geo_mean(" << name() << ")";
 	quantity_t mean(n.str(),unit());
@@ -266,6 +282,8 @@ quantity_t quantity_t::geo_mean() const
 
 quantity_t quantity_t::mean() const
 {
+	if (!is_set())
+		return {};
 	stringstream n;
 	n << "mean(" << name() << ")";
 	quantity_t mean(n.str(),{statistics::get_mean_from_Y(data)},unit());
@@ -274,6 +292,8 @@ quantity_t quantity_t::mean() const
 
 quantity_t quantity_t::trimmed_mean(float alpha) const
 {
+	if (!is_set())
+		return {};
 	stringstream n;
 	n << "tr" << alpha << "_mean(" << name() << ")";
 	quantity_t tr_mean(n.str(),{statistics::get_trimmed_mean_from_Y(data,alpha)},unit());
@@ -282,6 +302,8 @@ quantity_t quantity_t::trimmed_mean(float alpha) const
 
 quantity_t quantity_t::gastwirth() const
 {
+	if (!is_set())
+		return {};
 	stringstream n;
 	n << "gastwirth(" << name() << ")";
 	quantity_t gastw(n.str(),{statistics::statistics::get_gastwirth_estimator_from_Y(data)},unit());
@@ -290,14 +312,28 @@ quantity_t quantity_t::gastwirth() const
 
 quantity_t quantity_t::mad() const
 {
+	if (!is_set())
+		return {};
 	stringstream n;
 	n << "mad(" << name() << ")";
 	quantity_t mad(n.str(),{statistics::statistics::get_mad_from_Y(data)},unit());
 	return mad;
 }
 
+quantity_t quantity_t::back() const
+{
+	return {name(),{data.back()},unit()};
+}
+
+quantity_t quantity_t::front() const
+{
+	return {name(),{data.front()},unit()};
+}
+
 quantity_t quantity_t::moving_window_mad(int window_size) const
 {
+	if (!is_set())
+		return {};
 	if (window_size==0) window_size = 0.05*data.size();
 	if (window_size==0) return quantity_t();
 
@@ -310,6 +346,8 @@ quantity_t quantity_t::moving_window_mad(int window_size) const
 
 quantity_t quantity_t::moving_window_mean(int window_size) const
 {
+	if (!is_set())
+		return {};
 	if (window_size==0) window_size = 0.05*data.size();
 	if (window_size==0) return quantity_t();
 
@@ -321,6 +359,8 @@ quantity_t quantity_t::moving_window_mean(int window_size) const
 
 quantity_t quantity_t::moving_window_median(int window_size) const
 {
+	if (!is_set())
+		return {};
 	if (window_size==0) window_size = 0.05*data.size();
 	if (window_size==0) return quantity_t();
 
@@ -332,6 +372,8 @@ quantity_t quantity_t::moving_window_median(int window_size) const
 
 quantity_t quantity_t::moving_window_sd(int window_size) const
 {
+	if (!is_set())
+		return {};
 	if (window_size==0) window_size = 0.05*data.size();
 	if (window_size==0) return quantity_t();
 
@@ -343,6 +385,8 @@ quantity_t quantity_t::moving_window_sd(int window_size) const
 
 quantity_t quantity_t::sd() const
 {
+	if (!is_set())
+		return {};
 	stringstream n;
 	n << "sd(" << name() << ")";
 	quantity_t sd(n.str(),{statistics::statistics::get_sd_from_Y(data)},unit());
@@ -382,6 +426,8 @@ bool quantity_t::is_set() const
 
 quantity_t quantity_t::filter_impulse(int window_size, float factor) const
 {
+	if (!is_set())
+		return {};
 	if (data.size()<window_size)  return *this;
 	if (window_size==0) window_size=0.05*data.size();
 	if (window_size==0) window_size=3;
@@ -394,6 +440,8 @@ quantity_t quantity_t::filter_impulse(int window_size, float factor) const
 
 quantity_t quantity_t::filter_gaussian(int window_size, double alpha) const
 {
+	if (!is_set())
+		return {};
 	if (data.size()<window_size)  return *this;
 	if (window_size==0) window_size=0.05*data.size();
 	stringstream n;
@@ -405,6 +453,8 @@ quantity_t quantity_t::filter_gaussian(int window_size, double alpha) const
 
 quantity_t quantity_t::filter_recursive_median(int window_size) const
 {
+	if (!is_set())
+		return {};
 	if (data.size()<window_size)  return *this;
 	if (window_size==0) window_size=0.05*data.size();
 	stringstream n;
@@ -466,10 +516,12 @@ quantity_t quantity_t::resolution(double new_res) const
 const std::__cxx11::string quantity_t::to_string() const
 {
 	ostringstream out;
-	if (data.size()!=1)
+	if (data.size()>1)
 		out <<  name() << " = " <<"<" << data.size() << ">" << " [" << unit().to_string() << "]";
-	else
+	else if (data.size()==1)
 		out <<  name() << " = " << data[0] << " [" << unit().to_string() << "]";
+	else
+		out <<  name() << " = " <<"<0>" << " []";
 	return out.str();
 }
 
@@ -549,7 +601,8 @@ quantity_t quantity_t::remove_data_by_index(unsigned int start, unsigned int sto
 		return {};
 	}
 	quantity_t copy = *this;
-	copy.data.erase(data.begin()+start,data.begin()+stop);
+
+	copy.data.erase(copy.data.begin()+start,copy.data.begin()+stop);
 	return copy;
 }
 
@@ -622,7 +675,7 @@ void quantity_t::operator<<(quantity_t obj)
 	if (!obj.is_set()) return;
 	if (!is_set())
 	{
-		*this = obj;
+// 		*this = obj;
 		return;
 	}
 	quantity_t adder = obj.change_unit(unit());

@@ -64,14 +64,17 @@ const map<std::string, unit_t> unit_t::symbol_to_unit
 	/*atoms*/
 	{"at",units::derived::atoms},
 	{"at%",units::derived::atom_percent},
+	{"nm/s",units::SI::meter/units::SI::second*units::prefixes::nano},
+	{"nm/min",units::SI::meter/units::derived::min*units::prefixes::nano},
 	{"at/ccm",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
 	{"at/scm",units::derived::atoms/units::SI::meter.pow(2)/units::prefixes::centi.pow(2)},
 	{"at/cm^3",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
 	{"atom/cm3",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
+	{"atom/cm3/(c/s)",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)/(units::derived::counts/units::SI::second)},
 	{"at/cm^2",units::derived::atoms/units::SI::meter.pow(2)/units::prefixes::centi.pow(2)},
 	/*time*/
 	{"sec",{units::SI::second}},
-	{"min",{units::SI::second,60}},
+	{"min",{units::derived::min}},
 	{"h",{units::SI::second,60*60}},
 	{"hour",{units::SI::second,60*60}},
 	{"d",{units::SI::second,60*60*24}},
@@ -102,7 +105,7 @@ bool unit_t::base_exponents_t::operator!=(const unit_t::base_exponents_t& obj) c
 
 unit_t::base_exponents_t unit_t::base_exponents_t::operator/(const unit_t::base_exponents_t& obj) const
 {
-	return {obj.meters-meters,obj.kilograms-kilograms,seconds-obj.seconds,obj.amperes-amperes,moles-obj.moles,kelvins-obj.kelvins,candelas-obj.candelas,relative};
+	return {meters-obj.meters,kilograms-obj.kilograms,seconds-obj.seconds,amperes-obj.amperes,moles-obj.moles,kelvins-obj.kelvins,candelas-obj.candelas,relative};
 }
 
 
@@ -338,6 +341,19 @@ const std::__cxx11::string unit_t::to_string() const
 	}
 	
 	/*unknown SI derivative*/
+	
+	for (auto const& prefix : symbol_prefix_unit)
+	{
+		if (prefix.second != multiplier) continue;
+		stringstream out;
+		out << prefix.first << " ";
+		out << base_units_exponents.to_string();
+// 		logger::debug(21,"unit_t::to_string()","prefix+derived",prefix.first + it->first);
+		logger::warning(3,"unit_t::to_string()","unknown SI derivate unit:",out.str());
+		return out.str();
+	}
+	
+	
 // 	vector<string> counter, denominator;
 // 	if (base_units_exponents.Ampere==1)			counter.push_back(units::SI::Ampere.to_string());
 // 	else if (base_units_exponents.Ampere>0) 	counter.push_back(units::SI::Ampere.to_string() + string("^") + base_units_exponents.Ampere);

@@ -55,6 +55,8 @@ public:
 	bool is_set() const;
 	quantity_t();
 	quantity_t(const quantity_t& quant_s,const unit_t& unit_s);
+	quantity_t(const quantity_t& quant_s,double data);
+	quantity_t(const quantity_t& quant_s,vector<double> data);
 	quantity_t(string name_s,unit_t unit_s);
 	quantity_t(vector<double> data_s,unit_t unit_s);
 	quantity_t(double data_s,unit_t unit_s);
@@ -115,9 +117,11 @@ public:
 	quantity_t sd() const;
 	quantity_t mad() const;
 	quantity_t max() const;
+	quantity_t front() const;
+	quantity_t back() const;
 	/// returns x value at max(Y)
-	quantity_t max_at_x(quantity_t& X,double lower_X_limit, double upper_X_limit) const;
-	quantity_t max_at_x(quantity_t& X) const;
+// 	quantity_t max_at_x(const quantity_t& X,double lower_X_limit, double upper_X_limit) const;
+	quantity_t max_at_x(const quantity_t& X) const;
 	
 	quantity_t min() const;
 	/// returns x value at min(Y)
@@ -132,7 +136,9 @@ public:
 	
 	quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
 	quantity_t fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade=-1 ) const;
+	///polynomial interpolation
 	quantity_t polyfit(unsigned int polynom_grade) const;
+	quantity_t extrapolate(unsigned int polynom_grade, const quantity_t& X) const;
 	
 	
 	quantity_t filter_recursive_median(int window_size=0) const;

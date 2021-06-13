@@ -21,11 +21,16 @@
 /*globally defined*/
 // sqlite3* sql_handle;
 
-string database_t::file_location="build/database.sqlite3";
+
 
 database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle)
 { 
 } 
+
+database_t::database_t(sqlite3* sql_handle, std::__cxx11::string filename) : sql_handle(sql_handle), file_location(filename)
+{
+}
+
 
 bool database_t::open() {
     int exit = 0; 

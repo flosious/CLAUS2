@@ -22,7 +22,7 @@
 /********************************/
 
 
-set<string> tools::str::filter_t::special_characters{"_","#"};
+set<string> tools::str::filter_t::special_characters{"_","#","{","}"};
 
 string tools::str::filter_t::escape_special_characters(std::__cxx11::string prefix_escape_string)
 {

@@ -113,83 +113,135 @@ public:
 			///filters out pulses/spikes/gaps in data
 			sims_t impulses();
 		};
-		///determine sputter_equlibrium position (surface peak); maybe moved later on, when introducing other non cluster based measurement methods (e.g. XPS, AES)
-// 		class equlibrium_t
-// 		{
-// 		private:
-// 			const sims_t& M;
-// 			///just for MATRIX/Reference cluster C -> here we know the content should be constant (most of the time)
-// 			static const unsigned int equilibrium_start_index(const cluster_t& C);
-// 			///just for quantity Q
-// 			static const unsigned int equilibrium_start_index(const quantity_t& Q);
-// 			quantity_t& erase_inequilibrium_data(quantity_t& Q);
-// 			cluster_t& erase_inequilibrium_data(cluster_t& C);
-// 			crater_t& erase_inequilibrium_data(crater_t& C);
-// 			unsigned int& equilibrium_start_index_s;
-// 		public:
-// 			///if equilibrium_start_index_s>0 enforces to use this index
-// 			equlibrium_t(const sims_t& M, unsigned int& equilibrium_start_index_s);
-// 			///0 is equivalent to input measurement, so instant equilibrium
-// 			const unsigned int equilibrium_start_index();
-// 			sims_t measurement();
-// 			vector<cluster_t> clusters();
-// 		};
+		
 		class calc_t
 		{
 		protected:
-			const sims_t& measurement;
+			sims_t& M;
 		public:
-			/*fundamental functions*/
-			static SR_t sputter_rate(const total_sputter_time_t& total_sputter_time, const total_sputter_depth_t& total_sputter_depths);
-			static sputter_depth_t sputter_depth(const SR_t& SR, const sputter_time_t& ST);
-			static concentration_t concentration(const SF_t& SF, const intensity_t& intensity);
-// 			static SF_t SF(const dose_t& dose, const intensity_t& intensity, const sputter_depth_t& sputter_depth);
-			static RSF_t RSF(const SF_t& SF, const intensity_t& reference_intensity);
-			class from_crater_t
+			class SR_c
 			{
-				SR_t SR() const;
-				sputter_depth_t sputter_depth() const;
+			private:
+				sims_t& M;
+			public:
+				SR_c(sims_t& measurement);
+				sims_t& from_crater_depths();
+				///mean from all available clusters; uses max cluster intensity or concentration
+				sims_t& from_implant_max();
+				///from one particular cluster
+				sims_t& from_implant_max(cluster_t& cluster);
+				///mean from all available clusters
+				sims_t& from_ref();
+				///from one particular cluster
+				sims_t& from_ref(cluster_t& cluster);
 			};
-			class fit_to_ref_t
+			class SD_c
 			{
-				SR_t SR() const;
-				SF_t SF() const;
-				///SR and SF calculated once and returned within measurement
-				sims_t measurement() const;
+			private:
+				sims_t& M;
+			public:
+				SD_c(sims_t& measurement);
+				sims_t& from_SR();
 			};
+			class SF_c
+			{
+			private:
+				sims_t& M;
+			public:
+				SF_c(sims_t& measurement);
+				///for all available clusters
+				sims_t& from_db_max();
+				///just for one particular cluster
+				sims_t& from_db_max(cluster_t& cluster);
+				///for all available clusters
+				sims_t& from_db_dose();
+				///just for one particular cluster
+				sims_t& from_db_dose(cluster_t& cluster);
+				///for all available clusters
+				sims_t& from_ref();
+				///just for one particular cluster
+				sims_t& from_ref(cluster_t& cluster);
+				
+				sims_t& from_RSF();
+				sims_t& from_RSF(cluster_t& cluster);
+			};
+			class RSF_c
+			{
+			private:
+				sims_t& M;
+			public:
+				RSF_c(sims_t& measurement);
+			};
+			class concentration_c
+			{
+			private:
+				sims_t& M;
+			public:
+				concentration_c(sims_t& measurement);
+				sims_t& from_SF();
+				sims_t& from_SF(cluster_t& cluster);
+			};
+			
 			class implant_t
 			{
 			private:
-				const calc_t& calc;
+				///the measurement
+				sims_t& M;
+				cluster_t& cluster;
 				static unsigned int minimum_starting_position(quantity_t Y);
 			public:
-				implant_t(const calc_t& calc);
-				SR_t SR() const;
-				sputter_depth_t sputter_depth() const;
-				SF_t SF(const cluster_t& cluster) const;
-				static SF_t SF(const dose_t& dose, const intensity_t& intensity, const sputter_depth_t& sputter_depth);
-				RSF_t RSF(const cluster_t& cluster) const;
-				concentration_t concentration(const cluster_t& cluster) const;
-				sims_t measurement() const;
+				quantity_t minimum_starting_position();
+				implant_t(sims_t& measurement, cluster_t& cluster);
+				SR_t SR();
+				sputter_depth_t sputter_depth();
+				SF_t SF();
+				SF_t SF_from_dose();
+				SF_t SF_from_max();
+				RSF_t RSF();
+				concentration_t concentration();
+				///populates the whole measurement from implanted values
+// 				sims_t& measurement();
 			};
-			crater_t crater() const;
 			
-			SR_t sputter_rate() const;
+			implant_t implant(cluster_t& cluster);
+			SR_c SR();
+			SD_c SD();
+			SF_c SF();
+			RSF_c RSF();
+			concentration_c concentration();
+			///populates sputter_depth, if SR is set
+// 			sims_t& sputter_depth() const;
+			///populates all concentrations in clusters, if SF is set
 			
-			
-			sputter_depth_t sputter_depth() const;
-			vector<cluster_t> clusters() const;
+// 			sims_t& concentration(cluster_t& cluster) const;
+// 			vector<cluster_t> clusters() const;
 			///returns whole calculated measurement
-			sims_t calculat_everything() const;
-			calc_t(const sims_t& measurement);
-// 			calc::SR_c SR();
+// 			sims_t calculat_everything() const;
+			calc_t(sims_t& measurement);
 		};
+	private:
+		
 		///adds more cluster to this measurement
 		void add_clusters(vector<cluster_t>& clusters_s);
 		///saved variable for faster recalculation of sputter_equlibrium
 // 		unsigned int equilibrium_start_index_s=0;
+		cluster_t matrix_cluster_s;
+		vector<isotope_t> isotopes_in_matrix;
 	public: 
+		class matrix_cluster_c
+		{
+		private:
+			
+		public:
+			vector<cluster_t*> clusters;
+			vector<isotope_t> isotopes() const;
+			intensity_t intensity_sum() const;
+			concentration_t concentration_sum() const;
+			string to_string(const string del = "") const;
+			matrix_cluster_c(vector<cluster_t>& clusters, const vector<isotope_t> matrix_isotopes);
+		};
 		calc_t calc();
+		
 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
 			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
 		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
@@ -203,16 +255,18 @@ public:
 // 		set<isotope_t*> isotopes();
 		///returns the isotope corresponding clusterS (there can be more than one)
 		///e.g. isotope(31P) --> cluster(74Ge 31P) & cluster(31P) & ...
-		set<cluster_t*> clusters_corresponding_to_isotope(isotope_t& isotope);
-		isotope_t isotope_corresponding_to_cluster(cluster_t& cluster);
+		set<cluster_t*> clusters_corresponding_to_isotope(const isotope_t& isotope);
+		isotope_t isotope_corresponding_to_cluster(const cluster_t& cluster);
+		///get or set matrix_isotopes
+		matrix_cluster_c matrix_cluster(const vector<isotope_t>& matrix_isotopes={});
 		///virtual cluster generated from all reference_clusters
-		cluster_t virtual_matrix_cluster();
+// 		cluster_t& matrix_cluster();
 		///same as reference_clusters
-		const set<const cluster_t*> matrix_clusters() const;
+// 		const set<const cluster_t*> matrix_clusters() const;
 		///same as matrix_clusters
-		const set<const cluster_t*> reference_clusters() const;
+// 		const set<const cluster_t*> reference_clusters() const;
 		///all isotopes from reference_clusters
-		const set<isotope_t> reference_isotopes();
+// 		const vector<isotope_t> reference_isotopes() const;
 // 		bool load_reference();
 // 		bool load_reference_parameters();
 		///pointer to its measurement reference cluster

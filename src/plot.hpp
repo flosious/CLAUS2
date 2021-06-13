@@ -43,10 +43,12 @@ private:
 			///asuming y axis starts at low values and grows to bigger (e.g. from 1 to 1000)
 			range_t(const quantity_t* Ys);
 			range_t(const vector<const quantity_t*> Ys);
+			range_t(double start, double stop);
 			///changes start and stop to log10 values
-			void log10();
+			range_t log10() const;
 			double start=-1;
 			double stop=-1;
+			string to_string() const;
 		};
 	private:
 		///defines a curve on an axis
@@ -58,11 +60,26 @@ private:
 			const quantity_t Y;
 			const string legende="";
 		};
+		class line_t
+		{
+		public:
+			const double x_start;
+			const double y_start;
+			const double x_stop;
+			const double y_stop;
+			const string color;
+			const string text;
+			///adds an arrow from start --> stop
+			line_t(double x_start, double y_start, double x_stop, double y_stop, string color="", string text="");
+		};
+		vector<line_t> lines;
+		double start=-1;
+		double stop=-1;
 	public:
 		///all the curves for this axis
 		vector<curve_t> curves;
 		///e.g. "Intensity [c/s]"
-// 		axis_t();
+
 		///checks all curves for consistency (same physical quantities and units)
 		bool check();
 		///adds a new curve to this axis
@@ -72,30 +89,19 @@ private:
 		///set log10_scale usage to true
 		bool log10_scale=false;
 		string color="k";
+		///returns the actual range for all curves for this axis
 		range_t range();
-// 		string label;
-// 		double x_start();
-// 		double y_start();
-// 		double x_stop();
-// 		double y_stop();
+		///sets a range for all curves for this axis
+		void range(double start_s, double stop_s, bool log10_scale_s);
+		
+		void add_line(double x_start, double y_star, double x_stop, double y_stop, string color="", string text="");
+		void add_arrow(double x_start, double y_star, double x_stop, double y_stop, string color="rA", string text="");
 	};
-	class line_t
-	{
-	public:
-		const double x_start;
-		const double y_start;
-		const double x_stop;
-		const double y_stop;
-		const string color;
-		///adds an arrow from start --> stop
-		line_t(double x_start, double y_start, double x_stop, double y_stop, string color="");
-	};
-	vector<line_t> lines;
+	
 	int Draw(mglGraph * gr) override;
 public:
 	plot_t(bool Y1_log10=true, bool Y2_log10=true, bool Y3_log10=false);
-	void add_line(double x_start, double y_star, double x_stop, double y_stop, string color="");
-	void add_arrow(double x_start, double y_star, double x_stop, double y_stop, string color="rA");
+	
 	axis_t Y1;
 	axis_t Y2;
 	axis_t Y3;

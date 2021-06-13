@@ -89,6 +89,8 @@ public:
 	const string to_string(const string del=", ") const;
 	crater_t();
 	crater_t(const vector<cluster_t>& clusters, const sputter_beam_t& sputter_beam);
+	///returns sputter_depth if set, or sputter_time, or nullptr, if nothing is set
+	const quantity_t* X() const;
 	sputter_beam_t sputter_beam;
 	sputter_depth_t sputter_depth;
 	sputter_time_t sputter_time;
