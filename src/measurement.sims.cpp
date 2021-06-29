@@ -19,10 +19,10 @@
 #include "measurement.hpp"
 
 /********************************************/
-/* *measurements_::sims_t::matrix_cluster_c */
+/* *measurements_::sims_t::matrix_clusters_c */
 /********************************************/
 
-string measurements_::sims_t::matrix_cluster_c::to_string(const string del) const
+string measurements_::sims_t::matrix_clusters_c::to_string(const string del) const
 {
 	stringstream out;
 	unsigned int i=0;
@@ -40,7 +40,7 @@ string measurements_::sims_t::matrix_cluster_c::to_string(const string del) cons
 /*"30Si" can be a reference cluster for elemental Si or isotopical purified Si*/
 /*"30Si 28Si" can be a reference cluster for elemental Si or isotopical purified Si*/
 /*"74Ge 28Si" can be a reference cluster for elemental Si+Ge or isotopical purified Si+Ge*/
-measurements_::sims_t::matrix_cluster_c::matrix_cluster_c(vector<cluster_t>& clusters_s, const vector<isotope_t> matrix_isotopes)
+measurements_::sims_t::matrix_clusters_c::matrix_clusters_c(vector<cluster_t>& clusters_s, const vector<isotope_t> matrix_isotopes)
 {
 
 	if (matrix_isotopes.size()==0)
@@ -64,7 +64,15 @@ measurements_::sims_t::matrix_cluster_c::matrix_cluster_c(vector<cluster_t>& clu
 	}
 }
 
-intensity_t measurements_::sims_t::matrix_cluster_c::intensity_sum() const
+bool measurements_::sims_t::matrix_clusters_c::is_cluster_in_matrix(const cluster_t& cluster)
+{
+	for (auto& C : clusters)
+		if (*C == cluster)
+			return true;
+	return false;
+}
+
+intensity_t measurements_::sims_t::matrix_clusters_c::intensity_sum() const
 {
 	intensity_t intensity;
 	for (auto& C : clusters)
@@ -77,7 +85,7 @@ intensity_t measurements_::sims_t::matrix_cluster_c::intensity_sum() const
 	return intensity;
 }
 
-concentration_t measurements_::sims_t::matrix_cluster_c::concentration_sum() const
+concentration_t measurements_::sims_t::matrix_clusters_c::concentration_sum() const
 {
 	intensity_t concentration;
 	for (auto& C : clusters)
@@ -90,7 +98,7 @@ concentration_t measurements_::sims_t::matrix_cluster_c::concentration_sum() con
 	return concentration;
 }
 
-vector<isotope_t> measurements_::sims_t::matrix_cluster_c::isotopes() const
+vector<isotope_t> measurements_::sims_t::matrix_clusters_c::isotopes() const
 {
 	set<isotope_t> isotopes;
 	if (clusters.size()==0)
@@ -124,7 +132,7 @@ measurements_::sims_t measurements_::sims_t::filter_t::impulses()
 /****** measurements_::sims_t ******/
 /***********************************/
 
-measurements_::sims_t::matrix_cluster_c measurements_::sims_t::matrix_cluster(const vector<isotope_t>& matrix_isotopes)
+measurements_::sims_t::matrix_clusters_c measurements_::sims_t::matrix_clusters(const vector<isotope_t>& matrix_isotopes)
 {
 	///if no new isotopes, use the known ones
 	if (matrix_isotopes.size()!=0)
@@ -133,7 +141,7 @@ measurements_::sims_t::matrix_cluster_c measurements_::sims_t::matrix_cluster(co
 	if (isotopes_in_matrix.size()==0)
 		isotopes_in_matrix = sample->matrix().isotopes;
 	
-	return matrix_cluster_c(clusters,isotopes_in_matrix);
+	return matrix_clusters_c(clusters,isotopes_in_matrix);
 }
 
 measurements_::sims_t::filter_t measurements_::sims_t::filter() const
@@ -255,7 +263,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 		plot.Y3.add_curve(X,crater.sputter_current().change_unit({"nA"}));
 	plot.Y1.range(1,1E6,true);
 	
-	matrix_cluster_c MC = matrix_cluster();
+	matrix_clusters_c MC = matrix_clusters();
 	intensity_t ref_intensity = MC.intensity_sum();
 	if (MC.clusters.size()>1 && ref_intensity.is_set())
 		plot.Y1.add_curve(X,ref_intensity,MC.to_string());
@@ -265,14 +273,13 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 		if (C.intensity.is_set())
 		{
 			plot.Y1.add_curve(X,C.intensity,C.to_string());
-			if (sample->implant(C.corresponding_isotope(MC.isotopes())).dose.is_set())
+			if (sample->implant(C.corresponding_isotope(sample->matrix().isotopes)).dose.is_set())
 			{
 				// unit is not same as unit(x)
 				quantity_t min = calc().implant(C).minimum_starting_position().change_unit(X.unit());
 				if (min.is_set())
-				{
-					plot.Y1.add_arrow(min.data.at(0),0.1,min.data.at(0),1E6,"bA","implant\\_minimum");
-				}
+					plot.Y1.add_arrow(min.data.at(0),0.1,min.data.at(0),1E6,"bA",C.to_string() );
+// 					plot.Y1.add_arrow(min.data.at(0),0.1,min.data.at(0),1E6,"bA",C.to_string() +" implant\\_minimum");
 			}
 		}
 // 		cout << C.RSF.to_string() << endl;
@@ -431,7 +438,7 @@ isotope_t measurements_::sims_t::isotope_corresponding_to_cluster(const cluster_
 // 		return {};
 // 	}
 // 	return *isos.begin();
-	return cluster.corresponding_isotope(matrix_cluster().isotopes());
+	return cluster.corresponding_isotope(sample->matrix().isotopes);
 }
 
 // const vector<isotope_t> measurements_::sims_t::reference_isotopes() const
@@ -506,6 +513,14 @@ bool measurements_::sims_t::add(measurements_::sims_t& adder)
 	if (!crater.sputter_beam.sputter_current.is_set())
 		crater.sputter_beam = adder.crater.sputter_beam;
 	return true;
+}
+
+cluster_t* measurements_::sims_t::cluster(const cluster_t& cluster_s)
+{
+	for (auto& C : clusters)
+		if (cluster_s==C)
+			return &C;
+	return nullptr;
 }
 
 measurements_::sims_t measurements_::sims_t::change_resolution(sputter_depth_t sputter_depth_res)

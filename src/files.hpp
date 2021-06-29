@@ -167,6 +167,7 @@ public:
 				string dimension;
 				vector<double> data;
 				void to_screen();
+				string to_string() const;
 			};
 		protected:
 			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);

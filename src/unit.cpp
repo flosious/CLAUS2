@@ -66,8 +66,8 @@ const map<std::string, unit_t> unit_t::symbol_to_unit
 	{"at%",units::derived::atom_percent},
 	{"nm/s",units::SI::meter/units::SI::second*units::prefixes::nano},
 	{"nm/min",units::SI::meter/units::derived::min*units::prefixes::nano},
-	{"at/ccm",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
-	{"at/scm",units::derived::atoms/units::SI::meter.pow(2)/units::prefixes::centi.pow(2)},
+	{"at/ccm",units::derived::atoms/(units::SI::meter.pow(3)*units::prefixes::centi.pow(3))},
+	{"at/scm",units::derived::atoms/(units::SI::meter.pow(2)*units::prefixes::centi.pow(2))},
 	{"at/cm^3",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
 	{"atom/cm3",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
 	{"atom/cm3/(c/s)",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)/(units::derived::counts/units::SI::second)},
@@ -378,6 +378,7 @@ unit_t unit_t::pow(int pot) const
 	powed.base_units_exponents.moles = pot * base_units_exponents.moles;
 	powed.base_units_exponents.kelvins = pot * base_units_exponents.kelvins;
 	powed.base_units_exponents.candelas = pot * base_units_exponents.candelas;
+	
 	powed.multiplier = std::pow(multiplier,pot);
 	return powed;
 }

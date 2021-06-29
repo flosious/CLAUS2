@@ -131,9 +131,9 @@ public:
 				///from one particular cluster
 				sims_t& from_implant_max(cluster_t& cluster);
 				///mean from all available clusters
-				sims_t& from_ref();
+				sims_t& from_ref_fit();
 				///from one particular cluster
-				sims_t& from_ref(cluster_t& cluster);
+				sims_t& from_ref_fit(cluster_t& cluster);
 			};
 			class SD_c
 			{
@@ -157,13 +157,26 @@ public:
 				sims_t& from_db_dose();
 				///just for one particular cluster
 				sims_t& from_db_dose(cluster_t& cluster);
-				///for all available clusters
-				sims_t& from_ref();
-				///just for one particular cluster
-				sims_t& from_ref(cluster_t& cluster);
+				///for all available clusters; fitting to reference measurement(s)
+				sims_t& from_ref_fit();
+				///just for one particular cluster; fitting to reference measurement(s)
+				sims_t& from_ref_fit(cluster_t& cluster);
 				
-				sims_t& from_RSF();
-				sims_t& from_RSF(cluster_t& cluster);
+				sims_t& from_RSF_mean_ref();
+				sims_t& from_RSF_mean_ref(cluster_t& cluster);
+				
+				sims_t& from_RSF_median_ref();
+				sims_t& from_RSF_median_ref(cluster_t& cluster);
+				
+				sims_t& from_RSF_trimmed_mean_ref();
+				sims_t& from_RSF_trimmed_mean_ref(cluster_t& cluster);
+				
+				sims_t& from_RSF_pbp_ref();
+				sims_t& from_RSF_pbp_ref(cluster_t& cluster);
+				
+				///reference_intensity could be mean, median, trimmed_mean, a vector (pbp), ...
+				sims_t& from_RSF(const intensity_t& reference_intensity);
+				sims_t& from_RSF(cluster_t& cluster, const intensity_t& reference_intensity);
 			};
 			class RSF_c
 			{
@@ -171,6 +184,23 @@ public:
 				sims_t& M;
 			public:
 				RSF_c(sims_t& measurement);
+				RSF_c(const SF_t& SF, const intensity_t& reference);
+				
+				sims_t& from_SF_mean_ref();
+				sims_t& from_SF_mean_ref(cluster_t& cluster);
+				
+				sims_t& from_SF_median_ref();
+				sims_t& from_SF_median_ref(cluster_t& cluster);
+				
+				sims_t& from_SF_trimmed_mean_ref();
+				sims_t& from_SF_trimmed_mean_ref(cluster_t& cluster);
+				
+				sims_t& from_SF_pbp_ref();
+				sims_t& from_SF_pbp_ref(cluster_t& cluster);
+				
+				///reference_intensity could be mean, median, trimmed_mean, a vector (pbp), or anything other ...
+				sims_t& from_SF_ref(const intensity_t& reference_intensity);
+				sims_t& from_SF_ref(cluster_t& cluster, const intensity_t& reference_intensity);
 			};
 			class concentration_c
 			{
@@ -182,16 +212,24 @@ public:
 				sims_t& from_SF(cluster_t& cluster);
 			};
 			
-			class implant_t
+			class implant_c
 			{
 			private:
 				///the measurement
 				sims_t& M;
 				cluster_t& cluster;
 				static unsigned int minimum_starting_position(quantity_t Y);
+				sputter_time_t sputter_time_at_maximum_s;
+				intensity_t maximum_intensity_s;
+				///populates maximum_intensity_s + sputter_time_at_maximum_s ;seconds_for_fit_plot < 0 no plot;
+				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=0);
 			public:
+				///sputter_time_t of maximum of intensity of implant
+				const sputter_time_t& sputter_time_at_maximum();
+				///maximum of intensity of implant
+				const intensity_t& maximum_intensity();
 				quantity_t minimum_starting_position();
-				implant_t(sims_t& measurement, cluster_t& cluster);
+				implant_c(sims_t& measurement, cluster_t& cluster);
 				SR_t SR();
 				sputter_depth_t sputter_depth();
 				SF_t SF();
@@ -200,23 +238,14 @@ public:
 				RSF_t RSF();
 				concentration_t concentration();
 				///populates the whole measurement from implanted values
-// 				sims_t& measurement();
 			};
-			
-			implant_t implant(cluster_t& cluster);
+			implant_c implant(cluster_t& cluster);
 			SR_c SR();
 			SD_c SD();
 			SF_c SF();
 			RSF_c RSF();
 			concentration_c concentration();
-			///populates sputter_depth, if SR is set
-// 			sims_t& sputter_depth() const;
-			///populates all concentrations in clusters, if SF is set
-			
-// 			sims_t& concentration(cluster_t& cluster) const;
-// 			vector<cluster_t> clusters() const;
-			///returns whole calculated measurement
-// 			sims_t calculat_everything() const;
+
 			calc_t(sims_t& measurement);
 		};
 	private:
@@ -226,9 +255,10 @@ public:
 		///saved variable for faster recalculation of sputter_equlibrium
 // 		unsigned int equilibrium_start_index_s=0;
 		cluster_t matrix_cluster_s;
+		///locally save them
 		vector<isotope_t> isotopes_in_matrix;
 	public: 
-		class matrix_cluster_c
+		class matrix_clusters_c
 		{
 		private:
 			
@@ -238,7 +268,10 @@ public:
 			intensity_t intensity_sum() const;
 			concentration_t concentration_sum() const;
 			string to_string(const string del = "") const;
-			matrix_cluster_c(vector<cluster_t>& clusters, const vector<isotope_t> matrix_isotopes);
+			bool is_cluster_in_matrix(const cluster_t& cluster);
+			///returns the cluster corresponding to matrix
+			matrix_clusters_c(vector<cluster_t>& clusters, const vector<isotope_t> matrix_isotopes);
+			matrix_clusters_c();
 		};
 		calc_t calc();
 		
@@ -247,37 +280,19 @@ public:
 		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
 		string to_string(const string del = ", ");
 		///returns the measurement without surface artefacts
-// 		sims_t sputter_equilibrium();
 		filter_t filter() const;
-		///returns the cluster corresponding isotope
-// 		isotope_t* isotope(cluster_t& cluster);
-		///isotopes collected from clusters
-// 		set<isotope_t*> isotopes();
-		///returns the isotope corresponding clusterS (there can be more than one)
+
 		///e.g. isotope(31P) --> cluster(74Ge 31P) & cluster(31P) & ...
 		set<cluster_t*> clusters_corresponding_to_isotope(const isotope_t& isotope);
 		isotope_t isotope_corresponding_to_cluster(const cluster_t& cluster);
 		///get or set matrix_isotopes
-		matrix_cluster_c matrix_cluster(const vector<isotope_t>& matrix_isotopes={});
-		///virtual cluster generated from all reference_clusters
-// 		cluster_t& matrix_cluster();
-		///same as reference_clusters
-// 		const set<const cluster_t*> matrix_clusters() const;
-		///same as matrix_clusters
-// 		const set<const cluster_t*> reference_clusters() const;
-		///all isotopes from reference_clusters
-// 		const vector<isotope_t> reference_isotopes() const;
-// 		bool load_reference();
-// 		bool load_reference_parameters();
-		///pointer to its measurement reference cluster
-// 		cluster_t* reference_cluster=nullptr;
-		
+		matrix_clusters_c matrix_clusters(const vector<isotope_t>& matrix_isotopes={});
+
 		//creates instantly a plot
 		void plot_now(double sleep_sec=1);
 		///origin ready for import
 		void export_origin_ascii(string path="/tmp/", const string delimiter="\t");
-		
-// 		int Draw(mglGraph * gr) override;
+
 		bool add(sims_t& measurement);
 		
 		//changes sputter_time axis and all others accordingly
@@ -286,6 +301,7 @@ public:
 		
 		crater_t crater;
 		vector<cluster_t> clusters;
+		cluster_t* cluster(const cluster_t& cluster_s);
 	};
 	
 	class dsims_t : public sims_t
@@ -295,11 +311,6 @@ public:
 		class db_t
 		{
 		private:
-// 			database_t& sql_wrapper;
-			///reference to parent measurement
-// 			dsims_t& M;
-			///creates the table if not exists
-			
 			///loads all filenames counting as reference for this measurement M
 			static vector<string> ref_filenames();
 			///make this measurement M a reference
@@ -314,11 +325,10 @@ public:
 	public:
 		msettings::dsims_t settings;
 		dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profiler_t>* profiler_files=nullptr);
-		///loads all matching files into the measurement and clears the elements from the list(s)
-// 		dsims_t(vector<files_::dsims_t>& dsims_files, list<sample_t>& samples_list,vector<files_::jpg_t>* jpg_files=nullptr);
+
 		bool operator==(dsims_t& obj);
 		bool operator!=(dsims_t& obj);
-// 		bool operator<(dsims_t& obj);
+
 	};
 	
 	class tofsims_t : public sims_t

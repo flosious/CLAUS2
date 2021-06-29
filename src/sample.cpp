@@ -25,6 +25,13 @@ sample_t::db_t::db_t(const sample_t& sample, const database_t& sql_wrapper) : sa
 // 		table_exists=true;
 }
 
+const map<isotope_t, sample_t::implant_s>& sample_t::db_t::implants()
+{
+	load_from_table();
+	return implants_s;
+}
+
+
 ///load entries from old db into this(new)
 bool sample_t::db_t::migrate_claus1_db(database_t& sql_wrapper, const string filename)
 {
@@ -118,14 +125,17 @@ bool sample_t::db_t::create_table(database_t& sql_wrapper)
    return sql_wrapper.execute_sql(sql);
 }
 
-const map<string,vector<string>>& sample_t::db_t::load_from_table()
+bool sample_t::db_t::load_from_table()
 {
-	logger::debug(9,"sample_t::db_t::load_from_table()","entering");
-	if (table_entries_s.size()>0)
-	{
-		logger::debug(9,"sample_t::db_t::load_from_table()","table_entries_s.size()>0");
-		return table_entries_s;
-	}
+	logger::debug(21,"sample_t::db_t::load_from_table()","entering");
+	if (implants_s.size()>0 || matrix_s.is_set()) // already loaded
+		return true;
+	map<string,vector<string>> table_entries_s;
+// 	if (table_entries_s.size()>0)
+// 	{
+// 		logger::debug(9,"sample_t::db_t::load_from_table()","table_entries_s.size()>0");
+// 		return table_entries_s;
+// 	}
 
 	string sql1 = "SELECT * FROM " +tablename+ 	" WHERE " \
 			"lot='" + sample.lot + "' AND " \
@@ -137,67 +147,126 @@ const map<string,vector<string>>& sample_t::db_t::load_from_table()
 	logger::debug(11,"sample_t::db_t::load_from_table()","sql1=",sql1);
 
 	if (!sql_wrapper.execute_sql(sql1,database_t::callback_lines_map,&table_entries_s)) 
-		logger::error("sample_t::db_t::load_from_table()","could not load db_t table to local map","","returning empty");
-	logger::debug(9,"sample_t::db_t::load_from_table()","exiting");
-	return table_entries_s;
+	{
+		logger::error("sample_t::db_t::load_from_table()","could not load db_t table to local map","","returning false");
+		return false;
+	}
+	
+	if (table_entries_s.size()==0)
+	{
+		logger::error("sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
+		return false;
+	}
+	
+	/*set matrix*/
+	for (auto& m : table_entries_s.at("matrix"))
+	{
+		if (m=="" || m=="NULL") continue;
+		matrix_t M(m);
+		if (!M.is_set())
+		{
+			logger::error("sample_t::db_t::load_from_table()","db matrix is not parseable",m,sample.to_name());
+		}
+		matrix_s = M;
+		if (matrix_s.is_set())
+			logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name()+" DB: matrix:", matrix_s.to_string());
+		break;
+	}
+	
+	int line=-1;
+	/*set implants*/
+	for (auto& i : table_entries_s.at("isotope"))
+	{
+		line++;
+		if (i=="" || i=="NULL") continue;
+		isotope_t iso(i);
+		if (iso.symbol=="") continue;
+		if (implants_s.find(iso)!=implants_s.end())
+		{
+			logger::error("sample_t::db_t::load_from_table()","more then 1 identical isotope implanted in sample: check database",sample.to_name() +"  " +iso.to_string(),"skipping");
+			continue;
+		}
+		dose_t D;
+		concentration_t C_max;
+		sputter_depth_t SD_max;
+		if (table_entries_s.at("dose").at(line)!="" && table_entries_s.at("dose").at(line)!="NULL")
+			D = dose_t({tools::str::str_to_double(table_entries_s.at("dose").at(line))});
+		if (table_entries_s.at("depth_at_maximum_concentration").at(line)!="" && table_entries_s.at("depth_at_maximum_concentration").at(line)!="NULL")
+			SD_max = sputter_depth_t({tools::str::str_to_double(table_entries_s.at("depth_at_maximum_concentration").at(line))});
+		if (table_entries_s.at("maximum_concentration").at(line)!="" && table_entries_s.at("maximum_concentration").at(line)!="NULL")
+			C_max = concentration_t({tools::str::str_to_double(table_entries_s.at("maximum_concentration").at(line))});
+		if (D.is_set())
+			logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() +" DB: dose("+iso.to_string()+")="+D.to_string());
+		if (SD_max.is_set())
+			logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: depth_at_maximum_concentration("+iso.to_string()+")="+SD_max.to_string());
+		if (C_max.is_set())
+			logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: maximum_concentration("+iso.to_string()+")="+C_max.to_string());
+		implant_s I{D,C_max,SD_max};
+		implants_s.insert(pair<isotope_t,implant_s>(iso,I));
+	}
+	
+	logger::debug(21,"sample_t::db_t::load_from_table()","exiting");
+	return true;
 }
 
-matrix_t sample_t::db_t::matrix()
+matrix_t& sample_t::db_t::matrix()
 {
-	logger::debug(9,"sample_t::db_t::matrix()","entering");
-
-	if (load_from_table().size()==0 || load_from_table().at("lot").size()==0)
+	logger::debug(21,"sample_t::db_t::matrix()","entering");
+	if (matrix_s.is_set())
+		return matrix_s;
+	if (!load_from_table())
 	{
-		logger::info(3,"sample_t::db_t::matrix()","table_entries.size()==0","could not find sample in db_t table " +tablename,"returning empty");
-		return  {};
+		logger::info(3,"sample_t::db_t::matrix()","!load_from_table()","could not find sample in db_t table " +tablename,"returning empty");
+		return  matrix_s;
 	}
 
-	for (auto& matrix_str:load_from_table().at("matrix"))
-	{
-		if (matrix_str!="")
-			return matrix_t(matrix_str);
-	}
-	logger::info(3,"sample_t::db_t::matrix()","no db entry with matrix set",tablename,"returning empty");
-	return {};
+// 	for (auto& matrix_str:load_from_table().at("matrix"))
+// 	{
+// 		if (matrix_str!="")
+// 			return matrix_t(matrix_str);
+// 	}
+// 	logger::info(3,"sample_t::db_t::matrix()","no db entry with matrix set",tablename,"returning empty");
+	return matrix_s;
 }
 
 sample_t::implant_s sample_t::db_t::implant(const isotope_t& isotope)
 {
-	
-// 	map<string,vector<string>> table_entries = load_from_table();
-	if (load_from_table().size()==0)
+	if (implants().size()!=0 || load_from_table())
 	{
-		logger::error("sample_t::db_t::implant()","table_entries.size()==0","could not find sample " +sample.lot + "w"+ sample.wafer_string()+ " and isotope " +isotope.to_string()+  " in database table " +tablename,"returning empty");
-		return  {};
+		if (implants().find(isotope)!=implants().end())
+			return implants().at(isotope);
 	}
-	if (load_from_table().at("dose").size()>1)
-		logger::error("sample_t::db_t::implant()","load_from_table().at('dose').size()>1",sample.lot + "_w"+ sample.wafer_string() + " " + isotope.to_string(),"returning empty");
+	return {};
 	
-// 	implant.dose = dose_t({tools::str::str_to_double(table_entries.at("dose").at(1))});
-	implant_s I;
-	
-	int table_entry_row=-1;
-	for (int i=0;i<table_entries_s.at("isotope").size();i++)
-		if (isotope_t(table_entries_s.at("isotope").at(i)) == isotope)
-		{
-			table_entry_row = i;
-			break;
-		}
-	if (table_entry_row<0)
-		logger::info(3,"sample_t::db_t::implant()","isotope not found in database",isotope.to_string());
-	else
-	{
-		I.dose = dose_t({tools::str::str_to_double(table_entries_s.at("dose").at(table_entry_row))});
-		I.depth_at_concentration_maxium = sputter_depth_t({tools::str::str_to_double(table_entries_s.at("depth_at_maximum_concentration").at(table_entry_row))});
-		I.concentration_maximum = concentration_t({tools::str::str_to_double(table_entries_s.at("maximum_concentration").at(table_entry_row))});
-	}
-	if (!I.dose.is_set())
-		logger::info(3,"sample_t::db_t::implant()","dose not set",sample.to_name(), isotope.to_string());
-	if (!I.depth_at_concentration_maxium.is_set())
-		logger::info(3,"sample_t::db_t::implant()","depth_at_concentration_maxium not set",sample.to_name(), isotope.to_string());
-	if (!I.concentration_maximum.is_set())
-		logger::info(3,"sample_t::db_t::implant()","concentration_maximum not set",sample.to_name(), isotope.to_string());
-	return I;
+// 	int table_entry_row=-1;
+// 	for (int i=0;i<table_entries_s.at("isotope").size();i++)
+// 		if (isotope_t(table_entries_s.at("isotope").at(i)) == isotope)
+// 		{
+// 			table_entry_row = i;
+// 			break;
+// 		}
+// 	if (table_entry_row<0)
+// 	{
+// 		logger::info(3,"sample_t::db_t::implant()","isotope not found in database",isotope.to_string());
+// 		return I;
+// 	}
+// 	
+// // 	cout << "table_entries_s.at('depth_at_maximum_concentration').at(table_entry_row) = " << table_entries_s.at("depth_at_maximum_concentration").at(table_entry_row) << endl;
+// 	
+// 	if (table_entries_s.at("dose").at(table_entry_row)!="" && table_entries_s.at("dose").at(table_entry_row)!="NULL")
+// 		I.dose = dose_t({tools::str::str_to_double(table_entries_s.at("dose").at(table_entry_row))});
+// 	if (table_entries_s.at("depth_at_maximum_concentration").at(table_entry_row)!="" && table_entries_s.at("depth_at_maximum_concentration").at(table_entry_row)!="NULL")
+// 		I.depth_at_concentration_maxium = sputter_depth_t({tools::str::str_to_double(table_entries_s.at("depth_at_maximum_concentration").at(table_entry_row))});
+// 	if (table_entries_s.at("maximum_concentration").at(table_entry_row)!="" && table_entries_s.at("maximum_concentration").at(table_entry_row)!="NULL")
+// 		I.concentration_maximum = concentration_t({tools::str::str_to_double(table_entries_s.at("maximum_concentration").at(table_entry_row))});
+// 	
+// 	if (!I.dose.is_set())
+// 		logger::info(3,"sample_t::db_t::implant()","dose not set",sample.to_name(), isotope.to_string());
+// 	if (!I.depth_at_concentration_maxium.is_set())
+// 		logger::info(3,"sample_t::db_t::implant()","depth_at_concentration_maxium not set",sample.to_name(), isotope.to_string());
+// 	if (!I.concentration_maximum.is_set())
+// 		logger::info(3,"sample_t::db_t::implant()","concentration_maximum not set",sample.to_name(), isotope.to_string());
+// 	return I;
 }
 
 /************************************************/
@@ -307,18 +376,27 @@ bool sample_t::use_simple_name=true;
 
 /***********************/
 
-const sample_t::implant_s& sample_t::implant(const isotope_t& isotope)
+sample_t::implant_s sample_t::implant(const isotope_t& isotope)
 {
-	if (isos_to_implants.find(isotope)==isos_to_implants.end())
-		///load from database
-		isos_to_implants.insert(pair<isotope_t,implant_s> (isotope,database().implant(isotope)));
-	return isos_to_implants.at(isotope);
+	if (implants.size()==0)
+		load_from_database();
+// 	cout << "implants.size()=" << implants.size() << endl;
+// 	for (auto& I:implants)
+// 		cout << "implants: " << I.first.to_string() << "\t" << I.second.concentration_maximum.to_string() << endl;
+	if (implants.find(isotope)!=implants.end())
+		return implants.at(isotope);
+	return {};
 }
 
 
-sample_t::db_t sample_t::database() const
+void sample_t::load_from_database()
 {
-	return db_t(*this,*sql_wrapper);
+	db_t db(*this,*sql_wrapper);
+	if (!matrix_p.is_set())
+		matrix_p = db.matrix();
+	
+	if (implants.size()==0)
+		implants = db.implants();
 }
 
 
@@ -368,9 +446,8 @@ const matrix_t& sample_t::matrix()
 {
 	if (matrix_p.is_set()) return matrix_p;
 	// do something to populate matrix_p --> look up Database
-	if (database().matrix().is_set())
-		matrix_p = database().matrix();
-// 		return matrix_t(database.matrix());
+	load_from_database();
+	
 	return matrix_p;
 }
 

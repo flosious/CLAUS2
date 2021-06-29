@@ -74,6 +74,7 @@ public:
 	const string to_string() const;
 	const string name() const;
 	
+	quantity_t log10() const;
 	
 	bool operator>(const quantity_t& obj) const;
 	bool operator<(const quantity_t& obj) const;
@@ -103,11 +104,12 @@ public:
 	
 	//skalars
 	///
+	quantity_t get_data_by_index(unsigned int start, unsigned int stop) const;
 	quantity_t remove_data_by_index(unsigned int start, unsigned int stop) const;
 	quantity_t remove_data_from_begin(unsigned int stop) const;
 	quantity_t absolute() const;
 	quantity_t invert() const;
-	quantity_t sum() const;
+	quantity_t sum(int start=0, int stop = -1) const;
 	quantity_t quantile(double percentile=0.75) const;
 	quantity_t median() const;
 	quantity_t mean() const;
@@ -136,8 +138,8 @@ public:
 	
 	quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
 	quantity_t fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade=-1 ) const;
-	///polynomial interpolation
-	quantity_t polyfit(unsigned int polynom_grade) const;
+	///polynomial interpolation from idx_start to idx_stop
+	quantity_t polyfit(unsigned int polynom_grade, int idx_start=0, int idx_stop=-1) const;
 	quantity_t extrapolate(unsigned int polynom_grade, const quantity_t& X) const;
 	
 	

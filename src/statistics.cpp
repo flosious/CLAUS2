@@ -758,19 +758,17 @@ double statistics::get_trimmed_mean_from_Y(vector<double> Y, float alpha)
 
 double statistics::get_mean_from_Y(vector<double> Y) {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
-//     statistics::std_vec_to_gsl_vec(&Y,&vec);
     for (size_t i=0;i<Y.size();i++) gsl_vector_set (vec, i, Y.at(i));
     double max = gsl_stats_mean(vec->data,1,Y.size());
     gsl_vector_free(vec);
     return max;
 }
 
-//     stats.quantile = gsl_stats_quantile_from_sorted_data(vec->data,1,c,0.75);
 double statistics::get_quantile_from_Y(vector<double> Y, double percentile) 
 {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
-    for (size_t i=0;i<Y.size();i++)gsl_vector_set (vec, i, Y.at(i));
-//     double median = gsl_stats_median(vec->data,1,Y.size());
+    for (size_t i=0;i<Y.size();i++)
+		gsl_vector_set (vec, i, Y.at(i));
 	gsl_sort(vec->data,1,Y.size());
 	double quantile = gsl_stats_quantile_from_sorted_data(vec->data,1,Y.size(),percentile);
     gsl_vector_free(vec);
@@ -1394,7 +1392,15 @@ vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY
     double yi;
     double *x,*y;
     const size_t c=data_XY.size();
-
+	
+// 	for (auto& d : data_XY)
+// 		cout << d.first << "\t" << d.second << endl;
+	
+// 	for (auto& x : X)
+// 		cout << x << endl;
+// 	cout << "data_XY.size()=" << data_XY.size() << endl;
+// 	cout << "X.size()=" << X.size() << endl;
+	
 	if (c<10) return {};
     gsl_interp_accel *acc = gsl_interp_accel_alloc ();
     gsl_spline *spline_akima = gsl_spline_alloc(gsl_interp_akima, c);
@@ -1410,6 +1416,8 @@ vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY
         yi = gsl_spline_eval (spline_akima, X.at(i), acc);
         Y.push_back(yi);
       }
+// 	cout << "data_XY.size()=" << data_XY.size() << endl;
+// 	cout << "X.size()=" << X.size() << endl;
     gsl_spline_free (spline_akima);
     gsl_interp_accel_free (acc);
     return Y;

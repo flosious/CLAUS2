@@ -38,6 +38,7 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 	string symbol;
 	vector<isotope_t> isotopes;
 	vector<string> clustername_parts = tools::str::get_strings_between_delimiter(clustername, " ");
+	
 	for (auto& iso_p : clustername_parts)
 	{
 		isotope_t iso(iso_p);
@@ -49,6 +50,7 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 			return {};
 		}
 	}
+	logger::debug(11,"cluster_t::parse_clustername()","clustername",clustername);
 	return isotopes;
 }
 
@@ -185,8 +187,20 @@ isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_is
 	for (auto& i:isotopes)
 	{
 		if (find(reference_isotopes.begin(),reference_isotopes.end(),i)==reference_isotopes.end())
+		{
+			logger::debug(7,"cluster_t::corresponding_isotope()","not found cluster isotope in reference_isotopes", i.to_string());
 			isos.insert(i);
+		}
 	}
+	
+// 	stringstream out;
+// 	for (auto& i:reference_isotopes)
+// 	{
+// 		out << i.to_string() <<" ";
+// 	}
+// 	cout << "reference_isotopes: " << out.str() << endl; 
+// 	cout << "isotopes in cluster" << to_string() << endl;
+	
 	if (isos.size()==0)
 	{
 		logger::error("cluster_t::corresponding_isotope()","complex reference clusters are not supported","","returning empty");

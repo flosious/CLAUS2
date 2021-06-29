@@ -241,8 +241,8 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		if (line.text!="") // add text box below start
 		{
 			gr->SetFontSize(2);
-			gr->Puts(mglPoint(range().start-10,line.y_start), mglPoint(range().stop,line.y_start), line.text.c_str());
-// 			gr->Puts(mglPoint(line.x_start,line.y_start), mglPoint(line.x_stop,line.y_stop), line.text.c_str());
+// 			gr->Puts(mglPoint(range().start,line.y_start), mglPoint(range().stop,line.y_start), line.text.c_str());
+			gr->Puts(mglPoint(line.x_start,line.y_start), mglPoint(line.x_stop,line.y_stop), line.text.c_str());
 			gr->SetFontSize(3);
 		}
 	}

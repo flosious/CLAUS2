@@ -141,9 +141,13 @@ vector<cluster_t> files_::dsims_t::contents_t::clusters()
 			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
 		}
 		cluster_t cluster(clustername,sputter_time,intensity_s,sputter_depth_s,concentration_s);
-		if (cluster.is_set()) collected_clusters.push_back(cluster);
+		if (cluster.is_set()) 
+		{
+			collected_clusters.push_back(cluster);
+			logger::debug(11,"files_::dsims_t::contents_t::clusters()","cluster.to_string()",cluster.to_string());
+		}
 		else
-			logger::error("files_::dsims_t::contents_t::clusters()", "!cluster.is_set()",to_string());
+			logger::error("files_::dsims_t::contents_t::clusters()", "!cluster.is_set()",clustername);
 	}
 	return collected_clusters;
 }
@@ -180,6 +184,7 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 		col.data=tools::mat::str_vec_to_double_vec(col_data_string);
 		if (col.data.size()==0) continue;
 		columns_s.push_back(col);
+		logger::debug(11,"files_::dsims_t::contents_t::columns()",col.to_string());
 	}
 	
 	if (dimensions().size() != data_cols_lines.size())
@@ -246,7 +251,7 @@ const vector<std::__cxx11::string>& files_::dsims_t::contents_t::cluster_names()
 
 bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 {
-	logger::debug(6,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","entering","");
+	logger::debug(21,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","entering","");
 	cluster_names_p.clear();
 	units_p.clear();
 	dimensions_p.clear();
@@ -315,7 +320,7 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 // 		return false;
 // 	}
 
-	logger::debug(6,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","exiting","");
+	logger::debug(21,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","exiting","");
     return true;
 }
 

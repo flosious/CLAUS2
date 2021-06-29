@@ -100,71 +100,123 @@ public:
 		///if true, will save all calculated results (more RAM usage, but faster)
 		static bool save_results;
 	protected:
-// 		class pbp_t
-// 		{
-// 		private:
-// 			vector<measurements_::sims_t> measurements_s;
-// 		public:
-// 			pbp_t(sims_t& MG);
-// 			vector<measurements_::sims_t*> measurements();
-// 			const map<matrix_t,SR_t> SRs();
-// 			const SR_t SR(matrix_t& matrix);
-// 			const map<matrix_t,RSF_t> RSFs(cluster_t& cluster);
-// 			const RSF_t RSF(cluster_t& cluster, matrix_t& matrix);
-// 		};
-// 		pbp_t pbp_s;
-		
-		
+
 		class calc_t
 		{
+		protected:
+			sims_t& MG;
 		public:
-			class jiang_t
+			///changes overwrite properties for all calc methods
+			void toggle_overwrite(bool overwrite);
+			class jiang_c
 			{
-				const sims_t& MG;
-				
+				sims_t& MG;
 			public:
-				jiang_t(const sims_t& MG);
+				jiang_c(sims_t& MG);
 			};
+			///sputter_rate
+			class SR_c
+			{
+			private:
+				sims_t& MG;
+			public:
+				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
+				bool overwrite = false;
+				SR_c(sims_t& MG);
+				sims_t& from_crater_depths();
+			 	sims_t& from_implant_max();
+				sims_t& from_ref_fit();
+			};
+			///sputter_depth
+			class SD_c
+			{
+			private:
+				
+				sims_t& MG;
+			public:
+				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
+				bool overwrite = false;
+				SD_c(sims_t& MG);
+				sims_t& from_SR();
+			};
+			///sensitivity_factor
+			class SF_c
+			{
+			private:
+				sims_t& MG;
+			public:
+				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
+				bool overwrite = false;
+				SF_c(sims_t& MG);
+				sims_t& from_implant_dose();
+				sims_t& from_implant_max();
+				sims_t& from_ref_fit_();
+				sims_t& from_RSF_mean_ref();
+				sims_t& from_RSF_trimmed_mean_ref();
+				sims_t& from_RSF_pbp_ref();
+				sims_t& from_RSF_median_ref();
+				
+			};
+			///relative_sensitivity_factor
 			class RSF_c
 			{
 			private:
-				sims_t& MG_r;
+				sims_t& MG;
 			public:
+				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
+				bool overwrite = false;
 				RSF_c(sims_t& MG);
-				sims_t from_dose(); // SF
-				sims_t from_implant_max(); // SF
-				sims_t polynom_interpolation_from_matrix(const int max_rank=2);
-				sims_t from_mean();
-				sims_t from_median();
-				///tries to find the best calculation method under given boundary conditions
-				sims_t best();
+				sims_t& from_SF_mean_ref();
+				sims_t& from_SF_trimmed_mean_ref();
+				sims_t& from_SF_pbp_ref();
+				sims_t& from_SF_median_ref();
+				sims_t& polynom_interpolation_from_matrix(const int max_rank=2);
+			};
+			class concentration_c
+			{
+			private:
+				sims_t& MG;
+			public:
+				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
+				bool overwrite = false;
+				concentration_c(sims_t& MG);
+				sims_t& from_SF();
 			};
 			///matrix calibration
 			class matrix_c
 			{
-				private:
-				sims_t& MG_r;
+			private:
+				sims_t& MG;
 			public:
+				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
+				bool overwrite = false;
 				///calculation of matrix concentrations
 				matrix_c(sims_t& MG);
 				///rank{0,1,0} -> 0*a0+1*a1*x+0*a2*x*x == 0*a0+1*a1*x =rank{0,1}
-				sims_t from_jiangs_protocol(vector<int> rank = {0,1,0});
-				sims_t from_point_by_point();
-				sims_t from_mean();
-				sims_t from_median();
-				sims_t best();
+				sims_t& from_jiangs_protocol(vector<int> rank = {0,1,0});
+				sims_t& from_pbp();
+				sims_t& from_mean();
+				sims_t& from_median();
 			};
-			map<matrix_t,RSF_t> matrix_to_RSFs(const cluster_t& cluster);
-			map<matrix_t, SR_t> matrix_to_SRs();
-			map<matrix_t, quantity_t> matrix_to_intensity_ratio();
+			calc_t(sims_t& MG);
+			jiang_c jiang;
+			SR_c SRs;
+			SD_c SDs;
+			SF_c SFs;
+			RSF_c RSFs;
+			matrix_c matrices;
+			concentration_c concentrations;
 		};
-		
 		///check if all measurements belong in this group
 		void check();
 	public:
+		calc_t calc();
+		map<matrix_t,RSF_t> matrix_to_RSF(const cluster_t& cluster);
+		map<matrix_t,SR_t> matrix_to_SRs();
+		map<matrix_t,intensity_t> matrix_to_intensity_sum();
 		sims_t(measurements_::sims_t& measurement);
-		///looks up for common cluster in all measurements corresponding to the matrices
-		vector<cluster_t> reference_clusters();
+		///intersection of all matrix_clusters of all measurements within this group
+// 		measurements_::dsims_t::matrix_clusters_c& common_matrix_clusters();
 		virtual vector<measurements_::sims_t*> measurements();
 		///listed RSF to coressponding cluster and matrix
 		RSF_t RSF(cluster_t cluster, matrix_t matrix);

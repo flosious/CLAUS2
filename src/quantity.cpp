@@ -102,11 +102,29 @@ quantity_t quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_
 	return fit;
 }
 
-quantity_t quantity_t::polyfit(unsigned int polynom_grade) const
+quantity_t quantity_t::polyfit(unsigned int polynom_grade, int idx_start, int idx_stop) const
 {
-	if (!is_set()) return quantity_t();
+	if (!is_set()) 
+	{
+// 		cout << "return {}" << endl;
+		return quantity_t();
+	}
 // 	if (polynom_grade==-1) polynom_grade=17; // seems to be good for implant profiles
+	if (idx_stop<0)
+		idx_stop = data.size()-1;
+	if (data.size()<idx_stop)
+	{
+// 		cout << "return {}" << endl;
+		return {};
+	}
 	
+	if (idx_start!=0 || idx_stop!=data.size()-1)
+	{
+// 		cout << "return {}" << endl;
+		return remove_data_by_index(idx_start,idx_stop).polyfit(polynom_grade);
+	}
+	
+// 	vector<double> data;
 	fit_functions::polynom_t polynom;
 	map<double,double> data_XY;
 	vector<double> X(data.size());
@@ -116,7 +134,12 @@ quantity_t quantity_t::polyfit(unsigned int polynom_grade) const
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_fit(" << name() << ")";
 	quantity_t fit(ss.str(),{},{unit()});
-	if (!polynom.fit(data_XY,polynom_grade)) return {};
+// 	cout << "data.size()=" << data.size() << endl;
+	if (!polynom.fit(data_XY,polynom_grade)) 
+	{
+// 		cout << "fit error" << endl;
+		return {};
+	}
 	fit.data=polynom.fitted_y_data(X);
 	return fit;
 }
@@ -383,6 +406,16 @@ quantity_t quantity_t::moving_window_sd(int window_size) const
 	return _sd;
 }
 
+quantity_t quantity_t::log10() const
+{
+	if (!is_set())
+		return {};
+	quantity_t out = *this;
+	for (auto& o : out.data)
+		o = std::log10(o);
+	return out;
+}
+
 quantity_t quantity_t::sd() const
 {
 	if (!is_set())
@@ -590,19 +623,45 @@ quantity_t quantity_t::remove_data_by_index(unsigned int start, unsigned int sto
 {
 	if (!is_set())
 		return {};
+	if (start<0)
+		start=0;
 	if (start>=data.size())
 	{
 		logger::error("quantity_t::remove_data_by_index()","start>=data.size()","","return empty");
 		return {};
 	}
-	if (stop>=data.size())
+	if (stop>data.size())
 	{
-		logger::error("quantity_t::remove_data_by_index()","stop>=data.size()","","return empty");
-		return {};
+		stop=data.size();
 	}
 	quantity_t copy = *this;
 
 	copy.data.erase(copy.data.begin()+start,copy.data.begin()+stop);
+	return copy;
+}
+
+quantity_t quantity_t::get_data_by_index(unsigned int start, unsigned int stop) const
+{
+	if (!is_set())
+		return {};
+	if (start<0)
+		start=0;
+	if (start>data.size())
+	{
+		logger::error("quantity_t::filter_data_by_index()","start>=data.size()","","return empty");
+		return {};
+	}
+	if (stop>data.size())
+	{
+// 		logger::error("quantity_t::filter_data_by_index()","stop>=data.size()","","return empty");
+// 		return {};
+		stop=data.size();
+	}
+	
+	quantity_t copy = *this;
+	copy.data = vector<double> (data.begin()+start,data.begin()+stop);
+// 	copy.data.erase(copy.data.begin()+stop,copy.data.begin()+data.size());
+// 	copy.data.erase(copy.data.begin(),copy.data.begin()+start);
 	return copy;
 }
 
@@ -618,17 +677,19 @@ quantity_t quantity_t::absolute() const
 	return {ss.str(),{sum},unit()};
 }
 
-quantity_t quantity_t::sum() const
+quantity_t quantity_t::sum(int start, int stop) const
 {
 	if (!is_set()) return {};
-	quantity_t sum = *this;
-	for (int i=0;i<sum.data.size();i++)
-	{
-		sum.data.at(i) = 0;
-		for (int j=0;i<=j;j++)
-			sum.data.at(i) += data.at(j);
-	}
-	return sum;
+	if (stop<0)
+		stop = data.size();
+	if (start<0)
+		start = 0;
+// 	quantity_t sum = *this;
+// 	sum.data.resize(stop-start);
+	double summe = 0;
+	for (int i=start;i<stop;i++)
+		summe += data.at(i);
+	return {name(),{summe},unit()};
 }
 
 
@@ -675,9 +736,11 @@ void quantity_t::operator<<(quantity_t obj)
 	if (!obj.is_set()) return;
 	if (!is_set())
 	{
-// 		*this = obj;
+		*this = obj;
 		return;
 	}
+	if (unit().base_units_exponents!=obj.unit().base_units_exponents)
+		return;
 	quantity_t adder = obj.change_unit(unit());
 	tools::vec::add(&data,adder.data);
 }
@@ -789,8 +852,8 @@ quantity_t quantity_t::operator / (const quantity_t& quantity_p) const
 	}
 	else
 	{
-		cout << ">>>ERROR<<<: " <<  quotient.name() << endl;
-		cout << name() << ".data.size()= " << data.size() << " divide by " << quantity_p.name() << ".data.size()= " << quantity_p.data.size() << endl;
+// 		cout << ">>>ERROR<<<: " <<  quotient.name() << endl;
+// 		cout << name() << ".data.size()= " << data.size() << " divide by " << quantity_p.name() << ".data.size()= " << quantity_p.data.size() << endl;
 		return {};
 	}
 	return quotient;

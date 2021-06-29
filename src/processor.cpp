@@ -51,18 +51,24 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
 // 	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
 	
+// 	vector<double> test{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
+// 	test.erase(test.begin()+5,test.begin()+10);
+// 	for (auto& t : test)
+// 		cout << t << endl;
+// 	return ;
+	
 	for (auto& MG : dsims.mgroups())
 	{
-// 		for (auto& cR : MG.reference_clusters())
-// 			cout << "common ref_clusters: " << cR.to_string() << endl;
-		for (auto& M:MG.measurements_p)
-		{			
-// 			for (auto& d : M.calc().SR().from_implant_max().calc().SD().from_SR().crater.SR.data)
-// 				cout << d << endl;
-// 			cout << M.calc().SR().from_implant_max().crater.SR.to_string() << endl;
-			
-			M.calc().SR().from_implant_max().calc().SD().from_SR().calc().SF().from_db_dose().calc().concentration().from_SF().plot_now(2);
+		//get matrices
+		//get/calculate RSF from references
+		//set/calculate matrix
+		//set RSFs depending on matrix
+		MG.calc().SRs.from_implant_max().calc().SDs.from_SR().calc().SFs.from_implant_max().calc().concentrations.from_SF();
+		for (auto& M : MG.measurements())
+		{
+			M->plot_now(0);
 		}
+
 	}
 // 	sample_t::db_t::migrate_claus1_db(sql_wrapper, "build/migrate.database.sqlite3");
 // 	for (auto& s:samples_list)

@@ -265,8 +265,17 @@ bool fit_functions::polynom_t::fitted()
 
 bool fit_functions::polynom_t::fit(map<double,double> data_XY, int degree)
 {
-	if (degree<0) return false;
-	if (degree>=data_XY.size()) return false;
+	if (degree<0) 
+	{
+		cout << "degree<0" << endl;
+		return false;
+	}
+	if (degree>=data_XY.size()) 
+	{
+		cout << "data_XY.size()=" << data_XY.size() <<endl;
+		return false;
+	}
+	
 	fitted_p = false;
 	int i, n;
 	gsl_matrix *X, *cov;

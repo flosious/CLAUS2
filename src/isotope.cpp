@@ -21,8 +21,11 @@ isotope_t::isotope_t(std::__cxx11::string symbol_s, int nucleons_s, double abund
 isotope_t::isotope_t(std::__cxx11::string str, double abundance_s, double amount_s)
 {
 	smatch match;
-	if (regex_search(str,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)"))) 
+	if (regex_search(str,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)$"))) /// 11B_fit
 	{
+		stringstream t;
+		t << match[1]  << "\t"  << match[2] << "\t" << match[3];
+		logger::debug(11,"isotope_t::isotope_t()","str",str, t.str());
 		if (match[1]!="") nucleons = tools::str::str_to_int(match[1]);
 		else 
 		{
@@ -32,6 +35,7 @@ isotope_t::isotope_t(std::__cxx11::string str, double abundance_s, double amount
 		else
 		{
 			logger::error("isotope_t::isotope_t()","symbol=''", "iso:'"+str + "'","returning");
+			symbol="";
 			return;
 		}
 		if (match[3]!="") amount_s = tools::str::str_to_double (match[3]);

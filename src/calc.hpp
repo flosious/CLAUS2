@@ -20,23 +20,40 @@
 #define CALC_T_HPP
 
 #include "measurement.hpp"
+#include "mgroup.hpp"
 
 using namespace std;
 
 
-namespace calc
+class calc_t
 {
-	class SR_c
+	class sims_t
 	{
 	private:
-		const measurements_::sims_t& M;
+		class SF_c
+		{
+			
+		};
+		class RSF_c
+		{
+			vector<measurements_::sims_t*> measurements_s;
+		public:
+			RSF_c(vector<measurements_::sims_t*> measurements_s, SF_c& SF);
+		};
+		const bool overwrite;
+		vector<measurements_::sims_t*> measurements_s;
 	public:
-		SR_c(const measurements_::sims_t& M);
-		bool from_crater_depth();
-		bool from_implant_max();
-		bool from_database_parameters();
+		RSF_c RSF;
+		sims_t(measurements_::sims_t measurement , bool overwrite=true);
+		sims_t(vector<measurements_::sims_t> measurements , bool overwrite=true);
+		sims_t(vector<measurements_::sims_t>& measurements , bool overwrite=true);
+		sims_t(vector<measurements_::sims_t*> measurements , bool overwrite=true);
+		sims_t(mgroups_::sims_t& mgroup , bool overwrite=true);
+		
+		mgroups_::sims_t mgroup();
+		vector<measurements_::sims_t*> measurements();
 	};
-}
+};
 
 
 #endif // CALC_T_HPP

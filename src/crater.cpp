@@ -333,6 +333,8 @@ quantity_t crater_t::common_X_quantity(const vector<quantity_t>& X_quantities)
 		logger::error("crater_t::common_X_quantity()","resolution<=0","","returning false");
 		return {};
 	}
+	else
+		logger::debug(11,"crater_t::common_X_quantity()","resolution: ", tools::to_string(resolution));
 	
 	const int common_dimension_data_size = floor(x_max-x_min)/resolution+1;
 	if (common_dimension_data_size<3)
@@ -340,6 +342,8 @@ quantity_t crater_t::common_X_quantity(const vector<quantity_t>& X_quantities)
 		logger::error("crater_t::common_X_quantity()","common_dimension_data_size<3",tools::to_string(common_dimension_data_size),"returning false");
 		return {};
 	}
+	else
+		logger::debug(11,"crater_t::common_X_quantity()","common_dimension_data_size: ", tools::to_string(common_dimension_data_size));
 	
 	X.data.resize(common_dimension_data_size);
 	for (int i=0;i<common_dimension_data_size;i++)
