@@ -442,7 +442,7 @@ crater_t crater_t::change_resolution(sputter_depth_t sputter_depth_res)
 		return *this;
 	}
 	crater_t copy_C = *this;
-	copy_C.sputter_depth = sputter_depth.resolution(sputter_depth_res);
+	copy_C.sputter_depth = sputter_depth.change_resolution(sputter_depth_res);
 	if (sputter_time.is_set())
 		copy_C.sputter_time = sputter_time.interp(sputter_depth,copy_C.sputter_depth);
 	if (SR.is_set())
@@ -470,7 +470,7 @@ crater_t crater_t::change_resolution(sputter_time_t sputter_time_res)
 		return *this;
 	}
 	crater_t copy_C = *this;
-	copy_C.sputter_time = sputter_time.resolution(sputter_time_res);
+	copy_C.sputter_time = sputter_time.change_resolution(sputter_time_res);
 	if (sputter_depth.is_set())
 		copy_C.sputter_depth = sputter_depth.interp(sputter_time,copy_C.sputter_time);
 	if (SR.is_set())
@@ -482,7 +482,7 @@ crater_t crater_t::change_resolution(sputter_time_t sputter_time_res)
 
 sputter_current_t& crater_t::sputter_current()
 {
-	logger::debug(10,"crater_t::sputter_current()","sputter_beam.sputter_current()",sputter_beam.sputter_current.to_string());
+// 	logger::debug(10,"crater_t::sputter_current()","sputter_beam.sputter_current()",sputter_beam.sputter_current.to_string());
 	if (sputter_beam.sputter_time.is_set() && sputter_time.is_set())
 	{
 		sputter_beam.sputter_current = sputter_beam.sputter_current.interp(sputter_beam.sputter_time,sputter_time);

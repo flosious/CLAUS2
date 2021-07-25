@@ -50,7 +50,7 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 			return {};
 		}
 	}
-	logger::debug(11,"cluster_t::parse_clustername()","clustername",clustername);
+	logger::debug(20,"cluster_t::parse_clustername()","clustername",clustername);
 	return isotopes;
 }
 
@@ -188,7 +188,7 @@ isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_is
 	{
 		if (find(reference_isotopes.begin(),reference_isotopes.end(),i)==reference_isotopes.end())
 		{
-			logger::debug(7,"cluster_t::corresponding_isotope()","not found cluster isotope in reference_isotopes", i.to_string());
+			logger::debug(11,"cluster_t::corresponding_isotope()","not found cluster isotope in reference_isotopes", i.to_string());
 			isos.insert(i);
 		}
 	}
@@ -229,12 +229,12 @@ cluster_t cluster_t::interpolate(quantity_t& new_Q, quantity_t& old_Q) const
 	//new data is not allowed to be larger compared to old data
 	if (new_Q.max() > old_Q.max())
 	{
-		logger::error("cluster_t::interpolate()","new_Q.max() > old_Q.max()","","returning empty");
+		logger::error("cluster_t::interpolate()","new_Q.max()=" + new_Q.max().to_string() +" > old_Q.max()="+old_Q.max().to_string(),"","returning empty");
 		return {};
 	}
 	if (new_Q.min() < old_Q.min())
 	{
-		logger::error("cluster_t::interpolate()","new_Q.min() < old_Q.min()","","returning empty");
+		logger::error("cluster_t::interpolate()","new_Q.min()="+new_Q.min().to_string()+" < old_Q.min()="+old_Q.min().to_string(),"","returning empty");
 		return {};
 	}
 	cluster_t new_cluster(isotopes);

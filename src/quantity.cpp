@@ -49,6 +49,44 @@ quantity_t::quantity_t(double data_s, unit_t unit_s) : unit_p(unit_s), data(data
 {
 }
 
+fit_functions::polynom_t quantity_t::polynom(unsigned int polynom_grade) const
+{
+	fit_functions::polynom_t poly(polynom_grade);
+	if (!is_set()) 
+		return poly;
+	
+	map<double,double> data_XY;
+	vector<double> X(data.size());
+	for (int x=0;x<X.size();x++)
+		X[x]=x;
+	tools::vec::combine_vecs_to_map(&X,&data,&data_XY);
+
+	if (!poly.fit(data_XY)) 
+	{
+		return poly;
+	}
+	return poly;
+}
+
+quantity_t quantity_t::bspline_smoothing( unsigned int breakpoints, const size_t spline_order) const
+{
+	if (!is_set())
+		return {};
+	
+	stringstream ss;
+	ss << "BSpline" << spline_order<< "_smooth(" << name() << ")";
+	return {ss.str(),statistics::bspline_smooth(data,{}, breakpoints,spline_order),unit()};
+}
+
+quantity_t quantity_t::bspline_smoothing(const quantity_t& Xdata, unsigned int breakpoints, const size_t spline_order) const
+{
+	if (!is_set())
+		return {};
+	
+	stringstream ss;
+	ss << "BSpline" << spline_order<< "_smooth(" << name() << ")";
+	return {ss.str(),statistics::bspline_smooth(data,Xdata.data, breakpoints,spline_order),unit()};
+}
 
 quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) const
 {
@@ -89,58 +127,72 @@ quantity_t quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_
 	if (!is_set()) return quantity_t();
 	if (polynom_grade==-1) polynom_grade=17; // seems to be good for implant profiles
 	
-	fit_functions::polynom_t polynom;
+	fit_functions::polynom_t polynom(polynom_grade);
 	map<double,double> data_XY;
 	tools::vec::combine_vecs_to_map(&x_data.data,&data,&data_XY);
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_fit(" << name() << ")";
 	quantity_t fit(ss.str(),{},{unit()});
-	polynom.fit(data_XY,polynom_grade);
+	polynom.fit(data_XY);
 	
 	if (new_x_data.is_set()) fit.data=polynom.fitted_y_data(new_x_data.data);
 	else fit.data=polynom.fitted_y_data(x_data.data);
 	return fit;
 }
 
-quantity_t quantity_t::polyfit(unsigned int polynom_grade, int idx_start, int idx_stop) const
+quantity_t quantity_t::polyfit_derivative(unsigned int polynom_grade, unsigned int derivative) const
 {
-	if (!is_set()) 
+	fit_functions::polynom_t polynom_s = polynom(polynom_grade);
+	
+	if (!polynom_s.fit(data)) 
 	{
-// 		cout << "return {}" << endl;
-		return quantity_t();
-	}
-// 	if (polynom_grade==-1) polynom_grade=17; // seems to be good for implant profiles
-	if (idx_stop<0)
-		idx_stop = data.size()-1;
-	if (data.size()<idx_stop)
-	{
-// 		cout << "return {}" << endl;
+		logger::error("quantity_t::polyfit_derivative","polynom_s.derivative(derivative).fitted","returning empty");
 		return {};
 	}
+	stringstream ss;
+	ss << "poly" << polynom_grade << "_derivative" << derivative<< "_fit(" << name() << ")";
+	quantity_t fit(ss.str(),{},{unit()});
+	fit.data=polynom_s.derivative(derivative).fitted_y_data();
+	return fit;
+}
+
+
+quantity_t quantity_t::polyfit(unsigned int polynom_grade) const
+{
+// 	if (!is_set()) 
+// 		return quantity_t();
+// 	
+// 	if (idx_stop<0)
+// 		idx_stop = data.size()-1;
+// 	if (data.size()<idx_stop)
+// 	{
+// // 		cout << "return {}" << endl;
+// 		return {};
+// 	}
+// 	
+// 	if (idx_start!=0 || idx_stop!=data.size()-1)
+// 	{
+// // 		cout << "return {}" << endl;
+// 		return remove_data_by_index(idx_start,idx_stop).polyfit(polynom_grade);
+// 	}
+// 	
+// // 	vector<double> data;
+// 	fit_functions::polynom_t polynom;
+// 	map<double,double> data_XY;
+// 	vector<double> X(data.size());
 	
-	if (idx_start!=0 || idx_stop!=data.size()-1)
+// 	tools::vec::combine_vecs_to_map(&X,&data,&data_XY);
+	
+// 	cout << "data.size()=" << data.size() << endl;
+	fit_functions::polynom_t polynom_s = polynom(polynom_grade);
+	if (!polynom_s.fit(data)) 
 	{
-// 		cout << "return {}" << endl;
-		return remove_data_by_index(idx_start,idx_stop).polyfit(polynom_grade);
+		return {};
 	}
-	
-// 	vector<double> data;
-	fit_functions::polynom_t polynom;
-	map<double,double> data_XY;
-	vector<double> X(data.size());
-	for (int x=0;x<X.size();x++)
-		X[x]=x;
-	tools::vec::combine_vecs_to_map(&X,&data,&data_XY);
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_fit(" << name() << ")";
 	quantity_t fit(ss.str(),{},{unit()});
-// 	cout << "data.size()=" << data.size() << endl;
-	if (!polynom.fit(data_XY,polynom_grade)) 
-	{
-// 		cout << "fit error" << endl;
-		return {};
-	}
-	fit.data=polynom.fitted_y_data(X);
+	fit.data=polynom_s.fitted_y_data();
 	return fit;
 }
 
@@ -367,6 +419,74 @@ quantity_t quantity_t::moving_window_mad(int window_size) const
 	return mad;
 }
 
+quantity_t quantity_t::reverse() const
+{
+	auto copy = *this;
+	size_t size = data.size();
+	for (int i=0;i<size;i++)
+		copy.data.at(size-1-i) = data.at(i);
+	return copy;
+}
+
+
+quantity_t quantity_t::moving_window_iqr(int window_size) const
+{
+	return moving_window_qqr(window_size,0.25);
+}
+
+quantity_t quantity_t::moving_window_qqr(int window_size, double q) const
+{
+	if (!is_set())
+		return {};
+	if (window_size==0) window_size = 0.05*data.size();
+	if (window_size==0) return quantity_t();
+
+	stringstream n;
+	n << "mw" << window_size <<"_qqr" << q <<"(" << name() << ")";
+	quantity_t _mean(n.str(),{statistics::get_moving_window_qqr_from_Y(data,window_size,q)},unit());
+	return _mean;
+}
+
+quantity_t quantity_t::moving_window_max(int window_size) const
+{
+	if (!is_set())
+		return {};
+	if (window_size==0) window_size = 0.05*data.size();
+	if (window_size==0) return quantity_t();
+
+	stringstream n;
+	n << "mw" << window_size <<"_max(" << name() << ")";
+	quantity_t _mean(n.str(),{statistics::get_moving_window_max_from_Y(data,window_size)},unit());
+	return _mean;
+}
+
+quantity_t quantity_t::moving_window_min(int window_size) const
+{
+	if (!is_set())
+		return {};
+	if (window_size==0) window_size = 0.05*data.size();
+	if (window_size==0) return quantity_t();
+
+	stringstream n;
+	n << "mw" << window_size <<"_min(" << name() << ")";
+	quantity_t _mean(n.str(),{statistics::get_moving_window_min_from_Y(data,window_size)},unit());
+	return _mean;
+}
+
+quantity_t quantity_t::moving_window_sum(int window_size) const
+{
+	if (!is_set())
+		return {};
+	if (window_size==0) window_size = 0.05*data.size();
+	if (window_size==0) return quantity_t();
+
+	stringstream n;
+	n << "mw" << window_size <<"_sum(" << name() << ")";
+	quantity_t _mean(n.str(),{statistics::get_moving_window_sum_from_Y(data,window_size)},unit());
+	return _mean;
+}
+
+
 quantity_t quantity_t::moving_window_mean(int window_size) const
 {
 	if (!is_set())
@@ -438,10 +558,10 @@ quantity_t quantity_t::max() const
 quantity_t quantity_t::min() const
 {
 	if (!is_set()) return {};
-	int min_index = statistics::get_max_index_from_Y(data);
-	if (min_index==0) return {};
-	if (min_index>data.size()-2) return {}; 
-	if (min_index<2) return {}; 
+	int min_index = statistics::get_min_index_from_Y(data);
+// 	if (min_index==0) return {};
+// 	if (min_index>data.size()-2) return {}; 
+// 	if (min_index<2) return {}; 
 
 	stringstream n;
 	n << "min(" << name() << ")";
@@ -454,6 +574,20 @@ bool quantity_t::is_set() const
 	if (data.size()==0) return false;
 // 	if (dimension.length()==0) return false;
 // 	if (!unit().is_set()) return false;
+	return true;
+}
+
+bool quantity_t::is_scalar() const
+{
+	if (!is_set()) return false;
+	if (data.size()==1) return true;
+	return false;
+}
+
+bool quantity_t::is_vector() const
+{
+	if (!is_set()) return false;
+	if (is_scalar()) return false;
 	return true;
 }
 
@@ -496,21 +630,30 @@ quantity_t quantity_t::filter_recursive_median(int window_size) const
 	return recursiveMedian_filtered;
 }
 
+quantity_t quantity_t::change_resolution(unsigned int new_data_size) const
+{
+	if (new_data_size<=1)
+		return {};
+	if (data.size()<=1)
+		return {};
+	quantity_t new_res = resolution() * (new_data_size-1)/(data.size()-1);
+	return change_resolution({name(),new_res.data,new_res.unit()});
+}
 
-quantity_t quantity_t::resolution(quantity_t new_res) const
+quantity_t quantity_t::change_resolution(quantity_t new_res) const
 {
 	if (!is_set() || !new_res.is_set()) return{};
 	if (name() != new_res.name())
 	{
-		logger::error("quantity_t::resolution()","name() != new_res.name()",name() + "!=" + new_res.name(),"returning empty");
+		logger::error("quantity_t::change_resolution()","name() != new_res.name()",name() + "!=" + new_res.name(),"returning empty");
 		return {};
 	}
 	if (new_res.data.size()!=1)
-		logger::debug(4,"quantity_t::resolution()","new_res.data.size()!=1",tools::to_string(new_res.data.size()));
+		logger::debug(4,"quantity_t::change_resolution()","new_res.data.size()!=1",tools::to_string(new_res.data.size()));
 // 	new_res = new_res.change_unit(unit());
 	if (!new_res.is_set())
 	{
-		logger::debug(4,"quantity_t::resolution()","!new_res.is_set()","","returning empty");
+		logger::debug(4,"quantity_t::change_resolution()","!new_res.is_set()","","returning empty");
 		return {};
 	}
 	quantity_t old_Q = change_unit(new_res.unit());
@@ -585,6 +728,8 @@ quantity_t quantity_t::change_unit(unit_t target_unit) const
 {	
 	if (!is_set())
 		return {};
+	if (unit()==target_unit) // nothing to change
+		return *this;
 	if (unit().base_units_exponents != target_unit.base_units_exponents) 
 	{
 		logger::warning(1,"quantity_t::change_unit","unit().base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
@@ -594,7 +739,7 @@ quantity_t quantity_t::change_unit(unit_t target_unit) const
 	double factor = unit().multiplier / target_unit.multiplier;
 // 	for (int i=0;i<data.size();i++)
 // 		copy.data[i] *= factor ;
-	logger::debug(11,"quantity_t::change_unit",unit().to_string(),target_unit.to_string(),"changed");
+	logger::debug(11,"quantity_t::change_unit","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
 	return quantity_t{*this * factor,target_unit};
 }
 
@@ -615,9 +760,19 @@ quantity_t quantity_t::invert() const
 
 quantity_t quantity_t::remove_data_from_begin(unsigned int stop) const
 {
+// 	cout << "stop=" << stop << endl;
+	if (stop==0)
+		return *this;
 	return remove_data_by_index(0,stop);
 }
 
+quantity_t quantity_t::remove_data_from_begin(const quantity_t& remove_stop) const
+{
+// 	if (!remove_stop.is_set())
+// 		return {};
+// 	cout << remove_stop.change_unit(unit()).to_string() << endl;
+	return remove_data_from_begin(remove_stop.change_unit(unit()).data.front());
+}
 
 quantity_t quantity_t::remove_data_by_index(unsigned int start, unsigned int stop) const
 {
@@ -648,7 +803,7 @@ quantity_t quantity_t::get_data_by_index(unsigned int start, unsigned int stop) 
 		start=0;
 	if (start>data.size())
 	{
-		logger::error("quantity_t::filter_data_by_index()","start>=data.size()","","return empty");
+		logger::error("quantity_t::get_data_by_index()","start>=data.size()","","return empty");
 		return {};
 	}
 	if (stop>data.size())
@@ -665,7 +820,7 @@ quantity_t quantity_t::get_data_by_index(unsigned int start, unsigned int stop) 
 	return copy;
 }
 
-quantity_t quantity_t::absolute() const
+quantity_t quantity_t::abs_sum() const
 {
 	if (!is_set()) return {};
 	double sum=0;
@@ -673,8 +828,21 @@ quantity_t quantity_t::absolute() const
 		sum += pow(d,2);
 	sum = sqrt(sum);
 	stringstream ss;
-	ss << "abs(" << name() << ")";
+	ss << "abs_sum(" << name() << ")";
 	return {ss.str(),{sum},unit()};
+}
+
+quantity_t quantity_t::absolute() const
+{
+	if (!is_set()) return {};
+	quantity_t copy = *this;
+// 	for (auto& d: data)
+// 		sum += pow(d,2);
+	for (auto& d : copy.data)
+		d=abs(d);
+	stringstream ss;
+	ss << "abs(" << name() << ")";
+	return {ss.str(),copy.data,unit()};
 }
 
 quantity_t quantity_t::sum(int start, int stop) const
@@ -702,18 +870,22 @@ bool quantity_t::operator<(const quantity_t& obj) const
 
 bool quantity_t::operator>(const quantity_t& obj) const
 {
+	if (!is_set() || !obj.is_set())
+		return false;
 	quantity_t quantity_with_same_unit;
 	
-	if (unit()!=obj.unit())
+  	if (unit()!=obj.unit())
 		quantity_with_same_unit = change_unit(obj.unit());
 	else
 		quantity_with_same_unit = *this;
 	
 	if (obj.data.size() != quantity_with_same_unit.data.size()) 
 		return false;
-	for (int i=0;i<obj.data.size();i++)
-		if (obj.data.at(i) != quantity_with_same_unit.data.at(i))
-			return false;
+// 	for (int i=0;i<obj.data.size();i++)
+// 		if (obj.data.at(i) != quantity_with_same_unit.data.at(i))
+// 			return false;
+	if (abs_sum().data.front() <= obj.abs_sum().data.front())
+		return false;
 	return true;
 }
 

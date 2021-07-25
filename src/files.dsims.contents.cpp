@@ -115,7 +115,7 @@ void files_::dsims_t::contents_t::to_screen(string prefix)
 	cout << prefix << "\t"<<"sputter_energy:\t" << sputter_energy().to_string() << endl;
 	cout << prefix << "\t"<<"sputter_rastersize:\t" << sputter_rastersize().to_string() << endl;
 	cout << prefix << "\t"<<"analysis_rastersize:\t" << analyzed_area().to_string() << endl;
-	cout << prefix << "\t"<< "matrix\t" << matrix().to_string() << endl;
+	cout << prefix << "\t"<< "matrix\t" << matrix() << endl;
 }
 
 vector<cluster_t> files_::dsims_t::contents_t::clusters()

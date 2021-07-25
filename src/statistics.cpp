@@ -17,6 +17,138 @@
 */
 #include "statistics.hpp"
 
+void statistics::test()
+{
+	int N = 2000;
+	int NCOEFFS = 200;
+	int NBREAK = NCOEFFS -2 ;
+  const size_t n = N;
+  const size_t ncoeffs = NCOEFFS;
+  const size_t nbreak = NBREAK;
+  size_t i, j;
+  gsl_bspline_workspace *bw;
+  gsl_vector *B;
+  double dy;
+  gsl_rng *r;
+  gsl_vector *c, *w;
+  gsl_vector *x, *y;
+  gsl_matrix *X, *cov;
+  gsl_multifit_linear_workspace *mw;
+  double chisq, Rsq, dof, tss;
+
+  gsl_rng_env_setup();
+  r = gsl_rng_alloc(gsl_rng_default);
+
+  /* allocate a cubic bspline workspace (k = 4) */
+  bw = gsl_bspline_alloc(4, nbreak);
+  B = gsl_vector_alloc(ncoeffs);
+
+  x = gsl_vector_alloc(n);
+  y = gsl_vector_alloc(n);
+  X = gsl_matrix_alloc(n, ncoeffs);
+  c = gsl_vector_alloc(ncoeffs);
+  w = gsl_vector_alloc(n);
+  cov = gsl_matrix_alloc(ncoeffs, ncoeffs);
+  mw = gsl_multifit_linear_alloc(n, ncoeffs);
+// 	double TT=(15.0 / (N - 1))+0.05;
+  double TT = 0.1;
+  /* this is the data to be fitted */
+  for (i = 0; i < n; ++i)
+// 		i=0;
+// 	for (double xi = 0.0; xi <= 15.0; xi += 0.1)
+    {
+// 		cout << "A" << endl;
+      double sigma;
+//       double xi = (15.0 / (N - 1)) * i;
+	  double xi = TT*i;
+      double yi = cos(xi) * exp(-0.1 * xi);
+
+      sigma = 0.1 * yi;
+      dy = gsl_ran_gaussian(r, sigma);
+      yi += dy;
+
+//       gsl_vector_set(x, i, xi);
+	  gsl_vector_set(x, i, i);
+      gsl_vector_set(y, i, yi);
+      gsl_vector_set(w, i, 1.0 / (sigma * sigma));
+// 		i++;
+      printf("%f %f\n", xi, yi);
+    }
+    /************************/
+	vector<double> Xin, Yin;
+	Xin = get_gsl_vec(x);
+	Yin = get_gsl_vec(y);
+	/************************/
+	
+  /* use uniform breakpoints on [0, 15] */
+  gsl_bspline_knots_uniform(Xin.front(), Xin.back(), bw);
+
+  /* construct the fit matrix X */
+  for (i = 0; i < n; ++i)
+    {
+      double xi = gsl_vector_get(x, i);
+// 		cout << i << endl;
+      /* compute B_j(xi) for all j */
+      gsl_bspline_eval(xi, B, bw);
+
+      /* fill in row i of X */
+      for (j = 0; j < ncoeffs; ++j)
+        {
+          double Bj = gsl_vector_get(B, j);
+          gsl_matrix_set(X, i, j, Bj);
+        }
+    }
+// 	cout << "fit inc" << endl;
+  /* do the fit */
+  gsl_multifit_wlinear(X, w, y, c, cov, &chisq, mw);
+// 	cout << "fit done" << endl;
+  dof = n - ncoeffs;
+  tss = gsl_stats_wtss(w->data, 1, y->data, 1, y->size);
+  Rsq = 1.0 - chisq / tss;
+
+//   fprintf(stderr, "chisq/dof = %e, Rsq = %f\n",
+//                    chisq / dof, Rsq);
+// 
+//   printf("\n\n");
+
+  
+  
+  /* output the smoothed curve */
+  vector<double> Yfitted;
+  vector<double> Xfitted;
+    double xi, yi, yerr;
+
+//     for (xi = 0.0; xi < 15.0; xi += 0.1)
+	for (int j=0;j<Xin.size();j++)
+      {
+		  double xi = Xin.at(j);
+        gsl_bspline_eval(xi, B, bw);
+        gsl_multifit_linear_est(B, c, cov, &yi, &yerr);
+        printf("%f %f\n", xi, yi);
+		Yfitted.push_back(yi);
+		Xfitted.push_back(xi);
+      }
+  
+// 	plot_t plot(false,false);
+// 	plot.Y1.range(-1.2,1.2,false);
+// 	plot.Y2.range(-1.2,1.2,false);
+// 	plot.Y1.add_curve(Xin,Yin);
+// 	plot.Y2.add_curve(Xfitted,Yfitted);
+// 	cout << "Yin.size()=" << Yin.size() << "\t" << "Yfitted.size()=" << Yfitted.size() << endl;
+// 	plot.to_screen("",0);
+	
+  gsl_rng_free(r);
+  gsl_bspline_free(bw);
+  gsl_vector_free(B);
+  gsl_vector_free(x);
+  gsl_vector_free(y);
+  gsl_matrix_free(X);
+  gsl_vector_free(c);
+  gsl_vector_free(w);
+  gsl_matrix_free(cov);
+  gsl_multifit_linear_free(mw);
+
+}
 
 bool statistics::get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx, const vector<double>& Y, double treshold)
 {
@@ -464,7 +596,7 @@ vector<vector<double>> statistics::truncate_mat_by_limit_in_col(vector<vector<do
     for (int i=0;i<data_XY->size();i++) {
         if (data_XY->at(i)[col] > limit) result_XY.push_back(data_XY->at(i));
     }
-    cout << "limit = " << limit << "\tresult_XY.size()" << result_XY.size() << endl;
+//     cout << "limit = " << limit << "\tresult_XY.size()" << result_XY.size() << endl;
     return result_XY;
 }
 
@@ -594,40 +726,149 @@ vector<vector<double>> statistics::get_moving_window_statistics_from_Y(vector<do
     return mat_results;
 }
 
-vector<double> statistics::get_moving_window_mean_from_Y(vector<double> Y, int window_size) {
-    if (window_size<2) window_size=10;
-    vector<double> sd;
+vector<double> statistics::get_moving_window_function(vector<double> Y, int window_size, statistics::functiontype function, const gsl_movstat_end_t gsl_movstat_end)
+{
+	if (window_size<2) window_size=10;
+    
     int N=Y.size();
     gsl_vector *x = gsl_vector_alloc(N);
     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
-    gsl_vector *xsd = gsl_vector_alloc(N);
+    gsl_vector *results = gsl_vector_alloc(N);
     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
-    gsl_movstat_mean(GSL_MOVSTAT_END_TRUNCATE, x, xsd, w);
+    function(gsl_movstat_end, x, results, w);
+	vector<double> results_vec(N);
     for (int j=0;j<N;j++) {
-        sd.push_back(xsd->data[j]);     //8 c
+        results_vec.at(j)=(results->data[j]);   
     }
     gsl_vector_free(x);
-    gsl_vector_free(xsd);
+    gsl_vector_free(results);
     gsl_movstat_free(w);
-    return sd;
+    return results_vec;
+}
+
+
+vector<double> statistics::get_moving_window_qqr_from_Y(vector<double> Y, int window_size, double q)
+{
+	if (window_size<2) window_size=10;
+    
+    int N=Y.size();
+	gsl_vector *x = get_gsl_vec(Y);
+//     gsl_vector *x = gsl_vector_alloc(N);
+//     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
+    gsl_vector *results = gsl_vector_alloc(N);
+    gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
+    gsl_movstat_qqr(GSL_MOVSTAT_END_TRUNCATE, x, q , results, w);
+	vector<double> sum(N);
+    for (int j=0;j<N;j++) {
+        sum.at(j)=(results->data[j]);   
+    }
+    gsl_vector_free(x);
+    gsl_vector_free(results);
+    gsl_movstat_free(w);
+    return sum;
+}
+
+vector<double> statistics::get_moving_window_min_from_Y(vector<double> Y, int window_size)
+{
+// 	if (window_size<2) window_size=10;
+//     
+//     int N=Y.size();
+//     gsl_vector *x = gsl_vector_alloc(N);
+//     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
+//     gsl_vector *results = gsl_vector_alloc(N);
+//     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
+//     gsl_movstat_min(GSL_MOVSTAT_END_TRUNCATE, x, results, w);
+// 	vector<double> sum(N);
+//     for (int j=0;j<N;j++) {
+//         sum.at(j)=(results->data[j]);   
+//     }
+//     gsl_vector_free(x);
+//     gsl_vector_free(results);
+//     gsl_movstat_free(w);
+//     return sum;
+	return get_moving_window_function(Y,window_size,gsl_movstat_min);
+}
+
+vector<double> statistics::get_moving_window_max_from_Y(vector<double> Y, int window_size)
+{
+// 	if (window_size<2) window_size=10;
+//     
+//     int N=Y.size();
+//     gsl_vector *x = gsl_vector_alloc(N);
+//     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
+//     gsl_vector *results = gsl_vector_alloc(N);
+//     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
+//     gsl_movstat_max(GSL_MOVSTAT_END_TRUNCATE, x, results, w);
+// 	vector<double> sum(N);
+//     for (int j=0;j<N;j++) {
+//         sum.at(j)=(results->data[j]);   
+//     }
+//     gsl_vector_free(x);
+//     gsl_vector_free(results);
+//     gsl_movstat_free(w);
+//     return sum;
+	return get_moving_window_function(Y,window_size,gsl_movstat_max);
+}
+
+vector<double> statistics::get_moving_window_sum_from_Y(vector<double> Y, int window_size)
+{
+// 	if (window_size<2) window_size=10;
+//     
+//     int N=Y.size();
+//     gsl_vector *x = gsl_vector_alloc(N);
+//     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
+//     gsl_vector *results = gsl_vector_alloc(N);
+//     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
+//     gsl_movstat_sum(GSL_MOVSTAT_END_TRUNCATE, x, results, w);
+// 	vector<double> sum(N);
+//     for (int j=0;j<N;j++) {
+//         sum.at(j)=(results->data[j]);   
+//     }
+//     gsl_vector_free(x);
+//     gsl_vector_free(results);
+//     gsl_movstat_free(w);
+//     return sum;
+	return get_moving_window_function(Y,window_size,gsl_movstat_sum);
+}
+
+
+
+vector<double> statistics::get_moving_window_mean_from_Y(vector<double> Y, int window_size) {
+//     if (window_size<2) window_size=10;
+//     vector<double> sd;
+//     int N=Y.size();
+//     gsl_vector *x = gsl_vector_alloc(N);
+//     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
+//     gsl_vector *xsd = gsl_vector_alloc(N);
+//     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
+//     gsl_movstat_mean(GSL_MOVSTAT_END_TRUNCATE, x, xsd, w);
+//     for (int j=0;j<N;j++) {
+//         sd.push_back(xsd->data[j]);     //8 c
+//     }
+//     gsl_vector_free(x);
+//     gsl_vector_free(xsd);
+//     gsl_movstat_free(w);
+//     return sd;
+	return get_moving_window_function(Y,window_size,gsl_movstat_mean);
 }
 
 vector<double> statistics::get_moving_window_median_from_Y(vector<double> Y, int window_size) {
-    if (window_size<2) window_size=10;
-    vector<double> sd;
-    int N=Y.size();
-    gsl_vector *x = gsl_vector_alloc(N);
-    for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
-    gsl_vector *xsd = gsl_vector_alloc(N);
-    gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
-    gsl_movstat_median(GSL_MOVSTAT_END_TRUNCATE, x, xsd, w);
-    for (int j=0;j<N;j++) {
-        sd.push_back(xsd->data[j]);     //8 c
-    }
-    gsl_vector_free(x);
-    gsl_vector_free(xsd);
-    gsl_movstat_free(w);
-    return sd;
+//     if (window_size<2) window_size=10;
+//     vector<double> sd;
+//     int N=Y.size();
+//     gsl_vector *x = gsl_vector_alloc(N);
+//     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
+//     gsl_vector *xsd = gsl_vector_alloc(N);
+//     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
+//     gsl_movstat_median(GSL_MOVSTAT_END_TRUNCATE, x, xsd, w);
+//     for (int j=0;j<N;j++) {
+//         sd.push_back(xsd->data[j]);     //8 c
+//     }
+//     gsl_vector_free(x);
+//     gsl_vector_free(xsd);
+//     gsl_movstat_free(w);
+//     return sd;
+	return get_moving_window_function(Y,window_size,gsl_movstat_median);
 }
 
 vector<double> statistics::get_moving_window_MAD_from_Y(vector<double> Y, int window_size) {
@@ -651,36 +892,37 @@ vector<double> statistics::get_moving_window_MAD_from_Y(vector<double> Y, int wi
 }
 
 vector<double> statistics::get_moving_window_sd_from_Y(vector<double> Y, int window_size) {
-    if (window_size<2) window_size=10;
-    vector<double> sd;
-    int N=Y.size();
-    gsl_vector *x = gsl_vector_alloc(N);
-//     statistics::std_vec_to_gsl_vec(&Y,&x);
-    for (size_t i=0;i<Y.size();i++)gsl_vector_set (x, i, Y.at(i));
-    gsl_vector *xsd = gsl_vector_alloc(N);
-    gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
-    gsl_movstat_sd(GSL_MOVSTAT_END_TRUNCATE, x, xsd, w);
-    for (int j=0;j<N;j++) {
-        sd.push_back(xsd->data[j]);     //8 c
-    }
-    gsl_vector_free(x);
-    gsl_vector_free(xsd);
-    gsl_movstat_free(w);
-    return sd;
+//     if (window_size<2) window_size=10;
+//     vector<double> sd;
+//     int N=Y.size();
+//     gsl_vector *x = gsl_vector_alloc(N);
+// //     statistics::std_vec_to_gsl_vec(&Y,&x);
+//     for (size_t i=0;i<Y.size();i++)gsl_vector_set (x, i, Y.at(i));
+//     gsl_vector *xsd = gsl_vector_alloc(N);
+//     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
+//     gsl_movstat_sd(GSL_MOVSTAT_END_TRUNCATE, x, xsd, w);
+//     for (int j=0;j<N;j++) {
+//         sd.push_back(xsd->data[j]);     //8 c
+//     }
+//     gsl_vector_free(x);
+//     gsl_vector_free(xsd);
+//     gsl_movstat_free(w);
+//     return sd;
+	return get_moving_window_function(Y,window_size,gsl_movstat_sd);
 }
 
-int statistics::get_moving_window_max_index_from_Y(vector<double> Y, int window_size) {
-    int max_pos;
-    int N=Y.size();
-    gsl_vector *x = gsl_vector_alloc(N);
-//     statistics::std_vec_to_gsl_vec(&Y,&x);
-    for (size_t i=0;i<Y.size();i++)gsl_vector_set (x, i, Y.at(i));
-    gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
-    max_pos = gsl_stats_max_index(x->data,1,Y.size());
-    gsl_vector_free(x);
-    gsl_movstat_free(w);
-    return max_pos;
-}
+// int statistics::get_moving_window_max_index_from_Y(vector<double> Y, int window_size) {
+//     int max_pos;
+//     int N=Y.size();
+//     gsl_vector *x = gsl_vector_alloc(N);
+// //     statistics::std_vec_to_gsl_vec(&Y,&x);
+//     for (size_t i=0;i<Y.size();i++)gsl_vector_set (x, i, Y.at(i));
+//     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
+//     max_pos = gsl_stats_max_index(x->data,1,Y.size());
+//     gsl_vector_free(x);
+//     gsl_movstat_free(w);
+//     return max_pos;
+// }
 
 double statistics::get_correlation_from_dataXY(vector<vector<double>> *data_XY1, vector<vector<double>> *data_XY2) {
     gsl_vector *vec1, *vec2;
@@ -1251,22 +1493,22 @@ vector<double> statistics::interpolate_data_XY_transposed(vector<vector<double>>
     gsl_spline *spline_akima = gsl_spline_alloc(gsl_interp_akima, c);
     xv=data_XY_transposed[0];
     yv=data_XY_transposed[1];
-	print(xv);
+// 	print(xv);
     x=&xv[0];
     y=&yv[0];
     gsl_spline_init (spline_akima, x, y, c);
-	cout << "init done\n";
+// 	cout << "init done\n";
 //     for (size_t i = 0; i < c; ++i)
 //     printf("%g %g\n", x[i], y[i]);
         
     for (int i=0; i < X.size(); i++) {
 //         cout << X->at(i) << endl;
         yi = gsl_spline_eval (spline_akima, X.at(i), acc);
-		cout << "A";
+// 		cout << "A";
         
         Y.push_back(yi);
       }
-      cout << endl;
+//       cout << endl;
     gsl_spline_free (spline_akima);
     gsl_interp_accel_free (acc);
     return Y;
@@ -1280,7 +1522,7 @@ vector<double> statistics::interpolate_data_XY_transposed(vector<vector<double>>
 
 /********* NEW *************/
 
-
+//from file:///tmp/mozilla_florian0/Example-programs-for-B_002dsplines.html  ???
 vector<double> statistics::interpolate_bspline(map<double, double>& data_XY,vector<double> X_new, int bspline_degree)
 {
 	const size_t k = bspline_degree +1;
@@ -1383,6 +1625,163 @@ vector<double> statistics::interpolate_bspline(map<double, double>& data_XY,vect
 	return Y_new;
 }
 
+vector<double> statistics::get_gsl_vec(gsl_vector* Y)
+{
+	vector<double> Yout(Y->size);
+	
+	for (int i = 0; i < Y->size; ++i)
+		Yout.at(i) = gsl_vector_get(Y, i);
+	return Yout;
+}
+
+gsl_vector * statistics::get_gsl_vec(const vector<double>& Y)
+{
+	gsl_vector *y;
+	int n = Y.size();
+	y = gsl_vector_alloc(n);
+	for (int i = 0; i < n; ++i)
+		gsl_vector_set (y, i, Y[i]);
+	return y;
+}
+
+vector<double> statistics::bspline_smooth(const vector<double>& Ydata, vector<double> Xdata, unsigned int breakpoints, const size_t spline_order)
+{
+// 	breakpoints=100;
+	if (breakpoints==0)
+		breakpoints=50;
+	//nbreak = ncoeffs + 2 - spline_order
+	//ncoeffs = nbreak - 2 + spline_order 
+	if (breakpoints - 2 + spline_order < 1)
+		return {};
+	if (Xdata.size()==0)
+	{
+		Xdata.resize(Ydata.size());
+		for (int i=0;i<Ydata.size();i++)
+			Xdata.at(i)=i;
+	}
+	if (Xdata.size() != Ydata.size())
+		return {};
+// 	cout << "Xdata.size()=" << Xdata.size() << "\tYdata.size()=" << Ydata.size() << endl;
+// 	print(Xdata);
+	const size_t n = Ydata.size();
+	const size_t nbreak = breakpoints;
+	const size_t ncoeffs = breakpoints - 2 + spline_order;
+	size_t i, j;
+	gsl_bspline_workspace *bw;
+	gsl_vector *B;
+// 	double dy;
+	gsl_rng *r;
+	gsl_vector *c, *w;
+	gsl_vector *x ;
+	gsl_vector *y ;
+	
+	gsl_matrix *X, *cov;
+	gsl_multifit_linear_workspace *mw;
+	double chisq, Rsq, dof, tss;
+
+	gsl_rng_env_setup();
+	r = gsl_rng_alloc(gsl_rng_default);
+
+	/* allocate a cubic bspline workspace (k = 4) */
+	bw = gsl_bspline_alloc(spline_order, nbreak);
+	B = gsl_vector_alloc(ncoeffs);
+
+	x = gsl_vector_alloc(n);
+	y = gsl_vector_alloc(n);
+	X = gsl_matrix_alloc(n, ncoeffs);
+	c = gsl_vector_alloc(ncoeffs);
+	w = gsl_vector_alloc(n);
+	cov = gsl_matrix_alloc(ncoeffs, ncoeffs);
+	mw = gsl_multifit_linear_alloc(n, ncoeffs);
+	
+	x = get_gsl_vec(Xdata);
+	y = get_gsl_vec(Ydata);
+	
+	/* this is the data to be fitted */
+	for (i = 0; i < n; ++i)
+// 	{
+// 		double sigma;
+// 		double xi = (15.0 / (n - 1)) * i;
+// 		double yi = cos(xi) * exp(-0.1 * xi);
+// 
+// 		sigma = 0.1 * yi;
+// 		dy = gsl_ran_gaussian(r, sigma);
+// 		yi += dy;
+// 
+// 		gsl_vector_set(x, i, xi);
+// 		gsl_vector_set(y, i, yi);
+		gsl_vector_set(w, i, 1.0) ;
+// 
+// 		printf("%f %f\n", xi, yi);
+// 	}
+
+	/* use uniform breakpoints on [0, 15] */
+	gsl_bspline_knots_uniform(Xdata.front(), Xdata.back(), bw);
+
+	/* construct the fit matrix X */
+	for (i = 0; i < n; ++i)
+	{
+		double xi = Xdata.at(i);
+
+		/* compute B_j(xi) for all j */
+		gsl_bspline_eval(xi, B, bw);
+
+		/* fill in row i of X */
+		for (j = 0; j < ncoeffs; ++j)
+		{
+			double Bj = gsl_vector_get(B, j);
+			gsl_matrix_set(X, i, j, Bj);
+		}
+	}
+	
+	/* do the fit */
+	gsl_multifit_wlinear(X, w, y, c, cov, &chisq, mw);
+// 	gsl_multifit_linear(X, y, c, cov, &chisq, mw);
+
+	dof = n - ncoeffs;
+	tss = gsl_stats_wtss(w->data, 1, y->data, 1, y->size);
+// 	tss = gsl_stats_tss(y->data,1,y->size);
+	Rsq = 1.0 - chisq / tss;
+
+// 	fprintf(stderr, "chisq/dof = %e, Rsq = %f\n",
+// 					chisq / dof, Rsq);
+
+// 	printf("\n\n");
+
+	/* output the smoothed curve */
+	vector<double> Y_fitted(n);
+	vector<double> Y_fitted_err(n);
+	
+	for (int i=0;i<Xdata.size();i++)
+	{
+		gsl_bspline_eval(Xdata.at(i), B, bw);
+		gsl_multifit_linear_est(B, c, cov, &Y_fitted.at(i), &Y_fitted_err.at(i));
+	}
+	
+// 	Y_fitted.at(Y_fitted.size()-1) = Y_fitted.at(Y_fitted.size()-2);
+
+// 	plot_t plot(false,false);
+// 	plot.Y1.range(0,1E5,false);
+// 	plot.Y2.range(0,1E5,false);
+// 	plot.Y1.add_curve(Xdata,Ydata);
+// 	plot.Y2.add_curve(Xdata,Y_fitted);
+// 	plot.to_screen("",0);
+	
+	
+	
+	gsl_rng_free(r);
+	gsl_bspline_free(bw);
+	gsl_vector_free(B);
+	gsl_vector_free(x);
+	gsl_vector_free(y);
+	gsl_matrix_free(X);
+	gsl_vector_free(c);
+// 	gsl_vector_free(w);
+	gsl_matrix_free(cov);
+	gsl_multifit_linear_free(mw);
+
+	return Y_fitted;
+}
 
 
 vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY, const vector<double>& X) 
@@ -1403,6 +1802,8 @@ vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY
 	
 	if (c<10) return {};
     gsl_interp_accel *acc = gsl_interp_accel_alloc ();
+	
+	//TODO:maybe use gsl_interp_steffen instead of gsl_interp_akima
     gsl_spline *spline_akima = gsl_spline_alloc(gsl_interp_akima, c);
 	tools::vec::split_map_to_vecs(data_XY,&xv,&yv);
 

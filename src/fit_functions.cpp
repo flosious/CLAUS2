@@ -239,15 +239,54 @@ std::__cxx11::string fit_functions::asym2sig_t::to_string(std::__cxx11::string p
  **POLYNOM***
  ************/
 
+fit_functions::polynom_t::polynom_t(int degree) : fit_parameters_s(degree)
+{
+}
+
+fit_functions::polynom_t::polynom_t(vector<double> fit_parameters) : fit_parameters_s(fit_parameters_s)
+{
+}
+
+int fit_functions::polynom_t::degree()
+{
+	return fit_parameters_s.size()-1;
+}
+
+
+fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int derive)
+{
+	if (derive == 0) return *this;
+	polynom_t deriv = *this;
+	if (derive >= fit_parameters_s.size())
+	{
+		deriv.fit_parameters_s={0};
+		return deriv;
+	}
+	
+	for (int j=0;j<derive;j++)
+	{
+		int p = deriv.fit_parameters_s.size();
+		vector<double> derived_parameters(p-1);
+		for (int i=1;i<p;i++) {
+			derived_parameters.at(i-1) = (i*deriv.fit_parameters_s[i]);
+		}
+		deriv.fit_parameters_s = derived_parameters;
+	}
+	
+	return deriv;
+}
+
 vector<double> fit_functions::polynom_t::fitted_y_data(vector<double> x)
 {
 	if (!fitted_p) return {};
+	if (x.size()==0)
+		x = Xdata;
 	vector<double> Y(x.size());
 	for (int i=0;i<x.size();i++)
 	{
-		Y[i]=fit_parameters[0];
-		for (int p=1;p<fit_parameters.size();p++)
-			Y[i]+=fit_parameters[p]*pow(x[i],p);
+		Y[i]=fit_parameters_s[0];
+		for (int p=1;p<fit_parameters_s.size();p++)
+			Y[i]+=fit_parameters_s[p]*pow(x[i],p);
 	}
 	return Y;
 }
@@ -262,17 +301,29 @@ bool fit_functions::polynom_t::fitted()
 	return fitted_p;
 }
 
-
-bool fit_functions::polynom_t::fit(map<double,double> data_XY, int degree)
+bool fit_functions::polynom_t::fit(vector<double> Ydata)
 {
-	if (degree<0) 
+// 	for (int i=0;i<Y.size();i++)
+// 		if (i<100) cout << Y.at(i) << endl;
+	map<double,double> data_XY;
+	Xdata.resize(Ydata.size());
+	for (int x=0;x<Xdata.size();x++)
+		Xdata.at(x)=x;
+	tools::vec::combine_vecs_to_map(&Xdata,&Ydata,&data_XY);
+	return fit(data_XY);
+}
+
+
+bool fit_functions::polynom_t::fit(map<double,double> data_XY)
+{
+	if (degree()<0) 
 	{
-		cout << "degree<0" << endl;
+// 		cout << "degree<0" << endl;
 		return false;
 	}
-	if (degree>=data_XY.size()) 
+	if (degree()>=data_XY.size()) 
 	{
-		cout << "data_XY.size()=" << data_XY.size() <<endl;
+// 		cout << "data_XY.size()=" << data_XY.size() <<endl;
 		return false;
 	}
 	
@@ -280,8 +331,8 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY, int degree)
 	int i, n;
 	gsl_matrix *X, *cov;
 	gsl_vector *y, *w, *c;
-	const int p = degree+1;
-	fit_parameters.resize(p);
+	const int p = degree()+1;
+	fit_parameters_s.resize(p);
     
 	n = data_XY.size();
     
@@ -292,8 +343,9 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY, int degree)
 	c = gsl_vector_alloc (p);
 	cov = gsl_matrix_alloc (p, p);
     
-	vector<double> Xdata,Ydata;
+	vector<double> Ydata;
 	tools::vec::split_map_to_vecs(data_XY,&Xdata,&Ydata);
+	
 	chisq_p=-1;
 	
 	for (i = 0; i < n; i++)
@@ -313,7 +365,7 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY, int degree)
 #define C(i) (gsl_vector_get(c,(i)))
 #define COV(i,j) (gsl_matrix_get(cov,(i),(j)))
     for (int ii=0;ii<p;ii++) {
-        fit_parameters.at(ii)=C(ii);
+        fit_parameters_s.at(ii)=C(ii);
     }
     fitted_p = true;
     gsl_matrix_free (X);
@@ -321,6 +373,16 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY, int degree)
     gsl_vector_free (w);
     gsl_vector_free (c);
     gsl_matrix_free (cov);
+	
+	
+	chisq_p=0;
+	vector<double> YY = fitted_y_data(Xdata);
+	for (int i=0;i<YY.size();i++)
+	{
+		chisq_p +=  abs(YY.at(i)-Ydata.at(i));
+// 		if (i<100) cout << YY.at(i) <<"\t" << Ydata.at(i) << "chisq_p=" << chisq_p <<endl;
+	}
+	
 	return true;
 }
 

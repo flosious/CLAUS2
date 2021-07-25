@@ -43,7 +43,8 @@ class calc_t
 		const bool overwrite;
 		vector<measurements_::sims_t*> measurements_s;
 	public:
-		RSF_c RSF;
+		SF_c& SF();
+		RSF_c& RSF();
 		sims_t(measurements_::sims_t measurement , bool overwrite=true);
 		sims_t(vector<measurements_::sims_t> measurements , bool overwrite=true);
 		sims_t(vector<measurements_::sims_t>& measurements , bool overwrite=true);

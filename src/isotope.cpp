@@ -25,7 +25,7 @@ isotope_t::isotope_t(std::__cxx11::string str, double abundance_s, double amount
 	{
 		stringstream t;
 		t << match[1]  << "\t"  << match[2] << "\t" << match[3];
-		logger::debug(11,"isotope_t::isotope_t()","str",str, t.str());
+		logger::debug(21,"isotope_t::isotope_t()","str",str, t.str());
 		if (match[1]!="") nucleons = tools::str::str_to_int(match[1]);
 		else 
 		{

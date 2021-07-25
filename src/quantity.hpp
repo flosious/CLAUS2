@@ -39,7 +39,10 @@ using namespace std;
 */
 class quantity_t
 {
+
 // 	friend class matrix_t;
+private:
+	fit_functions::polynom_t polynom(unsigned int polynom_grade) const; 
 protected:
 	string name_p="";
 	unit_t unit_p{};
@@ -53,6 +56,8 @@ public:
 	vector<double> data;
 // 	const vector<double> data() const;
 	bool is_set() const;
+	bool is_scalar() const;
+	bool is_vector() const;
 	quantity_t();
 	quantity_t(const quantity_t& quant_s,const unit_t& unit_s);
 	quantity_t(const quantity_t& quant_s,double data);
@@ -69,7 +74,9 @@ public:
 	///0 returns the current resolution, otherwise returns quantity with new resolution
 	quantity_t resolution(double new_res=0) const;
 	///returns quantity with new resolution, performs unit transformation if neccessary
-	quantity_t resolution(quantity_t new_res) const;
+// 	quantity_t resolution(quantity_t new_res) const;
+	quantity_t change_resolution(quantity_t new_res) const;
+	quantity_t change_resolution(unsigned int new_data_size) const;
 	unit_t unit() const;
 	const string to_string() const;
 	const string name() const;
@@ -95,20 +102,33 @@ public:
 	
 	/*statistics*/
 	
+	quantity_t reverse() const;
+	
 	// moving windows
+	quantity_t moving_window_qqr(int window_size=0, double q=0.25) const;
+	quantity_t moving_window_iqr(int window_size=0) const;
+	quantity_t moving_window_sum(int window_size=0) const;
+	quantity_t moving_window_max(int window_size=0) const;
+	quantity_t moving_window_min(int window_size=0) const;
+	
 	quantity_t moving_window_median(int window_size=0) const;
 	quantity_t moving_window_mad(int window_size=0) const;
 	quantity_t moving_window_mean(int window_size=0) const;
 	quantity_t moving_window_sd(int window_size=0) const;
 	
+	//smoothing
+	quantity_t bspline_smoothing(unsigned int breakpoints = 0, const size_t spline_order = 4) const;
+	quantity_t bspline_smoothing(const quantity_t& Xdata, unsigned int breakpoints = 0, const size_t spline_order = 4) const;
 	
 	//skalars
 	///
 	quantity_t get_data_by_index(unsigned int start, unsigned int stop) const;
 	quantity_t remove_data_by_index(unsigned int start, unsigned int stop) const;
 	quantity_t remove_data_from_begin(unsigned int stop) const;
+	quantity_t remove_data_from_begin(const quantity_t& remove_stop) const;
 	quantity_t absolute() const;
 	quantity_t invert() const;
+	quantity_t abs_sum() const;
 	quantity_t sum(int start=0, int stop = -1) const;
 	quantity_t quantile(double percentile=0.75) const;
 	quantity_t median() const;
@@ -139,7 +159,9 @@ public:
 	quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
 	quantity_t fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade=-1 ) const;
 	///polynomial interpolation from idx_start to idx_stop
-	quantity_t polyfit(unsigned int polynom_grade, int idx_start=0, int idx_stop=-1) const;
+	quantity_t polyfit(unsigned int polynom_grade) const;
+	///deviation = 1 -> 1st deviation; 0 no deviation == polyfit
+	quantity_t polyfit_derivative(unsigned int polynom_grade, unsigned int derivative=1) const;
 	quantity_t extrapolate(unsigned int polynom_grade, const quantity_t& X) const;
 	
 	

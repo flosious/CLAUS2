@@ -42,7 +42,6 @@ string measurements_::sims_t::matrix_clusters_c::to_string(const string del) con
 /*"74Ge 28Si" can be a reference cluster for elemental Si+Ge or isotopical purified Si+Ge*/
 measurements_::sims_t::matrix_clusters_c::matrix_clusters_c(vector<cluster_t>& clusters_s, const vector<isotope_t> matrix_isotopes)
 {
-
 	if (matrix_isotopes.size()==0)
 		return;
 	if (clusters_s.size()==0)
@@ -90,6 +89,7 @@ concentration_t measurements_::sims_t::matrix_clusters_c::concentration_sum() co
 	intensity_t concentration;
 	for (auto& C : clusters)
 	{
+		if (!C->concentration.is_set()) return {};
 		if (!concentration.is_set())
 			concentration = C->concentration;
 		else
@@ -98,7 +98,7 @@ concentration_t measurements_::sims_t::matrix_clusters_c::concentration_sum() co
 	return concentration;
 }
 
-vector<isotope_t> measurements_::sims_t::matrix_clusters_c::isotopes() const
+const std::vector< isotope_t > measurements_::sims_t::matrix_clusters_c::isotopes() const
 {
 	set<isotope_t> isotopes;
 	if (clusters.size()==0)
@@ -109,6 +109,22 @@ vector<isotope_t> measurements_::sims_t::matrix_clusters_c::isotopes() const
 	}
 	return {isotopes.begin(),isotopes.end()};
 }
+
+cluster_t * measurements_::sims_t::matrix_clusters_c::cluster(const isotope_t iso)
+{
+	for (auto& C: clusters)
+	{
+		logger::debug(11,"measurements_::sims_t::matrix_clusters_c::cluster("+iso.to_string()+")","cluster=" + C->to_string());
+		for (auto& I : C->isotopes)
+		{
+			logger::debug(11,"measurements_::sims_t::matrix_clusters_c::cluster("+iso.to_string()+")","cluster->isotope="+I.to_string());
+			if (I==iso)
+				return C;
+		}
+	}
+	return nullptr;
+}
+
 
 
 /************************************/
@@ -132,16 +148,18 @@ measurements_::sims_t measurements_::sims_t::filter_t::impulses()
 /****** measurements_::sims_t ******/
 /***********************************/
 
-measurements_::sims_t::matrix_clusters_c measurements_::sims_t::matrix_clusters(const vector<isotope_t>& matrix_isotopes)
+// measurements_::sims_t::matrix_clusters_c measurements_::sims_t::matrix_clusters()
+// {
+// 	return matrix_clusters_c(clusters,sample->matrix().isotopes);
+// }
+
+measurements_::sims_t::matrix_clusters_c measurements_::sims_t::matrix_clusters()
 {
-	///if no new isotopes, use the known ones
-	if (matrix_isotopes.size()!=0)
-		isotopes_in_matrix = matrix_isotopes;
 	///if no isotopes are known, look in database
-	if (isotopes_in_matrix.size()==0)
-		isotopes_in_matrix = sample->matrix().isotopes;
+	if (matrix_isotopes.size()==0)
+		matrix_isotopes = sample->matrix().isotopes;
 	
-	return matrix_clusters_c(clusters,isotopes_in_matrix);
+	return matrix_clusters_c(clusters,matrix_isotopes);
 }
 
 measurements_::sims_t::filter_t measurements_::sims_t::filter() const
@@ -160,9 +178,9 @@ void measurements_::sims_t::add_clusters(vector<cluster_t>& clusters)
 	}
 }
 
-measurements_::sims_t::calc_t measurements_::sims_t::calc()
+measurements_::sims_t::calc_t measurements_::sims_t::calc(bool overwrite)
 {
-	return calc_t{(*this)};
+	return calc_t{(*this),overwrite};
 }
 
 measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, 
@@ -173,9 +191,7 @@ measurements_::sims_t::sims_t(files_::sims_t::name_t& filename,
 							  vector<files_::jpg_t>* jpg_files,
 							  vector<files_::profiler_t>* profiler_files) : 
 									measurement_t(filename,filecontents,samples_list,method,sql_wrapper), clusters(filecontents.clusters())
-{
-// 	clusters = filecontents.clusters;
-	
+{	
 	crater.total_sputter_depths = filename.total_sputter_depths();
 	
 	bool found_any=false;
@@ -232,7 +248,7 @@ measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, list<sample_t>& 
 
 std::__cxx11::string measurements_::sims_t::to_string(const std::__cxx11::string del)
 {
-	logger::debug(11,"measurements_::sims_t::to_string","","","entering");
+	logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
 	stringstream ss;
 	ss << measurement_t::to_string() << del;
 	ss << "crater: ";
@@ -240,7 +256,7 @@ std::__cxx11::string measurements_::sims_t::to_string(const std::__cxx11::string
 	if (crater.linescans.size()>0)
 		ss << "linescans: <" << crater.linescans.size() <<">" << del;
 	ss << "clusters: <" << clusters.size() << ">" << del;
-	logger::debug(11,"measurements_::sims_t::to_string","","","exiting");
+	logger::debug(31,"measurements_::sims_t::to_string()","","","exiting");
 	return ss.str();
 }
 
@@ -259,8 +275,10 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 		logger::error("measurements_::sims_t::to_string", "neither sputter_time nor sputter_depth is set","","no plot");
 		return;
 	}
-	if (crater.sputter_current().is_set())
-		plot.Y3.add_curve(X,crater.sputter_current().change_unit({"nA"}));
+	
+// 	if (crater.sputter_current().is_set())
+// 		plot.Y3.add_curve(X,crater.sputter_current().change_unit({"nA"}));
+	
 	plot.Y1.range(1,1E6,true);
 	
 	matrix_clusters_c MC = matrix_clusters();
@@ -279,15 +297,17 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 				quantity_t min = calc().implant(C).minimum_starting_position().change_unit(X.unit());
 				if (min.is_set())
 					plot.Y1.add_arrow(min.data.at(0),0.1,min.data.at(0),1E6,"bA",C.to_string() );
-// 					plot.Y1.add_arrow(min.data.at(0),0.1,min.data.at(0),1E6,"bA",C.to_string() +" implant\\_minimum");
 			}
 		}
-// 		cout << C.RSF.to_string() << endl;
-// 		cout << C.SF.to_string() << endl;
 		if (C.concentration.is_set())
-			plot.Y2.add_curve(X,C.concentration,C.to_string());
-		else if (C.RSF.is_set() && C.RSF.data.size()>1) // vector
-			plot.Y2.add_curve(X,C.RSF,C.to_string());
+		{
+			if (C.concentration.unit().base_units_exponents.relative)
+				plot.Y3.add_curve(X,C.concentration,C.to_string());
+			else /*if ((C.concentration.unit() == units::derived::atoms_per_ccm))*/
+				plot.Y2.add_curve(X,C.concentration,C.to_string());
+		}
+// 		else if (C.RSF.is_set() && C.RSF.data.size()>1) // vector
+// 			plot.Y2.add_curve(X,C.RSF,C.to_string());
 	}
 	
 	plot.to_screen(to_string(),sleep_sec);
@@ -565,7 +585,12 @@ measurements_::sims_t measurements_::sims_t::change_resolution(sputter_time_t sp
 	for (auto& C: copy_M.clusters)
 	{
 		C = C.interpolate(copy_M.crater.sputter_time,crater.sputter_time);
+		if (!C.is_set())
+		{
+			logger::error("measurements_::sims_t::change_resolution","could not interpolate " + C.to_string(),"returning *this");
+			return *this;
+		}
 	}
-	
 	return copy_M;
 }
+

@@ -28,7 +28,7 @@
 #include "element.hpp"
 #include "ion.hpp"
 #include "crater.hpp"
-#include "matrix.hpp"
+// #include "matrix.hpp"
 
 class files_
 {
@@ -116,7 +116,7 @@ public:
 			/*ctors*/
 			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
 		public:
-			matrix_t matrix();
+			string matrix();
 			const bool is_correct_type(); 
 			string to_string(const string del = ",");
 			///this does not work as intended for some reason

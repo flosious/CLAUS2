@@ -34,10 +34,11 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	/*connect to sqlite3 database*/
 	if (!sql_wrapper.open())
-		logger::error("processor::processor","could not connecto to database");
+		logger::error("processor::processor","could not connec to to database");
 	else // create tables
 	{
 		sample_t::db_t::create_table(sql_wrapper);
+// 		sample_t::db_t::migrate_claus1_db(sql_wrapper,"build/migrate.database.sqlite3");
 	}
 	/*****************************/
 	
@@ -51,43 +52,46 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
 // 	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
 	
-// 	vector<double> test{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
-// 	test.erase(test.begin()+5,test.begin()+10);
-// 	for (auto& t : test)
-// 		cout << t << endl;
-// 	return ;
+	cout << "dsims files:" << endl;
+	for (auto& d : dsims.files())
+		cout << "\t" << d.name.filename_without_crater_depths() << endl;
+	cout << endl;
 	
 	for (auto& MG : dsims.mgroups())
 	{
+// 		MG.calc().SR_SF_from_implants_maxima().RSFs.from_SF_median_ref().SFs.from_RSF_median_ref().SRs.to_others().SDs.from_SR().concentrations.from_SF();
+		MG.calc().SR_SF_from_implants_maxima().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF().SRs.copy_to_same_matrices().SDs.from_SR();
+// 		MG.calc().matrices.median_const_from_db();
 		//get matrices
 		//get/calculate RSF from references
 		//set/calculate matrix
 		//set RSFs depending on matrix
-		MG.calc().SRs.from_implant_max().calc().SDs.from_SR().calc().SFs.from_implant_max().calc().concentrations.from_SF();
+		
 		for (auto& M : MG.measurements())
 		{
+// 			logger::debug(11,"processor::processor()","sample="+M->sample->to_string(), M->sample->matrix().to_string());
+			for (auto& C : M->clusters)
+			{
+				if (C.RSF.is_set())
+				{
+					cout << endl << "C.SF=" << C.SF.to_string() << endl;
+					cout << "C.RSF=" << C.RSF.to_string() << endl;
+					cout << "C.concentration=" << C.concentration.to_string() << endl;
+				}
+// 				isotope_t I = M->isotope_corresponding_to_cluster(C);
+// 				logger::debug(11,"processor::processor()","cluster="+C.to_string(),"corresponding isotope="+I.to_string());
+			}
+// 			M->calc().SR.from_crater_depths().SR.from_implant_max().SR.from_ref_fit().SD.from_SR().SF.from_db_dose().SF.from_db_max().SF.from_ref_fit().concentration.from_SF();
+// 			M->calc().SR.from_implant_max().SD.from_SR().SF.from_db_max().concentration.from_SF();
 			M->plot_now(0);
 		}
-
 	}
-// 	sample_t::db_t::migrate_claus1_db(sql_wrapper, "build/migrate.database.sqlite3");
-// 	for (auto& s:samples_list)
-// 	{
-// 		cout << s.database().matrix().to_string() << endl;
-// 		cout << s.matrix().to_string() << endl;
-// 		cout << s.implant({"12C"}).dose.to_string() << endl ;
-// 		sample_t::db_t::implant_t I=s.database().implant({"12C"});
-// 		cout << I.dose.to_string() << endl;
-// 		cout << I.concentration_maximum.to_string() << endl;
-// 		cout << I.depth_at_concentration_maxium.to_string() << endl;
-// 	}
 	
 	if (!logger::instant_print_messages)
 		logger::to_screen();
 	
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
-	
 }
 
 /*****************************/

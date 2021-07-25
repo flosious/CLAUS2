@@ -28,7 +28,7 @@
 #include <map>
 
 #include "element.hpp"
-#include "matrix.hpp"
+// #include "matrix.hpp"
 #include "definitions.hpp"
 // #include "measurement.hpp"
 #include "files.hpp"
@@ -47,6 +47,28 @@ using namespace std;
 class sample_t
 {
 	friend class config_t;
+public:
+	class matrix_t
+	{
+	private:
+		///maybe loaded from DB if not set by ctor
+		///isotope mapping to its absolute concentration in amount of atoms or mole
+		/// OR relative concentration in at%; enforcing always 100at% within a matrix
+	// 	map<isotope_t,double> isotopes_amount;
+		void abs_to_relative();
+	public:
+		matrix_t();
+		matrix_t(const vector<string> elements_or_isotopes_s);
+		matrix_t(const string matrix_elements_s);
+		vector<isotope_t> isotopes;
+		const bool is_set() const;
+		const string to_string() const;
+		///RELATIVE! in at%
+		const concentration_t concentration(isotope_t& iso) const;
+		bool operator==(const matrix_t& obj) const;
+		bool operator!=(const matrix_t& obj) const;
+		bool operator<(const matrix_t& obj) const;
+	};
 private:
 // 	static const string db_tablename;
 	static bool use_lot;
@@ -76,7 +98,6 @@ private:
 protected:
 
 public:
-	
 	class db_t
 	{
 	private:
@@ -133,7 +154,7 @@ public:
 	string simple_name;
 	const string wafer_string() const;
 	
-	const matrix_t& matrix();
+	matrix_t& matrix();
 	
 	/*database stuff*/
 	bool save_to_database();
@@ -141,8 +162,8 @@ public:
 	/****************/
 	
 	/*operators*/
-	bool operator==(sample_t& obj) ;
-	bool operator!=(sample_t& obj) ;
+	bool operator==(const sample_t& obj) const;
+	bool operator!=(const sample_t& obj) const;
 	bool operator<(sample_t& obj);
 	bool operator>(sample_t& obj);
 	/***********/

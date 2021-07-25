@@ -97,12 +97,12 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file,
 	}
 }
 
-bool measurements_::dsims_t::operator!=(measurements_::dsims_t& obj)
+bool measurements_::dsims_t::operator!=(const measurements_::dsims_t& obj) const
 {
 	return !operator==(obj);
 }
 
-bool measurements_::dsims_t::operator==(measurements_::dsims_t& obj)
+bool measurements_::dsims_t::operator==(const measurements_::dsims_t& obj) const
 {
 	if (measurement_t::operator!=(obj)) return false;
 	if (settings!=obj.settings) return false;

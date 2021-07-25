@@ -58,6 +58,7 @@ public:
 			  concentration_t concentration={});
 	cluster_t();
 	cluster_t(const vector<isotope_t>& isotopes_s);
+	///e.g. 11B for cluster {28Si 11B}
 	isotope_t corresponding_isotope(const vector<isotope_t> reference_isotopes) const;
 	quantity_t mass();
 	quantity_t abundance();

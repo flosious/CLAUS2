@@ -70,8 +70,14 @@ bool sample_t::db_t::migrate_claus1_db(database_t& sql_wrapper, const string fil
 			sql << "'', ";
 		else
 			sql << "'" << table_entries_s.at("lot_split").at(i) << "', ";
-		sql << table_entries_s.at("chip_x").at(i) << ", ";
-		sql << table_entries_s.at("chip_y").at(i) << ", ";
+		if (table_entries_s.at("chip_x").at(i)!="-1") 
+			sql << table_entries_s.at("chip_x").at(i) << ", ";
+		else
+			sql << "null, ";
+		if (table_entries_s.at("chip_y").at(i)!="-1") 
+			sql << table_entries_s.at("chip_y").at(i) << ", ";
+		else
+			sql << "null, ";
 		sql << "'" << table_entries_s.at("monitor").at(i) << "', ";
 		
 		sql << "'" << table_entries_s.at("matrix_elements").at(i) << "', ";
@@ -136,13 +142,38 @@ bool sample_t::db_t::load_from_table()
 // 		logger::debug(9,"sample_t::db_t::load_from_table()","table_entries_s.size()>0");
 // 		return table_entries_s;
 // 	}
+	
+// 	string chipX = "";
+// 	string chipY = "";
+// 	
+// 	if (sample.chip.x>-1)
+// 		chipX = std::to_string(sample.chip.x);
+// 	if (sample.chip.y>-1)
+// 		chipX = std::to_string(sample.chip.y);
+// 	
+// 	if ((chipX == "" && chipY != "")  )
+// 		logger::error("sample_t::db_t::load_from_table()","chip Y not set","please check and rerun","continuing");
+// 	if ( (chipX != "" && chipY == "") )
+// 		logger::error("sample_t::db_t::load_from_table()","chip X not set","please check and rerun","continuing");
 
-	string sql1 = "SELECT * FROM " +tablename+ 	" WHERE " \
-			"lot='" + sample.lot + "' AND " \
-			"wafer=" +std::to_string(sample.wafer)+ " AND " \
-			"chip_x=" +std::to_string(sample.chip.x)+ " AND " \
-			"chip_y=" +std::to_string(sample.chip.y)+ " AND " \
-			"monitor='" + sample.monitor+"';";
+// 	string sql1	= "SELECT * FROM " +tablename+ 	" WHERE " \
+// 			"lot='" + sample.lot + "' AND " \
+// 			"wafer=" +std::to_string(sample.wafer)+ " AND " \
+// 			"chip_x=" + chipX + " AND " \
+// 			"chip_y=" + chipY + " AND " \
+// 			"monitor='" + sample.monitor+"';";
+			
+	string sql1	= "SELECT * FROM " +tablename+ 	" WHERE " \
+			"lot='" + sample.lot + "'" \
+			" AND wafer=" +std::to_string(sample.wafer);
+	
+	if (sample.chip.x > -1)
+		sql1 += " AND chip_x=" + std::to_string(sample.chip.x);
+	if (sample.chip.y > -1)
+		sql1 += " AND chip_y=" + std::to_string(sample.chip.y);
+	if (sample.monitor != "")
+		sql1 += " AND monitor='" + sample.monitor+"'";
+	sql1 += ";";
 
 	logger::debug(11,"sample_t::db_t::load_from_table()","sql1=",sql1);
 
@@ -154,7 +185,7 @@ bool sample_t::db_t::load_from_table()
 	
 	if (table_entries_s.size()==0)
 	{
-		logger::error("sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
+		logger::warning(4,"sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
 		return false;
 	}
 	
@@ -209,7 +240,7 @@ bool sample_t::db_t::load_from_table()
 	return true;
 }
 
-matrix_t& sample_t::db_t::matrix()
+sample_t::matrix_t& sample_t::db_t::matrix()
 {
 	logger::debug(21,"sample_t::db_t::matrix()","entering");
 	if (matrix_s.is_set())
@@ -442,7 +473,7 @@ const string sample_t::wafer_string() const
 	return ss.str();
 }
 
-const matrix_t& sample_t::matrix()
+sample_t::matrix_t& sample_t::matrix()
 {
 	if (matrix_p.is_set()) return matrix_p;
 	// do something to populate matrix_p --> look up Database
@@ -451,7 +482,7 @@ const matrix_t& sample_t::matrix()
 	return matrix_p;
 }
 
-bool sample_t::operator==(sample_t& obj)
+bool sample_t::operator==(const sample_t& obj) const
 {
 // 	to_screen();
 // 	obj.to_screen();
@@ -488,7 +519,7 @@ bool sample_t::operator==(sample_t& obj)
 	return true;
 }
 
-bool sample_t::operator!=(sample_t& obj)
+bool sample_t::operator!=(const sample_t& obj) const
 {
 	return !operator==(obj);
 }

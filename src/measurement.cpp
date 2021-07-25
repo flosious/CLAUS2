@@ -56,12 +56,12 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, li
 }
 
 
-bool measurements_::measurement_t::operator!=(measurements_::measurement_t& obj)
+bool measurements_::measurement_t::operator!=(const measurements_::measurement_t& obj) const
 {
 	return !(operator==(obj));
 }
 
-bool measurements_::measurement_t::operator==(measurements_::measurement_t& obj)
+bool measurements_::measurement_t::operator==(const measurements_::measurement_t& obj) const
 {
 	if (use_group)
 		if (group!=obj.group) return false;
@@ -88,7 +88,7 @@ std::__cxx11::string measurements_::measurement_t::to_string(const std::__cxx11:
 	return ss.str();
 }
 
-bool measurements_::measurement_t::operator<(measurements_::measurement_t& obj)
+bool measurements_::measurement_t::operator<(const measurements_::measurement_t& obj) const
 {
 	if (use_olcdb)
 	{
@@ -115,7 +115,7 @@ bool measurements_::measurement_t::operator<(measurements_::measurement_t& obj)
 	return false;
 }
 
-bool measurements_::measurement_t::operator>(measurements_::measurement_t& obj)
+bool measurements_::measurement_t::operator>(const measurements_::measurement_t& obj) const
 {
 	if (!operator<(obj) && operator!=(obj)) return true;
 	return false;

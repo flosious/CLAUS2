@@ -159,10 +159,16 @@ plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, dou
 /*******************       plot_t::axis_t              ******************************/
 /************************************************************************************/
 
+void plot_t::axis_t::add_curve(const vector<double>& X, const vector<double>& Y, const std::__cxx11::string legend)
+{
+	quantity_t Xq ("X",X,0);
+	quantity_t Yq ("Y",Y,0);
+	add_curve(Xq,Yq,legend);
+}
 
 void plot_t::axis_t::add_curve(const quantity_t& X, const quantity_t& Y, const std::__cxx11::string legend)
 {
-	logger::debug(9,"plot_t::axis_t::add_curve()","");
+	logger::debug(15,"plot_t::axis_t::add_curve()","entering");
 	if (Y.is_set() && X.is_set())
 		curves.push_back({&X,&Y,legend});
 }
@@ -212,7 +218,9 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	}
 	gr->SetRange('y',range().start,range().stop);
 	gr->SetOrigin(x_origin,-1);
+
 	if (log10_scale) gr->SetFunc("","lg(y)");
+	else gr->SetFunc("","");
 	if (log10_scale) gr->Axis("!Ey");
 	else gr->Axis("y",color.c_str());
 	
@@ -265,9 +273,8 @@ plot_t::axis_t::range_t plot_t::axis_t::range()
 		Ys.push_back(&c.Y);
 	range_t range(Ys);
 	if (log10_scale) 
-	{
 		return range.log10();
-	}
+	
 	return range;
 }
 
@@ -293,6 +300,7 @@ std::__cxx11::string plot_t::axis_t::range_t::to_string() const
 
 plot_t::axis_t::range_t plot_t::axis_t::range_t::log10() const
 {
+	logger::debug(15,"plot_t::axis_t::range_t plot_t::axis_t::range_t::log10()","");
 	double log_start, log_stop;
 	if (start<0) 
 		log_start = 1;

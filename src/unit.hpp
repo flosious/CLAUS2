@@ -130,6 +130,7 @@ namespace units
 		constexpr unit_t mol		({0,0,0,0,1,0,0},1);
 		constexpr unit_t Kelvin		({0,0,0,0,0,1,0},1);
 		constexpr unit_t Candela	({0,0,0,0,0,0,1},1);
+		constexpr unit_t one		({0,0,0,0,0,0,0},1);
 	}
 	
 	namespace prefixes
@@ -177,6 +178,7 @@ namespace units
 		constexpr unit_t atom_percent({0,0,0,0,1,0,0,true},0.01);
 		constexpr unit_t bar({-1,1,-2,0,0,0,0},1);
 		constexpr unit_t min({0,0,1,0,0,0,0},60);
+		constexpr unit_t atoms_per_ccm({-3,0,0,0,1,0,0},1E-6);
 	}
 }
 

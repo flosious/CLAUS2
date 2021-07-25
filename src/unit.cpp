@@ -94,7 +94,7 @@ bool unit_t::base_exponents_t::operator==(const unit_t::base_exponents_t& obj) c
 	if (moles != obj.moles) return false;
 	if (kelvins != obj.kelvins) return false;
 	if (candelas != obj.candelas) return false;
-	
+	if (relative != obj.relative) return false;
 	return true;
 }
 
@@ -363,9 +363,13 @@ const std::__cxx11::string unit_t::to_string() const
 // 	else if (base_units_exponents.Candela>0) 	counter << units::SI::Candela.to_string() << "^" << base_units_exponents.Candela << " ";
 		
 // 	logger::debug(5,"unit_t::to_string()","not found","");
-	logger::fatal("unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));
-	exit (EXIT_FAILURE);
-	return "unknown"; // will never be called
+
+	logger::error("unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));
+	stringstream out;
+	out  << tools::to_string(multiplier) << " * "<< base_units_exponents.to_string();
+	return out.str();
+// 	exit (EXIT_FAILURE);
+// 	return "unknown"; // will never be called
 }
 
 unit_t unit_t::pow(int pot) const
@@ -410,8 +414,9 @@ unit_t unit_t::operator*(const unit_t& obj) const
 
 unit_t unit_t::operator/(const unit_t& obj) const
 {
-// 	if (!is_set() || !obj.is_set()) return {};
-	return unit_t{base_units_exponents / obj.base_units_exponents, multiplier / obj.multiplier};
+	if (*this == obj)
+		return {{0,0,0,0,0,0,0,true},1};
+	return {base_units_exponents / obj.base_units_exponents, multiplier / obj.multiplier};
 }
 
 bool unit_t::operator<(const unit_t& obj) const

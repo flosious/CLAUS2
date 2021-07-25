@@ -81,10 +81,17 @@ public:
 		double chisq_p=-1;
 		/// parameters
 		bool fitted_p=false;
+		vector<double> Xdata;
+		vector<double> fit_parameters_s;
 	public:
+		polynom_t(int degree);
+		polynom_t(vector<double> fit_parameters);
+		int degree();
+		polynom_t derivative(unsigned int derive=1);
 		double chisq();
-		vector<double> fit_parameters;
-		bool fit(map<double,double> data_XY, int degree);
+		const vector<double>& fit_parameters();
+		bool fit(map<double,double> data_XY);
+		bool fit(vector<double> Ydata);
 		bool fitted();
 		string to_string(string prefix="");
 		vector<double> fitted_y_data(vector<double> x={});

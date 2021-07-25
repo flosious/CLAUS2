@@ -58,6 +58,10 @@ vector<measurements_::sims_t *> mgroups_::sims_t::measurements()
 
 mgroups_::sims_t::calc_t mgroups_::sims_t::calc()
 {
+	if (!set_matrix_isotopes_in_unknown_samples())
+	{
+		logger::error("mgroups_::sims_t::calc()","!set_matrix_isotopes_in_unknown_samples()","ignoring");
+	}
 	return calc_t(*this);
 }
 
@@ -87,51 +91,58 @@ void mgroups_::sims_t::check()
 	}
 }
 
-map<matrix_t,RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluster_t& cluster)
+const map<sample_t::matrix_t,RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluster_t& cluster)
 {
-	map<matrix_t,RSF_t> mat_to_RSF;
+	map<sample_t::matrix_t,RSF_t> mat_to_RSF;
 	for (auto& M : measurements())
 	{
-		matrix_t mat = M->sample->matrix();
+		sample_t::matrix_t mat = M->sample->matrix();
+		
 		if (!mat.is_set()) continue;
 		cluster_t* C = M->cluster(cluster);
 		if (C==nullptr) continue;
 		RSF_t RSF =  C->RSF;
 		if (!RSF.is_set()) continue;
+		logger::debug(21,"mgroups_::sims_t::matrix_to_SRs()",M->sample->to_string());
+		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()","matrix:"+mat.to_string(),"\trRSF:"+RSF.to_string());
 		if (RSF.data.size()>1)
 		{
 			logger::warning(3,"mgroups_::sims_t::matrix_to_RSF()","RSF is not a scalar, using median");
 			RSF =  RSF.median();
 		}
 		if (mat_to_RSF.find(mat)==mat_to_RSF.end())
-			mat_to_RSF.insert(pair<matrix_t, RSF_t> (mat,RSF));
+			mat_to_RSF.insert(pair<sample_t::matrix_t, RSF_t> (mat,RSF));
 		else
 			mat_to_RSF.at(mat) << RSF;
 	}
 	
 	for (auto& m : mat_to_RSF)
-		m.second = m.second.mean();
+		m.second = RSF_t(m.second.mean());
 	return mat_to_RSF;
 }
 
-map<matrix_t,SR_t> mgroups_::sims_t::matrix_to_SRs()
+const std::map< sample_t::matrix_t, SR_t > mgroups_::sims_t::matrix_to_SRs()
 {
-	map<matrix_t,SR_t> mat_to_SRs;
+	map<sample_t::matrix_t,SR_t> mat_to_SRs;
 	for (auto& M : measurements())
 	{
-		matrix_t mat = M->sample->matrix();
+		sample_t::matrix_t mat = M->sample->matrix();
 		if (!mat.is_set()) continue;
 		SR_t SR = M->crater.SR;
 		if (!SR.is_set()) continue;
+		logger::debug(21,"mgroups_::sims_t::matrix_to_SRs()",M->sample->to_string());
+		logger::debug(21,"mgroups_::sims_t::matrix_to_SRs()","matrix:"+mat.to_string(),"\tSR:"+SR.to_string());
 		if (SR.data.size()>1)
 		{
 			logger::warning(3,"mgroups_::sims_t::matrix_to_SRs()","SR is not a scalar, using median");
 			SR = SR.median();
 		}
 		if (mat_to_SRs.find(mat)==mat_to_SRs.end())
-			mat_to_SRs.insert(pair<matrix_t, SR_t> (mat,SR));
+			mat_to_SRs.insert(pair<sample_t::matrix_t, SR_t> (mat,SR));
 		else
+		{
 			mat_to_SRs.at(mat) << SR;
+		}
 	}
 	
 	for (auto& m : mat_to_SRs)
@@ -139,23 +150,106 @@ map<matrix_t,SR_t> mgroups_::sims_t::matrix_to_SRs()
 	return mat_to_SRs;
 }
 
-map<matrix_t,intensity_t> mgroups_::sims_t::matrix_to_intensity_sum()
+const std::map< sample_t::matrix_t, intensity_t > mgroups_::sims_t::matrix_to_intensity_sum()
 {
-	map<matrix_t,intensity_t> mat_to_I;
+	map<sample_t::matrix_t,intensity_t> mat_to_I;
 	for (auto& M : measurements())
 	{
-		matrix_t mat = M->sample->matrix();
+		sample_t::matrix_t mat = M->sample->matrix();
 		if (!mat.is_set()) continue;
-		intensity_t I = M->matrix_clusters(M->sample->matrix().isotopes).intensity_sum();
+		intensity_t I = M->matrix_clusters().intensity_sum();
 		if (!I.is_set()) continue;
 		if (mat_to_I.find(mat)==mat_to_I.end())
-			mat_to_I.insert(pair<matrix_t, intensity_t> (mat,I.quantile(0.10)));
+			mat_to_I.insert(pair<sample_t::matrix_t, intensity_t> (mat,I.quantile(0.10)));
 		else
 			mat_to_I.at(mat) << I.quantile(0.10);
 	}
 	return mat_to_I;
 }
 
+vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
+{
+	set<isotope_t> isos;
+	for (auto& M : measurements())
+	{
+		if (!M->sample->matrix().is_set()) continue;
+		vector<isotope_t> mat_isos=M->sample->matrix().isotopes;
+		isos.insert(mat_isos.begin(),mat_isos.end());
+// 		const vector<isotope_t> matrix_isos_in_M = M->matrix_clusters().isotopes();
+// 		isos.insert(matrix_isos_in_M.begin(),matrix_isos_in_M.end());
+	}
+	vector<isotope_t> isos_vec = {isos.begin(),isos.end()};
+	
+	// keep abundance and/or substance_amount if there is only 1 known matrix from all reference samples within this group
+	if (matrices().size()==1) 
+	{
+		logger::info(3,"mgroups_::sims_t::matrix_isotopes()","all references have same matrix, applying for whole group",matrices().begin()->to_string());
+		return isos_vec;
+	}
+	
+	// delete abundance and substance_amount because there are different ones in the group. calculate later
+	for (auto& I : isos_vec)
+	{
+		I.substance_amount.clear();
+		I.abundance.clear();
+	}
+	
+	return isos_vec;
+}
+
+vector<cluster_t> mgroups_::sims_t::matrix_clusters()
+{
+	set<cluster_t> clusters;
+	for (auto& M : measurements())
+	{
+		for (auto& C : M->matrix_clusters().clusters)
+		{
+			clusters.insert({C->isotopes});
+		}
+	}
+	return {clusters.begin(),clusters.end()};
+}
+
+bool mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()
+{
+	const vector<isotope_t> mat_isos = matrix_isotopes();
+	if (mat_isos.size()==0)
+	{
+		logger::error("mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()","matrix_isotopes()==0 unknown matrices","please include atleast 1 tabulated reference sample; check database","returning false");
+		return false;
+	}
+	for (auto& M : measurements())
+		if (M->sample->matrix().isotopes.size()==0)
+			M->sample->matrix().isotopes=mat_isos;
+	return true;
+}
+
+set<sample_t::matrix_t> mgroups_::sims_t::matrices()
+{
+	set<sample_t::matrix_t> mats;
+	for (auto& M : measurements())
+		if (M->sample->matrix().is_set())
+			mats.insert(M->sample->matrix());
+// 	cout << endl << "mats.size()=" << mats.size() << endl;
+// 	for (auto& m : mats)
+// 		cout << m.to_string() << endl;
+	return mats;
+}
+
+set<cluster_t> mgroups_::sims_t::clusters()
+{
+	set<cluster_t> cs;
+	
+	for (auto& M : measurements())
+	{
+		for (auto& C : M->clusters)
+		{
+			cs.insert({C.isotopes});
+		}
+	}
+	
+	return cs;
+}
 
 // measurements_::dsims_t::matrix_clusters_c& mgroups_::sims_t::common_matrix_clusters()
 // {

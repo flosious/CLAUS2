@@ -62,7 +62,7 @@ string files_::file_t::contents_t::value_by_key(string key)
 	return "";
 }
 
-matrix_t files_::file_t::contents_t::matrix()
+string files_::file_t::contents_t::matrix()
 {
 	return value_by_key("matrix");
 }

@@ -8,6 +8,10 @@
 #include <map>
 #include "print.hpp"
 #include "tools.hpp"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+// #include "plot.hpp"
 
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_rng.h>
@@ -27,6 +31,11 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_sort_double.h>
 #include <gsl/gsl_filter.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_bspline.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_statistics.h>
 
 #include "persistence1d.hpp" // from https://www.csc.kth.se/~weinkauf/notes/persistence1d.html
 
@@ -34,7 +43,14 @@ using namespace std;
 
 class statistics {
 private:  
+	typedef int (* functiontype) (const gsl_movstat_end_t, const gsl_vector*, gsl_vector*, gsl_movstat_workspace* );
+	static vector<double> get_moving_window_function(vector<double> Y, int window_size, functiontype function,const gsl_movstat_end_t gsl_movstat_end = GSL_MOVSTAT_END_TRUNCATE);
+	static gsl_vector* get_gsl_vec(const vector<double>& Y);
+	static vector<double> get_gsl_vec(gsl_vector* Y);
 public:
+	/*TEST*/
+	static void test();
+	
 	/*moving windows*/
 	static vector<vector<double>> get_moving_window_statistics_on_dataX_YY(vector<vector<double>> *data_X_YY, int window_size, int column);
 	static vector<vector<double>> get_moving_window_statistics_from_Y(vector<double> *Y, int window_size);
@@ -42,8 +58,13 @@ public:
 	static vector<double> get_moving_window_mean_from_Y(vector<double> Y, int window_size);
 	static vector<double> get_moving_window_sd_from_Y(vector<double> Y, int window_size);
 	static vector<double> get_moving_window_MAD_from_Y(vector<double> Y, int window_size);
+	///default q=0.25 = IQR (difference between the 75th and 25th percentiles of Y)
+	static vector<double> get_moving_window_qqr_from_Y(vector<double> Y, int window_size, double q=0.25);
+	static vector<double> get_moving_window_min_from_Y(vector<double> Y, int window_size);
+	static vector<double> get_moving_window_max_from_Y(vector<double> Y, int window_size);
+	static vector<double> get_moving_window_sum_from_Y(vector<double> Y, int window_size);
 	
-	static int get_moving_window_max_index_from_Y(vector<double> Y, int window_size);
+// 	static int get_moving_window_max_index_from_Y(vector<double> Y, int window_size);
 	
 	static vector<int> get_local_minima_indices_new(vector<double> Y, double Y_tolerance=0, int x_stepsize=1);
 	
@@ -142,9 +163,13 @@ public:
 	static vector<double> interpolate_dataXY_to_X(vector<vector<double>>& data_XY, vector<double>& X);
 	
 	/****************/
+	///obsolet, use bspline_smooth instead
 	static vector<double> interpolate_bspline(map<double, double>& data_XY,vector<double> X_new={}, int bspline_degree=3);
 	/// akima splines
 	static vector<double> interpolate_data_XY(const map<double,double>& data_XY,const vector<double>& X);
+	
+	///B-spline smoothing
+	static vector<double> bspline_smooth(const vector<double>& Y, vector<double> Xdata={}, unsigned int breakpoints = 0, const size_t spline_order = 4);
 	
 	static double integrate(map<double,double>& data_XY, unsigned int start_idx=0, unsigned int stop_idx=0) ;
 	
