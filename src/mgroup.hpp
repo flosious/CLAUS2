@@ -99,14 +99,6 @@ public:
 	{
 	private:
 	protected:
-// 		class clusters_populated_with_t
-// 		{
-// 		public:
-// 			//returns clusters where RSF is populated
-// 			vector<cluster_t*> RSF();
-// 			//returns clusters where RSF is populated
-// 			vector<cluster_t*> SF();
-// 		};
 		class calc_t
 		{
 		protected:
@@ -120,6 +112,7 @@ public:
 			{
 				sims_t& MG;
 				calc_t& calc;
+				const vector<measurements_::sims_t*>& measurements;
 			public:
 				jiang_c(calc_t& calc);
 			};
@@ -129,6 +122,7 @@ public:
 			private:
 				sims_t& MG;
 				calc_t& calc;
+				const vector<measurements_::sims_t*>& measurements;
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				
@@ -145,6 +139,7 @@ public:
 			private:
 				sims_t& MG;
 				calc_t& calc;
+				const vector<measurements_::sims_t*>& measurements;
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				bool overwrite = false;
@@ -157,6 +152,7 @@ public:
 			private:
 				sims_t& MG;
 				calc_t& calc;
+				const vector<measurements_::sims_t*>& measurements;
 				const map<cluster_t*,intensity_t> RSFs_to_ref_intensities();
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
@@ -176,6 +172,7 @@ public:
 			private:
 				sims_t& MG;
 				calc_t& calc;
+				const vector<measurements_::sims_t*>& measurements;
 				const map<cluster_t*,intensity_t> SFs_to_ref_intensities();
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
@@ -193,6 +190,7 @@ public:
 			private:
 				sims_t& MG;
 				calc_t& calc;
+				const vector<measurements_::sims_t*>& measurements;
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				concentration_c(calc_t& calc);
@@ -207,6 +205,7 @@ public:
 			private:
 				sims_t& MG;
 				calc_t& calc;
+				const vector<measurements_::sims_t*>& measurements;
 				const std::map< cluster_t*, isotope_t* > matrix_cluster_to_iso();
 			public:
 				///calculation of matrix concentrations
@@ -221,15 +220,20 @@ public:
 				calc_t& trimmed_mean_const_from_db(bool overwrite = false);
 				calc_t& const_from_db(quantity_t (*operation) (quantity_t), bool overwrite=false);
 			};
+			~calc_t();
 			calc_t(sims_t& MG);
 			sims_t& implant_references(bool overwrite=false);
+			///calculates SRs and RSFs for references, using the most precise models available and going to less precise, if not sufficient information is available
 			sims_t& references(bool overwrite=false);
 			
 			///calculates SR and SF from implants in one step, this save CPU time for high resolution polynom interpolation to get maxima pos
 			calc_t& SR_SF_from_implants_maxima(bool overwrite=false);
+			calc_t& normalize_to_ref_intensity(bool overwrite=false);
 			
 // 			map<sample_t::matrix_t,SR_t> matrices_to_SR();
 // 			map<sample_t::matrix_t,RSF_t> matrices_to_RSF(const cluster_t& cluster);
+			
+			const vector<measurements_::sims_t*> measurements;
 			
 			jiang_c jiang;
 			SR_c SRs;
@@ -243,6 +247,8 @@ public:
 		void check();
 // 		void set_matrix_isotopes_in_measurements();
 	public:
+		void export_origin_ascii(std::__cxx11::string path="/tmp/exports/", const std::__cxx11::string delimiter="\t");
+		string to_string_short() const;
 		calc_t calc();
 		///all different matrices from all samples within this group
 		set<sample_t::matrix_t> matrices();
@@ -255,6 +261,7 @@ public:
 		///intersection of all matrix_clusters of all measurements within this group
 // 		measurements_::dsims_t::matrix_clusters_c& common_matrix_clusters();
 		virtual vector<measurements_::sims_t*> measurements();
+		virtual const msettings::sims_t* settings() const;
 		///listed RSF to coressponding cluster and matrix
 		RSF_t RSF(cluster_t cluster, sample_t::matrix_t matrix);
 		///all clusters referencing to matrices
@@ -273,7 +280,9 @@ public:
 		friend class processor;
 	private:
 		vector<measurements_::dsims_t> measurements_p;
+		const msettings::dsims_t settings_p;
 	public:
+		const msettings::sims_t* settings() const override;
 		dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
 		dsims_t(measurements_::dsims_t& dsims_measurements);
 		vector<measurements_::sims_t*> measurements() override;
@@ -282,7 +291,7 @@ public:
 		/*normalize to primary current*/
 		dsims_t normalize_to_Iprimary();
 		
-		const msettings::dsims_t settings;
+		
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
 	};

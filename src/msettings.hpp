@@ -36,8 +36,10 @@ public:
 	class sims_t
 	{
 	public:
+		sims_t();
 		sims_t(files_::sims_t::name_t& filename);
 		const std::__cxx11::string to_string(const std::__cxx11::string del = ", ") const;
+		const std::__cxx11::string to_string_short() const;
 		string secondary_polarity;
 		energy_t sputter_energy;
 		ion_t sputter_ion;
@@ -49,10 +51,13 @@ public:
 	class dsims_t : public sims_t
 	{
 	public:
+		dsims_t();
 		dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents);
 		dsims_t(files_::dsims_t& file);
 		const string to_string(const string del=", ") const;
 		
+		total_sputter_time_t total_sputter_time;
+		total_sputter_time_t total_acquisition_time;
 		rastersize_t sputter_rastersize;
 		rastersize_t analyzed_area;
 		quantity_t chamber_pressure;

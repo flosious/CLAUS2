@@ -19,11 +19,17 @@
 
 #include "mgroup.hpp"
 
-mgroups_::sims_t::calc_t::calc_t(sims_t& MG) : MG(MG), jiang(*this), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this)
+mgroups_::sims_t::calc_t::~calc_t()
 {
+}
+
+
+mgroups_::sims_t::calc_t::calc_t(sims_t& MG) : MG(MG), jiang(*this), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this), measurements(MG.measurements())
+{
+	
 // 	if (save_calc_esults)
 // 	{
-// 		for (auto& M : MG.measurements())
+// 		for (auto& M : measurements)
 // 		{
 // 			MG.saved_calc_results.push_back(M->calc());
 // 		}
@@ -37,7 +43,7 @@ mgroups_::sims_t::calc_t::calc_t(sims_t& MG) : MG(MG), jiang(*this), SRs(*this),
 
 mgroups_::sims_t& mgroups_::sims_t::calc_t::references(bool overwrite)
 {
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		measurements_::sims_t::calc_t c = M->calc(overwrite);
 		//SR
@@ -60,9 +66,28 @@ mgroups_::sims_t& mgroups_::sims_t::calc_t::references(bool overwrite)
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_SF_from_implants_maxima(bool overwrite)
 {
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		M->calc().SR.from_implant_max(overwrite).SF.from_db_max(overwrite);
+	}
+	return *this;
+}
+
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(bool overwrite)
+{
+	for (auto& M : measurements)
+	{
+		for (auto& C : M->clusters)
+		{
+			intensity_t Iref = M->matrix_clusters().intensity_sum();
+			
+			if (C.intensity.is_set() && Iref.is_set() && !M->matrix_clusters().is_cluster_in_matrix(C))
+			{
+				logger::debug(11,"mgroups_::sims_t::calc_t::normalize_to_ref_intensity()","Iref="+Iref.to_string_detailed());
+				C.intensity = ((C.intensity / Iref ) * Iref.median());
+			}
+		}
+// 		M->plot_now(0);
 	}
 	return *this;
 }
@@ -72,7 +97,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_SF_from_implants_maxima(b
 // 	vector<pair<sample_t::matrix_t,SR_t>> mats_to_SR;
 // 	map<sample_t::matrix_t,SR_t> mats_to_SR_map;
 // 	
-// 	for (auto& M : MG.measurements())
+// 	for (auto& M : measurements)
 // 	{
 // 		if (!M->sample->matrix().is_set()) continue;
 // 		if (!M->crater.SR.is_set()) continue;
@@ -100,7 +125,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_SF_from_implants_maxima(b
 // {
 // 	map<sample_t::matrix_t,RSF_t> mat_to_RSF_map;
 // 	vector<pair<sample_t::matrix_t,RSF_t>> mat_to_RSF;
-// 	for (auto& M : MG.measurements())
+// 	for (auto& M : measurements)
 // 	{
 // 		if (!M->sample->matrix().is_set()) continue;
 // 		RSF_t RSF = M->cluster(cluster)->RSF;
@@ -129,7 +154,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_SF_from_implants_maxima(b
 /*****  jiang_c  *********/
 /*************************/
 
-mgroups_::sims_t::calc_t::jiang_c::jiang_c(calc_t& calc) : MG(calc.MG), calc(calc)
+mgroups_::sims_t::calc_t::jiang_c::jiang_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
 {
 }
 
@@ -137,13 +162,13 @@ mgroups_::sims_t::calc_t::jiang_c::jiang_c(calc_t& calc) : MG(calc.MG), calc(cal
 /*****   SR_c  **********/
 /*************************/
 
-mgroups_::sims_t::calc_t::SR_c::SR_c(calc_t& calc) : MG(calc.MG), calc(calc)
+mgroups_::sims_t::calc_t::SR_c::SR_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
 {
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::from_crater_depths(bool overwrite)
 {
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		if (!overwrite && M->crater.SR.is_set()) continue;
 // 		if (save_calc_esults)
@@ -157,7 +182,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::from_crater_depths(boo
 
 mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SR_c::from_implant_max(bool overwrite)
 {
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 // 		cout<< "B\t" << M->crater.sputter_time.to_string() << endl;
 		if (!overwrite && M->crater.SR.is_set()) continue;
@@ -186,7 +211,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices(
 	if (mat_to_SRs.size()==0)
 		return calc;
 	
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		if (!M->sample->matrix().is_set()) continue;
 		for (auto& mat_to_SR : mat_to_SRs)
@@ -214,13 +239,13 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices(
 /******   SD_c  **********/
 /*************************/
 
-mgroups_::sims_t::calc_t::SD_c::SD_c(calc_t& calc) : MG(calc.MG), calc(calc)
+mgroups_::sims_t::calc_t::SD_c::SD_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
 {
 }
 
 mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SD_c::from_SR()
 {
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		if (!overwrite && M->crater.sputter_depth.is_set()) continue;
 // 		if (save_calc_esults)
@@ -236,7 +261,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SD_c::from_SR()
 /*****   SF_c  **********/
 /*************************/
 
-mgroups_::sims_t::calc_t::SF_c::SF_c(calc_t& calc) : MG(calc.MG), calc(calc)
+mgroups_::sims_t::calc_t::SF_c::SF_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
 {
 }
 
@@ -253,7 +278,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_median_ref(bo
 const map<cluster_t*,intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs_to_ref_intensities()
 {
 	map<cluster_t*,intensity_t> rsf_to_ref_intensity;
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		auto matrix_clusters = M->matrix_clusters();
 		if (!matrix_clusters.intensity_sum().is_set())
@@ -272,7 +297,7 @@ const map<cluster_t*,intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs_to_ref_in
 
 mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_dose(bool overwrite)
 {
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		for (auto& C : M->clusters)
 		{
@@ -287,7 +312,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_dose(boo
 
 mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_max(bool overwrite)
 {
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		for (auto& C : M->clusters)
 		{
@@ -304,14 +329,14 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_max(bool
 /*****  RSF_c    *********/
 /*************************/
 
-mgroups_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc) : MG(calc.MG), calc(calc)
+mgroups_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
 {
 }
 
 const map<cluster_t*,intensity_t> mgroups_::sims_t::calc_t::RSF_c::SFs_to_ref_intensities()
 {
 	map<cluster_t*,intensity_t> sf_to_ref_intensity;
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		auto matrix_clusters = M->matrix_clusters();
 		if (!matrix_clusters.intensity_sum().is_set())
@@ -367,7 +392,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::copy_to_same_matrice
 		//for the specific cluster C
 		auto mat_to_RSF = MG.matrix_to_RSF(C);
 		if (mat_to_RSF.size()==0) continue; // no RSFs at all for this cluster at all
-		for (auto& M : MG.measurements())
+		for (auto& M : measurements)
 		{
 			if (!M->sample->matrix().is_set()) continue; // unknown matrix
 			auto mat = mat_to_RSF.find(M->sample->matrix());
@@ -392,13 +417,13 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::copy_to_same_matrice
 /**   concentration_c  **/
 /*************************/
 
-mgroups_::sims_t::calc_t::concentration_c::concentration_c(calc_t& calc) : MG(calc.MG), calc(calc)
+mgroups_::sims_t::calc_t::concentration_c::concentration_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
 {
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(bool overwrite)
 {
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		for (auto& C : M->clusters)
 		{
@@ -418,14 +443,14 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(boo
 /*****   matrix_c *******/
 /*************************/
 
-mgroups_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc) : MG(calc.MG), calc(calc)
+mgroups_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
 {
 }
 
 const map<cluster_t*,isotope_t*> mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_iso()
 {
 	map<cluster_t*,isotope_t*> matrix_C_to_I;
-	for (auto& M : MG.measurements())
+	for (auto& M : measurements)
 	{
 		if (!M->sample->matrix().is_set()) continue;
 		if (!M->matrix_clusters().intensity_sum().is_set()) continue;
@@ -477,7 +502,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::const_from_db(quan
 	return calc;
 }
 
-measurements_::sims_t* mgroups_::sims_t::measurement(const measurements_::sims_t& M)
+measurements_::sims_t* mgroups_::sims_t::measurement ( const measurements_::sims_t& M )
 {
 	for (auto& M_in_MG : measurements())
 		if (*M_in_MG==M)

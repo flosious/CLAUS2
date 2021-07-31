@@ -55,7 +55,7 @@ public:
 		///isotope mapping to its absolute concentration in amount of atoms or mole
 		/// OR relative concentration in at%; enforcing always 100at% within a matrix
 	// 	map<isotope_t,double> isotopes_amount;
-		void abs_to_relative();
+		void substance_amount_to_relative();
 	public:
 		matrix_t();
 		matrix_t(const vector<string> elements_or_isotopes_s);

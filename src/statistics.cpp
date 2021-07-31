@@ -1827,15 +1827,11 @@ vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY
 
 double statistics::integrate(map<double,double>& data_XY, unsigned int start_idx, unsigned int stop_idx) 
 {
-	if (stop_idx==0)
-		stop_idx = data_XY.size();
-	if (stop_idx<start_idx)
-		return 0;
     double sum=0;
 	map<double,double>::iterator it,it_prev;
 	double dY,dX;
 	it = data_XY.begin();
-	int i=1;
+	int i=0;
     for (++it;it!=data_XY.end();++it)
 	{
 		if (i > stop_idx)	break;

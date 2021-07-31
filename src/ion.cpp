@@ -22,9 +22,9 @@
 /***************************/
 /*******     ion_t     ********/
 /***************************/
-// ion_t::ion_t()
-// {
-// }
+ion_t::ion_t()
+{
+}
 
 ion_t::ion_t(vector<element_t> elements_s,  electrical_charge_t electric_charge_s) : elements(elements_s), electric_charge(electric_charge_s)
 {
@@ -63,6 +63,7 @@ bool ion_t::operator!=(const ion_t& obj) const
 bool ion_t::is_set() const
 {
 	if (elements.size()==0) return false;
+	if (elements.at(0).isotopes.size()==0) return false;
 	if (!electric_charge.is_set()) return false;
 	return true;
 }

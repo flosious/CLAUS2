@@ -28,8 +28,16 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file,
 				sims_t(dsims_file.name,dsims_file.contents,samples_list,"dsims",sql_wrapper,jpg_files,profiler_files), 
 				settings(dsims_file.name,dsims_file.contents)
 // 				clusters(dsims_file.contents.clusters)
-{		
+{	
 	crater.sputter_beam = dsims_file.contents.Ipr();
+	
+	if (dsims_file.contents.total_sputtering_time().is_set())
+		crater.total_sputter_time_s = total_sputter_time_t(dsims_file.contents.total_sputtering_time());
+	else if (crater.sputter_beam.sputter_time.is_set())
+		crater.total_sputter_time_s = total_sputter_time_t(crater.sputter_beam.sputter_time.max());
+	else
+		crater.total_sputter_time_s = total_sputter_time_t(dsims_file.contents.total_acquisition_time());
+	
 	if (clusters.size()==0)
 	{
 		logger::error("measurements_::dsims_t::dsims_t()","clusters.size()==0","","return");
@@ -65,6 +73,8 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file,
 	{
 		if (crater.sputter_beam.sputter_depth.is_set() && crater.sputter_depth.is_set())
 		{
+			logger::debug(11,"measurements_::dsims_t::dsims_t()","crater.sputter_beam.sputter_depth:",crater.sputter_beam.sputter_depth.to_string());
+			logger::debug(11,"measurements_::dsims_t::dsims_t()","crater.sputter_depth:",crater.sputter_depth.to_string());
 			crater.sputter_beam.sputter_current = crater.sputter_beam.sputter_current.interp(crater.sputter_beam.sputter_depth,crater.sputter_depth);
 			crater.sputter_beam.sputter_depth.clear();
 		}
@@ -108,40 +118,3 @@ bool measurements_::dsims_t::operator==(const measurements_::dsims_t& obj) const
 	if (settings!=obj.settings) return false;
 	return true;
 }
-
-// bool measurements_::dsims_t::operator<(measurements_::dsims_t& obj)
-// {
-// 	if (measurement_t::operator<(obj)) return true;
-// 	if (*this == obj)
-// 		if (settings < obj.settings)
-// 			return true;
-// 	return false;
-// }
-// 
-// 
-
-/*needs sorted dsims_files input*/
-// measurements_::dsims_t::dsims_t(vector<files_::dsims_t>& dsims_files, 
-// 								list<sample_t>& samples_list, 
-// 								vector<files_::jpg_t>* jpg_files) : 
-// 				dsims_t(dsims_files.back(),samples_list,jpg_files)	
-// {
-// 	dsims_files.pop_back(); // --> is *this
-// 	
-// 	for (int i=dsims_files.size()-1;i>=0;i--)
-// // 	for (vector<files_::dsims_t>::reverse_iterator df = dsims_files.rbegin();df!=dsims_files.rend();df++)
-// 	{
-// 		dsims_t M(dsims_files.at(i),samples_list,jpg_files);
-// 		if (*this!=M)	
-// 		{
-// 			break; //sorted data
-// // 			continue; //unsorted data
-// 		}
-// 		//copy useful information from M into this measurement
-// 		if (M.crater.total_sputter_depths.is_set()) 
-// 			crater.total_sputter_depths << M.crater.total_sputter_depths; 
-// 		if (M.crater.linescans.size()>0)
-// 			crater.linescans.insert(crater.linescans.end(),M.crater.linescans.begin(),M.crater.linescans.end());
-// 		dsims_files.erase(dsims_files.begin()+i);
-// 	}
-// }

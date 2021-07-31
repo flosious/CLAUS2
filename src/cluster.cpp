@@ -221,6 +221,7 @@ cluster_t cluster_t::interpolate(quantity_t& new_Q, quantity_t& old_Q) const
 		logger::error("cluster_t::interpolate()","!new_Q.is_set() || !old_Q.is_set()","","returning empty");
 		return {};
 	}
+
 	if (new_Q.unit().base_units_exponents != old_Q.unit().base_units_exponents)// same base units?
 	{
 		logger::error("cluster_t::interpolate()","new_Q.unit().base_units_exponents != old_Q.unit().base_units_exponents","","returning empty");

@@ -313,20 +313,20 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 	plot.to_screen(to_string(),sleep_sec);
 }
 
-void measurements_::sims_t::export_origin_ascii(std::__cxx11::string path, const std::__cxx11::string delimiter)
+void measurements_::sims_t:: export_origin_ascii(std::__cxx11::string path, const std::__cxx11::string delimiter)
 {
 	if (clusters.size()==0)
 	{
 		logger::warning(1,"measurements_::sims_t::export_origin_ascii","clusters.size()==0",to_string());
 		return;
 	}
-	cout << measurements_::sims_t::to_string() << endl;
+// 	cout << measurements_::sims_t::to_string() << endl;
 	logger::debug(6,"measurements_::sims_t::export_origin_ascii","path",path,"starting export");
 	vector<origin_t::column_t> cols;
 	/*time-intensity-profile*/
 	stringstream comment,longname;
 	comment << "crater ";
-	longname << "crater sputter_depth";
+	longname << "sputter_depth";
 	if (sample->simple_name!="")
 		comment << sample->simple_name;
 	else
@@ -350,7 +350,7 @@ void measurements_::sims_t::export_origin_ascii(std::__cxx11::string path, const
 	comment.str("");
 	longname.str("");
 	comment << "crater ";
-	longname << "crater sputter_time";
+	longname << "sputter_time";
 	if (sample->simple_name!="")
 		comment << sample->simple_name;
 	else

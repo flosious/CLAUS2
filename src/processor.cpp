@@ -59,32 +59,72 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	for (auto& MG : dsims.mgroups())
 	{
-// 		MG.calc().SR_SF_from_implants_maxima().RSFs.from_SF_median_ref().SFs.from_RSF_median_ref().SRs.to_others().SDs.from_SR().concentrations.from_SF();
-		MG.calc().SR_SF_from_implants_maxima().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF().SRs.copy_to_same_matrices().SDs.from_SR();
-// 		MG.calc().matrices.median_const_from_db();
+		auto MG_from_max = MG;
+		auto MG_from_dose = MG;
+		auto MG_from_max_Iref = MG;
+		MG_from_dose.calc().SRs.from_implant_max().SRs.copy_to_same_matrices().SDs.from_SR().SFs.from_implant_dose().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
+		MG_from_max.calc().SR_SF_from_implants_maxima().SRs.copy_to_same_matrices().SDs.from_SR().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
+		MG_from_max_Iref.calc().normalize_to_ref_intensity().SR_SF_from_implants_maxima().SRs.copy_to_same_matrices().SDs.from_SR().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
+		MG_from_max_Iref.export_origin_ascii();
+		for (auto& M : MG_from_max.measurements())
+		{
+			plot_t plot;
+			plot.Y1.range(1E16,1E21,true);
+			plot.Y2.range(1E16,1E21,true);
+			plot.Y3.range(1E16,1E21,true);
+			
+			auto* M_c = MG_from_dose.measurement(*M);
+			auto* M_d = MG_from_max_Iref.measurement(*M);
+			if (M_c==nullptr) continue;
+			if (M_d==nullptr) continue;
+			if (!M->crater.sputter_depth.is_set()) continue;
+			for (auto& C : M->clusters)
+			{
+				if (!C.concentration.is_set()) continue;
+				auto* C_c = M_c->cluster(C);
+				if (C_c == nullptr || !C_c->concentration.is_set()) continue;
+				auto* C_d = M_d->cluster(C);
+				if (C_d == nullptr || !C_d->concentration.is_set()) continue;
+				plot.Y1.add_curve(M->crater.sputter_depth,C.concentration,C.to_string()+"_from_Cmax");
+				plot.Y2.add_curve(M_c->crater.sputter_depth,C_c->concentration,C_c->to_string()+"_from_Dose");
+				plot.Y3.add_curve(M_d->crater.sputter_depth,C_d->concentration,C_d->to_string()+"_from_Cmax_Iref");
+				
+				auto dose = C.concentration.integrate(M->crater.sputter_depth.change_unit({"cm"}),*M->calc().implant(C).minimum_sputter_depth_position().data.begin());
+				auto dose_c = C_c->concentration.integrate(M_c->crater.sputter_depth.change_unit({"cm"}),*M_c->calc().implant(C).minimum_sputter_depth_position().data.begin());
+				auto dose_d = C_d->concentration.integrate(M_d->crater.sputter_depth.change_unit({"cm"}),*M_d->calc().implant(C).minimum_sputter_depth_position().data.begin());
+				
+				cout << endl;
+				cout << "from_Cmax: " << C.RSF.to_string_detailed() << "\t" << dose.to_string() << endl;
+				cout << "from_Dose: " << C_c->RSF.to_string_detailed() << "\t" << dose_c.to_string() << endl;
+				cout << "from_Cmax_Iref: " << C_d->RSF.to_string_detailed() << "\t" << dose_d.to_string() << endl;
+				
+				
+				
+			}
+			
+			plot.to_screen("",0);
+			M->plot_now(0);
+		}
+		
 		//get matrices
 		//get/calculate RSF from references
 		//set/calculate matrix
 		//set RSFs depending on matrix
 		
-		for (auto& M : MG.measurements())
-		{
-// 			logger::debug(11,"processor::processor()","sample="+M->sample->to_string(), M->sample->matrix().to_string());
-			for (auto& C : M->clusters)
-			{
-				if (C.RSF.is_set())
-				{
-					cout << endl << "C.SF=" << C.SF.to_string() << endl;
-					cout << "C.RSF=" << C.RSF.to_string() << endl;
-					cout << "C.concentration=" << C.concentration.to_string() << endl;
-				}
-// 				isotope_t I = M->isotope_corresponding_to_cluster(C);
-// 				logger::debug(11,"processor::processor()","cluster="+C.to_string(),"corresponding isotope="+I.to_string());
-			}
-// 			M->calc().SR.from_crater_depths().SR.from_implant_max().SR.from_ref_fit().SD.from_SR().SF.from_db_dose().SF.from_db_max().SF.from_ref_fit().concentration.from_SF();
-// 			M->calc().SR.from_implant_max().SD.from_SR().SF.from_db_max().concentration.from_SF();
-			M->plot_now(0);
-		}
+// 		for (auto& M : MG.measurements())
+// 		{
+// 			for (auto& C : M->clusters)
+// 			{
+// 				if (C.RSF.is_set())
+// 				{
+// 					cout << endl << "C.SF=" << C.SF.to_string() << endl;
+// 					cout << "C.RSF=" << C.RSF.to_string() << endl;
+// 					cout << "C.concentration=" << C.concentration.to_string() << endl;
+// 				}
+// 			}
+// 			M->plot_now(0);
+// // 			getchar(); // wait for press enter
+// 		}
 	}
 	
 	if (!logger::instant_print_messages)

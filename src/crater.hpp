@@ -97,7 +97,7 @@ public:
 	///resolution is 1s
 	sputter_time_t unix_sputter_time(string date_time_start);
 	sputter_current_t& sputter_current();
-	total_sputter_time_t total_sputter_time(vector<cluster_t>* clusters=nullptr);
+	total_sputter_time_t& total_sputter_time(vector<cluster_t>* clusters=nullptr);
 	total_sputter_depth_t total_sputter_depth();
 	SR_t SR;
 	

@@ -229,8 +229,13 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 
 unit_t::unit_t(std::__cxx11::string symbols)
 {
-	
 	tools::str::remove_spaces(&symbols);
+	
+	if (symbols=="" || symbols.length()==0)
+	{
+		logger::debug(11,"unit_t::unit_t()","symbols=="" || symbols.length()==0");
+		return;
+	}
 	
 	/*symbols is a derived unit*/
 	if (symbol_to_unit.size()>0 && symbol_to_unit.find(symbols)!=symbol_to_unit.end())

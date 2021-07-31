@@ -92,6 +92,8 @@ quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) 
 {
 	if (!is_set())
 		return {};
+	if (data.size()==1)
+		return *this;
 	if (!old_X.is_set() || !new_X.is_set() || !is_set()) 
 	{
 		logger::error("quantity_t::interp","!old_X.is_set() || !new_X.is_set() || !is_set()","","returning empty");
@@ -99,7 +101,7 @@ quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) 
 	}
 	if (old_X.data.size()!=data.size())
 	{
-		logger::error("quantity_t::interp","old_X.data.size()!=data.size()","","returning empty");
+		logger::error("quantity_t::interp","old_X.data.size()!=data.size()","current_X=" +to_string() +" old_X="+old_X.to_string(),"returning empty");
 		return {};
 	}
 	if (old_X.unit().base_units_exponents != new_X.unit().base_units_exponents)
@@ -115,6 +117,17 @@ quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) 
 	
 	map<double,double> XY_data;
 	tools::vec::combine_vecs_to_map(&old_X_same_unit.data,&data,&XY_data);
+	
+	if (XY_data.begin()->first > new_X.data.front() )
+	{
+		logger::error("quantity_t::interp","old_X start="+ tools::to_string(XY_data.begin()->first) +" new_X start=" + tools::to_string(new_X.data.front()),"extrapolation not supported","returning empty");
+		return {};
+	}
+	if (XY_data.rbegin()->first < new_X.data.back() )
+	{
+		logger::error("quantity_t::interp","old_X stop=" + tools::to_string(XY_data.rbegin()->first) + " new_X stop="+tools::to_string(new_X.data.back()),"extrapolation not supported","returning empty");
+		return {};
+	}
 	return {name(),statistics::interpolate_data_XY(XY_data,new_X.data),unit()};
 }
 
@@ -257,11 +270,31 @@ quantity_t quantity_t::integrate_pbp(const quantity_t& x_data) const
 
 quantity_t quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_limit, unsigned int upper_X_limit) const
 {
-	map<double,double> data_XY;
-	tools::vec::combine_vecs_to_map(&x_data.data,&data,&data_XY);
-	stringstream n;
+	if (lower_X_limit<0)
+		lower_X_limit=0;
+	if (upper_X_limit>=x_data.data.size() || upper_X_limit<=0)
+		upper_X_limit = x_data.data.size() -1 ;
+	if (x_data.data.size() != data.size())
+	{
+		logger::error("quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
+		return {};
+	}
+// 	
+// 	map<double,double> data_XY;
+// 	tools::vec::combine_vecs_to_map(&x_data.data,&data,&data_XY);
+// 	stringstream n;
+// 	n << "integral("<<name()<<")d(" << x_data.name() << ")";
+// 	double area_d = statistics::integrate(data_XY,lower_X_limit,upper_X_limit);
+// 	quantity_t area(n.str(),{area_d},unit()*x_data.unit());
+// 	logger::debug(11,"quantity_t::integrate()","area=" + area.to_string(),"area_double="+tools::to_string(area_d));
+// 	return area;
+	auto int_pbp = integrate_pbp(x_data);
+	double sum=int_pbp.data.at(upper_X_limit);
+	if (lower_X_limit>0)
+		sum -= int_pbp.data.at(lower_X_limit) ;
+	stringstream n,u;
 	n << "integral("<<name()<<")d(" << x_data.name() << ")";
-	quantity_t area(n.str(),{statistics::integrate(data_XY,lower_X_limit,upper_X_limit)},unit()*x_data.unit());
+	quantity_t area(n.str(),{sum},unit()*x_data.unit());
 	return area;
 }
 
@@ -526,6 +559,15 @@ quantity_t quantity_t::moving_window_sd(int window_size) const
 	return _sd;
 }
 
+quantity_t quantity_t::at(unsigned int pos) const
+{
+	if (!is_set())
+		return {};
+	if (data.size()>=pos)
+		return {};
+	return {name(),{data.at(pos)},unit()};
+}
+
 quantity_t quantity_t::log10() const
 {
 	if (!is_set())
@@ -700,6 +742,29 @@ const std::__cxx11::string quantity_t::to_string() const
 		out <<  name() << " = " <<"<0>" << " []";
 	return out.str();
 }
+
+const std::__cxx11::string quantity_t::to_string_detailed() const
+{
+	ostringstream out;
+	if (data.size()>1)
+	{
+		out <<  name() << " = " <<"<" << data.size() << ">" << " [" << unit().to_string() << "]";
+		out << " " << min().to_string();
+		out << " " << max().to_string();
+		out << " " << median().to_string();
+		out << " " << mean().to_string();
+		out << " " << sd().to_string();
+	}
+	else if (data.size()==1)
+		out <<  name() << " = " << data[0] << " [" << unit().to_string() << "]";
+	else
+	{
+		out <<  name() << " = " <<"<0>" << " []";
+	}
+	return out.str();
+}
+
+
 
 // quantity_t quantity_t::mean() const
 // {

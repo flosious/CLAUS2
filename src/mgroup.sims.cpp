@@ -26,35 +26,15 @@ mgroups_::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurem
 ///will be overwritten by dsims/tofsims
 vector<measurements_::sims_t *> mgroups_::sims_t::measurements()
 {
+	logger::error("mgroups_::sims_t::measurements()","called base virtual function","tell florian");
 	return {};
 }
 
-// vector<cluster_t> mgroups_::sims_t::reference_clusters()
-// {
-// 	
-// 	set<cluster_t> all_ref_clusters;
-// 	
-// 	for (auto& M : measurements())
-// 	{
-// 		for (auto& ref_c : M->reference_clusters())
-// 			all_ref_clusters.insert(ref_c->isotopes);
-// 	}
-// 
-// 	/*intersection of all reference clusters over all clusters in each measurement*/
-// 	for (auto& M : measurements())
-// 	{
-// 		for (auto ref_c=all_ref_clusters.begin();ref_c!=all_ref_clusters.end();ref_c++)
-// 			if(find(M->clusters.begin(),M->clusters.end(),*ref_c)==M->clusters.end())
-// 			{
-// 				all_ref_clusters.erase(ref_c);
-// 				ref_c--;
-// // 				logger::error("mgroups_::sims_t::reference_clusters(): missing cluster in measurements", ref_c->name());
-// 				logger::error("mgroups_::sims_t::reference_clusters()","missing cluster",ref_c->to_string() + " in " + M->to_string(),"keep calculating, but results might be wrong");
-// 			}
-// 	}
-// 	
-// 	return {all_ref_clusters.begin(),all_ref_clusters.end()};
-// }
+const msettings::sims_t* mgroups_::sims_t::settings() const
+{
+	logger::error("mgroups_::sims_t::settings()","called base virtual function","tell florian");
+	return nullptr;
+}
 
 mgroups_::sims_t::calc_t mgroups_::sims_t::calc()
 {
@@ -183,7 +163,7 @@ vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 	// keep abundance and/or substance_amount if there is only 1 known matrix from all reference samples within this group
 	if (matrices().size()==1) 
 	{
-		logger::info(3,"mgroups_::sims_t::matrix_isotopes()","all references have same matrix, applying for whole group",matrices().begin()->to_string());
+		logger::info(3,"mgroups_::sims_t::matrix_isotopes()","all references have same matrix, applying to whole group",matrices().begin()->to_string());
 		return isos_vec;
 	}
 	
@@ -251,17 +231,15 @@ set<cluster_t> mgroups_::sims_t::clusters()
 	return cs;
 }
 
-// measurements_::dsims_t::matrix_clusters_c& mgroups_::sims_t::common_matrix_clusters()
-// {
-// 	set<cluster_t> common_clusters;
-// 	if (matrix_clusters_s.clusters.size()>0)
-// 		return matrix_clusters_s;
-// 	for (auto& m:measurements())
-// 	{
-// 		vector<cluster_t*> cs =  m->matrix_clusters(m->sample->matrix().isotopes).clusters;
-// 		for (auto& c : cs)
-// 			common_clusters.insert(c->isotopes);
-// 	}
-// 	return matrix_clusters_s;
-// }
-// 
+string mgroups_::sims_t::to_string_short() const
+{
+	stringstream out;
+	out << olcdb << "_g"<<group << "_" << settings()->to_string_short();
+	return out.str();
+}
+
+void mgroups_::sims_t::export_origin_ascii(string path, const std::__cxx11::string delimiter)
+{
+	for (auto& M : measurements())
+		M->export_origin_ascii(path+to_string_short(),delimiter);
+}

@@ -55,3 +55,26 @@ const std::__cxx11::string msettings::sims_t::to_string(const string del) const
 	ss << "secondary_polarity: " << secondary_polarity;
 	return ss.str();
 }
+
+const std::__cxx11::string msettings::sims_t::to_string_short() const
+{
+	if (!sputter_energy.is_scalar() || !sputter_ion.is_set()) 
+		return "";
+	energy_t SE;
+	stringstream ss;
+	if (sputter_energy.data.at(0)>=1000)
+		SE =sputter_energy.change_unit(units::prefixes::kilo * sputter_energy.unit());
+	else
+		SE = sputter_energy;
+	
+// 	element_t E = sputter_ion.elements.at(0);
+// 	PSE.isotope()
+	
+	ss << SE.data.at(0) << SE.unit().to_string();
+	
+	for (auto& ele : sputter_ion.elements)
+		ss << ele.isotopes.at(0).symbol;
+	
+	ss << secondary_polarity;
+	return ss.str();
+}

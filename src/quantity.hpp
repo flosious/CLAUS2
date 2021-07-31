@@ -79,9 +79,13 @@ public:
 	quantity_t change_resolution(unsigned int new_data_size) const;
 	unit_t unit() const;
 	const string to_string() const;
+	const string to_string_detailed() const;
 	const string name() const;
 	
 	quantity_t log10() const;
+	
+	///returns the data point on fiven pos
+	quantity_t at(unsigned int pos) const;
 	
 	bool operator>(const quantity_t& obj) const;
 	bool operator<(const quantity_t& obj) const;
@@ -129,6 +133,7 @@ public:
 	quantity_t absolute() const;
 	quantity_t invert() const;
 	quantity_t abs_sum() const;
+	///sums up all data in the data.vector
 	quantity_t sum(int start=0, int stop = -1) const;
 	quantity_t quantile(double percentile=0.75) const;
 	quantity_t median() const;

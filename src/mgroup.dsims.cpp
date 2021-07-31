@@ -20,7 +20,7 @@
 #include "mgroup.hpp"
 
 mgroups_::dsims_t::dsims_t(measurements_::dsims_t& dsims_measurements) : 
-				sims_t(dsims_measurements), settings(dsims_measurements.settings)
+				sims_t(dsims_measurements), settings_p(dsims_measurements.settings)
 {
 	measurements_p.push_back(dsims_measurements);
 }
@@ -42,7 +42,7 @@ mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurem
 bool mgroups_::dsims_t::operator==(const mgroups_::dsims_t& obj) const
 {
 	if (sims_t::operator!=(obj)) return false;
-	if (settings != obj.settings) return false;
+	if (settings_p != obj.settings_p) return false;
 	return true;
 }
 
@@ -55,7 +55,7 @@ std::__cxx11::string mgroups_::dsims_t::to_string(const string del)
 {
 	stringstream ss;
 	ss << mgroup_t::to_string(del) << del;
-	if (use_settings) ss << settings.to_string(del) << del;
+	if (use_settings) ss << settings_p.to_string(del) << del;
 	ss << "measurements: <" << measurements_p.size() << ">" << endl;
 	ss << "{" << endl;
 	int counter = 0;
@@ -78,3 +78,7 @@ vector<measurements_::sims_t*> mgroups_::dsims_t::measurements()
 	return Ms;
 }
 
+const msettings::sims_t* mgroups_::dsims_t::settings() const
+{
+	return &settings_p;
+}

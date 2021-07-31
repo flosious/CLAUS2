@@ -140,6 +140,7 @@ vector<cluster_t> files_::dsims_t::contents_t::clusters()
 			if (col.dimension=="C") concentration_s = concentration_t(col.data,col.unit);
 			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
 		}
+		
 		cluster_t cluster(clustername,sputter_time,intensity_s,sputter_depth_s,concentration_s);
 		if (cluster.is_set()) 
 		{
@@ -460,6 +461,12 @@ const map<string,string>& files_::dsims_t::contents_t::infos_and_settings()
 	return infos_and_settings_p;
 }
 
+const vector<double> files_::dsims_t::contents_t::infos_and_settings_data(const string find_this)
+{
+	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
+	return {tools::str::str_to_double(infos_and_settings().at(find_this))};
+}
+
 const tm files_::dsims_t::contents_t::start_date_time()
 {
 	// Analysis date   03/06/2020    
@@ -490,7 +497,7 @@ const energy_t files_::dsims_t::contents_t::sputter_energy(const string find_thi
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return energy_t({data},{"eV"});
+	return energy_t(infos_and_settings_data(find_this),{"eV"});
 }
 
 const element_t files_::dsims_t::contents_t::sputter_element(const string find_this)
@@ -505,92 +512,76 @@ const element_t files_::dsims_t::contents_t::sputter_element(const string find_t
 
 const secondary_voltage_t files_::dsims_t::contents_t::secondary_voltage(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return secondary_voltage_t({data},{"V"});
+	return secondary_voltage_t(infos_and_settings_data(find_this),{"V"});
 }
 
 const rastersize_t files_::dsims_t::contents_t::sputter_rastersize(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return rastersize_t({data},{"um"});
+	return rastersize_t(infos_and_settings_data(find_this),{"um"});
 }
 
 const rastersize_t files_::dsims_t::contents_t::analyzed_area(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return rastersize_t({data},{"um"});
+	return rastersize_t(infos_and_settings_data(find_this),{"um"});
 }
 
 const quantity_t files_::dsims_t::contents_t::chamber_pressure(const string find_this)
-{
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("chamber_pressure",{data},{"mbar"});
+{	
+	return quantity_t("chamber_pressure",infos_and_settings_data(find_this),{"mbar"});
 }
 
 const quantity_t files_::dsims_t::contents_t::contrast_aperture(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("contrast_aperture",{data},{"um"});
+	return quantity_t("contrast_aperture",infos_and_settings_data(find_this),{"um"});
 }
 
 const quantity_t files_::dsims_t::contents_t::egate(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("egate",{data},{"%"});
+	return quantity_t("egate",infos_and_settings_data(find_this),{"%"});
 }
 
 const quantity_t files_::dsims_t::contents_t::em_voltage(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("em_voltage",{data},{"V"});
+	return quantity_t("em_voltage",infos_and_settings_data(find_this),{"V"});
 }
 
 const quantity_t files_::dsims_t::contents_t::em_yield(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("em_yield",{data},{"%"});
+	return quantity_t("em_yield",infos_and_settings_data(find_this),{"%"});
 }
 
 const quantity_t files_::dsims_t::contents_t::entrance_slit(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("entrance_slit",{data},{"um"});
+	return quantity_t("entrance_slit",infos_and_settings_data(find_this),{"um"});
 }
 
 const quantity_t files_::dsims_t::contents_t::energy_window(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("energy_window",{data},{"eV"});
+	return quantity_t("energy_window",infos_and_settings_data(find_this),{"eV"});
 }
 
 const quantity_t files_::dsims_t::contents_t::exit_slit(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("exit_slit",{data},{"um"});
+	return quantity_t("exit_slit",infos_and_settings_data(find_this),{"um"});
 }
 
 const quantity_t files_::dsims_t::contents_t::field_aperture(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("field_aperture",{data},{"um"});
+	return quantity_t("field_aperture",infos_and_settings_data(find_this),{"um"});
 }
 
 const quantity_t files_::dsims_t::contents_t::mass_resolution(const string find_this)
 {
-	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return quantity_t("mass_resolution",{data},{""});
+	return quantity_t("mass_resolution",infos_and_settings_data(find_this),{""});
+}
+
+const quantity_t files_::dsims_t::contents_t::total_acquisition_time(const std::__cxx11::string find_this)
+{
+	return quantity_t("total_acquisition_time",infos_and_settings_data(find_this),{"s"});
+}
+
+const quantity_t files_::dsims_t::contents_t::total_sputtering_time(const std::__cxx11::string find_this)
+{
+	return quantity_t("total_sputtering_time",infos_and_settings_data(find_this),{"s"});
 }
 

@@ -42,7 +42,6 @@ class cluster_t : public mglDraw
 {
 	friend class crater_t;
 private:
-	static vector<isotope_t> parse_clustername(const string clustername);
 public:
 	int Draw(mglGraph * gr) override;
 	/// 28Si2 Ge2
@@ -77,6 +76,7 @@ public:
 	cluster_t filter_impulse(int window_size=0, float factor=5);
 
 	vector<isotope_t> isotopes;
+	static vector<isotope_t> parse_clustername(const string clustername);
 	
 	bool operator==(const cluster_t& obj) const;
 	bool operator<(const cluster_t& obj) const;

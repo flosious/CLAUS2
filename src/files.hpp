@@ -189,6 +189,7 @@ public:
 			map<string,string> infos_and_settings_p;
 			///will create a map: keys->values from raw_data_tensor()
 			const map<string,string>& infos_and_settings();
+			const vector<double> infos_and_settings_data(const string find_this); 
 			vector<string> units_p;
 			vector<string> dimensions_p;
 			vector<string> cluster_names_p;
@@ -242,6 +243,8 @@ public:
 			const quantity_t energy_window(const string find_this="Energy window (eV)");
 			const quantity_t em_yield(const string find_this="EM yield (%)");
 			const quantity_t em_voltage(const string find_this="EM HV (V)");
+			const quantity_t total_sputtering_time(const string find_this="Total sputtering time (s)");
+			const quantity_t total_acquisition_time(const string find_this="Total acquisition time (s)");
 			const crater_t crater();
 			void to_screen(string prefix="");
 			contents_t(string& filename_with_path);

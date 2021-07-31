@@ -42,7 +42,8 @@ sample_t::matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isot
 	 * sum of all elements must be 100 at% (will be enforced)
 	 * input is something like: "Si Ge30" -> [28,29,30]Si70at% + [74,73,72,70]Ge30at% === [28,29,30]Si7mol + [74,73,72,70]Ge3mol
 	 * single isotopes are also possible, for purified matrices: "28Si30 Ge60" -> [28]Si33at% [74,73,72,70]Ge66at%
-	 * uncalculateable concentrations like "Si Ge" -> will lead to an error and aborting
+	 * //OLD: uncalculateable concentrations like "Si Ge" -> will lead to an error and aborting - OLD
+	 * uncalculateable concentrations like "Si Ge" -> will lead to a warning, matrix isotopes are saved without abundance/substance amount
 	 * indistinguishable isotopes like "29Si30 Si50 Ge10 Sn10" --> will lead to an error and aborting
 	 * not recognized isotopes --> will lead to an error an aborting
 	 */
@@ -153,8 +154,12 @@ sample_t::matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isot
 	
 	if (unknown_amounts>1)
 	{
-		*this = matrix_t(); //make me empty
-		logger::error("sample_t::matrix_t::matrix_t(): more than 1 unknown amount, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
+// 		*this = matrix_t(); //make me empty
+// 		logger::error("sample_t::matrix_t::matrix_t(): more than 1 unknown amount, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
+		logger::warning(3,"sample_t::matrix_t::matrix_t(): more than 1 unknown amount", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "),"setting subsstance amount to unknown");
+		for (auto& iso : isotopes)
+			iso.substance_amount.clear();
+		
 		return;
 	}
 	
@@ -198,7 +203,7 @@ sample_t::matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isot
 		}
 	}
 	
-	abs_to_relative();
+	   substance_amount_to_relative();
 	
 	/*sum of all isos subtance_amounts may be high*/
 // 	double sum=0, sum1=0;
@@ -210,7 +215,7 @@ sample_t::matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isot
 // 	}
 }
 
-void sample_t::matrix_t::abs_to_relative()
+void sample_t::matrix_t::substance_amount_to_relative()
 {
 	substance_amount_t sum({0});
 	for (auto& iso : isotopes)

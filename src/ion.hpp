@@ -41,7 +41,7 @@ private:
 // 	const electrical_charge_t electric_charge_p;
 // 	vector< element_t > elements_p;
 public:
-// 	ion_t();
+	ion_t();
 	ion_t(vector<element_t> elements_s, electrical_charge_t electric_charge_s);
 	ion_t(element_t element_s, electrical_charge_t electric_charge_s);
 	vector< element_t > elements;
