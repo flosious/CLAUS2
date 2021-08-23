@@ -26,7 +26,7 @@
 pse_t::pse_isotope_t::pse_isotope_t(const double abundance_s, 
 									const int nucleons_s, 
 									const double mass_s, 
-									const std::__cxx11::string symbol_alternative_s) : 
+									const string symbol_alternative_s) : 
 									abundance(abundance_s), 
 									nucleons(nucleons_s), 
 									mass(mass_s), 
@@ -34,7 +34,7 @@ pse_t::pse_isotope_t::pse_isotope_t(const double abundance_s,
 {}
 
 
-const pse_t::pse_isotope_t * pse_t::isotope(std::__cxx11::string symbol, int nucleons)
+const pse_t::pse_isotope_t * pse_t::isotope(string symbol, int nucleons)
 {
 	if (isotopes(symbol)==nullptr) return nullptr;
 	for (int i=0;i<isotopes(symbol)->size();i++)
@@ -45,7 +45,7 @@ const pse_t::pse_isotope_t * pse_t::isotope(std::__cxx11::string symbol, int nuc
 
 
 
-const vector<pse_t::pse_isotope_t> * pse_t::isotopes(std::__cxx11::string symbol)
+const vector<pse_t::pse_isotope_t> * pse_t::isotopes(string symbol)
 {
 	if (element(symbol)==nullptr) return nullptr;
 	return &element(symbol)->isotopes;
@@ -77,7 +77,7 @@ pse_t::pse_element_t::pse_element_t(string symbol_s, int protons_s, pse_t::pse_i
 }
 
 
-const pse_t::pse_element_t * pse_t::element(std::__cxx11::string symbol)
+const pse_t::pse_element_t * pse_t::element(string symbol)
 {
 	if (elements().size()==0) return nullptr;
 	for (int i=0;i<elements().size();i++)
@@ -168,7 +168,7 @@ const bool pse_t::pse_element_t::operator<(const pse_t::pse_element_t& obj) cons
 /************************************/
 
 
-// const std::vector< std::__cxx11::string > pse_t::get_all_isotopes_with_highest_abundance()
+// const std::vector< string > pse_t::get_all_isotopes_with_highest_abundance()
 // {
 // 	vector<string> isotopes_with_highest_abundance;
 // 	for (auto const& element:get_all_elements())

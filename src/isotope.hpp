@@ -45,20 +45,17 @@ public:
 	isotope_t(string str, double abundance_s=-1, double amount_s=1);
 	const mass_t mass() const;
 	const string symbol_alternative() const;
+	///isotopical signature; isotopenverhältnis; Häufigkeit eines Isotopes eines Elements
 	abundance_t abundance;
+	substance_amount_t substance_amount;
 	int nucleons;
 	string symbol;
-// 	pair<depth_t,concentration_t> depth_profile;
-	substance_amount_t substance_amount;
 	const string to_string(const string del=" ") const;
 	
-	///NOT checking abundance
+	///NOT checking abundance or substance_amount
 	const bool operator==(const isotope_t& obj) const;
 	const bool operator!=(const isotope_t& obj) const;
 	const bool operator<(const isotope_t& obj) const;
-	
-	
-	
 };
 
 

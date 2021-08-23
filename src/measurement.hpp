@@ -254,6 +254,7 @@ public:
 				///populates maximum_intensity_s + sputter_time_at_maximum_s ;seconds_for_fit_plot < 0 no plot;
 				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=-1);
 			public:
+				implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor=0.1);
 				static unsigned int minimum_index_position(quantity_t Y);
 				static unsigned int minimum_index_position(vector<double> data);
 				unsigned int minimum_index_position();
@@ -263,12 +264,13 @@ public:
 				const sputter_time_t& sputter_time_at_maximum();
 				///maximum of intensity of implant
 				const intensity_t& maximum_intensity();
-				quantity_t minimum_starting_position();
-				sputter_time_t minimum_sputter_time_position();
-				sputter_depth_t minimum_sputter_depth_position();
+				quantity_t minimum_starting_position() const;
+				sputter_time_t minimum_sputter_time_position() const;
+				sputter_depth_t minimum_sputter_depth_position() const;
 				sputter_time_t sputter_time_from_minimum();
 				sputter_depth_t sputter_depth_from_minimum();
-				implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor=0.1);
+				///calc dose from concentration and sputter_depth; returns {} if C or SD not set
+				dose_t dose() const;
 				SR_t SR();
 				SF_t SF();
 				SF_t SF_from_dose();
@@ -278,7 +280,7 @@ public:
 				///populates the whole measurement from implanted values
 			};
 		private:
-			map<cluster_t, implant_c> implants_s;
+			map<cluster_t* const, implant_c> implants_s;
 		public:
 			implant_c& implant(cluster_t& cluster, double X_resolution_factor=0.1);
 			///calculates SR and SF in one step from implant
@@ -302,7 +304,7 @@ public:
 		/*
 		 * matrix cluster should contain only unique isotope for its cluster;
 		 * that means e.g. SiGe matrix there can never be a SiGe cluster, just Si clusters and Ge clusters seperate
-		 * SiGeB cluster or SiB cluster will be treatet as NON-matric clusters, that means implanted isotopical cluster
+		 * SiGeB cluster or SiB cluster will be treatet as NON-matrix clusters, that means (implanted) isotopical cluster
 		 */
 		class matrix_clusters_c
 		{

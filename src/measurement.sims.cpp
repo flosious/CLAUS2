@@ -53,12 +53,15 @@ measurements_::sims_t::matrix_clusters_c::matrix_clusters_c(vector<cluster_t>& c
 		insert = true;
 		for (auto& I : C.isotopes)
 		{
+			
 			if (find(matrix_isotopes.begin(),matrix_isotopes.end(),I)==matrix_isotopes.end())
 			{
 				insert=false;
 				break;
 			}
 		}
+		// if all isotopes within the cluster are isotopes within the matrix, then this is a matrix-cluster
+		// that means: if at least 1 isotope within the cluster is NOT an isotope within the matrix, then this is no matrix-cluster
 		if (insert) clusters.push_back(&C);
 	}
 }
@@ -246,7 +249,7 @@ measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, list<sample_t>& 
 
 
 
-std::__cxx11::string measurements_::sims_t::to_string(const std::__cxx11::string del)
+string measurements_::sims_t::to_string(const string del)
 {
 	logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
 	stringstream ss;
@@ -313,7 +316,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 	plot.to_screen(to_string(),sleep_sec);
 }
 
-void measurements_::sims_t:: export_origin_ascii(std::__cxx11::string path, const std::__cxx11::string delimiter)
+void measurements_::sims_t:: export_origin_ascii(string path, const string delimiter)
 {
 	if (clusters.size()==0)
 	{

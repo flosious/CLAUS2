@@ -231,19 +231,19 @@ const crater_t::sputter_beam_t files_::dsims_t::contents_t::Ipr()
 	return {sputter_current_s,sputter_time,sputter_depth_s};
 }
 
-const vector<std::__cxx11::string>& files_::dsims_t::contents_t::dimensions()
+const vector<string>& files_::dsims_t::contents_t::dimensions()
 {
 	if (dimensions_p.size()>0) return dimensions_p;
 	parse_units_dimensions_clusternames();
 	return dimensions_p;
 }
-const vector<std::__cxx11::string>& files_::dsims_t::contents_t::units()
+const vector<string>& files_::dsims_t::contents_t::units()
 {
 	if (units_p.size()>0) return units_p;
 	parse_units_dimensions_clusternames();
 	return units_p;
 }
-const vector<std::__cxx11::string>& files_::dsims_t::contents_t::cluster_names()
+const vector<string>& files_::dsims_t::contents_t::cluster_names()
 {
 	if (cluster_names_p.size()>0) return cluster_names_p;
 	parse_units_dimensions_clusternames();
@@ -575,12 +575,12 @@ const quantity_t files_::dsims_t::contents_t::mass_resolution(const string find_
 	return quantity_t("mass_resolution",infos_and_settings_data(find_this),{""});
 }
 
-const quantity_t files_::dsims_t::contents_t::total_acquisition_time(const std::__cxx11::string find_this)
+const quantity_t files_::dsims_t::contents_t::total_acquisition_time(const string find_this)
 {
 	return quantity_t("total_acquisition_time",infos_and_settings_data(find_this),{"s"});
 }
 
-const quantity_t files_::dsims_t::contents_t::total_sputtering_time(const std::__cxx11::string find_this)
+const quantity_t files_::dsims_t::contents_t::total_sputtering_time(const string find_this)
 {
 	return quantity_t("total_sputtering_time",infos_and_settings_data(find_this),{"s"});
 }

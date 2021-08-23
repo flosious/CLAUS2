@@ -97,7 +97,7 @@ quantity_t crater_t::linescan_t::depth()
 	return linescan_depth;
 }
 
-std::__cxx11::string crater_t::linescan_t::to_string(std::__cxx11::string prefix)
+string crater_t::linescan_t::to_string(string prefix)
 {
 	stringstream ss;
 	ss << prefix;
@@ -121,7 +121,7 @@ crater_t::sputter_beam_t::sputter_beam_t(sputter_current_t sputter_current_s,
 {
 }
 
-const std::__cxx11::string crater_t::sputter_beam_t::to_string(const string del) const
+const string crater_t::sputter_beam_t::to_string(const string del) const
 {
 	stringstream out;
 	out << sputter_time.to_string() << del << sputter_depth.to_string() << del << sputter_current.to_string();

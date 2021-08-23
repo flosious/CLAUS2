@@ -51,7 +51,7 @@ bool mgroups_::dsims_t::operator!=(const mgroups_::dsims_t& obj) const
 	return !operator==(obj);
 }
 
-std::__cxx11::string mgroups_::dsims_t::to_string(const string del)
+string mgroups_::dsims_t::to_string(const string del)
 {
 	stringstream ss;
 	ss << mgroup_t::to_string(del) << del;

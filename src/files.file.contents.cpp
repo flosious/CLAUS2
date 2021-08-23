@@ -95,7 +95,7 @@ const bool files_::file_t::contents_t::is_correct_type()
 	return true;
 }
 
-bool files_::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor) 
+bool files_::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<string> > >* raw_header_tensor, vector<vector<vector<string> > >* raw_data_tensor) 
 {
 	raw_data_tensor->clear();
 	raw_header_tensor->clear();
@@ -145,7 +145,7 @@ bool files_::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vec
 	contents_p.clear();
 	return true;
 }
-vector<vector<vector<std::__cxx11::string> > >& files_::file_t::contents_t::raw_header_tensor()
+vector<vector<vector<string> > >& files_::file_t::contents_t::raw_header_tensor()
 {
 	if (raw_header_tensor_p.size()>0) return raw_header_tensor_p;
 	
@@ -155,7 +155,7 @@ vector<vector<vector<std::__cxx11::string> > >& files_::file_t::contents_t::raw_
 	}
 	return raw_header_tensor_p;
 }
-vector<vector<vector<std::__cxx11::string> > >& files_::file_t::contents_t::raw_data_tensor()
+vector<vector<vector<string> > >& files_::file_t::contents_t::raw_data_tensor()
 {
 
 	if (raw_data_tensor_p.size()>0) return raw_data_tensor_p;
@@ -175,7 +175,7 @@ void files_::file_t::contents_t::to_screen(string prefix)
 	else cout << prefix << "identifiers:\t<" << identifiers.size() << ">" << endl;
 }
 
-std::__cxx11::string files_::file_t::contents_t::to_string(const string del)
+string files_::file_t::contents_t::to_string(const string del)
 {
 	stringstream out;
 	out << "contents_string().size()="<< contents_string().size() << del;

@@ -101,7 +101,7 @@ public:
 			///should be freed after parse_data_and_header_tensors, as it has no longer use
 			string contents_p;
 			///populates raw_data_tensor_p, raw_header_tensor_p, will clear *contents_p
-			bool parse_data_and_header_tensors(vector<vector<vector<std::__cxx11::string> > >* raw_header_tensor, vector<vector<vector<std::__cxx11::string> > >* raw_data_tensor);
+			bool parse_data_and_header_tensors(vector<vector<vector<string> > >* raw_header_tensor, vector<vector<vector<string> > >* raw_data_tensor);
 			vector<vector<vector<string>>> raw_data_tensor_p, raw_header_tensor_p;
 			vector<vector<vector<string>>>& raw_data_tensor();
 			vector<vector<vector<string>>>& raw_header_tensor();
@@ -111,7 +111,7 @@ public:
 			void to_screen(string prefix="");
 			string delimiter;
 			set<string> identifiers;
-			const std::__cxx11::string& contents_string();
+			const string& contents_string();
 			string filename_with_path;
 			/*ctors*/
 			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);

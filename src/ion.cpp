@@ -75,7 +75,7 @@ bool ion_t::is_set() const
 
 
 
-std::__cxx11::string ion_t::to_string(const std::__cxx11::string del) const
+string ion_t::to_string(const string del) const
 {
 	if (!is_set()) return "";
 	stringstream out;

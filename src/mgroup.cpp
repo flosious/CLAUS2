@@ -33,7 +33,7 @@ mgroups_::mgroup_t::mgroup_t(measurements_::measurement_t& measurement) :
 }
 
 
-std::__cxx11::string mgroups_::mgroup_t::to_string(const string del)
+string mgroups_::mgroup_t::to_string(const string del)
 {
 	stringstream ss;
 	if (use_olcdb) ss << "olcdb: " << olcdb << del;

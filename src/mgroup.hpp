@@ -61,27 +61,10 @@ public:
 		
 	public:
 		mgroup_t(measurements_::measurement_t& measurement);
-// 		mgroup_t();
-		
-// 		bool is_set() const;
-// 		mgroup_t();
 		string to_string(const string del=", ");
-// 		void insert_measurement(measurements::measurement_t* M_p);
 		/*const defitions*/
 		///"51087" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
 		const int olcdb;
-		/// "17" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-	// 	const int wafer;
-		///"SJZ307" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-	// 	const string lot;
-		///"#A#B" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-	// 	const string lot_split;
-		/// X="1", Y="5" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-	// 	const sample_t::chip_t chip;
-		///"Q" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-	// 	const string monitor;
-		///multiple measurements of same sample use this: "q" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-	// 	const string repetition;
 		///measurement group identifier: "5" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
 		const string group;
 		///"d-sims", "tof-sims", "xps", "profiler", ...
@@ -103,19 +86,7 @@ public:
 		{
 		protected:
 			sims_t& MG;
-			///if true, will save all calculated results (more RAM usage, but faster)
-			static const bool save_calc_esults=true;
-			
 		public:
-			///changes overwrite properties for all calc methods
-			class jiang_c
-			{
-				sims_t& MG;
-				calc_t& calc;
-				const vector<measurements_::sims_t*>& measurements;
-			public:
-				jiang_c(calc_t& calc);
-			};
 			///sputter_rate
 			class SR_c
 			{
@@ -164,7 +135,6 @@ public:
 				calc_t& from_RSF_trimmed_mean_ref(bool overwrite = false);
 				calc_t& from_RSF_pbp_ref(bool overwrite = false);
 				calc_t& from_RSF_median_ref(bool overwrite = false);
-				
 			};
 			///relative_sensitivity_factor
 			class RSF_c
@@ -202,7 +172,24 @@ public:
 			///matrix calibration
 			class matrix_c
 			{
-			private:
+			private: 
+				/*fits a polynom of rank to known matrices and inter/extrapolates unknown matrices contents
+				 * uses jiangs protocol,that means the general RSF definition: RSF_C1_C2  * (C1) / (C2) = [Iso(C1)] / [Iso(C2)]
+				 * here () === Intensity() and [] === Concentration()
+				 */
+				class polynom_t
+				{
+				private:
+					const vector<int> rank;
+// 					const vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>>& mats_to_clusters;
+					///units are relative, dimensions are relative: this is a container of intensities and their corresponding concentrations of exactly 2 elements/clusters
+					const vector< pair< const intensity_t, const concentration_t> > relative_intensities_to_relative_concentration;
+					///interpolates relative_intensities_to_relative_concentration with rank
+					bool interpolate();
+				public:
+					///fits a polynom of rank R to known matrices and inter/extrapolates unknown matrices contents
+					polynom_t(vector<int> rank = {0,1,0});
+				};
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
@@ -211,9 +198,8 @@ public:
 				///calculation of matrix concentrations
 				matrix_c(calc_t& calc);
 				///rank{0,1,0} -> 0*a0+1*a1*x+0*a2*x*x == 0*a0+1*a1*x =rank{0,1}
-				calc_t& from_jiangs_protocol(vector<int> rank = {0,1,0});
-				///if all references have same matrix, then this function sets all other measurements/samples the same matrix
-// 				calc_t& set_single_substrat_matrices();
+				calc_t& interpolate(vector<int> rank = {0,1,0});
+				
 				calc_t& pbp_const_from_db(bool overwrite = false);
 				calc_t& mean_const_from_db(bool overwrite = false);
 				calc_t& median_const_from_db(bool overwrite = false);
@@ -229,13 +215,9 @@ public:
 			///calculates SR and SF from implants in one step, this save CPU time for high resolution polynom interpolation to get maxima pos
 			calc_t& SR_SF_from_implants_maxima(bool overwrite=false);
 			calc_t& normalize_to_ref_intensity(bool overwrite=false);
-			
-// 			map<sample_t::matrix_t,SR_t> matrices_to_SR();
-// 			map<sample_t::matrix_t,RSF_t> matrices_to_RSF(const cluster_t& cluster);
-			
+
 			const vector<measurements_::sims_t*> measurements;
 			
-			jiang_c jiang;
 			SR_c SRs;
 			SD_c SDs;
 			SF_c SFs;
@@ -245,9 +227,10 @@ public:
 		};
 		///check if all measurements belong in this group
 		void check();
-// 		void set_matrix_isotopes_in_measurements();
+		///sets mat_isos as matrix_isotopes in all samples within all measurements within this group
+		bool set_matrix_isotopes_in_unknown_samples();
 	public:
-		void export_origin_ascii(std::__cxx11::string path="/tmp/exports/", const std::__cxx11::string delimiter="\t");
+		void export_origin_ascii(string path="/tmp/exports/", const string delimiter="\t");
 		string to_string_short() const;
 		calc_t calc();
 		///all different matrices from all samples within this group
@@ -255,22 +238,24 @@ public:
 		///all different clusters from all measurements within this group
 		set<cluster_t> clusters();
 		const map<sample_t::matrix_t,RSF_t> matrix_to_RSF(const cluster_t& cluster);
+		
 		const map<sample_t::matrix_t,SR_t> matrix_to_SRs();
-		const map<sample_t::matrix_t,intensity_t> matrix_to_intensity_sum();
+// 		const map<sample_t::matrix_t,intensity_t> matrix_to_intensity_sum();
+		///known(set) matrices and their corresponding matrix_clusters; depricated, because there can be multiple corresponding clusters to one matrix isotope
+// 		const vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> sample_mats_to_mat_clusters();
 		sims_t(measurements_::sims_t& measurement);
 		///intersection of all matrix_clusters of all measurements within this group
-// 		measurements_::dsims_t::matrix_clusters_c& common_matrix_clusters();
 		virtual vector<measurements_::sims_t*> measurements();
 		virtual const msettings::sims_t* settings() const;
 		///listed RSF to coressponding cluster and matrix
 		RSF_t RSF(cluster_t cluster, sample_t::matrix_t matrix);
 		///all clusters referencing to matrices
-		vector<cluster_t> matrix_clusters();
-		vector<cluster_t*> matrix_clusters(measurements_::sims_t& M);
+// 		vector<cluster_t> matrix_clusters();
+// 		vector<cluster_t*> matrix_clusters(measurements_::sims_t& M);
 		///all isotopes contained in all matrices in all samples
-		vector<isotope_t> matrix_isotopes();
-		///sets mat_isos as matrix_isotopes in all samples within all measurements within this group
-		bool set_matrix_isotopes_in_unknown_samples();
+		const vector<isotope_t> matrix_isotopes();
+		///all clusters contained in all matrices in all measurements
+		const vector<cluster_t> matrix_clusters();
 		///returs pointer to the matching measurement within this group
 		measurements_::sims_t* measurement(const measurements_::sims_t& M);
 	};
@@ -306,20 +291,6 @@ public:
 // 		void insert_measurement(measurements::tofsims_t* M_p);
 // 		tofsims_t(measurements::tofsims_t* measurement);
 // 	};
-	
-// 	template<typename Mt>
-// 	static void try_insert_sources_into_target_vec(vector<Mt>& Ms,vector<Mt>& M_target)
-// 	{
-// 		for (auto& M : Ms)
-// 		{
-// 			Mt* M_p = tools::vec::find_in_vec(M,M_target);
-// 			if (M_p == nullptr) // M  not  found in vec
-// 			{
-// 				M_target.push_back(M);
-// 			}
-// 		}
-// 	}
-
 	
 };
 

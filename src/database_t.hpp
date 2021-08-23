@@ -75,7 +75,7 @@ class database_t {
 	friend class config_t;
 // 	friend class processor;
 private:
-	
+	static const int logger_verbosity_offset = 3;
     sqlite3* sql_handle=nullptr;
     bool close();
 	/// returns -1 if error, or the id of the last entry in the table
@@ -91,7 +91,7 @@ public:
 	database_t(sqlite3* sql_handle, string filename);
 	~database_t();
 	bool open();
-	bool execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr) const;
+	bool execute_sql(string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr) const;
 	
 	/*call backs*/
 	///general callback function -> populates *ptr -> matrix(vector(vector(string)))

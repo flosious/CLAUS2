@@ -27,7 +27,7 @@ msettings::sims_t::sims_t()
 // {
 // }
 // 
-// std::__cxx11::string msettings::sims_t::to_string()
+// string msettings::sims_t::to_string()
 // {
 // 	stringstream ss;
 // 	const string del = ",";
@@ -49,7 +49,7 @@ msettings::sims_t::sims_t()
 // 	return false;
 // }
 // 
-// std::__cxx11::string& msettings::sims_t::secondary_polarity()
+// string& msettings::sims_t::secondary_polarity()
 // {
 // 	if (secondary_polarity_p!="")
 // 		return secondary_polarity_p;
@@ -109,7 +109,7 @@ msettings::sims_t::sims_t()
 // /****  Tofsims_t  ******/
 // /***********************/
 // 
-// // msettings::tofsims_t::tofsims_t(settings::beam_settings_t sputter_beam_s, std::__cxx11::string secondary_polarity_s, settings::beam_settings_t analysis_beam_s) : sims_t(sputter_beam_s,secondary_polarity_s), analysis_beam(analysis_beam_s)
+// // msettings::tofsims_t::tofsims_t(settings::beam_settings_t sputter_beam_s, string secondary_polarity_s, settings::beam_settings_t analysis_beam_s) : sims_t(sputter_beam_s,secondary_polarity_s), analysis_beam(analysis_beam_s)
 // // {
 // // }
 // // 

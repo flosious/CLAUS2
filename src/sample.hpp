@@ -47,6 +47,8 @@ using namespace std;
 class sample_t
 {
 	friend class config_t;
+private:
+	static const int logger_verbosity_offset = 0;
 public:
 	class matrix_t
 	{
@@ -54,10 +56,19 @@ public:
 		///maybe loaded from DB if not set by ctor
 		///isotope mapping to its absolute concentration in amount of atoms or mole
 		/// OR relative concentration in at%; enforcing always 100at% within a matrix
-	// 	map<isotope_t,double> isotopes_amount;
 		void substance_amount_to_relative();
+		static const int logger_verbosity_offset = 11;
 	public:
 		matrix_t();
+		/* 
+		* mole/abundance/concentration/atoms input values are asumed as absolutes, which are iternally normalized to 100at%: 
+		* sum of all elements must be 100 at% (will be enforced)
+		* input is something like: "Si Ge30" -> [28,29,30]Si70at% + [74,73,72,70]Ge30at% === [28,29,30]Si7mol + [74,73,72,70]Ge3mol
+		* single isotopes are also possible, for purified matrices: "28Si30 Ge60" -> [28]Si33at% [74,73,72,70]Ge66at%
+		* uncalculateable concentrations like "Si Ge" -> will lead to a warning, matrix isotopes are saved without abundance/substance amount
+		* indistinguishable isotopes like "29Si30 Si50 Ge10 Sn10" --> will lead to an error and aborting
+		* not recognized isotopes --> will lead to an error an aborting
+		*/
 		matrix_t(const vector<string> elements_or_isotopes_s);
 		matrix_t(const string matrix_elements_s);
 		vector<isotope_t> isotopes;
@@ -70,7 +81,7 @@ public:
 		bool operator<(const matrix_t& obj) const;
 	};
 private:
-// 	static const string db_tablename;
+
 	static bool use_lot;
 	static bool use_lot_split;
 	static bool use_wafer;
@@ -86,6 +97,8 @@ private:
 	
 	class implant_s
 	{
+	private:
+		static const int logger_verbosity_offset = 0;
 	public:
 		dose_t dose;
 		concentration_t concentration_maximum;
@@ -101,6 +114,7 @@ public:
 	class db_t
 	{
 	private:
+		static const int logger_verbosity_offset = 10;
 		const database_t& sql_wrapper;
 		static const string tablename;
 		///saved load_from_table entries

@@ -58,16 +58,12 @@ void mgroups_::sims_t::check()
 		
 		if (SD_resolution.is_set() && ST_resolution.is_set())
 			logger::warning(1,"mgroups_::sims_t::check()","SD_resolution.is_set() && ST_resolution.is_set()",M->to_string());
-// 			logger::warning("mgroups_::sims_t::check: SD_resolution.is_set() && ST_resolution.is_set()", to_string());
 		if (!SD_resolution.is_set() && !ST_resolution.is_set())
 			logger::warning(1,"mgroups_::sims_t::check()","!SD_resolution.is_set() && !ST_resolution.is_set()",M->to_string());
-// 			logger::warning("mgroups_::sims_t::check: !SD_resolution.is_set() && !ST_resolution.is_set()", to_string());
 		if (SD_resolution.is_set() && SD_resolution != M->crater.sputter_depth.resolution())
 			logger::warning(1,"mgroups_::sims_t::check()","SD_resolution.is_set() && SD_resolution != M->crater.sputter_depth().resolution()",M->to_string());
-// 			logger::warning("mgroups_::sims_t::check: sputter_depth().resolution() differs", to_string());
 		if (ST_resolution.is_set() && ST_resolution != M->crater.sputter_time.resolution())
 			logger::warning(1,"mgroups_::sims_t::check()","ST_resolution.is_set() && ST_resolution != M->crater.sputter_time.resolution()",M->to_string());
-// 			logger::warning("mgroups_::sims_t::check: sputter_time.resolution() differs", to_string());
 	}
 }
 
@@ -83,7 +79,7 @@ const map<sample_t::matrix_t,RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluste
 		if (C==nullptr) continue;
 		RSF_t RSF =  C->RSF;
 		if (!RSF.is_set()) continue;
-		logger::debug(21,"mgroups_::sims_t::matrix_to_SRs()",M->sample->to_string());
+		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()",M->sample->to_string());
 		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()","matrix:"+mat.to_string(),"\trRSF:"+RSF.to_string());
 		if (RSF.data.size()>1)
 		{
@@ -130,24 +126,46 @@ const std::map< sample_t::matrix_t, SR_t > mgroups_::sims_t::matrix_to_SRs()
 	return mat_to_SRs;
 }
 
-const std::map< sample_t::matrix_t, intensity_t > mgroups_::sims_t::matrix_to_intensity_sum()
+// const std::map< sample_t::matrix_t, intensity_t > mgroups_::sims_t::matrix_to_intensity_sum()
+// {
+// 	map<sample_t::matrix_t,intensity_t> mat_to_I;
+// 	for (auto& M : measurements())
+// 	{
+// 		sample_t::matrix_t mat = M->sample->matrix();
+// 		if (!mat.is_set()) continue;
+// 		intensity_t I = M->matrix_clusters().intensity_sum();
+// 		if (!I.is_set()) continue;
+// 		if (mat_to_I.find(mat)==mat_to_I.end())
+// 			mat_to_I.insert(pair<sample_t::matrix_t, intensity_t> (mat,I.quantile(0.10)));
+// 		else
+// 			mat_to_I.at(mat) << I.quantile(0.10);
+// 	}
+// 	return mat_to_I;
+// }
+
+// const vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> mgroups_::sims_t::sample_mats_to_mat_clusters()
+// {
+// 	vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> Smat_to_Cmat;
+// 	for (auto& M : measurements())
+// 	{
+// 		if (!M->sample->matrix().is_set()) continue;
+// 		if (M->matrix_clusters().clusters.size()==0) continue;
+// 		Smat_to_Cmat.push_back(pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c&> (M->sample->matrix(),M->matrix_clusters()));
+// 	}
+// 	return Smat_to_Cmat;
+// }
+
+measurements_::sims_t* mgroups_::sims_t::measurement ( const measurements_::sims_t& M )
 {
-	map<sample_t::matrix_t,intensity_t> mat_to_I;
-	for (auto& M : measurements())
-	{
-		sample_t::matrix_t mat = M->sample->matrix();
-		if (!mat.is_set()) continue;
-		intensity_t I = M->matrix_clusters().intensity_sum();
-		if (!I.is_set()) continue;
-		if (mat_to_I.find(mat)==mat_to_I.end())
-			mat_to_I.insert(pair<sample_t::matrix_t, intensity_t> (mat,I.quantile(0.10)));
-		else
-			mat_to_I.at(mat) << I.quantile(0.10);
-	}
-	return mat_to_I;
+	for (auto& M_in_MG : measurements())
+		if (*M_in_MG==M)
+			return M_in_MG;
+	return nullptr;
 }
 
-vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
+
+
+const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 {
 	set<isotope_t> isos;
 	for (auto& M : measurements())
@@ -155,8 +173,6 @@ vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 		if (!M->sample->matrix().is_set()) continue;
 		vector<isotope_t> mat_isos=M->sample->matrix().isotopes;
 		isos.insert(mat_isos.begin(),mat_isos.end());
-// 		const vector<isotope_t> matrix_isos_in_M = M->matrix_clusters().isotopes();
-// 		isos.insert(matrix_isos_in_M.begin(),matrix_isos_in_M.end());
 	}
 	vector<isotope_t> isos_vec = {isos.begin(),isos.end()};
 	
@@ -177,7 +193,7 @@ vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 	return isos_vec;
 }
 
-vector<cluster_t> mgroups_::sims_t::matrix_clusters()
+const vector<cluster_t> mgroups_::sims_t::matrix_clusters()
 {
 	set<cluster_t> clusters;
 	for (auto& M : measurements())
@@ -238,7 +254,7 @@ string mgroups_::sims_t::to_string_short() const
 	return out.str();
 }
 
-void mgroups_::sims_t::export_origin_ascii(string path, const std::__cxx11::string delimiter)
+void mgroups_::sims_t::export_origin_ascii(string path, const string delimiter)
 {
 	for (auto& M : measurements())
 		M->export_origin_ascii(path+to_string_short(),delimiter);

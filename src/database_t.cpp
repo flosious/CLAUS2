@@ -27,7 +27,7 @@ database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle)
 { 
 } 
 
-database_t::database_t(sqlite3* sql_handle, std::__cxx11::string filename) : sql_handle(sql_handle), file_location(filename)
+database_t::database_t(sqlite3* sql_handle, string filename) : sql_handle(sql_handle), file_location(filename)
 {
 }
 
@@ -37,7 +37,7 @@ bool database_t::open() {
 
 	if (sql_handle!=nullptr)
 	{
-		logger::debug(11,"database_t::open()","database already opened","","return true");
+		logger::debug(logger_verbosity_offset+11,"database_t::open()","database already opened","","return true");
 		return true;
 	}
     exit = sqlite3_open(file_location.c_str(), &this->sql_handle);
@@ -49,7 +49,7 @@ bool database_t::open() {
 		
 	}
 	execute_sql("PRAGMA secure_delete = true");
-	logger::debug(11,"database_t::open()","database successfully opened","","return true");
+	logger::debug(logger_verbosity_offset+11,"database_t::open()","database successfully opened","","return true");
     return true; 
 }
 
@@ -229,7 +229,7 @@ bool database_t::close() {
     return true; 
 }
 
-bool database_t::execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int,char**,char**), void* func_arg) const
+bool database_t::execute_sql(string sql, int (*func_ptr)(void*,int,char**,char**), void* func_arg) const
 {
     char *zErrMsg = 0;
 	int rc = sqlite3_exec(this->sql_handle, sql.c_str(), func_ptr, func_arg, &zErrMsg);
@@ -241,7 +241,7 @@ bool database_t::execute_sql(std::__cxx11::string sql, int (*func_ptr)(void*,int
 		sqlite3_free(zErrMsg);
 		return false;
 	}
-	logger::debug(10,"database_t::execute_sql()","sql command executed successfully",sql,"returning true");
+	logger::debug(logger_verbosity_offset+10,"database_t::execute_sql()","sql command executed successfully",sql,"returning true");
 	return true;
 }
 

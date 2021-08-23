@@ -23,8 +23,7 @@ mgroups_::sims_t::calc_t::~calc_t()
 {
 }
 
-
-mgroups_::sims_t::calc_t::calc_t(sims_t& MG) : MG(MG), jiang(*this), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this), measurements(MG.measurements())
+mgroups_::sims_t::calc_t::calc_t(sims_t& MG) : MG(MG), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this), measurements(MG.measurements())
 {
 	
 // 	if (save_calc_esults)
@@ -80,11 +79,13 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 		for (auto& C : M->clusters)
 		{
 			intensity_t Iref = M->matrix_clusters().intensity_sum();
+// 			cout << endl << Iref.to_string_detailed() << endl;
 			
 			if (C.intensity.is_set() && Iref.is_set() && !M->matrix_clusters().is_cluster_in_matrix(C))
 			{
 				logger::debug(11,"mgroups_::sims_t::calc_t::normalize_to_ref_intensity()","Iref="+Iref.to_string_detailed());
 				C.intensity = ((C.intensity / Iref ) * Iref.median());
+// 				cout << endl << C.intensity.to_string_detailed() << endl;
 			}
 		}
 // 		M->plot_now(0);
@@ -150,13 +151,6 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 // 	return mat_to_RSF_map;
 // }
 
-/*************************/
-/*****  jiang_c  *********/
-/*************************/
-
-mgroups_::sims_t::calc_t::jiang_c::jiang_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
-{
-}
 
 /*************************/
 /*****   SR_c  **********/
@@ -270,7 +264,9 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_median_ref(bo
 	for (auto& rsf_to_ref : RSFs_to_ref_intensities())
 	{
 		if (overwrite || !rsf_to_ref.first->SF.is_set())
+		{
 			rsf_to_ref.first->SF = SF_t (rsf_to_ref.first->RSF / rsf_to_ref.second.median()); // this is the median of a sum; not the sum of the medians!
+		}
 	}
 	return calc;
 }
@@ -502,14 +498,18 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::const_from_db(quan
 	return calc;
 }
 
-measurements_::sims_t* mgroups_::sims_t::measurement ( const measurements_::sims_t& M )
+/*
+ * this function interpolates each matrix cluster from gives matrix isotopes from reference samples (database)
+ * rank = {0,1,0} means linear RSFs without offset (0*c0*x^0 + 1*c1*x^1 + 0*c2*x^2)
+ */ 
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::interpolate(vector<int> rank)
 {
-	for (auto& M_in_MG : measurements())
-		if (*M_in_MG==M)
-			return M_in_MG;
-	return nullptr;
+	for (auto& mc : MG.matrix_clusters())
+	{
+		//get the reference_intensities of all measurements and their known matrix_concentration for this isotope
+	}
+	return calc;
 }
-
 
 
 

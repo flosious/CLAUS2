@@ -133,35 +133,10 @@ bool sample_t::db_t::create_table(database_t& sql_wrapper)
 
 bool sample_t::db_t::load_from_table()
 {
-	logger::debug(21,"sample_t::db_t::load_from_table()","entering");
+	logger::debug(logger_verbosity_offset+6,"sample_t::db_t::load_from_table()","entering");
 	if (implants_s.size()>0 || matrix_s.is_set()) // already loaded
 		return true;
 	map<string,vector<string>> table_entries_s;
-// 	if (table_entries_s.size()>0)
-// 	{
-// 		logger::debug(9,"sample_t::db_t::load_from_table()","table_entries_s.size()>0");
-// 		return table_entries_s;
-// 	}
-	
-// 	string chipX = "";
-// 	string chipY = "";
-// 	
-// 	if (sample.chip.x>-1)
-// 		chipX = std::to_string(sample.chip.x);
-// 	if (sample.chip.y>-1)
-// 		chipX = std::to_string(sample.chip.y);
-// 	
-// 	if ((chipX == "" && chipY != "")  )
-// 		logger::error("sample_t::db_t::load_from_table()","chip Y not set","please check and rerun","continuing");
-// 	if ( (chipX != "" && chipY == "") )
-// 		logger::error("sample_t::db_t::load_from_table()","chip X not set","please check and rerun","continuing");
-
-// 	string sql1	= "SELECT * FROM " +tablename+ 	" WHERE " \
-// 			"lot='" + sample.lot + "' AND " \
-// 			"wafer=" +std::to_string(sample.wafer)+ " AND " \
-// 			"chip_x=" + chipX + " AND " \
-// 			"chip_y=" + chipY + " AND " \
-// 			"monitor='" + sample.monitor+"';";
 			
 	string sql1	= "SELECT * FROM " +tablename+ 	" WHERE " \
 			"lot='" + sample.lot + "'" \
@@ -175,7 +150,7 @@ bool sample_t::db_t::load_from_table()
 		sql1 += " AND monitor='" + sample.monitor+"'";
 	sql1 += ";";
 
-	logger::debug(11,"sample_t::db_t::load_from_table()","sql1=",sql1);
+	logger::debug(logger_verbosity_offset+4,"sample_t::db_t::load_from_table()","sql1=",sql1);
 
 	if (!sql_wrapper.execute_sql(sql1,database_t::callback_lines_map,&table_entries_s)) 
 	{
@@ -185,7 +160,7 @@ bool sample_t::db_t::load_from_table()
 	
 	if (table_entries_s.size()==0)
 	{
-		logger::warning(4,"sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
+		logger::debug(logger_verbosity_offset+4,"sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
 		return false;
 	}
 	
@@ -236,18 +211,18 @@ bool sample_t::db_t::load_from_table()
 		implants_s.insert(pair<isotope_t,implant_s>(iso,I));
 	}
 	
-	logger::debug(21,"sample_t::db_t::load_from_table()","exiting");
+	logger::debug(logger_verbosity_offset+6,"sample_t::db_t::load_from_table()","exiting");
 	return true;
 }
 
 sample_t::matrix_t& sample_t::db_t::matrix()
 {
-	logger::debug(21,"sample_t::db_t::matrix()","entering");
+	logger::debug(logger_verbosity_offset+6,"sample_t::db_t::matrix()","entering");
 	if (matrix_s.is_set())
 		return matrix_s;
 	if (!load_from_table())
 	{
-		logger::info(3,"sample_t::db_t::matrix()","!load_from_table()","could not find sample in db_t table " +tablename,"returning empty");
+		logger::debug(4,"sample_t::db_t::matrix()","!load_from_table()","could not find " + sample.to_name()+ " in " +tablename,"returning empty");
 		return  matrix_s;
 	}
 
@@ -304,7 +279,7 @@ sample_t::implant_s sample_t::db_t::implant(const isotope_t& isotope)
 /***   sample_t::db_t::implant_t::implant_t   ***/
 /************************************************/
 
-// sample_t::db_t::implant_t::implant_t(const isotope_t& isotope, const map<std::__cxx11::string, vector<std::__cxx11::string> >& table_entries_s)
+// sample_t::db_t::implant_t::implant_t(const isotope_t& isotope, const map<string, vector<string> >& table_entries_s)
 // {
 // 	if (table_entries_s.size()==0)
 // 	{
@@ -382,7 +357,7 @@ bool sample_t::chip_t::operator>(const chip_t& obj) const
 	return false;
 }
 
-const std::__cxx11::string sample_t::chip_t::to_string(const std::__cxx11::string del) const
+const string sample_t::chip_t::to_string(const string del) const
 {
 	if (x<0 && y < 0)
 		return "";
@@ -524,7 +499,7 @@ bool sample_t::operator!=(const sample_t& obj) const
 	return !operator==(obj);
 }
 
-std::__cxx11::string sample_t::to_string(const string del)
+string sample_t::to_string(const string del)
 {
 	stringstream ss;
 	ss << "lot: " << lot;
@@ -543,7 +518,7 @@ std::__cxx11::string sample_t::to_string(const string del)
 	return ss.str();
 }
 
-std::__cxx11::string sample_t::to_name(const string del) const
+string sample_t::to_name(const string del) const
 {
 	stringstream ss;
 	ss << "lot: " << lot;

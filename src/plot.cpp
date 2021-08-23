@@ -102,18 +102,18 @@ int plot_t::Draw(mglGraph* gr)
 	return 0;
 }
 
-void plot_t::axis_t::add_line(double x_start, double y_start, double x_stop, double y_stop, std::__cxx11::string color, string text)
+void plot_t::axis_t::add_line(double x_start, double y_start, double x_stop, double y_stop, string color, string text)
 {
 	lines.push_back({x_start,y_start,x_stop,y_stop,color,text});
 }
 
-void plot_t::axis_t::add_arrow(double x_start, double y_start, double x_stop, double y_stop, std::__cxx11::string color, string text)
+void plot_t::axis_t::add_arrow(double x_start, double y_start, double x_stop, double y_stop, string color, string text)
 {
 	lines.push_back({x_start,y_start,x_stop,y_stop,color,text});
 }
 
 
-void plot_t::to_screen(const std::__cxx11::string window_title, double sleep_sec)
+void plot_t::to_screen(const string window_title, double sleep_sec)
 {
 // 	cout << "window_title\t" << window_title << endl;
 	mglFLTK gr(this,window_title.c_str());
@@ -127,7 +127,7 @@ void plot_t::to_screen(const std::__cxx11::string window_title, double sleep_sec
 	}
 }
 
-void plot_t::to_file(const std::__cxx11::string filename)
+void plot_t::to_file(const string filename)
 {
 	mglFLTK gr(this);
 // 	gr.SetQuality(6);
@@ -149,7 +149,7 @@ void plot_t::to_file(const std::__cxx11::string filename)
 /*******************       plot_t::line_t              *****************************/
 /************************************************************************************/
 
-plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, double y_stop, std::__cxx11::string color, string text) :
+plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, double y_stop, string color, string text) :
 						x_start(x_start), y_start(y_star),x_stop(x_stop),y_stop(y_stop), color(color), text(text)
 {
 }
@@ -159,14 +159,14 @@ plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, dou
 /*******************       plot_t::axis_t              ******************************/
 /************************************************************************************/
 
-void plot_t::axis_t::add_curve(const vector<double>& X, const vector<double>& Y, const std::__cxx11::string legend)
+void plot_t::axis_t::add_curve(const vector<double>& X, const vector<double>& Y, const string legend)
 {
 	quantity_t Xq ("X",X,0);
 	quantity_t Yq ("Y",Y,0);
 	add_curve(Xq,Yq,legend);
 }
 
-void plot_t::axis_t::add_curve(const quantity_t& X, const quantity_t& Y, const std::__cxx11::string legend)
+void plot_t::axis_t::add_curve(const quantity_t& X, const quantity_t& Y, const string legend)
 {
 	logger::debug(15,"plot_t::axis_t::add_curve()","entering");
 	if (Y.is_set() && X.is_set())
@@ -290,7 +290,7 @@ void plot_t::axis_t::range(double start_s, double stop_s, bool log10_scale_s)
 /*******    plot_t::axis_t::range_t    *********/
 /***********************************************/
 
-std::__cxx11::string plot_t::axis_t::range_t::to_string() const
+string plot_t::axis_t::range_t::to_string() const
 {
 	stringstream out;
 	out << "start= " << start << "\tstop= " << stop << endl;
@@ -358,7 +358,7 @@ plot_t::axis_t::range_t::range_t(const vector<const quantity_t *> Ys)
 /***********************************************/
 /*******    plot_t::axis_t::curve_t    *********/
 /***********************************************/
-plot_t::axis_t::curve_t::curve_t(const quantity_t* X, const quantity_t* Y, const std::__cxx11::string legende) : X(*X),Y(*Y),legende(legende)
+plot_t::axis_t::curve_t::curve_t(const quantity_t* X, const quantity_t* Y, const string legende) : X(*X),Y(*Y),legende(legende)
 {
 }
 

@@ -23,7 +23,7 @@
 /***  origin_t::column_t ***/
 /***************************/
 
-origin_t::column_t::column_t(const quantity_t& quantity, std::__cxx11::string prefix, std::__cxx11::string suffix) :
+origin_t::column_t::column_t(const quantity_t& quantity, string prefix, string suffix) :
 	column_t(quantity.data,
 					quantity.name(),
 					quantity.unit().to_string(),
@@ -31,7 +31,7 @@ origin_t::column_t::column_t(const quantity_t& quantity, std::__cxx11::string pr
 {
 }
 
-origin_t::column_t::column_t(const vector<double>& data_s, std::__cxx11::string longname, std::__cxx11::string unit, std::__cxx11::string comment) :
+origin_t::column_t::column_t(const vector<double>& data_s, string longname, string unit, string comment) :
 	data(tools::vec::double_to_string(data_s)),
 	longname(longname),
 	unit(unit),
@@ -39,7 +39,7 @@ origin_t::column_t::column_t(const vector<double>& data_s, std::__cxx11::string 
 {
 }
 
-vector<std::__cxx11::string> origin_t::column_t::vec()
+vector<string> origin_t::column_t::vec()
 {
 	vector<string> vec;
 // 	if (!populated) return vector;
@@ -52,7 +52,7 @@ vector<std::__cxx11::string> origin_t::column_t::vec()
 }
 
 
-void origin_t::column_t::apply_origin_conform_replacements(std::__cxx11::string& in_here)
+void origin_t::column_t::apply_origin_conform_replacements(string& in_here)
 {
 	in_here = regex_replace(in_here,regex("\\^([0-9]+)"),"\\+($1)");
 	in_here = regex_replace(in_here,regex("\\_([0-9]+)"),"\\-($1)");
@@ -63,11 +63,11 @@ void origin_t::column_t::apply_origin_conform_replacements(std::__cxx11::string&
 /*****   origin_t   ********/
 /***************************/
 /*
-origin_t::origin_t(origin_t::column_t cols, std::__cxx11::string path, std::__cxx11::string filename)
+origin_t::origin_t(origin_t::column_t cols, string path, string filename)
 {
 }
 
-origin_t::origin_t(vector<cluster_t>& clusters, std::__cxx11::string path, std::__cxx11::string filename)
+origin_t::origin_t(vector<cluster_t>& clusters, string path, string filename)
 {
 	vector<origin_t::column_t> cols;
 	for (auto& C : clusters)

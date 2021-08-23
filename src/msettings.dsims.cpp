@@ -56,7 +56,7 @@ msettings::dsims_t::dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::
 	em_voltage = filecontents.em_voltage();
 }
 
-const std::__cxx11::string msettings::dsims_t::to_string(const string del) const
+const string msettings::dsims_t::to_string(const string del) const
 {
 	stringstream ss;
 // 	const string del = ",";

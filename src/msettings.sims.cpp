@@ -47,7 +47,7 @@ bool msettings::sims_t::is_set()
 	return true;
 }
 
-const std::__cxx11::string msettings::sims_t::to_string(const string del) const
+const string msettings::sims_t::to_string(const string del) const
 {
 	stringstream ss;
 	ss << sputter_energy.to_string() << del;
@@ -56,7 +56,7 @@ const std::__cxx11::string msettings::sims_t::to_string(const string del) const
 	return ss.str();
 }
 
-const std::__cxx11::string msettings::sims_t::to_string_short() const
+const string msettings::sims_t::to_string_short() const
 {
 	if (!sputter_energy.is_scalar() || !sputter_ion.is_set()) 
 		return "";

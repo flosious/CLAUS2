@@ -12,7 +12,7 @@ quantity_t::quantity_t(const quantity_t& quant_s, vector<double> data) : name_p(
 {
 }
 
-quantity_t::quantity_t(std::__cxx11::string name_s, vector<double> data_s, unit_t unit_s)
+quantity_t::quantity_t(string name_s, vector<double> data_s, unit_t unit_s)
 {
 	name_p = name_s;
 	unit_p = unit_s;
@@ -268,34 +268,78 @@ quantity_t quantity_t::integrate_pbp(const quantity_t& x_data) const
 // 	return integrate(x_data,lower_X_limit,upper_X_limit);
 // }
 
-quantity_t quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_limit, unsigned int upper_X_limit) const
+quantity_t quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_index, unsigned int upper_X_index) const
 {
-	if (lower_X_limit<0)
-		lower_X_limit=0;
-	if (upper_X_limit>=x_data.data.size() || upper_X_limit<=0)
-		upper_X_limit = x_data.data.size() -1 ;
+	if (lower_X_index<0)
+		      lower_X_index=0;
+	if (upper_X_index>=x_data.data.size() || upper_X_index<=0)
+		      upper_X_index = x_data.data.size() -1 ;
 	if (x_data.data.size() != data.size())
 	{
 		logger::error("quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
 		return {};
 	}
-// 	
-// 	map<double,double> data_XY;
-// 	tools::vec::combine_vecs_to_map(&x_data.data,&data,&data_XY);
-// 	stringstream n;
-// 	n << "integral("<<name()<<")d(" << x_data.name() << ")";
-// 	double area_d = statistics::integrate(data_XY,lower_X_limit,upper_X_limit);
-// 	quantity_t area(n.str(),{area_d},unit()*x_data.unit());
-// 	logger::debug(11,"quantity_t::integrate()","area=" + area.to_string(),"area_double="+tools::to_string(area_d));
-// 	return area;
+	
 	auto int_pbp = integrate_pbp(x_data);
-	double sum=int_pbp.data.at(upper_X_limit);
-	if (lower_X_limit>0)
-		sum -= int_pbp.data.at(lower_X_limit) ;
+	double sum=int_pbp.data.at(upper_X_index);
+	if (lower_X_index>0)
+		sum -= int_pbp.data.at(lower_X_index) ;
 	stringstream n,u;
 	n << "integral("<<name()<<")d(" << x_data.name() << ")";
 	quantity_t area(n.str(),{sum},unit()*x_data.unit());
 	return area;
+}
+
+int quantity_t::get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec)
+{
+	for (int i=0;i<monotonic_vec.size();i++)
+	{
+		if (monotonic_vec.at(i)>=value)
+			return i;
+	}
+	return -1;
+}
+
+quantity_t quantity_t::integrate(const quantity_t& x_data, const quantity_t& x_data_start, const quantity_t& x_data_stop) const
+{
+	unsigned int lower_X_limit=0;
+	unsigned int upper_X_limit=0;
+	if (!x_data_start.is_scalar())
+		lower_X_limit=0;
+	else
+	{
+		if (x_data.unit().base_units_exponents!=x_data_start.unit().base_units_exponents)
+		{
+			logger::error("quantity_t::integrate()","x_data.unit()="+x_data.unit().to_string(),"x_data_start.unit()="+x_data_start.unit().to_string());
+			return {};
+		}
+		if (x_data.unit()!=x_data_start.unit())
+			return integrate(x_data,x_data_start.change_unit(x_data.unit()),x_data_stop.change_unit(x_data.unit()));
+		int x = get_value_index_position_in_strictly_monotonic_increasing_vector(x_data_start.data.front(),x_data.data);
+		if (x>=0)
+			lower_X_limit=x;
+	}
+	if (!x_data_stop.is_scalar())
+		upper_X_limit = x_data.data.size() -1;
+	else
+	{
+		if (x_data.unit().base_units_exponents!=x_data_stop.unit().base_units_exponents)
+		{
+			logger::error("quantity_t::integrate()","x_data.unit()="+x_data.unit().to_string(),"x_data_stop.unit()="+x_data_stop.unit().to_string());
+			return {};
+		}
+		if (x_data.unit()!=x_data_stop.unit())
+			return integrate(x_data,x_data_start.change_unit(x_data.unit()),x_data_stop.change_unit(x_data.unit()));
+		int x = get_value_index_position_in_strictly_monotonic_increasing_vector(x_data_stop.data.front(),x_data.data);
+		if (x>=0)
+			upper_X_limit=x;
+	}
+	if (x_data.data.size() != data.size())
+	{
+		logger::error("quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
+		return {};
+	}
+	return integrate(x_data,lower_X_limit,upper_X_limit);
 }
 
 quantity_t quantity_t::max_at_x(const quantity_t& X) const
@@ -731,7 +775,7 @@ quantity_t quantity_t::resolution(double new_res) const
 	return new_quantity;
 }
 
-const std::__cxx11::string quantity_t::to_string() const
+const string quantity_t::to_string() const
 {
 	ostringstream out;
 	if (data.size()>1)
@@ -743,7 +787,7 @@ const std::__cxx11::string quantity_t::to_string() const
 	return out.str();
 }
 
-const std::__cxx11::string quantity_t::to_string_detailed() const
+const string quantity_t::to_string_detailed() const
 {
 	ostringstream out;
 	if (data.size()>1)
@@ -778,7 +822,7 @@ const std::__cxx11::string quantity_t::to_string_detailed() const
 // 	return median_p;
 // }
 
-const std::__cxx11::string quantity_t::name() const
+const string quantity_t::name() const
 {
 	return name_p;
 }
@@ -797,14 +841,14 @@ quantity_t quantity_t::change_unit(unit_t target_unit) const
 		return *this;
 	if (unit().base_units_exponents != target_unit.base_units_exponents) 
 	{
-		logger::warning(1,"quantity_t::change_unit","unit().base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
+		logger::warning(1,"quantity_t::change_unit()","unit().base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
 		return *this;
 	}
 // 	quantity_t copy = *this;
 	double factor = unit().multiplier / target_unit.multiplier;
 // 	for (int i=0;i<data.size();i++)
 // 		copy.data[i] *= factor ;
-	logger::debug(11,"quantity_t::change_unit","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
+	logger::debug(11,"quantity_t::change_unit()","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
 	return quantity_t{*this * factor,target_unit};
 }
 

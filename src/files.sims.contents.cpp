@@ -43,7 +43,7 @@ string files_::sims_t::contents_t::column_t::to_string() const
 	return out.str();
 }
 
-std::__cxx11::string files_::sims_t::contents_t::to_string(const std::__cxx11::string del)
+string files_::sims_t::contents_t::to_string(const string del)
 {
 	stringstream out;
 	out << files_::file_t::contents_t::to_string(del) << del;

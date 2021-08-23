@@ -45,9 +45,10 @@ class statistics {
 private:  
 	typedef int (* functiontype) (const gsl_movstat_end_t, const gsl_vector*, gsl_vector*, gsl_movstat_workspace* );
 	static vector<double> get_moving_window_function(vector<double> Y, int window_size, functiontype function,const gsl_movstat_end_t gsl_movstat_end = GSL_MOVSTAT_END_TRUNCATE);
+public:
 	static gsl_vector* get_gsl_vec(const vector<double>& Y);
 	static vector<double> get_gsl_vec(gsl_vector* Y);
-public:
+
 	/*TEST*/
 	static void test();
 	

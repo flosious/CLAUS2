@@ -59,7 +59,7 @@ cluster_t::cluster_t(const vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s
 {
 }
 
-std::__cxx11::string cluster_t::to_string(const string del) const
+string cluster_t::to_string(const string del) const
 {
 	const int max = isotopes.size();
 	if (max==0) return "";
@@ -193,14 +193,6 @@ isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_is
 		}
 	}
 	
-// 	stringstream out;
-// 	for (auto& i:reference_isotopes)
-// 	{
-// 		out << i.to_string() <<" ";
-// 	}
-// 	cout << "reference_isotopes: " << out.str() << endl; 
-// 	cout << "isotopes in cluster" << to_string() << endl;
-	
 	if (isos.size()==0)
 	{
 		logger::error("cluster_t::corresponding_isotope()","complex reference clusters are not supported","","returning empty");
@@ -208,7 +200,7 @@ isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_is
 	}
 	if (isos.size()>1)
 	{
-		logger::error("cluster_t::corresponding_isotope()","detected more than 1 possible isotope in cluster; unknown matrix isotopes? check database",to_string(),"returning empty");
+		logger::error("cluster_t::corresponding_isotope()","detected more than 1 possible corresponding isotope in cluster; unknown matrix isotopes? check database",to_string(),"returning empty");
 		return {};
 	}
 	return *isos.begin();
@@ -259,8 +251,8 @@ cluster_t cluster_t::interpolate(quantity_t& new_Q, quantity_t& old_Q) const
 	if (SF.is_set() && SF.data.size()>1)
 		new_cluster.SF = SF.interp(old_Q,new_Q);
 	
-// 	if (RSF.is_set() && RSF.data.size()>1)
-// 		new_cluster.RSF = RSF.interp(old_Q,new_Q);
+	if (RSF.is_set() && RSF.data.size()>1)
+		new_cluster.RSF = RSF.interp(old_Q,new_Q);
 	
 	return new_cluster;
 }
@@ -268,16 +260,19 @@ cluster_t cluster_t::interpolate(quantity_t& new_Q, quantity_t& old_Q) const
 cluster_t cluster_t::filter_impulse(int window_size, float factor)
 {
 	cluster_t c_out = *this;
+	
 	if (intensity.is_set())
-			c_out.intensity = intensity.filter_impulse(5);
+			c_out.intensity = intensity.filter_impulse(window_size,factor);
+	
 	if (concentration.is_set())
-		c_out.concentration = concentration.filter_impulse(5);
+		c_out.concentration = concentration.filter_impulse(window_size,factor);
+	
+	
+	//ATTENTION i am not sure if this is right ...
 	if (SF.is_set())
-		c_out.SF = SF.filter_impulse(5);
+		c_out.SF = SF.filter_impulse(window_size,factor);
+	if (RSF.is_set())
+		c_out.RSF = RSF.filter_impulse(window_size,factor);
+	
 	return c_out;
 }
-
-// unsigned int cluster_t::sputter_equilibrium_starting_index() const
-// {
-// 	
-// }

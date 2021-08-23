@@ -78,7 +78,7 @@ bool measurements_::measurement_t::operator==(const measurements_::measurement_t
 	return true;	
 }
 
-std::__cxx11::string measurements_::measurement_t::to_string(const std::__cxx11::string del) const
+string measurements_::measurement_t::to_string(const string del) const
 {
 	stringstream ss;
 	ss << "olcdb: " << olcdb;

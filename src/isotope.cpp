@@ -12,13 +12,13 @@ isotope_t::isotope_t() : symbol(""),nucleons(0)
 }
 
 
-isotope_t::isotope_t(std::__cxx11::string symbol_s, int nucleons_s, double abundance_s, double amount_s) :							 symbol(symbol_s), 
+isotope_t::isotope_t(string symbol_s, int nucleons_s, double abundance_s, double amount_s) :							 symbol(symbol_s), 
 																																   nucleons(nucleons_s),
 																																   abundance({abundance_s}),
 																																   substance_amount({amount_s})
 {}
 
-isotope_t::isotope_t(std::__cxx11::string str, double abundance_s, double amount_s)
+isotope_t::isotope_t(string str, double abundance_s, double amount_s)
 {
 	smatch match;
 	if (regex_search(str,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)$"))) /// 11B_fit
@@ -77,7 +77,7 @@ const mass_t isotope_t::mass() const
 // 	return PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
 // }
 
-const std::__cxx11::string isotope_t::to_string(const string del) const
+const string isotope_t::to_string(const string del) const
 {
 	stringstream out;
 	out << nucleons << symbol;
@@ -95,7 +95,6 @@ const std::__cxx11::string isotope_t::to_string(const string del) const
 /** OPERATORS **/
 const bool isotope_t::operator==(const isotope_t& obj) const
 {
-	
 	if (symbol!=obj.symbol) return false;
 	if (nucleons!=obj.nucleons) return false;
 	return true;

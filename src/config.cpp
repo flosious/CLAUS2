@@ -134,14 +134,14 @@ void config_t::save_test(string value)
 }
 
 
-// void config_t::save_export_column_names(std::__cxx11::string value)
+// void config_t::save_export_column_names(string value)
 // {
 // 	tools::str::remove_spaces(&value);
 // 	export2_t::export_column_names = tools::str::get_strings_between_delimiter(value,"+");
 // 	tools::str::remove_spaces(&export2_t::export_column_names);
 // }
 // 
-// void config_t::save_measurement_group_definition(std::__cxx11::string value)
+// void config_t::save_measurement_group_definition(string value)
 // {
 // 	tools::str::remove_spaces(&value);
 // 	vector<string> definitions = tools::str::get_strings_between_delimiter(value,"+");
@@ -164,7 +164,7 @@ void config_t::save_test(string value)
 // }
 
 /// sample_definition = lot + wafer + monitor + chip + simple_name
-void config_t::save_sample_definition(std::__cxx11::string value)
+void config_t::save_sample_definition(string value)
 {
 	tools::str::remove_spaces(&value);
 	vector<string> definitions = tools::str::get_strings_between_delimiter(value,"+");

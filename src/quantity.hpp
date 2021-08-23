@@ -43,6 +43,7 @@ class quantity_t
 // 	friend class matrix_t;
 private:
 	fit_functions::polynom_t polynom(unsigned int polynom_grade) const; 
+	static int get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec);
 protected:
 	string name_p="";
 	unit_t unit_p{};
@@ -154,7 +155,8 @@ public:
 	/// returns x value at min(Y)
 	quantity_t min_at_x(quantity_t& X,double lower_X_limit=0, double upper_X_limit=0) const;
 // 	quantity_t integrate(quantity_t& x_data,double lower_X_limit=0, double upper_X_limit=0);
-	quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_limit=0, unsigned int upper_X_limit = 0) const;
+	quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index, unsigned int upper_X_index = 0) const;
+	quantity_t integrate(const quantity_t& x_data, const quantity_t& x_data_start={}, const quantity_t& x_data_stop={}) const;
 	/// point by point integration
 	quantity_t integrate_pbp(const quantity_t& x_data) const;
 	

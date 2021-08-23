@@ -35,7 +35,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	/*connect to sqlite3 database*/
 	if (!sql_wrapper.open())
 		logger::error("processor::processor","could not connec to to database");
-	else // create tables
+	else // create tables    
 	{
 		sample_t::db_t::create_table(sql_wrapper);
 // 		sample_t::db_t::migrate_claus1_db(sql_wrapper,"build/migrate.database.sqlite3");
@@ -46,6 +46,8 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	profiler_t profiler(filenames,samples_list,sql_wrapper);
 	camera_t camera(filenames,sql_wrapper);
 	dsims_t dsims(filenames,samples_list,profiler,camera,sql_wrapper);
+	
+	
 	
 // 	cout << "filenames.size()=" << filenames.size() << endl;
 // 	cout << "dsims.files().size()=" << dsims.files().size() << endl;
@@ -58,7 +60,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	cout << endl;
 	
 	for (auto& MG : dsims.mgroups())
-	{
+	{	
 		auto MG_from_max = MG;
 		auto MG_from_dose = MG;
 		auto MG_from_max_Iref = MG;
@@ -78,32 +80,45 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 			if (M_c==nullptr) continue;
 			if (M_d==nullptr) continue;
 			if (!M->crater.sputter_depth.is_set()) continue;
+			
 			for (auto& C : M->clusters)
 			{
 				if (!C.concentration.is_set()) continue;
 				auto* C_c = M_c->cluster(C);
 				if (C_c == nullptr || !C_c->concentration.is_set()) continue;
 				auto* C_d = M_d->cluster(C);
-				if (C_d == nullptr || !C_d->concentration.is_set()) continue;
+				if (C_d == nullptr ) continue;
+				if ( !C_d->concentration.is_set()) continue;
+				
 				plot.Y1.add_curve(M->crater.sputter_depth,C.concentration,C.to_string()+"_from_Cmax");
 				plot.Y2.add_curve(M_c->crater.sputter_depth,C_c->concentration,C_c->to_string()+"_from_Dose");
 				plot.Y3.add_curve(M_d->crater.sputter_depth,C_d->concentration,C_d->to_string()+"_from_Cmax_Iref");
 				
-				auto dose = C.concentration.integrate(M->crater.sputter_depth.change_unit({"cm"}),*M->calc().implant(C).minimum_sputter_depth_position().data.begin());
-				auto dose_c = C_c->concentration.integrate(M_c->crater.sputter_depth.change_unit({"cm"}),*M_c->calc().implant(C).minimum_sputter_depth_position().data.begin());
-				auto dose_d = C_d->concentration.integrate(M_d->crater.sputter_depth.change_unit({"cm"}),*M_d->calc().implant(C).minimum_sputter_depth_position().data.begin());
 				
-				cout << endl;
-				cout << "from_Cmax: " << C.RSF.to_string_detailed() << "\t" << dose.to_string() << endl;
-				cout << "from_Dose: " << C_c->RSF.to_string_detailed() << "\t" << dose_c.to_string() << endl;
-				cout << "from_Cmax_Iref: " << C_d->RSF.to_string_detailed() << "\t" << dose_d.to_string() << endl;
-				
-				
-				
+// 				fit_functions::polynom_t p({0,0,0,0,0,0,0,0,0,0,0},{0,1,1,1,1,1,1,1,1,1,1});
+// 				plot_t plotC;
+// 				plotC.Y1.range(1,1E6,true);
+// 				plotC.Y2.range(1,1E6,true);
+// 				print(p.fit_parameters());
+// 				p.fit(C.intensity.data);
+// 				print(p.fit_parameters());
+// 				plotC.Y1.add_curve(M->crater.sputter_time, intensity_t(C.intensity.data));
+// 				plotC.Y2.add_curve(M->crater.sputter_time, intensity_t(p.fitted_y_data()));
+// 				plotC.to_screen("",0);
+// 				exit(1);
+	
+// 				auto dose = M->calc().implant(C).dose();
+// 				auto dose_c = M_c->calc().implant(*C_c).dose();
+// 				auto dose_d = M_d->calc().implant(*C_d).dose();
+// 				
+// 				cout << endl;
+// 				cout << "from_Cmax: " << C.RSF.to_string_detailed() << "\t" << dose.to_string() << endl;
+// 				cout << "from_Dose: " << C_c->RSF.to_string_detailed() << "\t" << dose_c.to_string() << endl;
+// 				cout << "from_Cmax_Iref: " << C_d->RSF.to_string_detailed() << "\t" << dose_d.to_string() << endl;
 			}
 			
 			plot.to_screen("",0);
-			M->plot_now(0);
+// 			M->plot_now(0);
 		}
 		
 		//get matrices
@@ -138,7 +153,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 /***  processor::dsims_t  ****/
 /*****************************/
 
-processor::dsims_t::dsims_t(vector<std::__cxx11::string>& filenames, 
+processor::dsims_t::dsims_t(vector<string>& filenames, 
 							list<sample_t>& samples_list, 
 							processor::profiler_t& profiler, 
 							processor::camera_t& cam,
@@ -223,7 +238,7 @@ vector<mgroups_::dsims_t>& processor::dsims_t::mgroups()
 /**  processor::camera_t  ****/
 /*****************************/
 
-processor::camera_t::camera_t(vector<std::__cxx11::string>& filenames, database_t& sql_wrapper) : filenames(filenames), sql_wrapper(sql_wrapper)
+processor::camera_t::camera_t(vector<string>& filenames, database_t& sql_wrapper) : filenames(filenames), sql_wrapper(sql_wrapper)
 {
 }
 
@@ -258,7 +273,7 @@ vector<files_::jpg_t>& processor::camera_t::files()
 /***   processor::profiler_t   ****/
 /**********************************/
 
-processor::profiler_t::profiler_t(vector<std::__cxx11::string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper) : filenames(filenames), samples_list(samples_list), sql_wrapper(sql_wrapper)
+processor::profiler_t::profiler_t(vector<string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper) : filenames(filenames), samples_list(samples_list), sql_wrapper(sql_wrapper)
 {
 }
 

@@ -38,8 +38,8 @@ public:
 	public:
 		sims_t();
 		sims_t(files_::sims_t::name_t& filename);
-		const std::__cxx11::string to_string(const std::__cxx11::string del = ", ") const;
-		const std::__cxx11::string to_string_short() const;
+		const string to_string(const string del = ", ") const;
+		const string to_string_short() const;
 		string secondary_polarity;
 		energy_t sputter_energy;
 		ion_t sputter_ion;

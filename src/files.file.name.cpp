@@ -22,8 +22,8 @@
 
 files_::file_t::name_t::name_t(string& filename_with_path_s, 
 								  const string delimiter_s, 
-								  const std::set< std::__cxx11::string > OR_identifiers_s, 
-								  const std::set< std::__cxx11::string > AND_identifiers_s) :
+								  const std::set< string > OR_identifiers_s, 
+								  const std::set< string > AND_identifiers_s) :
 											filename_with_path(filename_with_path_s),
 											delimiter(delimiter_s),
 											OR_identifiers_s(OR_identifiers_s),
@@ -93,7 +93,7 @@ int files_::file_t::name_t::chip_y()
 // 		logger::info("files_::file_t::chip_y() " +filename(), chip_y_p);
 	return chip_y_p;
 }
-std::__cxx11::string files_::file_t::name_t::group()
+string files_::file_t::name_t::group()
 {
 	parse_filename_parts();
 	if (group_p=="")
@@ -102,21 +102,21 @@ std::__cxx11::string files_::file_t::name_t::group()
 		
 	return group_p;
 }
-std::__cxx11::string files_::file_t::name_t::lot()
+string files_::file_t::name_t::lot()
 {
 	parse_filename_parts();
 // 	if (lot_p=="")
 // 		logger::warning("files_::file_t::lot() unkown", filename_with_path);
 	return lot_p;
 }
-std::__cxx11::string files_::file_t::name_t::lot_split()
+string files_::file_t::name_t::lot_split()
 {
 	parse_filename_parts();
 // 	if (lot_split_p=="")
 // 		logger::info("files_::file_t::lot_split() " +filename(), lot_split_p);
 	return lot_split_p;
 }
-std::__cxx11::string files_::file_t::name_t::monitor()
+string files_::file_t::name_t::monitor()
 {
 	parse_filename_parts();
 // 	if (monitor_p=="")
@@ -131,7 +131,7 @@ const int files_::file_t::name_t::olcdb()
 // 		logger::warning("files_::file_t::olcdb() unkown",filename_with_path);
 	return olcdb_p;
 }
-const vector<std::__cxx11::string>& files_::file_t::name_t::not_parseable_filename_parts()
+const vector<string>& files_::file_t::name_t::not_parseable_filename_parts()
 {
 	parse_filename_parts();
 	return not_parseable_filename_parts_p;
@@ -144,7 +144,7 @@ int files_::file_t::name_t::wafer()
 // 		logger::warning("files_::file_t::wafer() unkown",filename_with_path);
 	return wafer_p;
 }
-std::__cxx11::string files_::file_t::name_t::repetition()
+string files_::file_t::name_t::repetition()
 {
 	parse_filename_parts();
 	return repetition_p;
@@ -323,7 +323,7 @@ bool files_::file_t::name_t::parse_repetitor(string filename_part)
 	return false;
 }
 
-std::__cxx11::string files_::file_t::name_t::filename_type_ending() const
+string files_::file_t::name_t::filename_type_ending() const
 {
 	string filename_type_ending_p =tools::file::extract_filetype_ending(filename_with_path,".");
 // 	if (filename_type_ending_p=="")
@@ -331,7 +331,7 @@ std::__cxx11::string files_::file_t::name_t::filename_type_ending() const
 	return filename_type_ending_p;
 }
 
-// std::__cxx11::string& files_::file_t::name_t::filename_with_path() const
+// string& files_::file_t::name_t::filename_with_path() const
 // {
 // 	return filename_with_path;
 // }
@@ -348,7 +348,7 @@ const string files_::file_t::name_t::directory() const
 
 
 
-std::__cxx11::string files_::file_t::name_t::to_string(const string del)
+string files_::file_t::name_t::to_string(const string del)
 {
 	stringstream ss;
 	ss <<"delimiter '" << delimiter << "'" << del;

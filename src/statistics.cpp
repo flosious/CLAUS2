@@ -1640,7 +1640,10 @@ gsl_vector * statistics::get_gsl_vec(const vector<double>& Y)
 	int n = Y.size();
 	y = gsl_vector_alloc(n);
 	for (int i = 0; i < n; ++i)
+	{
 		gsl_vector_set (y, i, Y[i]);
+// 		cout << "y=" << *(y->data) << endl;
+	}
 	return y;
 }
 

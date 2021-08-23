@@ -127,7 +127,7 @@ bool unit_t::base_exponents_t::is_set() const
 	return false;
 }
 
-const std::__cxx11::string unit_t::base_exponents_t::to_string() const
+const string unit_t::base_exponents_t::to_string() const
 {
 	stringstream out;
 // 	vector<string> counter_, denominator;
@@ -227,7 +227,7 @@ const std::__cxx11::string unit_t::base_exponents_t::to_string() const
 /*****  unit_t   *******/
 /***********************/
 
-unit_t::unit_t(std::__cxx11::string symbols)
+unit_t::unit_t(string symbols)
 {
 	tools::str::remove_spaces(&symbols);
 	
@@ -285,7 +285,7 @@ unit_t::unit_t(std::__cxx11::string symbols)
 	logger::error("unit_t::unit_t: symbols unknown","'"+symbols+"'");
 }
 
-// const std::__cxx11::string unit_t::to_string(std::__cxx11::string symbol) const
+// const string unit_t::to_string(string symbol) const
 // {
 // 	if (symbol=="")
 // 		return to_string();
@@ -296,7 +296,7 @@ unit_t::unit_t(std::__cxx11::string symbols)
 // 	return to_string();
 // }
 
-const std::__cxx11::string unit_t::to_string() const
+const string unit_t::to_string() const
 {
 	if (!is_set()) return "";
 	logger::debug(21,"unit_t::to_string()","base_units_exponents: "+ base_units_exponents.to_string(), "multiplier: " + tools::to_string(multiplier));
@@ -369,7 +369,7 @@ const std::__cxx11::string unit_t::to_string() const
 		
 // 	logger::debug(5,"unit_t::to_string()","not found","");
 
-	logger::error("unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));
+	logger::warning(3,"unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));
 	stringstream out;
 	out  << tools::to_string(multiplier) << " * "<< base_units_exponents.to_string();
 	return out.str();

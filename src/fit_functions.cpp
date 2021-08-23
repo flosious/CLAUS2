@@ -41,10 +41,6 @@ double fit_functions::asym2sig_t::chisq0()
 int fit_functions::asym2sig_t::function(const gsl_vector * x, void *data, gsl_vector * f)
 {
   map<double, double> *data_XY = ((map<double, double> *)data);
-	
-//   size_t n = ((struct data *)data)->n;
-//   double *t = ((struct data *)data)->t;
-//   double *y = ((struct data *)data)->y;
 
   // y0,m,A,xc,w1,w2,w3
 	double y0 = gsl_vector_get (x, 0);
@@ -57,7 +53,6 @@ int fit_functions::asym2sig_t::function(const gsl_vector * x, void *data, gsl_ve
 
   size_t i=0;
 
-//   for (i = 0; i < data_XY->size(); i++)
 	for (map<double,double>::iterator XY=data_XY->begin();XY!=data_XY->end();++XY)
     {
       /* Model Yi = A * exp(-lambda * t_i) + b */
@@ -225,7 +220,7 @@ bool fit_functions::asym2sig_t::fitted()
 	return fitted_p;
 }
 
-std::__cxx11::string fit_functions::asym2sig_t::to_string(std::__cxx11::string prefix)
+string fit_functions::asym2sig_t::to_string(string prefix)
 {
 	if (!fitted()) return "";
 	stringstream ss;
@@ -239,17 +234,27 @@ std::__cxx11::string fit_functions::asym2sig_t::to_string(std::__cxx11::string p
  **POLYNOM***
  ************/
 
-fit_functions::polynom_t::polynom_t(int degree) : fit_parameters_s(degree)
+fit_functions::polynom_t::polynom_t(int degree) : fit_parameters_s(degree+1,1), rank(degree+1,1)
 {
 }
 
-fit_functions::polynom_t::polynom_t(vector<double> fit_parameters) : fit_parameters_s(fit_parameters_s)
+fit_functions::polynom_t::polynom_t(vector<double> fit_parameters) : fit_parameters_s(fit_parameters), rank(fit_parameters.size(),1)
 {
 }
+
+fit_functions::polynom_t::polynom_t(vector<double> fit_parameters, const vector<unsigned int> rank) : rank(rank), fit_parameters_s(fit_parameters)
+{
+}
+
 
 int fit_functions::polynom_t::degree()
 {
 	return fit_parameters_s.size()-1;
+}
+
+const vector<double>& fit_functions::polynom_t::fit_parameters()
+{
+	return fit_parameters_s;
 }
 
 
@@ -286,7 +291,10 @@ vector<double> fit_functions::polynom_t::fitted_y_data(vector<double> x)
 	{
 		Y[i]=fit_parameters_s[0];
 		for (int p=1;p<fit_parameters_s.size();p++)
+		{
+// 			if (rank.at(p)!=0)
 			Y[i]+=fit_parameters_s[p]*pow(x[i],p);
+		}
 	}
 	return Y;
 }
@@ -332,16 +340,20 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 	gsl_matrix *X, *cov;
 	gsl_vector *y, *w, *c;
 	const int p = degree()+1;
-	fit_parameters_s.resize(p);
     
 	n = data_XY.size();
     
 	X = gsl_matrix_alloc (n, p);
 	y = gsl_vector_alloc (n);
 	w = gsl_vector_alloc (n);
-
-	c = gsl_vector_alloc (p);
 	cov = gsl_matrix_alloc (p, p);
+	c = gsl_vector_alloc (p);
+// 	c = statistics::get_gsl_vec(fit_parameters_s);
+	for (int i=0;i<fit_parameters_s.size();i++)
+	{
+		gsl_vector_set (c, i, fit_parameters_s.at(i));
+// 		cout << "i="<<i<<"\tc=" << *c->data << endl;
+	}
     
 	vector<double> Ydata;
 	tools::vec::split_map_to_vecs(data_XY,&Xdata,&Ydata);
@@ -351,16 +363,20 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 	for (i = 0; i < n; i++)
     {
 		gsl_vector_set (y, i, Ydata[i]);
-		for (int ii=0;ii<p;ii++) {
-		gsl_matrix_set (X, i, ii, pow(Xdata[i],ii));
-      }
+		for (int ii=0;ii<p;ii++)  // create reference data (polynom)
+		{
+			if (rank.at(ii)==0)
+				gsl_matrix_set (X, i, ii, 0);
+			else
+				gsl_matrix_set (X, i, ii, pow(Xdata[i],ii));
+		}
     }
-//     cout << endl << "data_XY.size()=" << data_XY.size() << endl;
-  {
-    gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (n, p);
-    gsl_multifit_linear (X, y, c, cov, &chisq_p, work);
-    gsl_multifit_linear_free (work);
-  }
+
+	{
+		gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc (n, p);
+		gsl_multifit_linear (X, y, c, cov, &chisq_p, work);
+		gsl_multifit_linear_free (work);
+	}
 
 #define C(i) (gsl_vector_get(c,(i)))
 #define COV(i,j) (gsl_matrix_get(cov,(i),(j)))

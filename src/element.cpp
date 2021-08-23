@@ -30,7 +30,7 @@ element_t::element_t()
 {
 }
 
-element_t::element_t(std::__cxx11::string symbol_s, double abs_amount, bool use_natural_abundance) :symbol(symbol_s),substance_amount({abs_amount})
+element_t::element_t(string symbol_s, double abs_amount, bool use_natural_abundance) :symbol(symbol_s),substance_amount({abs_amount})
 {
 	if (PSE.element(symbol_s)==nullptr)
 	{
@@ -110,7 +110,7 @@ bool element_t::operator<(const element_t& obj) const
 	return symbol<obj.symbol;
 }
 
-const std::__cxx11::string element_t::to_string() const
+const string element_t::to_string() const
 {
 	stringstream out;
 	const int size = isotopes.size();

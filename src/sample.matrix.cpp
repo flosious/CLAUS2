@@ -29,20 +29,19 @@ sample_t::matrix_t::matrix_t()
 {
 }
 
-sample_t::matrix_t::matrix_t(const std::__cxx11::string matrix_elements_s)
+sample_t::matrix_t::matrix_t(const string matrix_elements_s)
 {
 	*this = matrix_t{tools::str::get_strings_between_delimiter(matrix_elements_s," ")};
 }
 
 
-sample_t::matrix_t::matrix_t(const vector<std::__cxx11::string> elements_or_isotopes_s)
+sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 {
 	/* 
 	 * mole/abundance/concentration/atoms input values are asumed as absolutes, which are iternally normalized to 100at%: 
 	 * sum of all elements must be 100 at% (will be enforced)
 	 * input is something like: "Si Ge30" -> [28,29,30]Si70at% + [74,73,72,70]Ge30at% === [28,29,30]Si7mol + [74,73,72,70]Ge3mol
 	 * single isotopes are also possible, for purified matrices: "28Si30 Ge60" -> [28]Si33at% [74,73,72,70]Ge66at%
-	 * //OLD: uncalculateable concentrations like "Si Ge" -> will lead to an error and aborting - OLD
 	 * uncalculateable concentrations like "Si Ge" -> will lead to a warning, matrix isotopes are saved without abundance/substance amount
 	 * indistinguishable isotopes like "29Si30 Si50 Ge10 Sn10" --> will lead to an error and aborting
 	 * not recognized isotopes --> will lead to an error an aborting
@@ -239,10 +238,10 @@ const bool sample_t::matrix_t::is_set() const
 
 bool sample_t::matrix_t::operator==(const matrix_t& obj) const
 {
-	logger::debug(31,"sample_t::matrix_t::operator==()","entering");
+	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator==()","entering");
 	if (isotopes.size()!=obj.isotopes.size()) 
 	{
-		logger::debug(31,"sample_t::matrix_t::operator==()","isotopes.size()!=obj.isotopes.size()","returning FALSE");
+		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator==()","isotopes.size()!=obj.isotopes.size()","returning FALSE");
 		return false;
 	}
 	bool same_iso;
@@ -260,11 +259,11 @@ bool sample_t::matrix_t::operator==(const matrix_t& obj) const
 		}
 		if (!same_iso) 
 		{
-			logger::debug(31,"sample_t::matrix_t::operator==()","!same_iso","returning FALSE");
+			logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator==()","!same_iso","returning FALSE");
 			return false;
 		}
 	}
-	logger::debug(31,"sample_t::matrix_t::operator==()","returning true");
+	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator==()","returning true");
 	return true;
 }
 
@@ -275,15 +274,15 @@ bool sample_t::matrix_t::operator!=(const matrix_t& obj) const
 
 bool sample_t::matrix_t::operator<(const matrix_t& obj) const
 {
-	logger::debug(31,"sample_t::matrix_t::operator<()","entering");
+	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator<()","entering");
 	if (isotopes.size()<obj.isotopes.size()) 
 	{
-		logger::debug(31,"sample_t::matrix_t::operator<()","returning true");
+		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator<()","returning true");
 		return true;
 	}
 	if (isotopes.size()>obj.isotopes.size())
 	{
-		logger::debug(31,"sample_t::matrix_t::operator<()","returning FALSE");
+		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator<()","returning FALSE");
 		return false;
 	}
 	
@@ -294,7 +293,7 @@ bool sample_t::matrix_t::operator<(const matrix_t& obj) const
 	return true;
 }
 
-const std::__cxx11::string sample_t::matrix_t::to_string() const
+const string sample_t::matrix_t::to_string() const
 {
 	stringstream out;
 	if (!is_set()) return "";

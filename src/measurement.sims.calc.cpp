@@ -24,10 +24,11 @@ measurements_::sims_t::calc_t::calc_t(sims_t& measurement, bool overwrite) : M(m
 
 measurements_::sims_t::calc_t::implant_c& measurements_::sims_t::calc_t::implant(cluster_t& cluster, double X_resolution_factor)
 {
-	if (implants_s.find(cluster)!=implants_s.end())
-		return implants_s.at(cluster);
-	implants_s.insert(pair<cluster_t,implant_c> (cluster,implant_c(M,cluster,X_resolution_factor)));
-	return implants_s.at(cluster);
+	if (implants_s.find(&cluster)!=implants_s.end())
+		return implants_s.at(&cluster);
+	
+	implants_s.insert(pair<cluster_t * const,implant_c> (&cluster,implant_c(M,cluster,X_resolution_factor)));
+	return implants_s.at(&cluster);
 }
 
 
@@ -199,6 +200,7 @@ RSF_t measurements_::sims_t::calc_t::RSF_c::from_SF_mean_ref(const cluster_t& cl
 
 measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor) : M(measurement), cluster(cluster), X_resolution_factor(X_resolution_factor)
 {
+	logger::debug(11,"measurements_::sims_t::calc_t::implant_c::implant_c()","new implant object created",cluster.to_string(),M.to_string());
 }
 
 unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position()
@@ -288,7 +290,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(qu
 // 		return {};
 // }
 
-sputter_depth_t measurements_::sims_t::calc_t::implant_c::minimum_sputter_depth_position()
+sputter_depth_t measurements_::sims_t::calc_t::implant_c::minimum_sputter_depth_position() const
 {
 	if (!M.crater.sputter_depth.is_set())
 		return {};
@@ -300,7 +302,7 @@ sputter_depth_t measurements_::sims_t::calc_t::implant_c::minimum_sputter_depth_
 	return {};
 }
 
-sputter_time_t measurements_::sims_t::calc_t::implant_c::minimum_sputter_time_position()
+sputter_time_t measurements_::sims_t::calc_t::implant_c::minimum_sputter_time_position() const
 {
 	if (!M.crater.sputter_time.is_set())
 		return {};
@@ -312,7 +314,7 @@ sputter_time_t measurements_::sims_t::calc_t::implant_c::minimum_sputter_time_po
 	return {};
 }
 
-quantity_t measurements_::sims_t::calc_t::implant_c::minimum_starting_position()
+quantity_t measurements_::sims_t::calc_t::implant_c::minimum_starting_position() const
 {
 	if (M.crater.X()==nullptr)
 	{
@@ -330,7 +332,6 @@ quantity_t measurements_::sims_t::calc_t::implant_c::minimum_starting_position()
 
 RSF_t measurements_::sims_t::calc_t::implant_c::RSF()
 {
-	
 	if (!cluster.SF.is_set())
 	{
 		logger::debug(6,"measurements_::sims_t::calc_t::implant_c::RSF()","!SF(cluster).is_set()","","return empty");
@@ -443,6 +444,14 @@ intensity_t measurements_::sims_t::calc_t::implant_c::background_intensity()
 	return {};
 }
 
+dose_t measurements_::sims_t::calc_t::implant_c::dose() const
+{
+	if (!M.crater.sputter_depth.is_set() || !cluster.concentration.is_set()) 
+		return {};
+	
+	return cluster.concentration.integrate(M.crater.sputter_depth.change_unit({"cm"}),minimum_sputter_depth_position());
+}
+
 const sputter_time_t&  measurements_::sims_t::calc_t::implant_c::sputter_time_at_maximum()
 {
 	if (!sputter_time_at_maximum_s.is_set())
@@ -463,7 +472,11 @@ const intensity_t& measurements_::sims_t::calc_t::implant_c::maximum_intensity()
 
 SR_t measurements_::sims_t::calc_t::implant_c::SR()
 {
-	//TODO something wrong here
+	if (M.matrix_clusters().is_cluster_in_matrix(cluster))
+	{
+		logger::debug(6,"measurements_::sims_t::calc_t::implant_c::SR()","matrix cluster true",cluster.to_string(),"return empty");
+		return {};
+	}
 	if (!cluster.intensity.is_set() || !M.crater.sputter_time.is_set())
 	{
 		logger::debug(6,"measurements_::sims_t::calc_t::implant_c::SR()","!cluster.intensity.is_set() || !M.crater.sputter_time.is_set()","","return empty");
@@ -484,6 +497,11 @@ SR_t measurements_::sims_t::calc_t::implant_c::SR()
 
 SF_t measurements_::sims_t::calc_t::implant_c::SF_from_max()
 {
+	if (M.matrix_clusters().is_cluster_in_matrix(cluster))
+	{
+		logger::debug(6,"measurements_::sims_t::calc_t::implant_c::SF_from_max()","matrix cluster true",cluster.to_string(),"return empty");
+		return {};
+	}
 	if (!cluster.intensity.is_set() )
 	{
 		logger::debug(6,"measurements_::sims_t::calc_t::implant_c::SF_from_max()","!cluster.intensity.is_set()","","return empty");
@@ -504,6 +522,11 @@ SF_t measurements_::sims_t::calc_t::implant_c::SF_from_max()
 
 SF_t measurements_::sims_t::calc_t::implant_c::SF_from_dose()
 {
+	if (M.matrix_clusters().is_cluster_in_matrix(cluster))
+	{
+		logger::debug(6,"measurements_::sims_t::calc_t::implant_c::SF_from_dose()","matrix cluster true",cluster.to_string(),"return empty");
+		return {};
+	}
 	if (!cluster.intensity.is_set() || !M.crater.sputter_depth.is_set())
 	{
 		logger::debug(6,"measurements_::sims_t::calc_t::implant_c::SF_from_dose()","!cluster.intensity.is_set() || !M.crater.sputter_depth.is_set()","","return empty");

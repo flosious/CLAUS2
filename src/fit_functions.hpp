@@ -74,7 +74,9 @@ public:
 		double gof();
 		string to_string(string prefix="");
 	};
-	
+	/*
+	 * Y = SUM_i ( c_j * x_j * rank_j )
+	 */
 	class polynom_t
 	{
 	private:
@@ -83,8 +85,12 @@ public:
 		bool fitted_p=false;
 		vector<double> Xdata;
 		vector<double> fit_parameters_s;
+		///rank of polynom: 0 means discard, and non-0 means use
+		const vector<unsigned int> rank;
 	public:
+		///degree means rank
 		polynom_t(int degree);
+		polynom_t(vector<double> fit_parameters, const vector<unsigned int> rank);
 		polynom_t(vector<double> fit_parameters);
 		int degree();
 		polynom_t derivative(unsigned int derive=1);
