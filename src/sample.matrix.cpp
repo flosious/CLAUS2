@@ -29,11 +29,35 @@ sample_t::matrix_t::matrix_t()
 {
 }
 
+sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes)
+{
+// 	cout << "isotopes.size() = " << isotopes.size() << endl;
+	///filter elements from isos and save in matrix
+	while (isotopes.size()>0)
+	{
+		vector<unsigned int> vec_positions_to_erase;
+		vector<isotope_t> isos_in_ele;
+		for (int i=0;i<isotopes.size();i++)
+		{
+			isotope_t& I = isotopes.at(i);
+			if (I.symbol=="") continue;
+			if ((isos_in_ele.size()==0) || isos_in_ele.front().symbol==I.symbol)
+			{
+				isos_in_ele.push_back(I);
+				vec_positions_to_erase.push_back(i);
+			}
+		}
+		if (isos_in_ele.size()==0)
+			break;
+		elements.push_back({isos_in_ele});
+		isotopes = tools::vec::erase(isotopes,vec_positions_to_erase);
+	}
+}
+
 sample_t::matrix_t::matrix_t(const string matrix_elements_s)
 {
 	*this = matrix_t{tools::str::get_strings_between_delimiter(matrix_elements_s," ")};
 }
-
 
 sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 {
@@ -46,7 +70,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 	 * indistinguishable isotopes like "29Si30 Si50 Ge10 Sn10" --> will lead to an error and aborting
 	 * not recognized isotopes --> will lead to an error an aborting
 	 */
-	
+	vector<isotope_t> isotopes;
 	/*parsing*/
 	smatch match;
 	int nucleons;
@@ -158,7 +182,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 		logger::warning(3,"sample_t::matrix_t::matrix_t(): more than 1 unknown amount", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "),"setting subsstance amount to unknown");
 		for (auto& iso : isotopes)
 			iso.substance_amount.clear();
-		
+		*this = matrix_t(isotopes);
 		return;
 	}
 	
@@ -171,8 +195,6 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 		if (iso.substance_amount.is_set() && iso.substance_amount.data.at(0)<0) 
 			iso.substance_amount =  iso.substance_amount * (total_amount - max_ ) ;
 	}
-	
-	
 	
 	/*calculate total substance_amount for each element/symbol*/
 	map<string,double> symbol_to_total_amount;
@@ -202,7 +224,16 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 		}
 	}
 	
-	   substance_amount_to_relative();
+	///calc relative substance_amount (at%)
+	substance_amount_to_relative(isotopes);
+	
+// 	cout << endl << "matrix::isotopes.size()=" << isotopes.size() << endl;
+// 	for (auto& i : isotopes)
+// 		cout << "iso=" << i.to_string() << endl;
+	
+	*this = matrix_t(isotopes);
+	
+	
 	
 	/*sum of all isos subtance_amounts may be high*/
 // 	double sum=0, sum1=0;
@@ -214,7 +245,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 // 	}
 }
 
-void sample_t::matrix_t::substance_amount_to_relative()
+void sample_t::matrix_t::substance_amount_to_relative(vector<isotope_t>& isotopes)
 {
 	substance_amount_t sum({0});
 	for (auto& iso : isotopes)
@@ -228,10 +259,35 @@ void sample_t::matrix_t::substance_amount_to_relative()
 // 		cout << iso.substance_amount.to_string() << endl;
 }
 
+isotope_t* sample_t::matrix_t::isotope(isotope_t iso)
+{
+	for (auto& E : elements)
+	{
+		if (E.symbol != iso.symbol) continue;
+		for (auto& I : E.isotopes)
+			if (I == iso)
+				return &I;
+	}
+	return nullptr;
+}
+
+const vector<isotope_t> sample_t::matrix_t::isotopes() const
+{
+	vector<isotope_t> isotopes;
+// 	cout << endl << "elements.size()="<< elements.size() << endl;
+	for (auto& E : elements)
+	{
+// 		cout <<endl<< E.symbol << endl;
+// 		for (auto& I : E.isotopes)
+// 			cout << endl << "iso = " << I.to_string() << endl;
+		isotopes.insert(isotopes.end(), E.isotopes.begin(),E.isotopes.end());
+	}
+	return isotopes;
+}
 
 const bool sample_t::matrix_t::is_set() const
 {
-	if (isotopes.size()==0)
+	if (isotopes().size()==0)
 		return false;
 	return true;
 }
@@ -239,16 +295,16 @@ const bool sample_t::matrix_t::is_set() const
 bool sample_t::matrix_t::operator==(const matrix_t& obj) const
 {
 	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator==()","entering");
-	if (isotopes.size()!=obj.isotopes.size()) 
+	if (isotopes().size()!=obj.isotopes().size()) 
 	{
 		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator==()","isotopes.size()!=obj.isotopes.size()","returning FALSE");
 		return false;
 	}
 	bool same_iso;
-	for (auto& iso: isotopes)
+	for (auto& iso: isotopes())
 	{
 		same_iso = false;
-		for (auto& iso_obj: obj.isotopes)
+		for (auto& iso_obj: obj.isotopes())
 		{
 			// iso == iso_obj will not check abundance and substance_amount!
 			if (iso == iso_obj && iso.substance_amount == iso_obj.substance_amount && iso.abundance == iso_obj.abundance) 
@@ -275,12 +331,12 @@ bool sample_t::matrix_t::operator!=(const matrix_t& obj) const
 bool sample_t::matrix_t::operator<(const matrix_t& obj) const
 {
 	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator<()","entering");
-	if (isotopes.size()<obj.isotopes.size()) 
+	if (isotopes().size()<obj.isotopes().size()) 
 	{
 		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator<()","returning true");
 		return true;
 	}
-	if (isotopes.size()>obj.isotopes.size())
+	if (isotopes().size()>obj.isotopes().size())
 	{
 		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator<()","returning FALSE");
 		return false;
@@ -297,13 +353,13 @@ const string sample_t::matrix_t::to_string() const
 {
 	stringstream out;
 	if (!is_set()) return "";
-	for (int i=0;i<isotopes.size();i++)
+	for (int i=0;i<isotopes().size();i++)
 	{
-		out << isotopes.at(i).nucleons << isotopes.at(i).symbol;
-		if (isotopes.at(i).substance_amount.is_set()) 
-			out << isotopes.at(i).substance_amount.data.at(0);
+		out << isotopes().at(i).nucleons << isotopes().at(i).symbol;
+		if (isotopes().at(i).substance_amount.is_set()) 
+			out << isotopes().at(i).substance_amount.data.at(0);
 // 		out << isotopes.at(i).to_string();
-		if (i<isotopes.size()-1) out << " ";
+		if (i<isotopes().size()-1) out << " ";
 	}
 	return out.str();
 }

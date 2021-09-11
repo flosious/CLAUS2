@@ -238,17 +238,25 @@ fit_functions::polynom_t::polynom_t(int degree) : fit_parameters_s(degree+1,1), 
 {
 }
 
-fit_functions::polynom_t::polynom_t(vector<double> fit_parameters) : fit_parameters_s(fit_parameters), rank(fit_parameters.size(),1)
+// fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank) : rank(rank)
+// // fit_parameters_s(fit_parameters), rank(fit_parameters.size(),1)
+// {
+// }
+
+// fit_functions::polynom_t::polynom_t(vector<double> fit_parameters) : rank(fit_parameters.size(),1), fit_parameters_s(fit_parameters)
+// // fit_parameters_s(fit_parameters), 
+// {
+// }
+
+fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, vector<double> fit_parameters) : rank(rank), fit_parameters_s(fit_parameters)
 {
 }
 
-fit_functions::polynom_t::polynom_t(vector<double> fit_parameters, const vector<unsigned int> rank) : rank(rank), fit_parameters_s(fit_parameters)
-{
-}
 
-
-int fit_functions::polynom_t::degree()
+int fit_functions::polynom_t::degree() const
 {
+	if (rank.size()>0)
+		return rank.size()-1;
 	return fit_parameters_s.size()-1;
 }
 
@@ -281,7 +289,7 @@ fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int deriv
 	return deriv;
 }
 
-vector<double> fit_functions::polynom_t::fitted_y_data(vector<double> x)
+vector<double> fit_functions::polynom_t::fitted_y_data(vector<double> x) const
 {
 	if (!fitted_p) return {};
 	if (x.size()==0)
@@ -299,12 +307,12 @@ vector<double> fit_functions::polynom_t::fitted_y_data(vector<double> x)
 	return Y;
 }
 
-double fit_functions::polynom_t::chisq()
+double fit_functions::polynom_t::chisq() const
 {
 	return chisq_p;
 }
 
-bool fit_functions::polynom_t::fitted()
+bool fit_functions::polynom_t::fitted() const
 {
 	return fitted_p;
 }
@@ -324,14 +332,12 @@ bool fit_functions::polynom_t::fit(vector<double> Ydata)
 
 bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 {
-	if (degree()<0) 
+	if (rank.size()==0) 
 	{
-// 		cout << "degree<0" << endl;
 		return false;
 	}
-	if (degree()>=data_XY.size()) 
+	if (rank.size()>data_XY.size()) 
 	{
-// 		cout << "data_XY.size()=" << data_XY.size() <<endl;
 		return false;
 	}
 	
@@ -339,7 +345,7 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 	int i, n;
 	gsl_matrix *X, *cov;
 	gsl_vector *y, *w, *c;
-	const int p = degree()+1;
+	const int p = rank.size();
     
 	n = data_XY.size();
     

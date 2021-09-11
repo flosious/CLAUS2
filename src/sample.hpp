@@ -56,7 +56,7 @@ public:
 		///maybe loaded from DB if not set by ctor
 		///isotope mapping to its absolute concentration in amount of atoms or mole
 		/// OR relative concentration in at%; enforcing always 100at% within a matrix
-		void substance_amount_to_relative();
+		void substance_amount_to_relative(vector<isotope_t>& isotopes);
 		static const int logger_verbosity_offset = 11;
 	public:
 		matrix_t();
@@ -71,7 +71,13 @@ public:
 		*/
 		matrix_t(const vector<string> elements_or_isotopes_s);
 		matrix_t(const string matrix_elements_s);
-		vector<isotope_t> isotopes;
+		matrix_t(vector<isotope_t> isotopes);
+		
+		const vector<isotope_t> isotopes() const;
+		///points to the corresponding isotope of this cluster
+		isotope_t* isotope(isotope_t iso);
+		vector<element_t> elements;
+		
 		const bool is_set() const;
 		const string to_string() const;
 		///RELATIVE! in at%

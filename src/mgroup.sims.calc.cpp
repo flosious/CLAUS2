@@ -194,7 +194,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SR_c::from_implant_max(bool
 // 		}
 // 		else
 		auto C = M->calc();
-		C.SR.from_implant_max();	
+		C.SR.from_implant_max();
 	}
 	return calc;
 }
@@ -431,82 +431,6 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(boo
 // 			else
 			C.concentration = M->calc().concentration.from_SF(C);
 		}
-	}
-	return calc;
-}
-
-/*************************/
-/*****   matrix_c *******/
-/*************************/
-
-mgroups_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
-{
-}
-
-const map<cluster_t*,isotope_t*> mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_iso()
-{
-	map<cluster_t*,isotope_t*> matrix_C_to_I;
-	for (auto& M : measurements)
-	{
-		if (!M->sample->matrix().is_set()) continue;
-		if (!M->matrix_clusters().intensity_sum().is_set()) continue;
-		for (int i=0;i<M->sample->matrix().isotopes.size();i++)
-		{
-			cluster_t* C = M->matrix_clusters().cluster(M->sample->matrix().isotopes.at(i));
-			if (C == nullptr) 
-			{
-				logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_iso()","M->matrix_clusters().cluster("+M->sample->matrix().isotopes.at(i).to_string()+")==nullptr","doing nothing");
-				continue;
-			}
-			if (!C->intensity.is_set())
-			{
-				logger::warning(4,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_iso()",C->to_string()+" intensity not set","doing nothing");
-				continue;
-			}
-// 			isotope_t* I = &((.isotopes).at(i));
-			matrix_C_to_I.insert(pair<cluster_t*,isotope_t*> (C,&M->sample->matrix().isotopes.at(i)));
-// 			C->concentration = concentration_t( (C->intensity / C->intensity.median() ) * mat_iso.substance_amount);
-// 			logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::median_const_from_db()","mat_iso.substance_amount="+mat_iso.substance_amount.to_string(),"C->concentration=" + C->concentration.to_string());
-		}
-	}
-	return matrix_C_to_I;
-}
-
-mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::median_const_from_db(bool overwrite)
-{
-	for (auto& mat_C_to_I : matrix_cluster_to_iso())
-	{
-		cluster_t* C = mat_C_to_I.first;
-		isotope_t* mat_iso = mat_C_to_I.second;
-		if (!C->concentration.is_set() || overwrite)
-			C->concentration = concentration_t( (C->intensity / C->intensity.median() ) * mat_iso->substance_amount);
-	}	
-	return calc;
-// 	return const_from_db(quantity_t::mean);
-}
-
-mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::const_from_db(quantity_t (*operation) (quantity_t), bool overwrite)
-{
-	for (auto& mat_C_to_I : matrix_cluster_to_iso())
-	{
-		cluster_t* C = mat_C_to_I.first;
-		isotope_t* mat_iso = mat_C_to_I.second;
-		if (!C->concentration.is_set() || overwrite)
-			C->concentration = concentration_t( (C->intensity / operation(C->intensity) ) * mat_iso->substance_amount);
-// 			C->concentration = concentration_t( (C->intensity / C->intensity.operation() ) * mat_iso->substance_amount);
-	}	
-	return calc;
-}
-
-/*
- * this function interpolates each matrix cluster from gives matrix isotopes from reference samples (database)
- * rank = {0,1,0} means linear RSFs without offset (0*c0*x^0 + 1*c1*x^1 + 0*c2*x^2)
- */ 
-mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::interpolate(vector<int> rank)
-{
-	for (auto& mc : MG.matrix_clusters())
-	{
-		//get the reference_intensities of all measurements and their known matrix_concentration for this isotope
 	}
 	return calc;
 }

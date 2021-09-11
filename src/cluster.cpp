@@ -61,6 +61,7 @@ cluster_t::cluster_t(const vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s
 
 string cluster_t::to_string(const string del) const
 {
+	
 	const int max = isotopes.size();
 	if (max==0) return "";
 	stringstream out;
@@ -69,6 +70,7 @@ string cluster_t::to_string(const string del) const
 		out << isotopes.at(i).to_string();
 		if (i<max-1) out << del;
 	}
+	
 	return out.str();
 }
 

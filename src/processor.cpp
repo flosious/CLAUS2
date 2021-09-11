@@ -28,6 +28,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	cout << "processor start" << endl;
 	
 	/*tests*/
+
 	/*******/
 	
 	filenames=args_p;
@@ -61,85 +62,52 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	for (auto& MG : dsims.mgroups())
 	{	
-		auto MG_from_max = MG;
-		auto MG_from_dose = MG;
-		auto MG_from_max_Iref = MG;
-		MG_from_dose.calc().SRs.from_implant_max().SRs.copy_to_same_matrices().SDs.from_SR().SFs.from_implant_dose().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
-		MG_from_max.calc().SR_SF_from_implants_maxima().SRs.copy_to_same_matrices().SDs.from_SR().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
-		MG_from_max_Iref.calc().normalize_to_ref_intensity().SR_SF_from_implants_maxima().SRs.copy_to_same_matrices().SDs.from_SR().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
-		MG_from_max_Iref.export_origin_ascii();
-		for (auto& M : MG_from_max.measurements())
+		MG.calc().matrices.median_const_from_db().matrices.interpolate();
+// 		auto MG_from_max = MG;
+// 		auto MG_from_dose = MG;
+// 		auto MG_from_max_Iref = MG;
+// 		auto calcDose = MG_from_dose.calc();
+// 		calcDose.SRs.from_crater_depths();
+// 		calcDose.SRs.from_implant_max().SRs.copy_to_same_matrices().SDs.from_SR().SFs.from_implant_dose().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
+// 		MG_from_max.calc().SRs.from_crater_depths().SR_SF_from_implants_maxima().SRs.copy_to_same_matrices().SDs.from_SR().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
+// 		MG_from_max_Iref.calc().SRs.from_crater_depths().normalize_to_ref_intensity().SR_SF_from_implants_maxima().SRs.copy_to_same_matrices().SDs.from_SR().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
+// 		MG_from_max_Iref.export_origin_ascii();
+
+		for (auto& M : MG.measurements())
 		{
-			plot_t plot;
-			plot.Y1.range(1E16,1E21,true);
-			plot.Y2.range(1E16,1E21,true);
-			plot.Y3.range(1E16,1E21,true);
-			
-			auto* M_c = MG_from_dose.measurement(*M);
-			auto* M_d = MG_from_max_Iref.measurement(*M);
-			if (M_c==nullptr) continue;
-			if (M_d==nullptr) continue;
-			if (!M->crater.sputter_depth.is_set()) continue;
-			
-			for (auto& C : M->clusters)
-			{
-				if (!C.concentration.is_set()) continue;
-				auto* C_c = M_c->cluster(C);
-				if (C_c == nullptr || !C_c->concentration.is_set()) continue;
-				auto* C_d = M_d->cluster(C);
-				if (C_d == nullptr ) continue;
-				if ( !C_d->concentration.is_set()) continue;
-				
-				plot.Y1.add_curve(M->crater.sputter_depth,C.concentration,C.to_string()+"_from_Cmax");
-				plot.Y2.add_curve(M_c->crater.sputter_depth,C_c->concentration,C_c->to_string()+"_from_Dose");
-				plot.Y3.add_curve(M_d->crater.sputter_depth,C_d->concentration,C_d->to_string()+"_from_Cmax_Iref");
-				
-				
-// 				fit_functions::polynom_t p({0,0,0,0,0,0,0,0,0,0,0},{0,1,1,1,1,1,1,1,1,1,1});
-// 				plot_t plotC;
-// 				plotC.Y1.range(1,1E6,true);
-// 				plotC.Y2.range(1,1E6,true);
-// 				print(p.fit_parameters());
-// 				p.fit(C.intensity.data);
-// 				print(p.fit_parameters());
-// 				plotC.Y1.add_curve(M->crater.sputter_time, intensity_t(C.intensity.data));
-// 				plotC.Y2.add_curve(M->crater.sputter_time, intensity_t(p.fitted_y_data()));
-// 				plotC.to_screen("",0);
-// 				exit(1);
-	
-// 				auto dose = M->calc().implant(C).dose();
-// 				auto dose_c = M_c->calc().implant(*C_c).dose();
-// 				auto dose_d = M_d->calc().implant(*C_d).dose();
-// 				
-// 				cout << endl;
-// 				cout << "from_Cmax: " << C.RSF.to_string_detailed() << "\t" << dose.to_string() << endl;
-// 				cout << "from_Dose: " << C_c->RSF.to_string_detailed() << "\t" << dose_c.to_string() << endl;
-// 				cout << "from_Cmax_Iref: " << C_d->RSF.to_string_detailed() << "\t" << dose_d.to_string() << endl;
-			}
-			
-			plot.to_screen("",0);
-// 			M->plot_now(0);
-		}
-		
-		//get matrices
-		//get/calculate RSF from references
-		//set/calculate matrix
-		//set RSFs depending on matrix
-		
-// 		for (auto& M : MG.measurements())
-// 		{
+			M->plot_now(0);
+// 			plot_t plot;
+// 			plot.Y1.range(1E16,1E21,true);
+// 			plot.Y2.range(1E16,1E21,true);
+// 			plot.Y3.range(1E16,1E21,true);
+// 			
+// 			auto* M_c = MG_from_dose.measurement(*M);
+// 			auto* M_d = MG_from_max_Iref.measurement(*M);
+// 			if (M_c==nullptr) continue;
+// 			if (M_d==nullptr) continue;
+// 			if (!M->crater.sputter_depth.is_set()) continue;
+// 			
 // 			for (auto& C : M->clusters)
 // 			{
-// 				if (C.RSF.is_set())
-// 				{
-// 					cout << endl << "C.SF=" << C.SF.to_string() << endl;
-// 					cout << "C.RSF=" << C.RSF.to_string() << endl;
-// 					cout << "C.concentration=" << C.concentration.to_string() << endl;
-// 				}
+// 				//skip matrix clusters
+// 				auto MC = MG.matrix_clusters();
+// 				if (tools::find_in_V(C,MC)!=nullptr) continue;
+// 				
+// 				if (!C.concentration.is_set()) continue;
+// 				auto* C_c = M_c->cluster(C);
+// 				if (C_c == nullptr || !C_c->concentration.is_set()) continue;
+// 				auto* C_d = M_d->cluster(C);
+// 				if (C_d == nullptr ) continue;
+// 				if ( !C_d->concentration.is_set()) continue;
+// 				
+// 				plot.Y1.add_curve(M->crater.sputter_depth,C.concentration,C.to_string()+"_from_Cmax");
+// 				plot.Y2.add_curve(M_c->crater.sputter_depth,C_c->concentration,C_c->to_string()+"_from_Dose");
+// 				plot.Y3.add_curve(M_d->crater.sputter_depth,C_d->concentration,C_d->to_string()+"_from_Cmax_Iref");
+// 				
 // 			}
-// 			M->plot_now(0);
-// // 			getchar(); // wait for press enter
-// 		}
+// 			
+// 			plot.to_screen("",0);
+		}
 	}
 	
 	if (!logger::instant_print_messages)
@@ -147,6 +115,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+	
 }
 
 /*****************************/

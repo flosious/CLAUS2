@@ -30,6 +30,15 @@
 // 	{debug,"DEBUG"},
 // };
 
+// logger::message_t::message_t(string mtype,std::string class_func_name, string variable_condition, bool variable_contents_b) : 
+// 			 mtype(mtype), class_func_name(class_func_name),  variable_condition(variable_condition)
+// {
+// 	if (variable_contents_b)
+// 		variable_contents="true";
+// 	else
+// 		variable_contents="false";
+// }
+
 const string logger::message_t::to_string() const
 {
 	stringstream out;
@@ -95,6 +104,19 @@ void logger::debug(unsigned int verbosity, string class_func_name, string variab
 	if (verbosity_level>=verbosity)
 	{
 		messages.push_back({"debug",class_func_name,variable_condition,variable_contents,solution});
+		if (instant_print_messages) cout << messages.back().to_string() << endl;
+	}
+}
+
+void logger::debug(unsigned int verbosity, string class_func_name, string variable_condition, bool variable_contents)
+{
+	//just record if verbosity is high enough
+	if (verbosity_level>=verbosity)
+	{
+		if (variable_contents)
+			messages.push_back({"debug",class_func_name,variable_condition,"true",""});
+		else 
+			messages.push_back({"debug",class_func_name,variable_condition,"false",""});
 		if (instant_print_messages) cout << messages.back().to_string() << endl;
 	}
 }

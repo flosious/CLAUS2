@@ -71,15 +71,11 @@ private:
 		message_t(string mtype,std::string class_func_name, string variable_condition, string variable_contents, string solution) : 
 			 mtype(mtype), class_func_name(class_func_name),  variable_condition(variable_condition), variable_contents(variable_contents), solution(solution)
 							  {};
+// 		message_t(string mtype,std::string class_func_name, string variable_condition, bool variable_contents_b);
 		const string to_string() const;
 	};
 public:
 	static const bool instant_print_messages=true;
-	///strong type: mtype should contain a strong map fatal->"fatal", error->"error", ...
-// 	struct mtype {string type;};
-// 	static const mtype fatal{"fatal"};
-	
-	
 // 	static bool log_debug;
 	//default is 0 -> no record; increase for more verbosity
 	static int verbosity_level;
@@ -94,6 +90,7 @@ public:
 	static void info(unsigned int verbosity, string class_func_name, string variable_condition, string variable_contents="", string solution="");
 	///adds a debug message to the messages
 	static void debug(unsigned int verbosity, string class_func_name, string variable_condition, string variable_contents="", string solution="");
+	static void debug(unsigned int verbosity, string class_func_name, string variable_condition, bool variable_contents);
 	static void to_screen();
 };
 

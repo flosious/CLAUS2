@@ -66,12 +66,20 @@ using namespace std;
 class tools{
 private:  
 public:
-	
 	template<typename O>
 	static string to_string(O object)
 	{
 		stringstream out;
 		out << object;
+		return out.str();
+	}
+	
+	template<class In1, class In2>
+	static string to_string(map<In1,In2>& I1_to_I2)
+	{
+		stringstream out;
+		for (auto& i : I1_to_I2)
+			out << to_string(i.first) << "->" << to_string(i.second) << ", ";
 		return out.str();
 	}
 	///returns the pointer to key in V<keys>
@@ -183,12 +191,21 @@ public:
 	{
 	public:
 		template<class In>
-		static vector<string> to_string(In& I)
+		static string to_string(const vector<In>& I)
 		{
-			vector<string> O;
-			to_string(begin(I),end(I),back_inserter(O));
-			return O;
+			stringstream out;
+			for (auto& i : I)
+				out << tools::to_string(i) << ", ";
+			return out.str();
 		}
+// 		template<class In>
+// 		static vector<string> to_string(In& I)
+// 		{
+// 			vector<string> O;
+// 			to_string(begin(I),end(I),back_inserter(O));
+// 			return O;
+// 		}
+		
 		/*from https://stackoverflow.com/questions/25371873/convert-vectordouble-to-vectorstring-elegant-way*/
 		template<class IteratorIn, class IteratorOut>
 		static void to_string(IteratorIn first, IteratorIn last, IteratorOut out)
@@ -198,16 +215,39 @@ public:
 		}
 		///returns the pointer to key in keys_list
 		template <typename F>
-		static F* find_in_vec(F& f,vector<F>& keys)
+		static F* find_in_vec(F& key,vector<F>& keys)
 		{
-			return find_in_V(f,keys);
-// 			for (auto& key : keys)
-// 			{
-// 				if (key==f)
-// 					return &key;
-// 			}
-// 			return nullptr;
+			return find_in_V(key,keys);
 		}
+		template <typename F>
+		static vector<F> erase(const vector<F>& erase_from, vector<unsigned int>& positions_to_erase)
+		{
+			if (erase_from.size()==0) return {};
+			if (positions_to_erase.size()==0) return erase_from;
+			if (erase_from.size() == positions_to_erase.size()) return {};
+			sort(positions_to_erase.begin(),positions_to_erase.end());
+			vector<F> result(erase_from.size()-positions_to_erase.size());
+			unsigned int result_idx = 0;
+			unsigned int pos_start = 0;
+			unsigned int pos_stop = erase_from.size();
+			for (auto& pos : positions_to_erase)
+			{
+				for (int i=pos_start;i<pos;i++)
+				{
+					result.at(result_idx) = erase_from.at(i);
+					result_idx++;
+				}
+				pos_start = pos + 1;
+			}
+			for (int i = pos_start;i<pos_stop;i++)
+			{
+				result.at(result_idx) = erase_from.at(i);
+				result_idx++;
+			}
+				
+			return result;
+		}
+		
 // 		template <typename T> static vector<T> add(vector<T> *start,/*vector*/<T> *ende);
 		static void add(vector<string> *result_vec,vector<string> adder);
 		static void add(vector<double> *result_vec,vector<double> adder);

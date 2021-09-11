@@ -56,6 +56,8 @@ public:
 // 	const map<double,double> to_Y(const quantity_t& Y) const;
 	vector<double> data;
 // 	const vector<double> data() const;
+	bool is_nan() const;
+	bool is_inf() const;
 	bool is_set() const;
 	bool is_scalar() const;
 	bool is_vector() const;

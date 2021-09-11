@@ -151,7 +151,7 @@ vector<vector<vector<string> > >& files_::file_t::contents_t::raw_header_tensor(
 	
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
-		logger::debug(3,"files_::file_t::contents_t::raw_header_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no header");
+		logger::debug(33,"files_::file_t::contents_t::raw_header_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no header");
 	}
 	return raw_header_tensor_p;
 }
@@ -162,7 +162,7 @@ vector<vector<vector<string> > >& files_::file_t::contents_t::raw_data_tensor()
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
 // 		logger::debug("files_::file_t::contents_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
-		logger::debug(3,"files_::file_t::contents_t::raw_data_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no data");
+		logger::debug(33,"files_::file_t::contents_t::raw_data_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no data");
 // 		return {};
 	}
 	return raw_data_tensor_p;

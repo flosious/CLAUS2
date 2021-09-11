@@ -101,6 +101,20 @@ concentration_t measurements_::sims_t::matrix_clusters_c::concentration_sum() co
 	return concentration;
 }
 
+const vector<cluster_t> measurements_::sims_t::matrix_clusters_c::cluster_names()
+{
+	if (clusters.size()==0)
+		return {};
+	vector<cluster_t> c_names(clusters.size());
+	int i = 0;
+	for (auto& C : clusters)
+	{
+		c_names.at(i) = C->isotopes;
+		i++;
+	}
+	return c_names;
+}
+
 const std::vector< isotope_t > measurements_::sims_t::matrix_clusters_c::isotopes() const
 {
 	set<isotope_t> isotopes;
@@ -117,10 +131,10 @@ cluster_t * measurements_::sims_t::matrix_clusters_c::cluster(const isotope_t is
 {
 	for (auto& C: clusters)
 	{
-		logger::debug(11,"measurements_::sims_t::matrix_clusters_c::cluster("+iso.to_string()+")","cluster=" + C->to_string());
+		logger::debug(12,"measurements_::sims_t::matrix_clusters_c::cluster("+iso.to_string()+")","cluster=" + C->to_string());
 		for (auto& I : C->isotopes)
 		{
-			logger::debug(11,"measurements_::sims_t::matrix_clusters_c::cluster("+iso.to_string()+")","cluster->isotope="+I.to_string());
+			logger::debug(12,"measurements_::sims_t::matrix_clusters_c::cluster("+iso.to_string()+")","cluster->isotope="+I.to_string());
 			if (I==iso)
 				return C;
 		}
@@ -156,13 +170,15 @@ measurements_::sims_t measurements_::sims_t::filter_t::impulses()
 // 	return matrix_clusters_c(clusters,sample->matrix().isotopes);
 // }
 
-measurements_::sims_t::matrix_clusters_c measurements_::sims_t::matrix_clusters()
+measurements_::sims_t::matrix_clusters_c measurements_::sims_t::matrix_clusters(const vector<isotope_t> matrix_isotopes)
 {
 	///if no isotopes are known, look in database
+// 	if (matrix_isotopes.size()==0)
+// 		matrix_isotopes = sample->matrix().isotopes();
 	if (matrix_isotopes.size()==0)
-		matrix_isotopes = sample->matrix().isotopes;
-	
-	return matrix_clusters_c(clusters,matrix_isotopes);
+		return matrix_clusters_c(clusters,sample->matrix().isotopes());
+	else
+		return matrix_clusters_c(clusters,matrix_isotopes);
 }
 
 measurements_::sims_t::filter_t measurements_::sims_t::filter() const
@@ -263,6 +279,14 @@ string measurements_::sims_t::to_string(const string del)
 	return ss.str();
 }
 
+const string measurements_::sims_t::to_string_short(const string del) const
+{
+	logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
+	stringstream ss;
+	ss << measurement_t::to_string();
+	return ss.str();
+}
+
 void measurements_::sims_t::plot_now(double sleep_sec)
 {
 	plot_t plot;
@@ -294,7 +318,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 		if (C.intensity.is_set())
 		{
 			plot.Y1.add_curve(X,C.intensity,C.to_string());
-			if (sample->implant(C.corresponding_isotope(sample->matrix().isotopes)).dose.is_set())
+			if (sample->implant(C.corresponding_isotope(sample->matrix().isotopes())).dose.is_set())
 			{
 				// unit is not same as unit(x)
 				quantity_t min = calc().implant(C).minimum_starting_position().change_unit(X.unit());
@@ -461,7 +485,7 @@ isotope_t measurements_::sims_t::isotope_corresponding_to_cluster(const cluster_
 // 		return {};
 // 	}
 // 	return *isos.begin();
-	return cluster.corresponding_isotope(sample->matrix().isotopes);
+	return cluster.corresponding_isotope(sample->matrix().isotopes());
 }
 
 // const vector<isotope_t> measurements_::sims_t::reference_isotopes() const
@@ -539,6 +563,14 @@ bool measurements_::sims_t::add(measurements_::sims_t& adder)
 }
 
 cluster_t* measurements_::sims_t::cluster(const cluster_t& cluster_s)
+{
+	for (auto& C : clusters)
+		if (cluster_s==C)
+			return &C;
+	return nullptr;
+}
+
+const cluster_t* measurements_::sims_t::cluster(const cluster_t& cluster_s) const
 {
 	for (auto& C : clusters)
 		if (cluster_s==C)

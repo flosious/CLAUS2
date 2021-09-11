@@ -230,7 +230,7 @@ public:
 			private:
 				sims_t& M;
 				calc_t& calc;
-				const std::map< cluster_t*, isotope_t* > matrix_cluster_to_iso();
+// 				const std::map< cluster_t*, isotope_t* > matrix_cluster_to_iso();
 // 				calc_t& const_from_db(quantity_t (*operation) (quantity_t), bool overwrite=false);
 			public:
 				///calculation of matrix concentrations
@@ -312,6 +312,7 @@ public:
 		public:
 			cluster_t* cluster(const isotope_t iso);
 			vector<cluster_t*> clusters;
+			const vector<cluster_t> cluster_names();
 			const vector<isotope_t> isotopes() const;
 			intensity_t intensity_sum() const;
 			concentration_t concentration_sum() const;
@@ -327,6 +328,7 @@ public:
 			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
 		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
 		string to_string(const string del = ", ");
+		const string to_string_short(const string del = ", ") const;
 		///returns the measurement without surface artefacts
 		filter_t filter() const;
 
@@ -334,8 +336,8 @@ public:
 		set<cluster_t*> clusters_corresponding_to_isotope(const isotope_t& isotope);
 		isotope_t isotope_corresponding_to_cluster(const cluster_t& cluster);
 		///get or set matrix_isotopes
-		matrix_clusters_c matrix_clusters();
-		vector<isotope_t> matrix_isotopes;
+		matrix_clusters_c matrix_clusters(const vector<isotope_t> matrix_isotopes={});
+// 		vector<isotope_t> matrix_isotopes;
 		
 		//creates instantly a plot
 		void plot_now(double sleep_sec=1);
@@ -352,6 +354,7 @@ public:
 		vector<cluster_t> clusters;
 		///returns pointer to the matching cluster within this measurement
 		cluster_t* cluster(const cluster_t& cluster_s);
+		const cluster_t* cluster(const cluster_t& cluster_s) const;
 	};
 	
 	class dsims_t : public sims_t

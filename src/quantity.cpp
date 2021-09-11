@@ -655,6 +655,22 @@ quantity_t quantity_t::min() const
 	return min;
 }
 
+bool quantity_t::is_nan() const
+{
+	for (auto& d : data)
+		if (isnan(d))
+			return true;
+	return false;
+}
+
+bool quantity_t::is_inf() const
+{
+	for (auto& d : data)
+		if (isinf(d))
+			return true;
+	return false;
+}
+
 bool quantity_t::is_set() const
 {
 	if (data.size()==0) return false;
@@ -848,7 +864,7 @@ quantity_t quantity_t::change_unit(unit_t target_unit) const
 	double factor = unit().multiplier / target_unit.multiplier;
 // 	for (int i=0;i<data.size();i++)
 // 		copy.data[i] *= factor ;
-	logger::debug(11,"quantity_t::change_unit()","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
+	logger::debug(13,"quantity_t::change_unit()","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
 	return quantity_t{*this * factor,target_unit};
 }
 
@@ -1021,7 +1037,10 @@ void quantity_t::operator<<(quantity_t obj)
 		return;
 	}
 	if (unit().base_units_exponents!=obj.unit().base_units_exponents)
+	{
+		logger::error("quantity_t::operator<<()","base units are different: " + unit().base_units_exponents.to_string() + " != " + obj.unit().base_units_exponents.to_string());
 		return;
+	}
 	quantity_t adder = obj.change_unit(unit());
 	tools::vec::add(&data,adder.data);
 }

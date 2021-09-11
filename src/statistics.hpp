@@ -175,6 +175,9 @@ public:
 	static double integrate(map<double,double>& data_XY, unsigned int start_idx=0, unsigned int stop_idx=0) ;
 	
 	static map<double, double> change_X_resolution(const map<double, double>& data_XY,const double new_resolution);
+	
+	static unsigned int factorial(const unsigned int& fac);
+	static vector<unsigned int> factorial(const vector<unsigned int>& fac);
 };
 
 #endif // STATISTICS_HPP

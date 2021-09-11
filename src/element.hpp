@@ -43,16 +43,12 @@ private:
 public:
 	element_t();
 	element_t(string symbol_s, double abs_amount=1, bool use_naturale_abundance=true);
-	element_t(vector<isotope_t> isotopes_s, double abs_amount=1);
-// 	element_t(const isotope_t& isotope_s, double amount=1);
-// 	const vector<isotope_t>* isotopes() const;
+	element_t(vector<isotope_t> isotopes_s);
+
 	vector<isotope_t> isotopes;
-	
 	substance_amount_t substance_amount;
 	
-// 	const double abundance() const;
 	const mass_t mass();
-// 	const string symbol();
 	string symbol;
 	const string to_string() const;
 	const int protons();

@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2020 Florian Bärwolf
+	Copyright (C) 2020-2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -15,6 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+#pragma once
 
 #ifndef MEASUREMENT_GROUP_T_HPP
 #define MEASUREMENT_GROUP_T_HPP
@@ -32,6 +34,7 @@
 // #include "sample.hpp"
 #include "definitions.hpp"
 #include "measurement.hpp"
+#include "fit_functions.hpp"
 
 using namespace std;
 
@@ -103,6 +106,8 @@ public:
 				calc_t& from_ref_fit(bool overwrite = false);
 				///sets SR for known matrices
 				calc_t& copy_to_same_matrices(bool overwrite = false);
+				///uses SR from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24
+				calc_t& interpolate_from_known_matrices(vector<unsigned int> rank={1,1,1}, bool overwrite = false);
 			};
 			///sputter_depth
 			class SD_c
@@ -151,9 +156,11 @@ public:
 				calc_t& from_SF_trimmed_mean_ref(bool overwrite = false);
 				calc_t& from_SF_pbp_ref(bool overwrite = false);
 				calc_t& from_SF_median_ref(bool overwrite = false);
-				calc_t& polynom_interpolation_from_matrix(bool overwrite = false, const int max_rank=2);
+// 				calc_t& polynom_interpolation_from_matrix(bool overwrite = false, const int max_rank=2);
 				///sets RSF for known matrices
-				mgroups_::sims_t::calc_t& copy_to_same_matrices(bool overwrite=false);
+				calc_t& copy_to_same_matrices(bool overwrite=false);
+				///uses SR from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24
+				calc_t& interpolate_from_known_matrices(vector<unsigned int> rank={1,1,1}, bool overwrite = false);
 			};
 			class concentration_c
 			{
@@ -173,32 +180,94 @@ public:
 			class matrix_c
 			{
 			private: 
-				/*fits a polynom of rank to known matrices and inter/extrapolates unknown matrices contents
-				 * uses jiangs protocol,that means the general RSF definition: RSF_C1_C2  * (C1) / (C2) = [Iso(C1)] / [Iso(C2)]
-				 * here () === Intensity() and [] === Concentration()
+				///calculates the ratios of intensities of 2 (matrix)clusters and their corresponding elemental substance_amount
+				class Crel_to_Irel_c
+				{
+				protected:
+					Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc);
+					calc_t& calc;
+					///store unit and name
+					quantity_t Crel_template;
+// 					matrix_c& matrix_c_ref;
+				public:
+// 					Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc, matrix_c& matrix_c_ref);
+					
+					const cluster_t zaehler;
+					const cluster_t nenner;
+					///supporting points of all known intensities and concentrations ratios for the clusters zaehler and nenner
+					const pair<quantity_t,quantity_t> known_Crels_from_Clusters_to_Irels();
+					///supporting points of all known intensities and concentrations ratios for the clusters zaehler and nenner
+					const pair<quantity_t,quantity_t> known_Crels_from_sample_matrix_to_Irels_truncated_median();
+					///returns the interpolated value belonging to Irel, based on supporting points of all known matrices within the MG; using Crel_template
+// 					quantity_t Crel(const quantity_t& Irel);
+					///the polynomial fitting routine
+// 					fit_functions::polynom_t polynom;
+					///fits the polynom using known_Crels_from_sample_matrix_to_Irels_truncated_median
+// 					bool execute_fit_polynom();
+					/// (zaehler) / (nenner)
+					const intensity_t Irel(const measurements_::sims_t& M) const;
+				};
+				
+				/* 
+				 *  [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
 				 */
-				class polynom_t
+				class polynom_c
 				{
 				private:
-					const vector<int> rank;
-// 					const vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>>& mats_to_clusters;
-					///units are relative, dimensions are relative: this is a container of intensities and their corresponding concentrations of exactly 2 elements/clusters
-					const vector< pair< const intensity_t, const concentration_t> > relative_intensities_to_relative_concentration;
-					///interpolates relative_intensities_to_relative_concentration with rank
-					bool interpolate();
+					///interpolates [E_i][E_j] = POLYNOM( (E_i)/(E_j) )
+					class polynom_fit_Crel_to_Irel_c : public Crel_to_Irel_c
+					{
+					private:
+						/// concentration with "1" as unit
+						static const concentration_t Crel_template;
+					public:
+						polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
+						///the polynomial fitting routine
+						fit_functions::polynom_t polynom;
+						///fits the polynom using known_Crels_from_sample_matrix_to_Irels_truncated_median
+						bool execute_fit_polynom();
+						///returns Crel using Crel_template from Irel polynomfit
+						concentration_t Crel(measurements_::sims_t& M) const;
+					};
+					///for one E_j === matrix_cluster : [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
+					class matrix_isotope_concentration_c
+					{
+					private:
+						calc_t& calc;
+						///creates the constant vector of polynoms of Crel to Irel and already fits them
+						const vector<polynom_fit_Crel_to_Irel_c> polynom_fits_Crels_to_Irels_f(vector<unsigned int> rank, vector<double> fit_start_parameters) const;
+					public:
+						/*for one E_j: [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
+						 * generates Irels { (E_i)/(matrix_cluster) } from measurement pointer and saves the internal related polynoms
+						 * to polynom_fits_Crels_to_Irels
+						 */
+						matrix_isotope_concentration_c(const cluster_t& matrix_cluster, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
+						const cluster_t matrix_cluster;
+						const vector<polynom_fit_Crel_to_Irel_c> polynom_fits_Crels_to_Irels;
+						///calculates [matrix_cluster](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[matrix_cluster]))^-1 using polynom_fits_Crels_to_Irels
+						concentration_t concentration(measurements_::sims_t& M, const cluster_t& matrix_cluster) const;
+					};
+					calc_t& calc;
+					const vector<matrix_isotope_concentration_c> matrix_isotopes_concentrations_f(vector<double> fit_start_parameters);
 				public:
-					///fits a polynom of rank R to known matrices and inter/extrapolates unknown matrices contents
-					polynom_t(vector<int> rank = {0,1,0});
+					polynom_c(vector<unsigned int> rank, vector<double> fit_start_parameters, calc_t& calc);
+					const vector<unsigned int> rank;
+					///for ALL E_j === matrix_clusterS : [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
+					const vector<matrix_isotope_concentration_c> matrix_isotopes_concentrations;
+					///uses polynom_fits_Crels_to_Irels to calculate all matrix_clusters concentrations within the measurement M
+					bool concentration(measurements_::sims_t& M);
 				};
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
-				const std::map< cluster_t*, isotope_t* > matrix_cluster_to_iso();
+				
+				///checks whether all intensities of all matrix_clusters are set
+				bool intensities_are_set() const;
 			public:
 				///calculation of matrix concentrations
 				matrix_c(calc_t& calc);
 				///rank{0,1,0} -> 0*a0+1*a1*x+0*a2*x*x == 0*a0+1*a1*x =rank{0,1}
-				calc_t& interpolate(vector<int> rank = {0,1,0});
+				calc_t& interpolate(const vector<unsigned int> polynom_rank = {0,1}, bool overwrite = false);
 				
 				calc_t& pbp_const_from_db(bool overwrite = false);
 				calc_t& mean_const_from_db(bool overwrite = false);
@@ -244,20 +313,22 @@ public:
 		///known(set) matrices and their corresponding matrix_clusters; depricated, because there can be multiple corresponding clusters to one matrix isotope
 // 		const vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> sample_mats_to_mat_clusters();
 		sims_t(measurements_::sims_t& measurement);
-		///intersection of all matrix_clusters of all measurements within this group
 		virtual vector<measurements_::sims_t*> measurements();
 		virtual const msettings::sims_t* settings() const;
 		///listed RSF to coressponding cluster and matrix
 		RSF_t RSF(cluster_t cluster, sample_t::matrix_t matrix);
-		///all clusters referencing to matrices
-// 		vector<cluster_t> matrix_clusters();
-// 		vector<cluster_t*> matrix_clusters(measurements_::sims_t& M);
 		///all isotopes contained in all matrices in all samples
 		const vector<isotope_t> matrix_isotopes();
 		///all clusters contained in all matrices in all measurements
 		const vector<cluster_t> matrix_clusters();
+		///all isotopes corresponding to matrix_clusters
+		const vector<isotope_t> isotopes_corresponding_to_matrix_clusters();
+		///matrix_cluster of each measurement pointing to its sample matrix isotope
+		const std::map< cluster_t*, isotope_t* > matrix_cluster_to_matrix_iso();
 		///returs pointer to the matching measurement within this group
 		measurements_::sims_t* measurement(const measurements_::sims_t& M);
+		bool check_cluster_consistency();
+		bool check_matrix_cluster_consistency();
 	};
 
 	class dsims_t: public sims_t

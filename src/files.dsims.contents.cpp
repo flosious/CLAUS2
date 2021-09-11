@@ -185,18 +185,18 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 		col.data=tools::mat::str_vec_to_double_vec(col_data_string);
 		if (col.data.size()==0) continue;
 		columns_s.push_back(col);
-		logger::debug(11,"files_::dsims_t::contents_t::columns()",col.to_string());
+		logger::debug(13,"files_::dsims_t::contents_t::columns()",col.to_string());
 	}
 	
 	if (dimensions().size() != data_cols_lines.size())
 	{
 		logger::warning(3,"files_::dsims_t::contents_t::columns()","dimensions().size() != data_cols_lines.size()","bug in ckb_asc Cs+","fixed using last unit in line");
 		columns_s.back().unit = units().back();
-		logger::debug(6,"files_::dsims_t::contents_t::columns()","cols_per_element=",tools::to_string(cols_per_element));
-		logger::debug(6,"files_::dsims_t::contents_t::columns()","dimensions().size()=",tools::to_string(dimensions().size()));
-		logger::debug(6,"files_::dsims_t::contents_t::columns()","cluster_names().size()=",tools::to_string(cluster_names().size()));
-		logger::debug(6,"files_::dsims_t::contents_t::columns()","units().size()=",tools::to_string(units().size()));
-		logger::debug(6,"files_::dsims_t::contents_t::columns()","data_cols_lines.size()=",tools::to_string(data_cols_lines.size()));
+		logger::debug(12,"files_::dsims_t::contents_t::columns()","cols_per_element=",tools::to_string(cols_per_element));
+		logger::debug(12,"files_::dsims_t::contents_t::columns()","dimensions().size()=",tools::to_string(dimensions().size()));
+		logger::debug(12,"files_::dsims_t::contents_t::columns()","cluster_names().size()=",tools::to_string(cluster_names().size()));
+		logger::debug(12,"files_::dsims_t::contents_t::columns()","units().size()=",tools::to_string(units().size()));
+		logger::debug(12,"files_::dsims_t::contents_t::columns()","data_cols_lines.size()=",tools::to_string(data_cols_lines.size()));
 	}
 // 	cout << "START"<<endl;
 // 	print(cluster_names());

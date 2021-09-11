@@ -46,8 +46,23 @@ element_t::element_t(string symbol_s, double abs_amount, bool use_natural_abunda
 	}
 }
 
-element_t::element_t(std::vector< isotope_t > isotopes_s, double abs_amount) : isotopes(isotopes_s),substance_amount({abs_amount}),symbol(isotopes_s.at(0).symbol)
+element_t::element_t(std::vector< isotope_t > isotopes_s) : 
+													isotopes(isotopes_s),
+													symbol(isotopes_s.at(0).symbol)
 {
+	if (isotopes.size()==0) return;
+	substance_amount=isotopes.front().substance_amount;
+	auto start = (isotopes.begin());
+	start++;
+	for (auto I = start;I!=isotopes.end();I++)
+	{
+		if (!I->substance_amount.is_set())
+		{
+			substance_amount.clear();
+			break;
+		}
+		substance_amount += I->substance_amount;
+	}
 }
 
 const int element_t::protons()
@@ -76,25 +91,25 @@ const mass_t element_t::mass()
 bool element_t::operator==(const element_t& obj) const
 {
 	if (symbol!=obj.symbol) return false;
-	if (isotopes.size()!=obj.isotopes.size()) return false;
-	bool iso_same=false;
-
-	for (auto& iso:isotopes)
-	{
-		iso_same = false;
-		for (auto& iso_obj : obj.isotopes)
-		{
-			if (iso == iso_obj)
-			{
-				iso_same = true;
-				break;
-			}
-		}
-		if (!iso_same) 
-		{
-			return false;
-		}
-	}
+// 	if (isotopes.size()!=obj.isotopes.size()) return false;
+// 	bool iso_same=false;
+// 
+// 	for (auto& iso:isotopes)
+// 	{
+// 		iso_same = false;
+// 		for (auto& iso_obj : obj.isotopes)
+// 		{
+// 			if (iso == iso_obj)
+// 			{
+// 				iso_same = true;
+// 				break;
+// 			}
+// 		}
+// 		if (!iso_same) 
+// 		{
+// 			return false;
+// 		}
+// 	}
 	
 	return true;
 }
@@ -114,7 +129,7 @@ const string element_t::to_string() const
 {
 	stringstream out;
 	const int size = isotopes.size();
-	
+	out << substance_amount.to_string() << "\t";
 	if (size==0) return "";
 	for (int i=0;i<size;i++)
 	{
@@ -125,75 +140,12 @@ const string element_t::to_string() const
 	return out.str();
 }
 
-// vector<isotope_t> & element_t::isotopes
-// {
-// 	return isotopes;
-// }
 
 bool element_t::is_set()
 {
 	if (isotopes.size()>0) return true;
 	return false;
 }
-/*
-substance_amount_t& element_t::substance_amount()
-{
-	return substance_amount;
-}*/
-
-
-// const substance_amount_t & element_t::substance_amount() const
-// {
-// 	return substance_amount;
-// }
-// 
-
-
-// const vector<isotope_t> * element_t::isotopes const
-// {
-// 	if (isotopes.size()>0)
-// 		return &isotopes;
-// 	if (symbol!="")
-// 	{
-// 		vector<isotope_t> isos;
-// 		for (auto& iso : PSE.element(symbol)->isotopes)
-// 		{
-// 			isos.push_back({symbol,iso.nucleons,iso.abundance});
-// 		}
-// 		*this = element_t(isos);
-// 	}
-// 	return nullptr;
-// }
-
-
-// set<element_t> element_t::elements(vector<isotope_t>& isotopes)
-// {
-// 	set<element_t> elements;
-// 	set<string> symbols;
-// 	for (auto& iso : isotopes)
-// 		symbols.insert(iso.symbol);
-// 	
-// 	for (auto& symbol : symbols)
-// 	{
-// 		vector<isotope_t> isotopes_in_ele;
-// 		for (auto& iso : isotopes)
-// 		{
-// 			if (iso.symbol==symbol)
-// 				isotopes_in_ele.push_back(iso);
-// 		}
-// 		if (isotopes_in_ele.size()>0) elements.insert(isotopes_in_ele);
-// 	}
-// 	return elements;
-// }
-
-
-
-
-
-
-
-
-
 
 
 

@@ -33,7 +33,6 @@
 #include <gsl/gsl_minmax.h>
 #include <gsl/gsl_fit.h>
 
-
 using namespace std;
 
 class fit_functions
@@ -85,22 +84,27 @@ public:
 		bool fitted_p=false;
 		vector<double> Xdata;
 		vector<double> fit_parameters_s;
-		///rank of polynom: 0 means discard, and non-0 means use
-		const vector<unsigned int> rank;
+		
 	public:
 		///degree means rank
 		polynom_t(int degree);
-		polynom_t(vector<double> fit_parameters, const vector<unsigned int> rank);
-		polynom_t(vector<double> fit_parameters);
-		int degree();
+		polynom_t(const vector<unsigned int> rank, vector<double> fit_parameters);
+// 		polynom_t(vector<double> fit_parameters);
+// 		polynom_t(const vector<unsigned int> rank);
+		///rank of polynom: 0 means discard, and non-0 means use
+		const vector<unsigned int> rank;
+		int degree() const;
 		polynom_t derivative(unsigned int derive=1);
-		double chisq();
+		double chisq() const;
 		const vector<double>& fit_parameters();
+		///performs the actual fit
 		bool fit(map<double,double> data_XY);
+		///performs the actual fit
 		bool fit(vector<double> Ydata);
-		bool fitted();
+		///was data successfully fitted?
+		bool fitted() const;
 		string to_string(string prefix="");
-		vector<double> fitted_y_data(vector<double> x={});
+		vector<double> fitted_y_data(vector<double> x={}) const;
 	};
 	
 	///y=m*x

@@ -171,7 +171,7 @@ const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 	for (auto& M : measurements())
 	{
 		if (!M->sample->matrix().is_set()) continue;
-		vector<isotope_t> mat_isos=M->sample->matrix().isotopes;
+		vector<isotope_t> mat_isos=M->sample->matrix().isotopes();
 		isos.insert(mat_isos.begin(),mat_isos.end());
 	}
 	vector<isotope_t> isos_vec = {isos.begin(),isos.end()};
@@ -191,6 +191,15 @@ const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 	}
 	
 	return isos_vec;
+}
+
+const vector<isotope_t> mgroups_::sims_t::isotopes_corresponding_to_matrix_clusters()
+{
+	const auto matrix_isos = matrix_isotopes();
+	set<isotope_t> isos;
+	for (auto& MC : matrix_clusters())
+		isos.insert(MC.corresponding_isotope(matrix_isos));
+	return {isos.begin(),isos.end()};
 }
 
 const vector<cluster_t> mgroups_::sims_t::matrix_clusters()
@@ -215,8 +224,8 @@ bool mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()
 		return false;
 	}
 	for (auto& M : measurements())
-		if (M->sample->matrix().isotopes.size()==0)
-			M->sample->matrix().isotopes=mat_isos;
+		if (M->sample->matrix().elements.size()==0)
+			M->sample->matrix()=mat_isos;
 	return true;
 }
 
@@ -258,4 +267,82 @@ void mgroups_::sims_t::export_origin_ascii(string path, const string delimiter)
 {
 	for (auto& M : measurements())
 		M->export_origin_ascii(path+to_string_short(),delimiter);
+}
+
+bool mgroups_::sims_t::check_cluster_consistency()
+{
+	auto Ms = measurements();
+	if (Ms.size()==0)
+	{
+		logger::error("mgroups_::sims_t::check_cluster_consistency()","no measurements","returning false");
+		return false;
+	}
+	const auto& ref_clusters = clusters();
+	for (int i=0;i<Ms.size();i++)
+	{
+		auto M = Ms.at(i);
+		for (auto& Cref : ref_clusters)
+		{
+			if (tools::find_in_V(Cref,M->clusters)==nullptr)
+			{
+				logger::warning(3,"mgroups_::sims_t::check_cluster_consistency()","missing cluster " + Cref.to_string() +" in measurement " + M->to_string());
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool mgroups_::sims_t::check_matrix_cluster_consistency()
+{
+	auto Ms = measurements();
+	if (Ms.size()==0)
+	{
+		logger::error("mgroups_::sims_t::check_matrix_cluster_consistency()","no measurements","returning false");
+		return false;
+	}
+	const auto& ref_clusters = matrix_clusters();
+	for (int i=0;i<Ms.size();i++)
+	{
+		auto M = Ms.at(i);
+		for (auto& Cref : ref_clusters)
+		{
+			if (tools::find_in_V(Cref,M->matrix_clusters(matrix_isotopes()).cluster_names())==nullptr)
+			{
+				logger::error("mgroups_::sims_t::check_matrix_cluster_consistency()","missing matrix_cluster " + Cref.to_string() +" in measurement " + M->to_string());
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+const map<cluster_t*,isotope_t*> mgroups_::sims_t::matrix_cluster_to_matrix_iso()
+{
+	map<cluster_t*,isotope_t*> matrix_C_to_I;
+	for (auto& M : measurements())
+	{
+		if (!M->sample->matrix().is_set()) continue;
+		if (!M->matrix_clusters().intensity_sum().is_set()) continue;
+		for (int i=0;i<M->sample->matrix().isotopes().size();i++)
+		{
+			isotope_t iso = M->sample->matrix().isotopes().at(i);
+			cluster_t* C = M->matrix_clusters().cluster(iso);
+			if (C == nullptr) 
+			{
+				logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_matrix_iso()","M->matrix_clusters().cluster("+iso.to_string()+")==nullptr","doing nothing");
+				continue;
+			}
+			if (!C->intensity.is_set())
+			{
+				logger::warning(4,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_matrix_iso()",C->to_string()+" intensity not set","doing nothing");
+				continue;
+			}
+// 			isotope_t* I = &((.isotopes).at(i));
+			matrix_C_to_I.insert(pair<cluster_t*,isotope_t*> (C,M->sample->matrix().isotope(iso)));
+// 			C->concentration = concentration_t( (C->intensity / C->intensity.median() ) * mat_iso.substance_amount);
+// 			logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::median_const_from_db()","mat_iso.substance_amount="+mat_iso.substance_amount.to_string(),"C->concentration=" + C->concentration.to_string());
+		}
+	}
+	return matrix_C_to_I;
 }

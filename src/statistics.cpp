@@ -1862,4 +1862,11 @@ map<double, double> change_X_resolution(const map<double, double>& data_XY,const
 	return new_data_XY_map;
 }
 
-
+unsigned int statistics::factorial(const unsigned int& fac)
+{
+	if (fac==0) return 1;
+	unsigned int result = 1;
+	for (int i=1;i<=fac;i++)
+		result *= i;
+	return result;
+}

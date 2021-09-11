@@ -80,13 +80,17 @@ const mass_t isotope_t::mass() const
 const string isotope_t::to_string(const string del) const
 {
 	stringstream out;
+	
+// 	cout << endl << endl << "HERE 4 " << nucleons << endl;
 	out << nucleons << symbol;
+	
 // 	cout << "IN" << endl;
 // 	if (abundance.is_set())
 // 		out << ":" << abundance.data.at(0) << abundance.unit().to_string();
 	if (substance_amount.is_set() && substance_amount.data.at(0) != 1)
 		out << "" << substance_amount.data.at(0)/* << substance_amount.unit().to_string()*/;
 // 	cout << out.str() << endl;
+// 	cout << endl << endl << "HERE 5" << symbol << endl;
 	return out.str();
 }
 

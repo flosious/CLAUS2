@@ -299,6 +299,7 @@ unit_t::unit_t(string symbols)
 const string unit_t::to_string() const
 {
 	if (!is_set()) return "";
+	if (!base_units_exponents.is_set()) return "*"+tools::to_string(multiplier);
 	logger::debug(21,"unit_t::to_string()","base_units_exponents: "+ base_units_exponents.to_string(), "multiplier: " + tools::to_string(multiplier));
 	/*check SI*/
 	for (auto it=symbol_to_base_unit.begin();it!=symbol_to_base_unit.end();it++)
