@@ -85,6 +85,21 @@ const map<std::string, unit_t> unit_t::symbol_to_unit
 	{"w",{units::SI::second,60*60*24*7}}
 };
 
+bool unit_t::base_exponents_t::is_relative() const
+{
+	unsigned int sum = 0;
+	sum += abs(meters);
+	sum += abs(kilograms);
+	sum += abs(seconds);
+	sum += abs(amperes);
+	sum += abs(moles);
+	sum += abs(kelvins);
+	sum += abs(candelas);
+	if (sum==0)
+		return true;
+	return false;
+}
+
 bool unit_t::base_exponents_t::operator==(const unit_t::base_exponents_t& obj) const
 {
 	if (meters != obj.meters) return false;
@@ -94,7 +109,7 @@ bool unit_t::base_exponents_t::operator==(const unit_t::base_exponents_t& obj) c
 	if (moles != obj.moles) return false;
 	if (kelvins != obj.kelvins) return false;
 	if (candelas != obj.candelas) return false;
-	if ( (relative != obj.relative)) return false;
+	if ( (is_relative() != obj.is_relative())) return false;
 	return true;
 }
 
@@ -299,6 +314,16 @@ unit_t::unit_t(string symbols)
 // 		return symbol;
 // 	//fallback to any symbol
 // 	return to_string();
+// }
+
+// const string unit_t::to_string(const string output) const
+// {
+// 	if (is_set())
+// 	{
+// 		if (unit_t(output)==*this)
+// 			return output;
+// 	}
+// 	return "";
 // }
 
 const string unit_t::to_string() const

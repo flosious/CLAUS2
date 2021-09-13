@@ -71,6 +71,7 @@ public:
 		int kelvins;
 		int candelas;
 		bool relative=false;
+		bool is_relative() const;
 		const string to_string() const;
 		bool is_set() const;
 		bool operator==(const base_exponents_t& obj) const;
@@ -104,6 +105,8 @@ public:
 	bool is_set() const;
 	///return any matching symbol
 	const string to_string() const;
+	///forces the exact output string if unit_t is same
+// 	const string to_string(const string output) const;
 	///return exact matching symbol, if not found -> fallback to any
 // 	const string to_string(string symbol) const;
 // 	double change_unit(unit_t new_unit);
@@ -177,7 +180,7 @@ namespace units
 		constexpr unit_t volt({2,1,-3,-1,0,0,0},1); // kg m m /s /s / A /s = V
 		constexpr unit_t atoms({0,0,0,0,1,0,0},1/6.02214076E23);
 		constexpr unit_t counts(atoms);
-		constexpr unit_t atom_percent({0,0,0,0,1,0,0,true},0.01);
+		constexpr unit_t atom_percent({0,0,0,0,0,0,0,true},0.01);
 		constexpr unit_t bar({-1,1,-2,0,0,0,0},1);
 		constexpr unit_t min({0,0,1,0,0,0,0},60);
 		constexpr unit_t atoms_per_ccm({-3,0,0,0,1,0,0},1E-6);

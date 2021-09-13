@@ -53,8 +53,9 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::median_const_from_
 		
 		if (!C->concentration.is_set() || overwrite)
 		{
-			C->concentration = concentration_t( (C->intensity / C->intensity.median() ) * mat_C_to_I.second).change_unit(units::derived::atom_percent);
-// 			C->concentration.change_unit(units::derived::atom_percent);
+			C->concentration = concentration_t( (C->intensity / C->intensity.median() ) * mat_C_to_I.second);
+			logger::debug(7,"mgroups_::sims_t::calc_t::matrix_c::median_const_from_db()",C->concentration.to_string());
+			C->concentration.change_unit(units::derived::atom_percent);
 		}
 	}	
 	return calc;
@@ -67,7 +68,10 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::const_from_db(quan
 		cluster_t* C = mat_C_to_I.first;
 // 		isotope_t* mat_iso = mat_C_to_I.second;
 		if (!C->concentration.is_set() || overwrite)
+		{
 			C->concentration = concentration_t( (C->intensity / operation(C->intensity) ) * mat_C_to_I.second).change_unit(units::derived::atom_percent);
+// 			logger::debug(7,"mgroups_::sims_t::calc_t::matrix_c::const_from_db()",C->concentration.to_string());
+		}
 	}	
 	return calc;
 }

@@ -328,7 +328,7 @@ public:
 		///all isotopes corresponding to matrix_clusters
 		const vector<isotope_t> isotopes_corresponding_to_matrix_clusters();
 		///matrix_cluster of each measurement pointing to its sample matrix isotope
-		const std::map< cluster_t*, isotope_t > matrix_cluster_to_matrix_iso();
+// 		const std::map< cluster_t*, isotope_t > matrix_cluster_to_matrix_iso();
 		const std::map< cluster_t*, abundance_t > matrix_cluster_to_matrix_iso_abundance();
 		///returs pointer to the matching measurement within this group
 		measurements_::sims_t* measurement(const measurements_::sims_t& M);
