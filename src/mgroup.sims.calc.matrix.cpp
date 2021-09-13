@@ -47,25 +47,27 @@ mgroups_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc) : MG(calc.MG), calc(c
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::median_const_from_db(bool overwrite)
 {
-	for (auto& mat_C_to_I : MG.matrix_cluster_to_matrix_iso())
+	for (auto& mat_C_to_I : MG.matrix_cluster_to_matrix_iso_abundance())
 	{
 		cluster_t* C = mat_C_to_I.first;
-		isotope_t* mat_iso = mat_C_to_I.second;
+		
 		if (!C->concentration.is_set() || overwrite)
-			C->concentration = concentration_t( (C->intensity / C->intensity.median() ) * mat_iso->substance_amount);
+		{
+			C->concentration = concentration_t( (C->intensity / C->intensity.median() ) * mat_C_to_I.second).change_unit(units::derived::atom_percent);
+// 			C->concentration.change_unit(units::derived::atom_percent);
+		}
 	}	
 	return calc;
-// 	return const_from_db(quantity_t::mean);
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::const_from_db(quantity_t (*operation) (quantity_t), bool overwrite)
 {
-	for (auto& mat_C_to_I : MG.matrix_cluster_to_matrix_iso())
+	for (auto& mat_C_to_I : MG.matrix_cluster_to_matrix_iso_abundance())
 	{
 		cluster_t* C = mat_C_to_I.first;
-		isotope_t* mat_iso = mat_C_to_I.second;
+// 		isotope_t* mat_iso = mat_C_to_I.second;
 		if (!C->concentration.is_set() || overwrite)
-			C->concentration = concentration_t( (C->intensity / operation(C->intensity) ) * mat_iso->substance_amount);
+			C->concentration = concentration_t( (C->intensity / operation(C->intensity) ) * mat_C_to_I.second).change_unit(units::derived::atom_percent);
 	}	
 	return calc;
 }
@@ -164,23 +166,29 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::interpolate(const 
 		logger::error("mgroups_::sims_t::calc_t::matrix_c::interpolate()","not all intensities are set","returning");
 		return calc;
 	}
+	vector<double> fit_start_parameters(polynom_rank.size(),0);
+	polynom_c polyfit(polynom_rank,fit_start_parameters,calc);
+	const auto matrix_isotopes = MG.matrix_isotopes();
+	for (auto& M : measurements)
+	{
+		///use results no matter what
+		if (overwrite)
+			polyfit.concentration(*M);
+		else
+		{
+			auto M_copy = *M;
+			if (!polyfit.concentration(M_copy)) continue;
+			for (auto& MC : M->matrix_clusters(matrix_isotopes).clusters)
+			{
+				if (!MC->concentration.is_set())
+					MC->concentration = M_copy.cluster(*MC)->concentration;
+			}
+		}
+	}
 	
-// 	logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::interpolate()","polynom_rank=",tools::vec::to_string(polynom_rank));
-// 	auto isotopes_2_Crels_from_Irels = isotopes_to_Crels_from_Irels(polynom_rank);
-// 	if (isotopes_2_Crels_from_Irels.size()<2 )
-// 	{
-// 		logger::warning(3,"mgroups_::sims_t::calc_t::matrix_c::interpolate()","isotopes_to_Crels_from_Irels() has less then 2 entries","returning");
-// 		return calc;
-// 	}
-// 	if (isotopes_2_Crels_from_Irels.size()<polynom_rank.size())
-// 	{
-// 		logger::warning(3,"mgroups_::sims_t::calc_t::matrix_c::interpolate()","isotopes_to_Crels_from_Irels() has less then size of rank entries","returning");
-// 		return calc;
-// 	}
+	//show me 
+	polyfit.plot_to_screen(0);
 	
-	//skip unsecessfull fits and
-// 	for ()
-		
 	return calc;
 }
 
@@ -227,6 +235,8 @@ mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::Crel_to_Irel_c(const cluster
 {
 }
 
+const concentration_t mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::Crel_template = concentration_t({},units::SI::one);
+
 const intensity_t mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::Irel(const measurements_::sims_t& M) const
 {
 	const cluster_t* Z = M.cluster(zaehler);
@@ -241,7 +251,7 @@ const intensity_t mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::Irel(const
 	return {(Z->intensity) / (N->intensity)};
 }
 
-const pair<quantity_t,quantity_t> mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median()
+const pair<quantity_t,quantity_t> mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median() const
 {
 	quantity_t Crel, Irel;
 	const auto matrix_isotopes = calc.MG.matrix_isotopes();
@@ -263,7 +273,7 @@ const pair<quantity_t,quantity_t> mgroups_::sims_t::calc_t::matrix_c::Crel_to_Ir
 		if (Nmat_iso == nullptr || !Nmat_iso->substance_amount.is_set()) 
 			continue; //skip division by 0
 		if (Zmat_iso == nullptr || !Zmat_iso->substance_amount.is_set())
-			Crel << (substance_amount_t({0})/substance_amount_t({1}));
+			Crel << (substance_amount_t({0})/substance_amount_t({1})); // this adds always a 0
 		else
 			Crel << (Zmat_iso->substance_amount / Nmat_iso->substance_amount);
 		
@@ -274,21 +284,20 @@ const pair<quantity_t,quantity_t> mgroups_::sims_t::calc_t::matrix_c::Crel_to_Ir
 		if (!Crel.is_set())
 			logger::warning(3,"mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median()","Crel is not set for " + Zmat_iso->to_string() +" / " + Nmat_iso->to_string(),"ignoring");
 	}
-	Crel_template = quantity_t(Crel.name(),{},Crel.unit());
+// 	Crel_template = quantity_t(Crel.name(),{},Crel.unit());
 	logger::debug(7,"mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median()","Z="+zaehler.to_string()+" N="+nenner.to_string(),"Irel=" + Irel.to_string(), "Crel=" + Crel.to_string());
 	logger::debug(7,"mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median()","Crel",Crel.to_string_detailed());
 	logger::debug(7,"mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median()","Irel",Irel.to_string_detailed());
 	
-	plot_t plot;
-	plot.Y2.log10_scale=false;
-	plot.Y1.add_curve(Irel,Crel,"");
-	plot.Y2.add_curve(Irel,Crel,"");
-	plot.to_screen(zaehler.to_string() +" / " + nenner.to_string(),0);
+// 	plot_t plot;
+// 	plot.Y2.log10_scale=false;
+// 	plot.Y2.add_points(Irel,Crel,"");
+// 	plot.to_screen(zaehler.to_string() +" / " + nenner.to_string(),0);
 	
 	return {Crel,Irel};
 }
 
-const pair<quantity_t,quantity_t> mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_Clusters_to_Irels()
+const pair<quantity_t,quantity_t> mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_Clusters_to_Irels() const
 {
 	quantity_t Crel, Irel;
 	for (auto& M : calc.measurements)
@@ -306,7 +315,7 @@ const pair<quantity_t,quantity_t> mgroups_::sims_t::calc_t::matrix_c::Crel_to_Ir
 		Irel << (Z->intensity / N->intensity);
 		Crel << (Z->concentration / N->concentration);
 	}
-	Crel_template = quantity_t(Crel.name(),{},Crel.unit());
+// 	Crel_template = quantity_t(Crel.name(),{},Crel.unit());
 	logger::debug(7,"mgroups_::sims_t::calc_t::matrix_c::Crel_to_Irel_c::known_Crels_from_Clusters_to_Irels()","Z="+zaehler.to_string()+" N="+nenner.to_string(),"Irel=" + Irel.to_string(), "Crel=" + Crel.to_string());
 	
 // 	plot_t plot;

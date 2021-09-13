@@ -62,7 +62,8 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	for (auto& MG : dsims.mgroups())
 	{	
-		MG.calc().matrices.median_const_from_db().matrices.interpolate();
+		MG.calc().matrices.median_const_from_db();
+// 		MG.calc().matrices.interpolate();
 // 		auto MG_from_max = MG;
 // 		auto MG_from_dose = MG;
 // 		auto MG_from_max_Iref = MG;

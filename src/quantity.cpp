@@ -745,11 +745,11 @@ quantity_t quantity_t::change_resolution(unsigned int new_data_size) const
 quantity_t quantity_t::change_resolution(quantity_t new_res) const
 {
 	if (!is_set() || !new_res.is_set()) return{};
-	if (name() != new_res.name())
-	{
-		logger::error("quantity_t::change_resolution()","name() != new_res.name()",name() + "!=" + new_res.name(),"returning empty");
-		return {};
-	}
+// 	if (name() != new_res.name())
+// 	{
+// 		logger::error("quantity_t::change_resolution()","name() != new_res.name()",name() + "!=" + new_res.name(),"returning empty");
+// 		return {};
+// 	}
 	if (new_res.data.size()!=1)
 		logger::debug(4,"quantity_t::change_resolution()","new_res.data.size()!=1",tools::to_string(new_res.data.size()));
 // 	new_res = new_res.change_unit(unit());
@@ -776,7 +776,7 @@ quantity_t quantity_t::resolution(double new_res) const
 	{
 		stringstream ss;
 		ss << "resolution(" << name()<<")";
-		return {ss.str(),{diff().mean().data},unit()};
+		return {ss.str(),{diff().absolute().mean().data},unit()};
 	}
 	if (new_res<0) return {};
 	if (data.size()<2) return {};
@@ -877,10 +877,10 @@ quantity_t quantity_t::invert() const
 	stringstream ss;
 	ss << "inv(" << name() << ")";
 	inv.name_p = ss.str();
-	ss.str("");
-	ss << "1/" << unit().to_string();
-	unit_t u(ss.str());
-	return {inv.name(),inv.data,u};
+// 	ss.str("");
+// 	ss << "1/" << unit().to_string();
+// 	unit_t u(ss.str());
+	return {inv.name(),inv.data, unit().invert()};
 }
 
 quantity_t quantity_t::remove_data_from_begin(unsigned int stop) const

@@ -186,18 +186,18 @@ public:
 				protected:
 					Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc);
 					calc_t& calc;
-					///store unit and name
-					quantity_t Crel_template;
+					/// concentration with "1" as unit
+					static const concentration_t Crel_template;
 // 					matrix_c& matrix_c_ref;
 				public:
 // 					Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc, matrix_c& matrix_c_ref);
 					
 					const cluster_t zaehler;
 					const cluster_t nenner;
+					///DO NOT USE! supporting points of all known intensities and concentrations ratios for the clusters zaehler and nenner
+					const pair<quantity_t,quantity_t> known_Crels_from_Clusters_to_Irels() const;
 					///supporting points of all known intensities and concentrations ratios for the clusters zaehler and nenner
-					const pair<quantity_t,quantity_t> known_Crels_from_Clusters_to_Irels();
-					///supporting points of all known intensities and concentrations ratios for the clusters zaehler and nenner
-					const pair<quantity_t,quantity_t> known_Crels_from_sample_matrix_to_Irels_truncated_median();
+					const pair<quantity_t,quantity_t> known_Crels_from_sample_matrix_to_Irels_truncated_median() const;
 					///returns the interpolated value belonging to Irel, based on supporting points of all known matrices within the MG; using Crel_template
 // 					quantity_t Crel(const quantity_t& Irel);
 					///the polynomial fitting routine
@@ -218,8 +218,7 @@ public:
 					class polynom_fit_Crel_to_Irel_c : public Crel_to_Irel_c
 					{
 					private:
-						/// concentration with "1" as unit
-						static const concentration_t Crel_template;
+						
 					public:
 						polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
 						///the polynomial fitting routine
@@ -228,6 +227,7 @@ public:
 						bool execute_fit_polynom();
 						///returns Crel using Crel_template from Irel polynomfit
 						concentration_t Crel(measurements_::sims_t& M) const;
+						void plot_to_screen(double sleep_sec=0) const;
 					};
 					///for one E_j === matrix_cluster : [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
 					class matrix_isotope_concentration_c
@@ -246,11 +246,15 @@ public:
 						const vector<polynom_fit_Crel_to_Irel_c> polynom_fits_Crels_to_Irels;
 						///calculates [matrix_cluster](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[matrix_cluster]))^-1 using polynom_fits_Crels_to_Irels
 						concentration_t concentration(measurements_::sims_t& M, const cluster_t& matrix_cluster) const;
+						///plots the polynoms
+						void plot_to_screen(double sleep_sec=0) const;
 					};
 					calc_t& calc;
 					const vector<matrix_isotope_concentration_c> matrix_isotopes_concentrations_f(vector<double> fit_start_parameters);
 				public:
 					polynom_c(vector<unsigned int> rank, vector<double> fit_start_parameters, calc_t& calc);
+					///plots the polynoms
+					void plot_to_screen(double sleep_sec=0) const;
 					const vector<unsigned int> rank;
 					///for ALL E_j === matrix_clusterS : [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
 					const vector<matrix_isotope_concentration_c> matrix_isotopes_concentrations;
@@ -324,7 +328,8 @@ public:
 		///all isotopes corresponding to matrix_clusters
 		const vector<isotope_t> isotopes_corresponding_to_matrix_clusters();
 		///matrix_cluster of each measurement pointing to its sample matrix isotope
-		const std::map< cluster_t*, isotope_t* > matrix_cluster_to_matrix_iso();
+		const std::map< cluster_t*, isotope_t > matrix_cluster_to_matrix_iso();
+		const std::map< cluster_t*, abundance_t > matrix_cluster_to_matrix_iso_abundance();
 		///returs pointer to the matching measurement within this group
 		measurements_::sims_t* measurement(const measurements_::sims_t& M);
 		bool check_cluster_consistency();

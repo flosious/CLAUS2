@@ -94,7 +94,7 @@ bool unit_t::base_exponents_t::operator==(const unit_t::base_exponents_t& obj) c
 	if (moles != obj.moles) return false;
 	if (kelvins != obj.kelvins) return false;
 	if (candelas != obj.candelas) return false;
-	if (relative != obj.relative) return false;
+	if ( (relative != obj.relative)) return false;
 	return true;
 }
 
@@ -106,6 +106,11 @@ bool unit_t::base_exponents_t::operator!=(const unit_t::base_exponents_t& obj) c
 unit_t::base_exponents_t unit_t::base_exponents_t::operator/(const unit_t::base_exponents_t& obj) const
 {
 	return {meters-obj.meters,kilograms-obj.kilograms,seconds-obj.seconds,amperes-obj.amperes,moles-obj.moles,kelvins-obj.kelvins,candelas-obj.candelas,relative};
+}
+
+unit_t::base_exponents_t unit_t::base_exponents_t::invert() const
+{
+	return {-1*meters,-1*kilograms,-1*seconds,-1*amperes,-1*moles,-1*kelvins,-1*candelas,relative};
 }
 
 
@@ -424,6 +429,12 @@ unit_t unit_t::operator/(const unit_t& obj) const
 		return {{0,0,0,0,0,0,0,true},1};
 	return {base_units_exponents / obj.base_units_exponents, multiplier / obj.multiplier};
 }
+
+unit_t unit_t::invert() const
+{
+	return {base_units_exponents.invert(), 1/multiplier};
+}
+
 
 bool unit_t::operator<(const unit_t& obj) const
 {

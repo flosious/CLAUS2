@@ -77,6 +77,7 @@ public:
 		bool operator!=(const base_exponents_t& obj) const;
 		base_exponents_t operator*(const base_exponents_t& obj) const;
 		base_exponents_t operator/(const base_exponents_t& obj) const;
+		base_exponents_t invert() const;
 	};
 
 
@@ -112,6 +113,7 @@ public:
 	unit_t pow(int pot) const;
 	unit_t operator*(const unit_t& obj) const;
 	unit_t operator/(const unit_t& obj) const;
+	unit_t invert() const;
 	double multiplier=1;
 	/*tests*/
 // 	signed int meter_ : 5;

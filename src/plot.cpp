@@ -43,6 +43,13 @@ int plot_t::Draw(mglGraph* gr)
 	for (auto& c:Y3.curves)
 		Xs.push_back(&c.X);
 	
+	for (auto& c:Y1.points)
+		Xs.push_back(&c.X);
+	for (auto& c:Y2.points)
+		Xs.push_back(&c.X);
+	for (auto& c:Y3.points)
+		Xs.push_back(&c.X);
+	
 	if (Xs.size()==0)
 	{
 		logger::error("plot_t::Draw()","no X axis","","returning 0");
@@ -173,13 +180,20 @@ void plot_t::axis_t::add_curve(const quantity_t& X, const quantity_t& Y, const s
 		curves.push_back({&X,&Y,legend});
 }
 
+void plot_t::axis_t::add_points(const quantity_t& X, const quantity_t& Y, const string legend, const string color)
+{
+	logger::debug(15,"plot_t::axis_t::add_points()","entering");
+	if (Y.is_set() && X.is_set())
+		points.push_back({&X,&Y,legend,color});
+}
+
 bool plot_t::axis_t::check()
 {
 	logger::debug(15,"plot_t::axis_t::check()","entering");
 	if (curves.size()==0)
 	{
 // 		logger::error("plot_t::axis_t::check()","no curves","","false");
-		return false;
+		return true;
 	}
 	for (auto& c : curves)
 	{
@@ -210,12 +224,14 @@ bool plot_t::axis_t::check()
 
 void plot_t::axis_t::draw(mglGraph* gr, double x_origin) 
 {
-	logger::debug(15,"plot_t::axis_t::draw()","entering");
+	logger::debug(15,"plot_t::axis_t::draw()","curves: " + tools::to_string(curves.size()),"points: " + tools::to_string(points.size()),"entering");
 	if (!check()) 
 	{
 		logger::error("plot_t::axis_t::draw()","check returned false","","aboarting plot for this axis");
 		return;
 	}
+	if (curves.size() == 0 && points.size() == 0)
+		return;
 	gr->SetRange('y',range().start,range().stop);
 	gr->SetOrigin(x_origin,-1);
 
@@ -225,22 +241,34 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	else gr->Axis("y",color.c_str());
 	
 	stringstream y_l;
-	y_l << curves.front().Y.name() << " [" << curves.front().Y.unit().to_string() << "]";
+	if (curves.size()>0)
+		y_l << curves.front().Y.name() << " [" << curves.front().Y.unit().to_string() << "]";
+	else if (points.size()>0)
+		y_l << points.front().Y.name() << " [" << points.front().Y.unit().to_string() << "]";
 	tools::str::filter_t y_f(y_l.str());
 	gr->Label('y',("#"+color+"{"+ y_f.escape_special_characters()+"}").c_str(),0);
 	
+	for (auto& c: points)
+	{
+		mglData x(c.X.data);
+		mglData y(c.Y.data);
+// 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
+		tools::str::filter_t l_f("legend '"+ c.legende +"'");
+		gr->Plot(x,y," +",l_f.escape_special_characters().c_str()); 
+	}
 	for (auto& c: curves)
 	{
 		mglData x(c.X.data);
 		mglData y(c.Y.data);
-		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
+// 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
+		tools::str::filter_t l_f("legend '"+ c.legende +"'");
 		gr->Plot(x,y,color.c_str(),l_f.escape_special_characters().c_str());
 		if (c.Y.data.size()<11) continue;
 		int y_offset=0;
 		if (log10_scale)
 			y_offset = 1;
 		gr->SetFontSize(2);
-		gr->Puts(mglPoint(c.X.data.at(c.Y.data.size()*0.05),c.Y.data.at(c.Y.data.size()*0.05)+y_offset),c.legende.c_str(),"m");
+		gr->Puts(mglPoint(c.X.data.at(c.Y.data.size()*0.1),c.Y.data.at(c.Y.data.size()*0.05)+y_offset),c.legende.c_str(),"m");
 		gr->SetFontSize(3); // default
 	}
 	for (auto& line : lines)
@@ -270,6 +298,8 @@ plot_t::axis_t::range_t plot_t::axis_t::range()
 	
 	vector<const quantity_t*> Ys;
 	for (auto& c: curves)
+		Ys.push_back(&c.Y);
+	for (auto& c: points)
 		Ys.push_back(&c.Y);
 	range_t range(Ys);
 	if (log10_scale) 
@@ -356,25 +386,25 @@ plot_t::axis_t::range_t::range_t(const vector<const quantity_t *> Ys)
 
 
 /***********************************************/
-/*******    plot_t::axis_t::curve_t    *********/
+/*******    plot_t::axis_t::points_t    *********/
 /***********************************************/
-plot_t::axis_t::curve_t::curve_t(const quantity_t* X, const quantity_t* Y, const string legende) : X(*X),Y(*Y),legende(legende)
+plot_t::axis_t::points_t::points_t(const quantity_t* X, const quantity_t* Y, const string legende, const string color) : X(*X),Y(*Y),legende(legende), color(color)
 {
 }
 
-// double plot_t::axis_t::curve_t::x_stop()
+// double plot_t::axis_t::points_t::x_stop()
 // {
 // 	return statistics::get_max_from_Y(X->data);
 // }
-// double plot_t::axis_t::curve_t::x_start()
+// double plot_t::axis_t::points_t::x_start()
 // {
 // 	return statistics::get_min_from_Y(X->data);
 // }
-// double plot_t::axis_t::curve_t::y_start()
+// double plot_t::axis_t::points_t::y_start()
 // {
 // 	return statistics::get_min_from_Y(Y->data);
 // }
-// double plot_t::axis_t::curve_t::y_stop()
+// double plot_t::axis_t::points_t::y_stop()
 // {
 // 	return statistics::get_max_from_Y(Y->data);
 // }

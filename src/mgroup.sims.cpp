@@ -317,32 +317,51 @@ bool mgroups_::sims_t::check_matrix_cluster_consistency()
 	return true;
 }
 
-const map<cluster_t*,isotope_t*> mgroups_::sims_t::matrix_cluster_to_matrix_iso()
+const map<cluster_t*,abundance_t> mgroups_::sims_t::matrix_cluster_to_matrix_iso_abundance()
 {
-	map<cluster_t*,isotope_t*> matrix_C_to_I;
+	map<cluster_t*,abundance_t> matrix_C_to_I;
+	const auto MCs = matrix_clusters();
+	const auto MIs = matrix_isotopes();
 	for (auto& M : measurements())
 	{
 		if (!M->sample->matrix().is_set()) continue;
-		if (!M->matrix_clusters().intensity_sum().is_set()) continue;
-		for (int i=0;i<M->sample->matrix().isotopes().size();i++)
+		for (auto& MC : MCs)
 		{
-			isotope_t iso = M->sample->matrix().isotopes().at(i);
-			cluster_t* C = M->matrix_clusters().cluster(iso);
-			if (C == nullptr) 
+			if (M->cluster(MC)==nullptr)
 			{
-				logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_matrix_iso()","M->matrix_clusters().cluster("+iso.to_string()+")==nullptr","doing nothing");
+				logger::error("mgroups_::sims_t::matrix_cluster_to_matrix_iso()","matrix cluster: "+ MC.to_string() + " not found in measurement " + M->to_string_short(),"skipping");
 				continue;
 			}
-			if (!C->intensity.is_set())
-			{
-				logger::warning(4,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_matrix_iso()",C->to_string()+" intensity not set","doing nothing");
-				continue;
-			}
-// 			isotope_t* I = &((.isotopes).at(i));
-			matrix_C_to_I.insert(pair<cluster_t*,isotope_t*> (C,M->sample->matrix().isotope(iso)));
-// 			C->concentration = concentration_t( (C->intensity / C->intensity.median() ) * mat_iso.substance_amount);
-// 			logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::median_const_from_db()","mat_iso.substance_amount="+mat_iso.substance_amount.to_string(),"C->concentration=" + C->concentration.to_string());
+			auto corresponding_isotope = MC.corresponding_isotope(MIs);
+			abundance_t abu;
+			if (M->sample->matrix().isotope(corresponding_isotope)==nullptr) 
+				abu = abundance_t({0});
+			else
+				abu = M->sample->matrix().isotope(corresponding_isotope)->abundance;
+			matrix_C_to_I.insert(pair<cluster_t*,abundance_t> (M->cluster(MC),abu) );
 		}
 	}
 	return matrix_C_to_I;
+// 	for (auto& M : measurements())
+// 	{
+// 		if (!M->sample->matrix().is_set()) continue;
+// 		if (!M->matrix_clusters(matrix_isotopes()).intensity_sum().is_set()) continue;
+// 		for (int i=0;i<M->sample->matrix().isotopes().size();i++)
+// 		{
+// 			isotope_t iso = M->sample->matrix().isotopes().at(i);
+// 			cluster_t* C = M->matrix_clusters(matrix_isotopes()).cluster(iso);
+// 			if (C == nullptr) 
+// 			{
+// 				logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_matrix_iso()","M->matrix_clusters().cluster("+iso.to_string()+")==nullptr","doing nothing");
+// 				continue;
+// 			}
+// 			if (!C->intensity.is_set())
+// 			{
+// 				logger::warning(4,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_matrix_iso()",C->to_string()+" intensity not set","doing nothing");
+// 				continue;
+// 			}
+// 			matrix_C_to_I.insert(pair<cluster_t*,isotope_t> (C,*M->sample->matrix().isotope(iso)));
+// 		}
+// 	}
+// 	return matrix_C_to_I;
 }

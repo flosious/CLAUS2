@@ -52,12 +52,13 @@ private:
 		};
 	private:
 		///defines a curve on an axis
-		class curve_t
+		class points_t
 		{
 		public:
-			curve_t(const quantity_t* X,const quantity_t* Y, const string legende);
+			points_t(const quantity_t* X,const quantity_t* Y, const string legende, const string color=" +");
 			const quantity_t X;
 			const quantity_t Y;
+			const string color;
 			const string legende="";
 		};
 		class line_t
@@ -77,9 +78,10 @@ private:
 		double stop=-1;
 	public:
 		///all the curves for this axis
-		vector<curve_t> curves;
+		vector<points_t> curves;
+		vector<points_t> points;
 		///e.g. "Intensity [c/s]"
-
+		void add_points(const quantity_t& X, const quantity_t& Y, const string legend="", const string color=" +");
 		///checks all curves for consistency (same physical quantities and units)
 		bool check();
 		///adds a new curve to this axis
