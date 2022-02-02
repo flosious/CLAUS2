@@ -43,12 +43,12 @@
 // 	return Ms;
 // }
 // 
-// const std::map< matrix_t, SR_t > mgroups_::sims_t::pbp_t::SRs()
+// const std::map< matrix_t, quantity::SR_t > mgroups_::sims_t::pbp_t::SRs()
 // {
 // 	return {};
 // }
 // 
-// const SR_t mgroups_::sims_t::pbp_t::SR(matrix_t& matrix)
+// const quantity::SR_t mgroups_::sims_t::pbp_t::SR(matrix_t& matrix)
 // {
 // 	if (SRs().find(matrix)!=SRs().end())
 // 		return SRs().at(matrix);

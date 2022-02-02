@@ -5,10 +5,10 @@ cluster_t::cluster_t()
 }
 
 cluster_t::cluster_t(set<isotope_t> isotopes,
-					 sputter_time_t sputter_time, 
-					 intensity_t intensity, 
-					 sputter_depth_t sputter_depth, 
-					 concentration_t concentration) :
+					 quantity::sputter_time_t sputter_time, 
+					 quantity::intensity_t intensity, 
+					 quantity::depth_t sputter_depth, 
+					 quantity::concentration_t concentration) :
 					 isotopes(isotopes.begin(),isotopes.end()),
 					 sputter_time(sputter_time), 
 					 intensity(intensity), 
@@ -18,10 +18,10 @@ cluster_t::cluster_t(set<isotope_t> isotopes,
 }
 
 cluster_t::cluster_t(string clustername, 
-			  sputter_time_t sputter_time,
-			  intensity_t intensity,
-			  sputter_depth_t sputter_depth,
-			  concentration_t concentration) : 
+			  quantity::sputter_time_t sputter_time,
+			  quantity::intensity_t intensity,
+			  quantity::depth_t sputter_depth,
+			  quantity::concentration_t concentration) : 
 			  sputter_time(sputter_time), 
 			  intensity(intensity), 
 			  sputter_depth(sputter_depth), 
@@ -147,7 +147,7 @@ int cluster_t::Draw(mglGraph* gr)
 		gr->Label('y',"intensity",0);
 // 		gr->Plot(x,y);
 		gr->Plot(y,"k","legend 'intensity'");
-// 		concentration_p = concentration_t((intensity()*1E17).data);
+// 		concentration_p = quantity::concentration_t((intensity()*1E17).data);
 	}
 	
 	gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data));
@@ -208,7 +208,7 @@ isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_is
 	return *isos.begin();
 }
 
-cluster_t cluster_t::interpolate(quantity_t& new_Q, quantity_t& old_Q) const
+cluster_t cluster_t::interpolate(quantity::quantity_t& new_Q, quantity::quantity_t& old_Q) const
 {
 	if (!new_Q.is_set() || !old_Q.is_set())
 	{

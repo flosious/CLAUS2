@@ -46,33 +46,33 @@ public:
 	int Draw(mglGraph * gr) override;
 	/// 28Si2 Ge2
 	cluster_t(string clustername, 
-			  sputter_time_t sputter_time={},
-			  intensity_t intensity={},
-			  sputter_depth_t sputter_depth={},
-			  concentration_t concentration={});
+			  quantity::sputter_time_t sputter_time={},
+			  quantity::intensity_t intensity={},
+			  quantity::depth_t sputter_depth={},
+			  quantity::concentration_t concentration={});
 	cluster_t(set<isotope_t> isotopes, 
-			  sputter_time_t sputter_time={},
-			  intensity_t intensity={},
-			  sputter_depth_t sputter_depth={},
-			  concentration_t concentration={});
+			  quantity::sputter_time_t sputter_time={},
+			  quantity::intensity_t intensity={},
+			  quantity::depth_t sputter_depth={},
+			  quantity::concentration_t concentration={});
 	cluster_t();
 	cluster_t(const vector<isotope_t>& isotopes_s);
 	///e.g. 11B for cluster {28Si 11B}
 	isotope_t corresponding_isotope(const vector<isotope_t> reference_isotopes) const;
-	quantity_t mass();
-	quantity_t abundance();
+	quantity::quantity_t mass();
+	quantity::quantity_t abundance();
 	string name() const;
 	string to_string(const string del=" ") const;
 	const bool is_set() const;
 	
-	concentration_t concentration;
-	intensity_t intensity;
-	sputter_time_t sputter_time;
-	sputter_depth_t sputter_depth;
-	SF_t SF;
-	RSF_t RSF;
+	quantity::concentration_t concentration;
+	quantity::intensity_t intensity;
+	quantity::sputter_time_t sputter_time;
+	quantity::depth_t sputter_depth;
+	quantity::SF_t SF;
+	quantity::SF_t RSF;
 	///cahnges resolution of all
-	cluster_t interpolate(quantity_t& new_Q, quantity_t& old_Q) const;
+	cluster_t interpolate(quantity::quantity_t& new_Q, quantity::quantity_t& old_Q) const;
 	cluster_t filter_impulse(int window_size=0, float factor=5);
 
 	vector<isotope_t> isotopes;

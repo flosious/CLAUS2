@@ -41,7 +41,7 @@ private:
 public:
 //     static void measurement(measurement_t* measurement, string prefix="");
 // 	static void id(identifier_t* id,string prefix="");
-// 	static void quantity(quantity_t* quantity, string prefix="");
+// 	static void quantity(quantity::quantity_t* quantity, string prefix="");
 // 	static void cluster(cluster_t* cluster, string prefix="");
 };
 
@@ -135,7 +135,7 @@ void print(map<T, T>  mat) {
 // }
 
 
-// void print(map<string, quantity_t>  mat) {
+// void print(map<string, quantity::quantity_t>  mat) {
 // 	for (auto& it : mat) {
 //         if (it.second.data.size()==1) cout << it.first << " = " << it.second.data[0] << "[" << it.second.unit << "]";
 // 		

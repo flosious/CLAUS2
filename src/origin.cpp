@@ -23,7 +23,7 @@
 /***  origin_t::column_t ***/
 /***************************/
 
-origin_t::column_t::column_t(const quantity_t& quantity, string prefix, string suffix) :
+origin_t::column_t::column_t(const quantity::quantity_t& quantity, string prefix, string suffix) :
 	column_t(quantity.data,
 					quantity.name(),
 					quantity.unit().to_string(),

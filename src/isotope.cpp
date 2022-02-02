@@ -46,24 +46,24 @@ isotope_t::isotope_t(string str, double abundance_s, double amount_s)
 		logger::error("isotope_t::isotope_t()","regex_search(iso_p,match,regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",str,"returning");
 }
 
-const mass_t isotope_t::mass() const
+const quantity::mass_t isotope_t::mass() const
 {
 	if (symbol=="")
 	{
 		logger::error("isotope_t::mass() symbol not set", "this will likely cause calculation errors");
-		return mass_t();
+		return quantity::mass_t();
 	}
 	if (nucleons<=0)
 	{
 		logger::error("isotope_t::mass() nucleons not set or found", "this will likely cause calculation errors");
-		return mass_t();
+		return quantity::mass_t();
 	}
 	if (PSE.element(symbol)->isotope_from_nucleons(nucleons)==nullptr) 
 	{
-		logger::error("mass_t::abundance() isotope not found in PSE", "this will likely cause calculation errors");
-		return mass_t();
+		logger::error("quantity::mass_t::abundance() isotope not found in PSE", "this will likely cause calculation errors");
+		return quantity::mass_t();
 	}
-	return mass_t({PSE.element(symbol)->isotope_from_nucleons(nucleons)->mass});
+	return quantity::mass_t({PSE.element(symbol)->isotope_from_nucleons(nucleons)->mass});
 }
 
 // const int isotope_t::nucleons() const

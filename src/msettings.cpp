@@ -5,7 +5,7 @@
 // /****  Beam_settings_t  *****/
 // /****************************/
 // 
-// msettings::beam_settings_t::beam_settings_t(energy_t energy_s, rastersize_t rastersize_s, ion_t ion_s) :energy(energy_s), raster_size(rastersize_s),ion(ion_s)
+// msettings::beam_settings_t::beam_settings_t(quantity::energy_t energy_s, quantity::rastersize_t rastersize_s, ion_t ion_s) :energy(energy_s), raster_size(rastersize_s),ion(ion_s)
 // {
 // }
 
@@ -62,7 +62,7 @@ msettings::sims_t::sims_t()
 // 	return secondary_polarity_p;
 // }
 // 
-// secondary_voltage_t& msettings::sims_t::secondary_voltage()
+// quantity::secondary_voltage_t& msettings::sims_t::secondary_voltage()
 // {
 // 	if (secondary_voltage_p.is_set())
 // 		return secondary_voltage_p;
@@ -84,7 +84,7 @@ msettings::sims_t::sims_t()
 // 		{
 // 			element_t ele = f->name.sputter_element();
 // 			if (secondary_polarity()=="+") // O2 +
-// 				ele.substance_amount() = substance_amount_t({2});
+// 				ele.substance_amount() = quantity::substance_amount_t({2});
 // 			sputter_ion_p = ion_t{ele,{{1}}}; // Cs +
 // 		}
 // 	return sputter_ion_p;

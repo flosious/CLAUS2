@@ -94,7 +94,7 @@ public:
 		string primary_method_p="";
 	public:
 		const string& primary_method();
-		total_sputter_depth_t total_sputter_depths;
+		quantity::depth_t total_sputter_depths;
 		crater_t::linescan_t linescan;
 		profiler_t(files_::profiler_t& file, list<sample_t>& samples_list, database_t& sql_wrapper);
 		//creates instantly a plot
@@ -136,7 +136,7 @@ public:
 				///mean from all available clusters; uses max cluster intensity or concentration
 				calc_t& from_implant_max(bool overwrite=false);
 				///from one particular cluster
-				SR_t from_implant_max(cluster_t& C) const;
+				quantity::SR_t from_implant_max(cluster_t& C) const;
 				///mean from all available clusters
 				calc_t& from_ref_fit();
 				///from one particular cluster
@@ -161,31 +161,31 @@ public:
 				///for all available clusters
 				calc_t& from_db_max(bool overwrite=false);
 				///just for one particular cluster
-				SF_t from_db_max(cluster_t& cluster);
+				quantity::SF_t from_db_max(cluster_t& cluster);
 				///for all available clusters
 				calc_t& from_db_dose(bool overwrite=false);
 				///just for one particular cluster
-				SF_t from_db_dose(cluster_t& cluster);
+				quantity::SF_t from_db_dose(cluster_t& cluster);
 				///for all available clusters; fitting to reference measurement(s)
 				calc_t& from_ref_fit(bool overwrite=false);
 				///just for one particular cluster; fitting to reference measurement(s)
-				SF_t from_ref_fit(cluster_t& cluster);
+				quantity::SF_t from_ref_fit(cluster_t& cluster);
 				
 				calc_t& from_RSF_mean_ref(bool overwrite=false);
-				SF_t from_RSF_mean_ref(cluster_t& cluster);
+				quantity::SF_t from_RSF_mean_ref(cluster_t& cluster);
 				
 				calc_t& from_RSF_median_ref(bool overwrite=false);
-				SF_t from_RSF_median_ref(cluster_t& cluster);
+				quantity::SF_t from_RSF_median_ref(cluster_t& cluster);
 				
-				calc_t& from_RSF_trimmed_mean_ref(bool overwrite=false);
-				SF_t from_RSF_trimmed_mean_ref(cluster_t& cluster);
+				calc_t& from_SF_trimmed_mean_ref(bool overwrite=false);
+				quantity::SF_t from_SF_trimmed_mean_ref(cluster_t& cluster);
 				
 				calc_t& from_RSF_pbp_ref(bool overwrite=false);
-				SF_t from_RSF_pbp_ref(cluster_t& cluster);
+				quantity::SF_t from_RSF_pbp_ref(cluster_t& cluster);
 				
 				///reference_intensity could be mean, median, trimmed_mean, a vector (pbp), ...
-				calc_t& from_RSF(const intensity_t& reference_intensity);
-				SF_t from_RSF(cluster_t& cluster, const intensity_t& reference_intensity);
+				calc_t& from_RSF(const quantity::intensity_t& reference_intensity);
+				quantity::SF_t from_RSF(cluster_t& cluster, const quantity::intensity_t& reference_intensity);
 			};
 			class RSF_c
 			{
@@ -194,26 +194,26 @@ public:
 				calc_t& calc;
 			public:
 				RSF_c(calc_t& calc);
-				RSF_c(const SF_t& SF, const intensity_t& reference);
+				RSF_c(const quantity::SF_t& SF, const quantity::intensity_t& reference);
 				
 				calc_t& from_SF_mean_ref(bool overwrite=false);
-				RSF_t from_SF_mean_ref(const cluster_t& cluster);
+				quantity::SF_t from_SF_mean_ref(const cluster_t& cluster);
 				
 				calc_t& from_SF_median_ref(bool overwrite=false);
-				RSF_t from_SF_median_ref(const cluster_t& cluster);
+				quantity::SF_t from_SF_median_ref(const cluster_t& cluster);
 				
 				calc_t& from_SF_trimmed_mean_ref(bool overwrite=false);
-				RSF_t from_SF_trimmed_mean_ref(const cluster_t& cluster);
+				quantity::SF_t from_SF_trimmed_mean_ref(const cluster_t& cluster);
 				
 				calc_t& from_SF_pbp_ref(bool overwrite=false);
-				RSF_t from_SF_pbp_ref(const cluster_t& cluster);
+				quantity::SF_t from_SF_pbp_ref(const cluster_t& cluster);
 				
 				calc_t& from_SF_percentile_ref(double percentile, bool overwrite=false);
-				RSF_t from_SF_percentile_ref(const cluster_t& cluster, double percentile);
+				quantity::SF_t from_SF_percentile_ref(const cluster_t& cluster, double percentile);
 				
 				///reference_intensity could be percentile, mean, median, trimmed_mean, a vector (pbp), or anything other ...
-				calc_t& from_SF_ref(const intensity_t& reference_intensity, bool overwrite=false);
-				RSF_t from_SF_ref(const cluster_t& cluster, const intensity_t& reference_intensity, bool overwrite=false);
+				calc_t& from_SF_ref(const quantity::intensity_t& reference_intensity, bool overwrite=false);
+				quantity::SF_t from_SF_ref(const cluster_t& cluster, const quantity::intensity_t& reference_intensity, bool overwrite=false);
 			};
 			class concentration_c
 			{
@@ -223,7 +223,7 @@ public:
 			public:
 				concentration_c(calc_t& calc);
 				calc_t& from_SF(bool overwrite=false);
-				static concentration_t from_SF(const cluster_t& cluster);
+				static quantity::concentration_t from_SF(const cluster_t& cluster);
 			};
 			class matrix_c
 			{
@@ -231,7 +231,7 @@ public:
 				sims_t& M;
 				calc_t& calc;
 // 				const std::map< cluster_t*, isotope_t* > matrix_cluster_to_iso();
-// 				calc_t& const_from_db(quantity_t (*operation) (quantity_t), bool overwrite=false);
+// 				calc_t& const_from_db(quantity::quantity_t (*operation) (quantity::quantity_t), bool overwrite=false);
 			public:
 				///calculation of matrix concentrations
 				matrix_c(calc_t& calc);
@@ -249,34 +249,34 @@ public:
 				///a factor to change sputter_time resolution when determining maximum position
 				double X_resolution_factor;
 				int maximum_pos_index_s = -1;
-				sputter_time_t sputter_time_at_maximum_s;
-				intensity_t maximum_intensity_s;
+				quantity::sputter_time_t sputter_time_at_maximum_s;
+				quantity::intensity_t maximum_intensity_s;
 				///populates maximum_intensity_s + sputter_time_at_maximum_s ;seconds_for_fit_plot < 0 no plot;
 				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=-1);
 			public:
 				implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor=0.1);
-				static unsigned int minimum_index_position(quantity_t Y);
+				static unsigned int minimum_index_position(quantity::quantity_t Y);
 				static unsigned int minimum_index_position(vector<double> data);
 				unsigned int minimum_index_position();
 				int maximum_pos_index();
-				intensity_t background_intensity();
-				///sputter_time_t of maximum of intensity of implant
-				const sputter_time_t& sputter_time_at_maximum();
+				quantity::intensity_t background_intensity();
+				///quantity::sputter_time_t of maximum of intensity of implant
+				const quantity::sputter_time_t& sputter_time_at_maximum();
 				///maximum of intensity of implant
-				const intensity_t& maximum_intensity();
-				quantity_t minimum_starting_position() const;
-				sputter_time_t minimum_sputter_time_position() const;
-				sputter_depth_t minimum_sputter_depth_position() const;
-				sputter_time_t sputter_time_from_minimum();
-				sputter_depth_t sputter_depth_from_minimum();
+				const quantity::intensity_t& maximum_intensity();
+				quantity::quantity_t minimum_starting_position() const;
+				quantity::sputter_time_t minimum_sputter_time_position() const;
+				quantity::depth_t minimum_sputter_depth_position() const;
+				quantity::sputter_time_t sputter_time_from_minimum();
+				quantity::depth_t sputter_depth_from_minimum();
 				///calc dose from concentration and sputter_depth; returns {} if C or SD not set
-				dose_t dose() const;
-				SR_t SR();
-				SF_t SF();
-				SF_t SF_from_dose();
-				SF_t SF_from_max();
-				RSF_t RSF();
-				concentration_t concentration();
+				quantity::dose_t dose() const;
+				quantity::SR_t SR();
+				quantity::SF_t SF();
+				quantity::SF_t SF_from_dose();
+				quantity::SF_t SF_from_max();
+				quantity::SF_t RSF();
+				quantity::concentration_t concentration();
 				///populates the whole measurement from implanted values
 			};
 		private:
@@ -301,6 +301,51 @@ public:
 // 		unsigned int equilibrium_start_index_s=0;
 		cluster_t matrix_cluster_s;
 	public: 
+		class Crel_t
+		{
+		private:
+			const cluster_t zaehler;
+			const cluster_t nennber;
+		public:
+			Crel_t(const cluster_t& zaehler, const cluster_t& nenner);
+			///ratios of the concentrations of the coressponding cluster isotopes from the samples matrix
+			quantity::concentration_t from_sample_matrix_ratios() const;
+			///ratios of the concentrations of the median of clusters concentrations
+			quantity::concentration_t from_clusters_median_ratios() const;
+			///ratios of the concentrations of the mean of clusters concentrations
+			quantity::concentration_t from_clusters_mean_ratios() const;
+			///ratios of the concentrations of the last factor*data.size() mean of clusters concentrations; skip first 1-factor data
+			quantity::concentration_t from_clusters_cutted_mean_ratios(float factor=0.25) const;
+			///ratios of the concentrations of the last factor*data.size() median of clusters concentrations; skip first 1-factor data
+			quantity::concentration_t from_clusters_cutted_median_ratios(float factor=0.25) const;
+		};
+		class Irel_t
+		{
+		private:
+			const cluster_t zaehler;
+			const cluster_t nennber;
+		public:
+			Irel_t(const cluster_t& zaehler, const cluster_t& nenner);
+			///ratios of the concentrations of the median of clusters intensities
+			quantity::intensity_t from_clusters_median_ratios() const;
+			///ratios of the concentrations of the mean of clusters intensities
+			quantity::intensity_t from_clusters_mean_ratios() const;
+			///ratios of the concentrations of the last factor*data.size() mean of clusters intensities; skip first 1-factor data
+			quantity::intensity_t from_clusters_cutted_mean_ratios(float factor=0.25) const;
+			///ratios of the concentrations of the last factor*data.size() median of clusters intensities; skip first 1-factor data
+			quantity::intensity_t from_clusters_cutted_median_ratios(float factor=0.25) const;
+		};
+		class Crel_to_Irel_t
+		{
+		private:
+			const cluster_t zaehler;
+			const cluster_t nennber;
+		public:
+			Crel_to_Irel_t(const cluster_t& zaehler, const cluster_t& nenner);
+			Crel_t Crel() const;
+			Irel_t Irel() const;
+		};
+		
 		/*
 		 * matrix cluster should contain only unique isotope for its cluster;
 		 * that means e.g. SiGe matrix there can never be a SiGe cluster, just Si clusters and Ge clusters seperate
@@ -310,18 +355,26 @@ public:
 		{
 		private:
 		public:
+			///E.g. for 28Si 30Si 70Ge  matrix_clusters Crels={[28Si]/[30Si],[30Si]/[28Si],[28Si]/[70Ge],[70Ge]/[28Si],[30Si]/[70Ge],[70Ge]/[30Si]}
+			vector<Crel_t> Crels();
+			///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
+			vector<Crel_t> Irels();
+			///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
+			///and their corresponding Crels
+			vector<Crel_to_Irel_t> Crels_to_Irels();
 			cluster_t* cluster(const isotope_t iso);
 			vector<cluster_t*> clusters;
 			const vector<cluster_t> cluster_names();
 			const vector<isotope_t> isotopes() const;
-			intensity_t intensity_sum() const;
-			concentration_t concentration_sum() const;
+			quantity::intensity_t intensity_sum() const;
+			quantity::concentration_t concentration_sum() const;
 			string to_string(const string del = "") const;
 			bool is_cluster_in_matrix(const cluster_t& cluster);
 			///returns the cluster corresponding to matrix
 			matrix_clusters_c(vector<cluster_t>& clusters, const vector<isotope_t> matrix_isotopes);
 			matrix_clusters_c();
 		};
+		
 		
 		calc_t calc(bool overwrite=false);
 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
@@ -347,8 +400,8 @@ public:
 		bool add(sims_t& measurement);
 		
 		//changes sputter_time axis and all others accordingly
-		sims_t change_resolution(sputter_time_t sputter_time_res);
-		sims_t change_resolution(sputter_depth_t sputter_depth_res);
+		sims_t change_resolution(quantity::sputter_time_t sputter_time_res);
+		sims_t change_resolution(quantity::depth_t sputter_depth_res);
 		
 		crater_t crater;
 		vector<cluster_t> clusters;

@@ -74,9 +74,9 @@ bool measurements_::sims_t::matrix_clusters_c::is_cluster_in_matrix(const cluste
 	return false;
 }
 
-intensity_t measurements_::sims_t::matrix_clusters_c::intensity_sum() const
+quantity::intensity_t measurements_::sims_t::matrix_clusters_c::intensity_sum() const
 {
-	intensity_t intensity;
+	quantity::intensity_t intensity;
 	for (auto& C : clusters)
 	{
 		if (!intensity.is_set())
@@ -87,9 +87,9 @@ intensity_t measurements_::sims_t::matrix_clusters_c::intensity_sum() const
 	return intensity;
 }
 
-concentration_t measurements_::sims_t::matrix_clusters_c::concentration_sum() const
+quantity::concentration_t measurements_::sims_t::matrix_clusters_c::concentration_sum() const
 {
-	intensity_t concentration;
+	quantity::intensity_t concentration;
 	for (auto& C : clusters)
 	{
 		if (!C->concentration.is_set()) return {};
@@ -270,8 +270,10 @@ string measurements_::sims_t::to_string(const string del)
 	logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
 	stringstream ss;
 	ss << measurement_t::to_string() << del;
+	if (crater.total_sputter_depths.is_set() || crater.linescans.size()>0)
 	ss << "crater: ";
-	ss << crater.total_sputter_depths.to_string() << del;
+	if (crater.total_sputter_depths.is_set())
+		ss << crater.total_sputter_depths.to_string() << del;
 	if (crater.linescans.size()>0)
 		ss << "linescans: <" << crater.linescans.size() <<">" << del;
 	ss << "clusters: <" << clusters.size() << ">" << del;
@@ -290,13 +292,13 @@ const string measurements_::sims_t::to_string_short(const string del) const
 void measurements_::sims_t::plot_now(double sleep_sec)
 {
 	plot_t plot;
-	quantity_t X;
+	quantity::quantity_t X;
 	if (crater.sputter_depth.is_set())
 	{
-		X = crater.sputter_depth.change_unit({"nm"});
+		X = crater.sputter_depth.change_unit("nm");
 	}
 	else if (crater.sputter_time.is_set())
-		X = crater.sputter_time.change_unit({"min"});
+		X = crater.sputter_time.change_unit("min");
 	else
 	{
 		logger::error("measurements_::sims_t::to_string", "neither sputter_time nor sputter_depth is set","","no plot");
@@ -309,7 +311,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 	plot.Y1.range(1,1E6,true);
 	
 	matrix_clusters_c MC = matrix_clusters();
-	intensity_t ref_intensity = MC.intensity_sum();
+	quantity::intensity_t ref_intensity = MC.intensity_sum();
 	if (MC.clusters.size()>1 && ref_intensity.is_set())
 		plot.Y1.add_curve(X,ref_intensity,MC.to_string());
 	
@@ -321,7 +323,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 			if (sample->implant(C.corresponding_isotope(sample->matrix().isotopes())).dose.is_set())
 			{
 				// unit is not same as unit(x)
-				quantity_t min = calc().implant(C).minimum_starting_position().change_unit(X.unit());
+				quantity::quantity_t min = calc().implant(C).minimum_starting_position().change_unit(X.unit());
 				if (min.is_set())
 					plot.Y1.add_arrow(min.data.at(0),0.1,min.data.at(0),1E6,"bA",C.to_string() );
 			}
@@ -451,8 +453,8 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 // 		logger::error("measurements_::sims_t::matrix_cluster()","reference_clusters().size()==0",to_string(),"skipping");
 // 		return matrix_cluster_s;
 // 	}
-// 	intensity_t intensity;
-// 	concentration_t concentration;
+// 	quantity::intensity_t intensity;
+// 	quantity::concentration_t concentration;
 // 	set<isotope_t> isos;
 // 	for (auto& C : reference_clusters())
 // 	{
@@ -578,7 +580,7 @@ const cluster_t* measurements_::sims_t::cluster(const cluster_t& cluster_s) cons
 	return nullptr;
 }
 
-measurements_::sims_t measurements_::sims_t::change_resolution(sputter_depth_t sputter_depth_res)
+measurements_::sims_t measurements_::sims_t::change_resolution(quantity::depth_t sputter_depth_res)
 {
 	if (!sputter_depth_res.is_set())
 	{
@@ -601,7 +603,7 @@ measurements_::sims_t measurements_::sims_t::change_resolution(sputter_depth_t s
 	
 	return copy_M;
 }
-measurements_::sims_t measurements_::sims_t::change_resolution(sputter_time_t sputter_time_res)
+measurements_::sims_t measurements_::sims_t::change_resolution(quantity::sputter_time_t sputter_time_res)
 {
 	if (!sputter_time_res.is_set())
 	{

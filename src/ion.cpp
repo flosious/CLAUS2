@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2021Florian Bärwolf
+	Copyright (C) 2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -20,17 +20,17 @@
 #include "ion.hpp"
 
 /***************************/
-/*******     ion_t     ********/
+/*******    ion_t   ********/
 /***************************/
 ion_t::ion_t()
 {
 }
 
-ion_t::ion_t(vector<element_t> elements_s,  electrical_charge_t electric_charge_s) : elements(elements_s), electric_charge(electric_charge_s)
+ion_t::ion_t(vector<element_t> elements_s,  quantity::electrical_charge_t electric_charge_s) : elements(elements_s), electric_charge(electric_charge_s)
 {
 }
 
-ion_t::ion_t(element_t element_s,  electrical_charge_t electric_charge_s) : elements({element_s}), electric_charge(electric_charge_s)
+ion_t::ion_t(element_t element_s,  quantity::electrical_charge_t electric_charge_s) : elements({element_s}), electric_charge(electric_charge_s)
 {
 }
 
@@ -67,12 +67,6 @@ bool ion_t::is_set() const
 	if (!electric_charge.is_set()) return false;
 	return true;
 }
-
-// vector<element_t>& ion_t::elements()
-// {
-// 	return elements_p;
-// }
-
 
 
 string ion_t::to_string(const string del) const

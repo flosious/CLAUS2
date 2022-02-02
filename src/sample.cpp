@@ -4,7 +4,7 @@
 /** sample_t::db_t::implant_s **/
 /*******************************/
 
-sample_t::implant_s::implant_s(dose_t dose, concentration_t concentration_maximum, sputter_depth_t depth_at_concentration_maxium) :
+sample_t::implant_s::implant_s(quantity::dose_t dose, quantity::concentration_t concentration_maximum, quantity::depth_t depth_at_concentration_maxium) :
 								dose(dose), concentration_maximum(concentration_maximum), depth_at_concentration_maxium(depth_at_concentration_maxium)
 {
 }
@@ -150,7 +150,7 @@ bool sample_t::db_t::load_from_table()
 		sql1 += " AND monitor='" + sample.monitor+"'";
 	sql1 += ";";
 
-	logger::debug(logger_verbosity_offset+4,"sample_t::db_t::load_from_table()","sql1=",sql1);
+	logger::debug(logger_verbosity_offset+5,"sample_t::db_t::load_from_table()","sql1=",sql1);
 
 	if (!sql_wrapper.execute_sql(sql1,database_t::callback_lines_map,&table_entries_s)) 
 	{
@@ -160,7 +160,7 @@ bool sample_t::db_t::load_from_table()
 	
 	if (table_entries_s.size()==0)
 	{
-		logger::debug(logger_verbosity_offset+4,"sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
+		logger::debug(logger_verbosity_offset+5,"sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
 		return false;
 	}
 	
@@ -195,15 +195,15 @@ bool sample_t::db_t::load_from_table()
 			logger::error("sample_t::db_t::load_from_table()","more then 1 identical isotope implanted in sample: check database",sample.to_name() +"  " +iso.to_string(),"skipping");
 			continue;
 		}
-		dose_t D;
-		concentration_t C_max;
-		sputter_depth_t SD_max;
+		quantity::dose_t D;
+		quantity::concentration_t C_max;
+		quantity::depth_t SD_max;
 		if (table_entries_s.at("dose").at(line)!="" && table_entries_s.at("dose").at(line)!="NULL")
-			D = dose_t({tools::str::str_to_double(table_entries_s.at("dose").at(line))});
+			D = quantity::dose_t({tools::str::str_to_double(table_entries_s.at("dose").at(line))});
 		if (table_entries_s.at("depth_at_maximum_concentration").at(line)!="" && table_entries_s.at("depth_at_maximum_concentration").at(line)!="NULL")
-			SD_max = sputter_depth_t({tools::str::str_to_double(table_entries_s.at("depth_at_maximum_concentration").at(line))});
+			SD_max = quantity::depth_t({tools::str::str_to_double(table_entries_s.at("depth_at_maximum_concentration").at(line))});
 		if (table_entries_s.at("maximum_concentration").at(line)!="" && table_entries_s.at("maximum_concentration").at(line)!="NULL")
-			C_max = concentration_t({tools::str::str_to_double(table_entries_s.at("maximum_concentration").at(line))});
+			C_max = quantity::concentration_t({tools::str::str_to_double(table_entries_s.at("maximum_concentration").at(line))});
 		if (D.is_set())
 			logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() +" DB: dose("+iso.to_string()+")="+D.to_string());
 		if (SD_max.is_set())
@@ -225,7 +225,7 @@ sample_t::matrix_t& sample_t::db_t::matrix()
 		return matrix_s;
 	if (!load_from_table())
 	{
-		logger::debug(4,"sample_t::db_t::matrix()","!load_from_table()","could not find " + sample.to_name()+ " in " +tablename,"returning empty");
+		logger::debug(logger_verbosity_offset+4,"sample_t::db_t::matrix()","!load_from_table()","could not find " + sample.to_name()+ " in " +tablename,"returning empty");
 		return  matrix_s;
 	}
 

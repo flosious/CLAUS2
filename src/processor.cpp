@@ -35,7 +35,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	/*connect to sqlite3 database*/
 	if (!sql_wrapper.open())
-		logger::error("processor::processor","could not connec to to database");
+		logger::error("processor::processor","could not connect to to database");
 	else // create tables    
 	{
 		sample_t::db_t::create_table(sql_wrapper);
@@ -62,52 +62,14 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	for (auto& MG : dsims.mgroups())
 	{	
-		MG.calc().matrices.median_const_from_db();
-// 		MG.calc().matrices.interpolate();
-// 		auto MG_from_max = MG;
-// 		auto MG_from_dose = MG;
-// 		auto MG_from_max_Iref = MG;
-// 		auto calcDose = MG_from_dose.calc();
-// 		calcDose.SRs.from_crater_depths();
-// 		calcDose.SRs.from_implant_max().SRs.copy_to_same_matrices().SDs.from_SR().SFs.from_implant_dose().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
-// 		MG_from_max.calc().SRs.from_crater_depths().SR_SF_from_implants_maxima().SRs.copy_to_same_matrices().SDs.from_SR().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
-// 		MG_from_max_Iref.calc().SRs.from_crater_depths().normalize_to_ref_intensity().SR_SF_from_implants_maxima().SRs.copy_to_same_matrices().SDs.from_SR().RSFs.from_SF_pbp_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().concentrations.from_SF();
-// 		MG_from_max_Iref.export_origin_ascii();
-
+		auto MG_copy = MG;
+		MG_copy.calc().matrices.median_const_from_db();
+		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
+		
 		for (auto& M : MG.measurements())
 		{
+			MG_copy.measurement(*M)->plot_now(0);
 			M->plot_now(0);
-// 			plot_t plot;
-// 			plot.Y1.range(1E16,1E21,true);
-// 			plot.Y2.range(1E16,1E21,true);
-// 			plot.Y3.range(1E16,1E21,true);
-// 			
-// 			auto* M_c = MG_from_dose.measurement(*M);
-// 			auto* M_d = MG_from_max_Iref.measurement(*M);
-// 			if (M_c==nullptr) continue;
-// 			if (M_d==nullptr) continue;
-// 			if (!M->crater.sputter_depth.is_set()) continue;
-// 			
-// 			for (auto& C : M->clusters)
-// 			{
-// 				//skip matrix clusters
-// 				auto MC = MG.matrix_clusters();
-// 				if (tools::find_in_V(C,MC)!=nullptr) continue;
-// 				
-// 				if (!C.concentration.is_set()) continue;
-// 				auto* C_c = M_c->cluster(C);
-// 				if (C_c == nullptr || !C_c->concentration.is_set()) continue;
-// 				auto* C_d = M_d->cluster(C);
-// 				if (C_d == nullptr ) continue;
-// 				if ( !C_d->concentration.is_set()) continue;
-// 				
-// 				plot.Y1.add_curve(M->crater.sputter_depth,C.concentration,C.to_string()+"_from_Cmax");
-// 				plot.Y2.add_curve(M_c->crater.sputter_depth,C_c->concentration,C_c->to_string()+"_from_Dose");
-// 				plot.Y3.add_curve(M_d->crater.sputter_depth,C_d->concentration,C_d->to_string()+"_from_Cmax_Iref");
-// 				
-// 			}
-// 			
-// 			plot.to_screen("",0);
 		}
 	}
 	
@@ -116,7 +78,6 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
-	
 }
 
 /*****************************/

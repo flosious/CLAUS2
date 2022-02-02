@@ -4,58 +4,58 @@
 
 /*******************************/
 
-quantity_t::quantity_t(const quantity_t& quant_s, double data) : quantity_t(quant_s,vector<double>{data})
+quantity::quantity_t::quantity_t(const quantity_t& quant_s, double data) : quantity_t(quant_s,vector<double>{data})
 {
 }
 
-quantity_t::quantity_t(const quantity_t& quant_s, vector<double> data) : name_p(quant_s.name()),unit_p(quant_s.unit()),data(data)
+quantity::quantity_t::quantity_t(const quantity_t& quant_s, vector<double> data) : name_p(quant_s.name()),unit_p(quant_s.unit()),data(data)
 {
 }
 
-quantity_t::quantity_t(string name_s, vector<double> data_s, unit_t unit_s)
+quantity::quantity_t::quantity_t(string name_s, vector<double> data_s, unit_t unit_s)
 {
 	name_p = name_s;
 	unit_p = unit_s;
 	data = data_s;
 }
 
-quantity_t::quantity_t(string name_s,unit_t unit_s)
+quantity::quantity_t::quantity_t(string name_s,unit_t unit_s)
 {
 	name_p = name_s;
 	unit_p = unit_s;
 }
 
-quantity_t::quantity_t(vector<double> data_s,unit_t unit_s)
+quantity::quantity_t::quantity_t(vector<double> data_s,unit_t unit_s)
 {
 	data = data_s;
 	unit_p = unit_s;
 }
 
-quantity_t::quantity_t()
+quantity::quantity_t::quantity_t()
 {
 
 }
 
-quantity_t::quantity_t(const quantity_t& quant_s, const unit_t& unit_s) : unit_p(unit_s), data(quant_s.data), name_p(quant_s.name())
+quantity::quantity_t::quantity_t(const quantity_t& quant_s, const unit_t& unit_s) : unit_p(unit_s), data(quant_s.data), name_p(quant_s.name())
 {
 }
 
-void quantity_t::clear()
+void quantity::quantity_t::clear()
 {
 	data.clear();
 }
 
-quantity_t::quantity_t(double data_s, unit_t unit_s) : unit_p(unit_s), data(data_s)
+quantity::quantity_t::quantity_t(double data_s, unit_t unit_s) : unit_p(unit_s), data(data_s)
 {
 }
 
-fit_functions::polynom_t quantity_t::polynom(unsigned int polynom_grade) const
+fit_functions::polynom_t quantity::quantity_t::polynom(unsigned int polynom_grade) const
 {
 	fit_functions::polynom_t poly(polynom_grade);
 	if (!is_set()) 
 		return poly;
 	
-	map<double,double> data_XY;
+	std::map<double,double> data_XY;
 	vector<double> X(data.size());
 	for (int x=0;x<X.size();x++)
 		X[x]=x;
@@ -68,7 +68,7 @@ fit_functions::polynom_t quantity_t::polynom(unsigned int polynom_grade) const
 	return poly;
 }
 
-quantity_t quantity_t::bspline_smoothing( unsigned int breakpoints, const size_t spline_order) const
+quantity::quantity_t quantity::quantity_t::bspline_smoothing( unsigned int breakpoints, const size_t spline_order) const
 {
 	if (!is_set())
 		return {};
@@ -78,7 +78,7 @@ quantity_t quantity_t::bspline_smoothing( unsigned int breakpoints, const size_t
 	return {ss.str(),statistics::bspline_smooth(data,{}, breakpoints,spline_order),unit()};
 }
 
-quantity_t quantity_t::bspline_smoothing(const quantity_t& Xdata, unsigned int breakpoints, const size_t spline_order) const
+quantity::quantity_t quantity::quantity_t::bspline_smoothing(const quantity_t& Xdata, unsigned int breakpoints, const size_t spline_order) const
 {
 	if (!is_set())
 		return {};
@@ -88,7 +88,7 @@ quantity_t quantity_t::bspline_smoothing(const quantity_t& Xdata, unsigned int b
 	return {ss.str(),statistics::bspline_smooth(data,Xdata.data, breakpoints,spline_order),unit()};
 }
 
-quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) const
+quantity::quantity_t quantity::quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) const
 {
 	if (!is_set())
 		return {};
@@ -96,17 +96,17 @@ quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) 
 		return *this;
 	if (!old_X.is_set() || !new_X.is_set() || !is_set()) 
 	{
-		logger::error("quantity_t::interp","!old_X.is_set() || !new_X.is_set() || !is_set()","","returning empty");
+		logger::error("quantity::quantity_t::interp","!old_X.is_set() || !new_X.is_set() || !is_set()","","returning empty");
 		return {};
 	}
 	if (old_X.data.size()!=data.size())
 	{
-		logger::error("quantity_t::interp","old_X.data.size()!=data.size()","current_X=" +to_string() +" old_X="+old_X.to_string(),"returning empty");
+		logger::error("quantity::quantity_t::interp","old_X.data.size()!=data.size()","current_X=" +to_string() +" old_X="+old_X.to_string(),"returning empty");
 		return {};
 	}
 	if (old_X.unit().base_units_exponents != new_X.unit().base_units_exponents)
 	{
-		logger::error("quantity_t::interp","old_X.unit().base_units_exponents != new_X.unit().base_units_exponents","","returning empty");
+		logger::error("quantity::quantity_t::interp","old_X.unit().base_units_exponents != new_X.unit().base_units_exponents","","returning empty");
 		return {};
 	}
 	quantity_t old_X_same_unit;
@@ -115,24 +115,24 @@ quantity_t quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) 
 	else
 		old_X_same_unit = old_X;
 	
-	map<double,double> XY_data;
+	std::map<double,double> XY_data;
 	tools::vec::combine_vecs_to_map(&old_X_same_unit.data,&data,&XY_data);
 	
 	if (XY_data.begin()->first > new_X.data.front() )
 	{
-		logger::error("quantity_t::interp","old_X start="+ tools::to_string(XY_data.begin()->first) +" new_X start=" + tools::to_string(new_X.data.front()),"extrapolation not supported","returning empty");
+		logger::error("quantity::quantity_t::interp","old_X start="+ tools::to_string(XY_data.begin()->first) +" new_X start=" + tools::to_string(new_X.data.front()),"extrapolation not supported","returning empty");
 		return {};
 	}
 	if (XY_data.rbegin()->first < new_X.data.back() )
 	{
-		logger::error("quantity_t::interp","old_X stop=" + tools::to_string(XY_data.rbegin()->first) + " new_X stop="+tools::to_string(new_X.data.back()),"extrapolation not supported","returning empty");
+		logger::error("quantity::quantity_t::interp","old_X stop=" + tools::to_string(XY_data.rbegin()->first) + " new_X stop="+tools::to_string(new_X.data.back()),"extrapolation not supported","returning empty");
 		return {};
 	}
 	return {name(),statistics::interpolate_data_XY(XY_data,new_X.data),unit()};
 }
 
 
-quantity_t quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade) const
+quantity::quantity_t quantity::quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade) const
 {
 	if (!is_set())
 		return {};
@@ -141,7 +141,7 @@ quantity_t quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_
 	if (polynom_grade==-1) polynom_grade=17; // seems to be good for implant profiles
 	
 	fit_functions::polynom_t polynom(polynom_grade);
-	map<double,double> data_XY;
+	std::map<double,double> data_XY;
 	tools::vec::combine_vecs_to_map(&x_data.data,&data,&data_XY);
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_fit(" << name() << ")";
@@ -153,13 +153,13 @@ quantity_t quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_
 	return fit;
 }
 
-quantity_t quantity_t::polyfit_derivative(unsigned int polynom_grade, unsigned int derivative) const
+quantity::quantity_t quantity::quantity_t::polyfit_derivative(unsigned int polynom_grade, unsigned int derivative) const
 {
 	fit_functions::polynom_t polynom_s = polynom(polynom_grade);
 	
 	if (!polynom_s.fit(data)) 
 	{
-		logger::error("quantity_t::polyfit_derivative","polynom_s.derivative(derivative).fitted","returning empty");
+		logger::error("quantity::quantity_t::polyfit_derivative","polynom_s.derivative(derivative).fitted","returning empty");
 		return {};
 	}
 	stringstream ss;
@@ -170,7 +170,7 @@ quantity_t quantity_t::polyfit_derivative(unsigned int polynom_grade, unsigned i
 }
 
 
-quantity_t quantity_t::polyfit(unsigned int polynom_grade) const
+quantity::quantity_t quantity::quantity_t::polyfit(unsigned int polynom_grade) const
 {
 // 	if (!is_set()) 
 // 		return quantity_t();
@@ -209,7 +209,7 @@ quantity_t quantity_t::polyfit(unsigned int polynom_grade) const
 	return fit;
 }
 
-quantity_t quantity_t::round_() const
+quantity::quantity_t quantity::quantity_t::round_() const
 {
 	if (!is_set()) return {};
 	quantity_t copy = *this;
@@ -218,7 +218,7 @@ quantity_t quantity_t::round_() const
 	return copy;
 }
 
-quantity_t quantity_t::diff(bool preserve_size) const
+quantity::quantity_t quantity::quantity_t::diff(bool preserve_size) const
 {
 	if (!is_set() || data.size()==1) return {};
 	stringstream ss;
@@ -234,7 +234,7 @@ quantity_t quantity_t::diff(bool preserve_size) const
 
 
 
-quantity_t quantity_t::integrate_pbp(const quantity_t& x_data) const
+quantity::quantity_t quantity::quantity_t::integrate_pbp(const quantity_t& x_data) const
 {
 	if (data.size()!=x_data.data.size()) return {};
 	if (data.size()==1) // fall back to simple multiplication
@@ -263,12 +263,12 @@ quantity_t quantity_t::integrate_pbp(const quantity_t& x_data) const
 	return area;
 }
 
-// quantity_t quantity_t::integrate(quantity_t& x_data, double lower_X_limit, double upper_X_limit)
+// quantity_t quantity::quantity_t::integrate(quantity_t& x_data, double lower_X_limit, double upper_X_limit)
 // {
 // 	return integrate(x_data,lower_X_limit,upper_X_limit);
 // }
 
-quantity_t quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_index, unsigned int upper_X_index) const
+quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_index, unsigned int upper_X_index) const
 {
 	if (lower_X_index<0)
 		      lower_X_index=0;
@@ -276,7 +276,7 @@ quantity_t quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_
 		      upper_X_index = x_data.data.size() -1 ;
 	if (x_data.data.size() != data.size())
 	{
-		logger::error("quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
+		logger::error("quantity::quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
 		return {};
 	}
 	
@@ -290,7 +290,7 @@ quantity_t quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_
 	return area;
 }
 
-int quantity_t::get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec)
+int quantity::quantity_t::get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec)
 {
 	for (int i=0;i<monotonic_vec.size();i++)
 	{
@@ -300,7 +300,7 @@ int quantity_t::get_value_index_position_in_strictly_monotonic_increasing_vector
 	return -1;
 }
 
-quantity_t quantity_t::integrate(const quantity_t& x_data, const quantity_t& x_data_start, const quantity_t& x_data_stop) const
+quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data, const quantity_t& x_data_start, const quantity_t& x_data_stop) const
 {
 	unsigned int lower_X_limit=0;
 	unsigned int upper_X_limit=0;
@@ -310,7 +310,7 @@ quantity_t quantity_t::integrate(const quantity_t& x_data, const quantity_t& x_d
 	{
 		if (x_data.unit().base_units_exponents!=x_data_start.unit().base_units_exponents)
 		{
-			logger::error("quantity_t::integrate()","x_data.unit()="+x_data.unit().to_string(),"x_data_start.unit()="+x_data_start.unit().to_string());
+			logger::error("quantity::quantity_t::integrate()","x_data.unit()="+x_data.unit().to_string(),"x_data_start.unit()="+x_data_start.unit().to_string());
 			return {};
 		}
 		if (x_data.unit()!=x_data_start.unit())
@@ -325,7 +325,7 @@ quantity_t quantity_t::integrate(const quantity_t& x_data, const quantity_t& x_d
 	{
 		if (x_data.unit().base_units_exponents!=x_data_stop.unit().base_units_exponents)
 		{
-			logger::error("quantity_t::integrate()","x_data.unit()="+x_data.unit().to_string(),"x_data_stop.unit()="+x_data_stop.unit().to_string());
+			logger::error("quantity::quantity_t::integrate()","x_data.unit()="+x_data.unit().to_string(),"x_data_stop.unit()="+x_data_stop.unit().to_string());
 			return {};
 		}
 		if (x_data.unit()!=x_data_stop.unit())
@@ -336,13 +336,13 @@ quantity_t quantity_t::integrate(const quantity_t& x_data, const quantity_t& x_d
 	}
 	if (x_data.data.size() != data.size())
 	{
-		logger::error("quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
+		logger::error("quantity::quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
 		return {};
 	}
 	return integrate(x_data,lower_X_limit,upper_X_limit);
 }
 
-quantity_t quantity_t::max_at_x(const quantity_t& X) const
+quantity::quantity_t quantity::quantity_t::max_at_x(const quantity_t& X) const
 {
 	if (data.size()!=X.data.size())
 		return {};
@@ -363,7 +363,7 @@ quantity_t quantity_t::max_at_x(const quantity_t& X) const
 }
 
 /// TESTEN!!!
-// quantity_t quantity_t::max_at_x(const quantity_t& X, double lower_X_limit, double upper_X_limit) const
+// quantity_t quantity::quantity_t::max_at_x(const quantity_t& X, double lower_X_limit, double upper_X_limit) const
 // {
 // 	for(int x=0;x<X.data.size();x++)
 // 	{
@@ -376,13 +376,13 @@ quantity_t quantity_t::max_at_x(const quantity_t& X) const
 // 	return max_at_x(X);
 // }
 
-quantity_t quantity_t::min_at_x(quantity_t& X, double lower_X_limit, double upper_X_limit) const
+quantity::quantity_t quantity::quantity_t::min_at_x(quantity_t& X, double lower_X_limit, double upper_X_limit) const
 {
 	stringstream n;
 	n << name()  << "("<<X.name()<<")at_min("<<name()<<")";
-	map<double,double> XY_data;
+	std::map<double,double> XY_data;
 	tools::vec::combine_vecs_to_map(&X.data,&data,&XY_data);
-	for(map<double,double>::iterator it=XY_data.begin();it!=XY_data.end();++it)
+	for(std::map<double,double>::iterator it=XY_data.begin();it!=XY_data.end();++it)
 	{
 		if (it->first<lower_X_limit || it->first>upper_X_limit) 
 		{
@@ -398,7 +398,7 @@ quantity_t quantity_t::min_at_x(quantity_t& X, double lower_X_limit, double uppe
 }
 
 
-quantity_t quantity_t::median() const
+quantity::quantity_t quantity::quantity_t::median() const
 {
 	stringstream n;
 	n << "median(" << name() << ")";
@@ -406,7 +406,7 @@ quantity_t quantity_t::median() const
 	return median;
 }
 
-quantity_t quantity_t::quantile(double percentile) const
+quantity::quantity_t quantity::quantity_t::quantile(double percentile) const
 {
 	if (!is_set())
 		return {};
@@ -417,7 +417,7 @@ quantity_t quantity_t::quantile(double percentile) const
 	return quantile;
 }
 
-quantity_t quantity_t::geo_mean() const
+quantity::quantity_t quantity::quantity_t::geo_mean() const
 {
 	if (!is_set())
 		return {};
@@ -432,7 +432,7 @@ quantity_t quantity_t::geo_mean() const
 	return mean;
 }
 
-quantity_t quantity_t::mean() const
+quantity::quantity_t quantity::quantity_t::mean() const
 {
 	if (!is_set())
 		return {};
@@ -442,7 +442,7 @@ quantity_t quantity_t::mean() const
 	return mean;
 }
 
-quantity_t quantity_t::trimmed_mean(float alpha) const
+quantity::quantity_t quantity::quantity_t::trimmed_mean(float alpha) const
 {
 	if (!is_set())
 		return {};
@@ -452,7 +452,7 @@ quantity_t quantity_t::trimmed_mean(float alpha) const
 	return tr_mean;
 }
 
-quantity_t quantity_t::gastwirth() const
+quantity::quantity_t quantity::quantity_t::gastwirth() const
 {
 	if (!is_set())
 		return {};
@@ -462,7 +462,7 @@ quantity_t quantity_t::gastwirth() const
 	return gastw;
 }
 
-quantity_t quantity_t::mad() const
+quantity::quantity_t quantity::quantity_t::mad() const
 {
 	if (!is_set())
 		return {};
@@ -472,17 +472,17 @@ quantity_t quantity_t::mad() const
 	return mad;
 }
 
-quantity_t quantity_t::back() const
+quantity::quantity_t quantity::quantity_t::back() const
 {
 	return {name(),{data.back()},unit()};
 }
 
-quantity_t quantity_t::front() const
+quantity::quantity_t quantity::quantity_t::front() const
 {
 	return {name(),{data.front()},unit()};
 }
 
-quantity_t quantity_t::moving_window_mad(int window_size) const
+quantity::quantity_t quantity::quantity_t::moving_window_mad(int window_size) const
 {
 	if (!is_set())
 		return {};
@@ -496,7 +496,7 @@ quantity_t quantity_t::moving_window_mad(int window_size) const
 	return mad;
 }
 
-quantity_t quantity_t::reverse() const
+quantity::quantity_t quantity::quantity_t::reverse() const
 {
 	auto copy = *this;
 	size_t size = data.size();
@@ -506,12 +506,12 @@ quantity_t quantity_t::reverse() const
 }
 
 
-quantity_t quantity_t::moving_window_iqr(int window_size) const
+quantity::quantity_t quantity::quantity_t::moving_window_iqr(int window_size) const
 {
 	return moving_window_qqr(window_size,0.25);
 }
 
-quantity_t quantity_t::moving_window_qqr(int window_size, double q) const
+quantity::quantity_t quantity::quantity_t::moving_window_qqr(int window_size, double q) const
 {
 	if (!is_set())
 		return {};
@@ -524,7 +524,7 @@ quantity_t quantity_t::moving_window_qqr(int window_size, double q) const
 	return _mean;
 }
 
-quantity_t quantity_t::moving_window_max(int window_size) const
+quantity::quantity_t quantity::quantity_t::moving_window_max(int window_size) const
 {
 	if (!is_set())
 		return {};
@@ -537,7 +537,7 @@ quantity_t quantity_t::moving_window_max(int window_size) const
 	return _mean;
 }
 
-quantity_t quantity_t::moving_window_min(int window_size) const
+quantity::quantity_t quantity::quantity_t::moving_window_min(int window_size) const
 {
 	if (!is_set())
 		return {};
@@ -550,7 +550,7 @@ quantity_t quantity_t::moving_window_min(int window_size) const
 	return _mean;
 }
 
-quantity_t quantity_t::moving_window_sum(int window_size) const
+quantity::quantity_t quantity::quantity_t::moving_window_sum(int window_size) const
 {
 	if (!is_set())
 		return {};
@@ -564,7 +564,7 @@ quantity_t quantity_t::moving_window_sum(int window_size) const
 }
 
 
-quantity_t quantity_t::moving_window_mean(int window_size) const
+quantity::quantity_t quantity::quantity_t::moving_window_mean(int window_size) const
 {
 	if (!is_set())
 		return {};
@@ -577,7 +577,7 @@ quantity_t quantity_t::moving_window_mean(int window_size) const
 	return _mean;
 }
 
-quantity_t quantity_t::moving_window_median(int window_size) const
+quantity::quantity_t quantity::quantity_t::moving_window_median(int window_size) const
 {
 	if (!is_set())
 		return {};
@@ -590,7 +590,7 @@ quantity_t quantity_t::moving_window_median(int window_size) const
 	return _median;
 }
 
-quantity_t quantity_t::moving_window_sd(int window_size) const
+quantity::quantity_t quantity::quantity_t::moving_window_sd(int window_size) const
 {
 	if (!is_set())
 		return {};
@@ -603,7 +603,7 @@ quantity_t quantity_t::moving_window_sd(int window_size) const
 	return _sd;
 }
 
-quantity_t quantity_t::at(unsigned int pos) const
+quantity::quantity_t quantity::quantity_t::at(unsigned int pos) const
 {
 	if (!is_set())
 		return {};
@@ -612,7 +612,7 @@ quantity_t quantity_t::at(unsigned int pos) const
 	return {name(),{data.at(pos)},unit()};
 }
 
-quantity_t quantity_t::log10() const
+quantity::quantity_t quantity::quantity_t::log10() const
 {
 	if (!is_set())
 		return {};
@@ -622,7 +622,7 @@ quantity_t quantity_t::log10() const
 	return out;
 }
 
-quantity_t quantity_t::sd() const
+quantity::quantity_t quantity::quantity_t::sd() const
 {
 	if (!is_set())
 		return {};
@@ -632,7 +632,7 @@ quantity_t quantity_t::sd() const
 	return sd;
 }
 
-quantity_t quantity_t::max() const
+quantity::quantity_t quantity::quantity_t::max() const
 {
 	if (!is_set()) return {};
 	double max = statistics::get_max_from_Y(data);
@@ -641,7 +641,7 @@ quantity_t quantity_t::max() const
 	return {n.str(),{max},unit()};
 }
 
-quantity_t quantity_t::min() const
+quantity::quantity_t quantity::quantity_t::min() const
 {
 	if (!is_set()) return {};
 	int min_index = statistics::get_min_index_from_Y(data);
@@ -655,7 +655,7 @@ quantity_t quantity_t::min() const
 	return min;
 }
 
-bool quantity_t::is_nan() const
+bool quantity::quantity_t::is_nan() const
 {
 	for (auto& d : data)
 		if (isnan(d))
@@ -663,7 +663,7 @@ bool quantity_t::is_nan() const
 	return false;
 }
 
-bool quantity_t::is_inf() const
+bool quantity::quantity_t::is_inf() const
 {
 	for (auto& d : data)
 		if (isinf(d))
@@ -671,7 +671,7 @@ bool quantity_t::is_inf() const
 	return false;
 }
 
-bool quantity_t::is_set() const
+bool quantity::quantity_t::is_set() const
 {
 	if (data.size()==0) return false;
 // 	if (dimension.length()==0) return false;
@@ -679,21 +679,21 @@ bool quantity_t::is_set() const
 	return true;
 }
 
-bool quantity_t::is_scalar() const
+bool quantity::quantity_t::is_scalar() const
 {
 	if (!is_set()) return false;
 	if (data.size()==1) return true;
 	return false;
 }
 
-bool quantity_t::is_vector() const
+bool quantity::quantity_t::is_vector() const
 {
 	if (!is_set()) return false;
 	if (is_scalar()) return false;
 	return true;
 }
 
-quantity_t quantity_t::filter_impulse(int window_size, float factor) const
+quantity::quantity_t quantity::quantity_t::filter_impulse(int window_size, float factor) const
 {
 	if (!is_set())
 		return {};
@@ -707,7 +707,7 @@ quantity_t quantity_t::filter_impulse(int window_size, float factor) const
 	return filtered;
 }
 
-quantity_t quantity_t::filter_gaussian(int window_size, double alpha) const
+quantity::quantity_t quantity::quantity_t::filter_gaussian(int window_size, double alpha) const
 {
 	if (!is_set())
 		return {};
@@ -720,7 +720,7 @@ quantity_t quantity_t::filter_gaussian(int window_size, double alpha) const
 }
 
 
-quantity_t quantity_t::filter_recursive_median(int window_size) const
+quantity::quantity_t quantity::quantity_t::filter_recursive_median(int window_size) const
 {
 	if (!is_set())
 		return {};
@@ -732,7 +732,7 @@ quantity_t quantity_t::filter_recursive_median(int window_size) const
 	return recursiveMedian_filtered;
 }
 
-quantity_t quantity_t::change_resolution(unsigned int new_data_size) const
+quantity::quantity_t quantity::quantity_t::change_resolution(unsigned int new_data_size) const
 {
 	if (new_data_size<=1)
 		return {};
@@ -742,34 +742,34 @@ quantity_t quantity_t::change_resolution(unsigned int new_data_size) const
 	return change_resolution({name(),new_res.data,new_res.unit()});
 }
 
-quantity_t quantity_t::change_resolution(quantity_t new_res) const
+quantity::quantity_t quantity::quantity_t::change_resolution(quantity_t new_res) const
 {
 	if (!is_set() || !new_res.is_set()) return{};
 // 	if (name() != new_res.name())
 // 	{
-// 		logger::error("quantity_t::change_resolution()","name() != new_res.name()",name() + "!=" + new_res.name(),"returning empty");
+// 		logger::error("quantity::quantity_t::change_resolution()","name() != new_res.name()",name() + "!=" + new_res.name(),"returning empty");
 // 		return {};
 // 	}
 	if (new_res.data.size()!=1)
-		logger::debug(4,"quantity_t::change_resolution()","new_res.data.size()!=1",tools::to_string(new_res.data.size()));
+		logger::debug(13,"quantity::quantity_t::change_resolution()","new_res.data.size()!=1",tools::to_string(new_res.data.size()));
 // 	new_res = new_res.change_unit(unit());
 	if (!new_res.is_set())
 	{
-		logger::debug(4,"quantity_t::change_resolution()","!new_res.is_set()","","returning empty");
+		logger::debug(13,"quantity::quantity_t::change_resolution()","!new_res.is_set()","","returning empty");
 		return {};
 	}
 	quantity_t old_Q = change_unit(new_res.unit());
 	if (!old_Q.is_set())
 	{
-		logger::debug(4,"quantity_t::resolution()","!old_Q.is_set()","","returning empty");
+		logger::debug(13,"quantity::quantity_t::resolution()","!old_Q.is_set()","","returning empty");
 		return {};
 	}
-	logger::debug(5,"quantity_t::resolution()","new_res",new_res.to_string());
+	logger::debug(13,"quantity::quantity_t::resolution()","new_res",new_res.to_string());
 // 	return resolution(new_res.data.front());
 	return old_Q.resolution(new_res.data.front());
 }
 
-quantity_t quantity_t::resolution(double new_res) const
+quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
 {
 	if (!is_set())	return {};
 	if (new_res==0) //the momentary resolutiion
@@ -791,7 +791,7 @@ quantity_t quantity_t::resolution(double new_res) const
 	return new_quantity;
 }
 
-const string quantity_t::to_string() const
+const string quantity::quantity_t::to_string() const
 {
 	ostringstream out;
 	if (data.size()>1)
@@ -803,7 +803,7 @@ const string quantity_t::to_string() const
 	return out.str();
 }
 
-const string quantity_t::to_string_detailed() const
+const string quantity::quantity_t::to_string_detailed() const
 {
 	ostringstream out;
 	if (data.size()>1)
@@ -826,30 +826,46 @@ const string quantity_t::to_string_detailed() const
 
 
 
-// quantity_t quantity_t::mean() const
+// quantity_t quantity::quantity_t::mean() const
 // {
 // 	quantity_t mean_p{"mean("+name()+")",{statistics::get_mean_from_Y(data)},unit()};
 // 	return mean_p;
 // }
 // 
-// quantity_t quantity_t::median() const
+// quantity_t quantity::quantity_t::median() const
 // {
 // 	quantity_t median_p{"median("+name()+")",{statistics::get_median_from_Y(data)},unit()};
 // 	return median_p;
 // }
 
-const string quantity_t::name() const
+const string quantity::quantity_t::name() const
 {
 	return name_p;
 }
 
-unit_t quantity_t::unit() const
+const unit_t& quantity::quantity_t::unit() const
 {
 	return unit_p;
 }
 
+const unit_t quantity::quantity_t::unit_copy() const
+{
+	return unit_p;
+}
 
-quantity_t quantity_t::change_unit(unit_t target_unit) const
+quantity::quantity_t quantity::quantity_t::change_unit(string target_unit_string) const
+{
+	quantity_t q = change_unit(unit_t(target_unit_string));
+	if (q.is_set())
+	{
+		q.unit_p.prefered_output_string = target_unit_string;
+		logger::debug(15,"quantity::quantity_t::change_unit()","q.unit_p.prefered_output_string=" + q.unit_p.prefered_output_string, "target_unit_string=" + target_unit_string );
+		return q;
+	}
+	return {};
+}
+
+quantity::quantity_t quantity::quantity_t::change_unit(unit_t target_unit) const
 {	
 	if (!is_set())
 		return {};
@@ -857,18 +873,18 @@ quantity_t quantity_t::change_unit(unit_t target_unit) const
 		return *this;
 	if (unit().base_units_exponents != target_unit.base_units_exponents) 
 	{
-		logger::warning(1,"quantity_t::change_unit()","unit().base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
-		return *this;
+		logger::warning(1,"quantity::quantity_t::change_unit()","unit().base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
+		return {};
 	}
 // 	quantity_t copy = *this;
 	double factor = unit().multiplier / target_unit.multiplier;
 // 	for (int i=0;i<data.size();i++)
 // 		copy.data[i] *= factor ;
-	logger::debug(13,"quantity_t::change_unit()","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
+	logger::debug(14,"quantity::quantity_t::change_unit()","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
 	return quantity_t{*this * factor,target_unit};
 }
 
-quantity_t quantity_t::invert() const
+quantity::quantity_t quantity::quantity_t::invert() const
 {
 	if (!is_set()) return {};
 	quantity_t inv = *this;
@@ -883,7 +899,7 @@ quantity_t quantity_t::invert() const
 	return {inv.name(),inv.data, unit().invert()};
 }
 
-quantity_t quantity_t::remove_data_from_begin(unsigned int stop) const
+quantity::quantity_t quantity::quantity_t::remove_data_from_begin(unsigned int stop) const
 {
 // 	cout << "stop=" << stop << endl;
 	if (stop==0)
@@ -891,7 +907,7 @@ quantity_t quantity_t::remove_data_from_begin(unsigned int stop) const
 	return remove_data_by_index(0,stop);
 }
 
-quantity_t quantity_t::remove_data_from_begin(const quantity_t& remove_stop) const
+quantity::quantity_t quantity::quantity_t::remove_data_from_begin(const quantity_t& remove_stop) const
 {
 // 	if (!remove_stop.is_set())
 // 		return {};
@@ -899,7 +915,7 @@ quantity_t quantity_t::remove_data_from_begin(const quantity_t& remove_stop) con
 	return remove_data_from_begin(remove_stop.change_unit(unit()).data.front());
 }
 
-quantity_t quantity_t::remove_data_by_index(unsigned int start, unsigned int stop) const
+quantity::quantity_t quantity::quantity_t::remove_data_by_index(unsigned int start, unsigned int stop) const
 {
 	if (!is_set())
 		return {};
@@ -907,7 +923,7 @@ quantity_t quantity_t::remove_data_by_index(unsigned int start, unsigned int sto
 		start=0;
 	if (start>=data.size())
 	{
-		logger::error("quantity_t::remove_data_by_index()","start>=data.size()","","return empty");
+		logger::error("quantity::quantity_t::remove_data_by_index()","start>=data.size()","","return empty");
 		return {};
 	}
 	if (stop>data.size())
@@ -920,7 +936,7 @@ quantity_t quantity_t::remove_data_by_index(unsigned int start, unsigned int sto
 	return copy;
 }
 
-quantity_t quantity_t::get_data_by_index(unsigned int start, unsigned int stop) const
+quantity::quantity_t quantity::quantity_t::get_data_by_index(unsigned int start, unsigned int stop) const
 {
 	if (!is_set())
 		return {};
@@ -928,24 +944,19 @@ quantity_t quantity_t::get_data_by_index(unsigned int start, unsigned int stop) 
 		start=0;
 	if (start>data.size())
 	{
-		logger::error("quantity_t::get_data_by_index()","start>=data.size()","","return empty");
+		logger::error("quantity::quantity_t::get_data_by_index()","start>=data.size()","","return empty");
 		return {};
 	}
 	if (stop>data.size())
 	{
-// 		logger::error("quantity_t::filter_data_by_index()","stop>=data.size()","","return empty");
-// 		return {};
 		stop=data.size();
 	}
-	
 	quantity_t copy = *this;
 	copy.data = vector<double> (data.begin()+start,data.begin()+stop);
-// 	copy.data.erase(copy.data.begin()+stop,copy.data.begin()+data.size());
-// 	copy.data.erase(copy.data.begin(),copy.data.begin()+start);
 	return copy;
 }
 
-quantity_t quantity_t::abs_sum() const
+quantity::quantity_t quantity::quantity_t::abs_sum() const
 {
 	if (!is_set()) return {};
 	double sum=0;
@@ -957,12 +968,10 @@ quantity_t quantity_t::abs_sum() const
 	return {ss.str(),{sum},unit()};
 }
 
-quantity_t quantity_t::absolute() const
+quantity::quantity_t quantity::quantity_t::absolute() const
 {
 	if (!is_set()) return {};
 	quantity_t copy = *this;
-// 	for (auto& d: data)
-// 		sum += pow(d,2);
 	for (auto& d : copy.data)
 		d=abs(d);
 	stringstream ss;
@@ -970,7 +979,7 @@ quantity_t quantity_t::absolute() const
 	return {ss.str(),copy.data,unit()};
 }
 
-quantity_t quantity_t::sum(int start, int stop) const
+quantity::quantity_t quantity::quantity_t::sum(int start, int stop) const
 {
 	if (!is_set()) return {};
 	if (stop<0)
@@ -986,14 +995,14 @@ quantity_t quantity_t::sum(int start, int stop) const
 }
 
 
-bool quantity_t::operator<(const quantity_t& obj) const
+bool quantity::quantity_t::operator<(const quantity_t& obj) const
 {
 	if (*this > obj || *this == obj)
 		return false;
 	return true;
 }
 
-bool quantity_t::operator>(const quantity_t& obj) const
+bool quantity::quantity_t::operator>(const quantity_t& obj) const
 {
 	if (!is_set() || !obj.is_set())
 		return false;
@@ -1014,7 +1023,7 @@ bool quantity_t::operator>(const quantity_t& obj) const
 	return true;
 }
 
-bool quantity_t::operator==(const quantity_t& obj) const
+bool quantity::quantity_t::operator==(const quantity_t& obj) const
 {
 	if (unit()!=obj.unit()) return false;
 	if (data.size()!=obj.data.size())	 return false;
@@ -1023,12 +1032,12 @@ bool quantity_t::operator==(const quantity_t& obj) const
 	return true;
 }
 
-bool quantity_t::operator!=(const quantity_t& obj) const
+bool quantity::quantity_t::operator!=(const quantity_t& obj) const
 {
 	return !(operator==(obj));
 }
 
-void quantity_t::operator<<(quantity_t obj)
+void quantity::quantity_t::operator<<(quantity_t obj)
 {
 	if (!obj.is_set()) return;
 	if (!is_set())
@@ -1038,14 +1047,14 @@ void quantity_t::operator<<(quantity_t obj)
 	}
 	if (unit().base_units_exponents!=obj.unit().base_units_exponents)
 	{
-		logger::error("quantity_t::operator<<()","base units are different: " + unit().base_units_exponents.to_string() + " != " + obj.unit().base_units_exponents.to_string());
+		logger::error("quantity::quantity_t::operator<<()","base units are different: " + unit().base_units_exponents.to_string() + " != " + obj.unit().base_units_exponents.to_string());
 		return;
 	}
 	quantity_t adder = obj.change_unit(unit());
 	tools::vec::add(&data,adder.data);
 }
 
-quantity_t quantity_t::operator+(const quantity_t& quantity) const
+quantity::quantity_t quantity::quantity_t::operator+(const quantity_t& quantity) const
 {
 	if (name()!=quantity.name()) return {}; // only allow addition within the same Größenart
 	if (!is_set() || !quantity.is_set()) return {};
@@ -1078,7 +1087,7 @@ quantity_t quantity_t::operator+(const quantity_t& quantity) const
 	return sum;
 }
 
-quantity_t quantity_t::operator+(const double summand) const
+quantity::quantity_t quantity::quantity_t::operator+(const double summand) const
 {
 	if (!is_set()) return {};
 	quantity_t sum=*this;
@@ -1090,16 +1099,16 @@ quantity_t quantity_t::operator+(const double summand) const
 	return sum;
 }
 
-quantity_t quantity_t::operator-(const quantity_t& quantity) const
+quantity::quantity_t quantity::quantity_t::operator-(const quantity_t& quantity) const
 {
 	return {*this + quantity*(-1)};
 }
-quantity_t quantity_t::operator-(const double summand) const
+quantity::quantity_t quantity::quantity_t::operator-(const double summand) const
 {
 	return {*this + summand*(-1)};
 }
 
-quantity_t quantity_t::operator * (const quantity_t& quantity_p) const
+quantity::quantity_t quantity::quantity_t::operator * (const quantity_t& quantity_p) const
 {
 	if (!is_set() || !quantity_p.is_set()) return {};
 
@@ -1127,7 +1136,7 @@ quantity_t quantity_t::operator * (const quantity_t& quantity_p) const
 	return produkt;
 }
 
-quantity_t quantity_t::operator / (const quantity_t& quantity_p) const
+quantity::quantity_t quantity::quantity_t::operator / (const quantity_t& quantity_p) const
 {
 	if (!is_set() || !quantity_p.is_set()) return {};
 	quantity_t quotient{name() + " / (" + quantity_p.name() +")",{unit() / quantity_p.unit()}};
@@ -1159,7 +1168,7 @@ quantity_t quantity_t::operator / (const quantity_t& quantity_p) const
 	return quotient;
 }
 
-quantity_t quantity_t::operator/ (const double divisor) const
+quantity::quantity_t quantity::quantity_t::operator/ (const double divisor) const
 {
 	quantity_t quotient=*this;
 	for (int i=0;i<data.size();i++)
@@ -1170,7 +1179,7 @@ quantity_t quantity_t::operator/ (const double divisor) const
 	return quotient;
 }
 
-quantity_t quantity_t::operator * (const double factor) const
+quantity::quantity_t quantity::quantity_t::operator * (const double factor) const
 {
 	quantity_t multiplier=*this;
 	for (int i=0;i<data.size();i++)
@@ -1180,116 +1189,80 @@ quantity_t quantity_t::operator * (const double factor) const
 	return multiplier;
 }
 
-void quantity_t::operator+=(const double summand)
+void quantity::quantity_t::operator+=(const double summand)
 {
 	*this = *this + summand;
 }
 
-void quantity_t::operator+=(const quantity_t& quantity_p)
+void quantity::quantity_t::operator+=(const quantity_t& quantity_p)
 {
 	*this = *this + quantity_p;
 }
 
-
-/******************************************/
-/*STATICS*/
-// quantity_t quantity_t::sputter_energy()
-// {
-// 	return quantity_t{"sputter_energy",{"eV"}};
-// }
-// 
-// quantity_t quantity_t::analysis_energy()
-// {
-// 	return quantity_t{"analysis_energy",{"keV"}};
-// }
-// 
-// quantity_t quantity_t::analysis_rastersize()
-// {
-// 	return quantity_t{"analysis_rastersize",{"um"}};
-// }
-// 
-// quantity_t quantity_t::concentration()
-// {
-// 	return quantity_t{"concentration",{"at/cm^3"}};
-// }
-// 
-// quantity_t quantity_t::dose()
-// {
-// 	return quantity_t{"dose",{"at/cm^2"}};
-// }
-
-
-
 /*********************/
 
-mass_t::mass_t(vector<double> data_s,unit_t unit_s) : quantity_t("mass",data_s,unit_s){}
-mass_t::mass_t(quantity_t quantity_s) : mass_t(quantity_s.data,quantity_s.unit()) {}
+quantity::mass_t::mass_t(vector<double> data_s,unit_t unit_s) : quantity_t("mass",data_s,unit_s){}
+quantity::mass_t::mass_t(quantity_t quantity_s) : mass_t(quantity_s.data,quantity_s.unit()) {}
 
-abundance_t::abundance_t(vector<double> data_s,unit_t unit_s) : quantity_t("abundance",data_s,unit_s){}
-abundance_t::abundance_t(quantity_t quantity_s) : abundance_t(quantity_s.data,quantity_s.unit()) {}
+quantity::abundance_t::abundance_t(vector<double> data_s,unit_t unit_s) : quantity_t("abundance",data_s,unit_s){}
+quantity::abundance_t::abundance_t(quantity_t quantity_s) : abundance_t(quantity_s.data,quantity_s.unit()) {}
 
-energy_t::energy_t(vector<double> data_s,unit_t unit_s) : quantity_t("energy",data_s,unit_s){}
-energy_t::energy_t(quantity_t quantity_s) : energy_t(quantity_s.data,quantity_s.unit()) {}
+quantity::energy_t::energy_t(vector<double> data_s,unit_t unit_s) : quantity_t("energy",data_s,unit_s){}
+quantity::energy_t::energy_t(quantity_t quantity_s) : energy_t(quantity_s.data,quantity_s.unit()) {}
 
-rastersize_t::rastersize_t(vector<double> data_s,unit_t unit_s) : quantity_t( "rastersize",data_s,unit_s){}
-rastersize_t::rastersize_t(quantity_t quantity_s) : rastersize_t(quantity_s.data,quantity_s.unit()) {}
+quantity::rastersize_t::rastersize_t(vector<double> data_s,unit_t unit_s) : quantity_t( "rastersize",data_s,unit_s){}
+quantity::rastersize_t::rastersize_t(quantity_t quantity_s) : rastersize_t(quantity_s.data,quantity_s.unit()) {}
 
-depth_t::depth_t(vector<double> data_s,unit_t unit_s) : quantity_t("depth",data_s,unit_s){}
-depth_t::depth_t(quantity_t quantity_s) : depth_t(quantity_s.data,quantity_s.unit()) {}
+quantity::depth_t::depth_t(vector<double> data_s,unit_t unit_s) : quantity_t("depth",data_s,unit_s){}
+quantity::depth_t::depth_t(quantity_t quantity_s) : depth_t(quantity_s.data,quantity_s.unit()) {}
 
-sputter_depth_t::sputter_depth_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_depth",data_s,unit_s){}
-sputter_depth_t::sputter_depth_t(quantity_t quantity_s) : sputter_depth_t(quantity_s.data,quantity_s.unit()) {}
+quantity::sputter_depth_t::sputter_depth_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_depth",data_s,unit_s){}
+quantity::sputter_depth_t::sputter_depth_t(quantity_t quantity_s) : sputter_depth_t(quantity_s.data,quantity_s.unit()) {}
 
-total_sputter_depth_t::total_sputter_depth_t(vector<double> data_s,unit_t unit_s) : quantity_t("total_sputter_depth",data_s,unit_s){}
-total_sputter_depth_t::total_sputter_depth_t(quantity_t quantity_s) : total_sputter_depth_t(quantity_s.data,quantity_s.unit()) {}
+quantity::total_sputter_depth_t::total_sputter_depth_t(vector<double> data_s,unit_t unit_s) : quantity_t("total_sputter_depth",data_s,unit_s){}
+quantity::total_sputter_depth_t::total_sputter_depth_t(quantity_t quantity_s) : total_sputter_depth_t(quantity_s.data,quantity_s.unit()) {}
 
-sputter_time_t::sputter_time_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_time",data_s,unit_s){}
-sputter_time_t::sputter_time_t(quantity_t quantity_s) : sputter_time_t(quantity_s.data,quantity_s.unit()) {}
+quantity::sputter_time_t::sputter_time_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_time",data_s,unit_s){}
+quantity::sputter_time_t::sputter_time_t(quantity_t quantity_s) : sputter_time_t(quantity_s.data,quantity_s.unit()) {}
 
-total_sputter_time_t::total_sputter_time_t(vector<double> data_s,unit_t unit_s) : quantity_t("total_sputter_time",data_s,unit_s){}
-total_sputter_time_t::total_sputter_time_t(quantity_t quantity_s) : total_sputter_time_t(quantity_s.data,quantity_s.unit()) {}
+quantity::total_sputter_time_t::total_sputter_time_t(vector<double> data_s,unit_t unit_s) : quantity_t("total_sputter_time",data_s,unit_s){}
+quantity::total_sputter_time_t::total_sputter_time_t(quantity_t quantity_s) : total_sputter_time_t(quantity_s.data,quantity_s.unit()) {}
 
-// analysis_energy_t::analysis_energy_t(vector<double> data_s,unit_t unit_s) : quantity_t("analysis_energy",data_s,unit_s){}
-// analysis_energy_t::analysis_energy_t(quantity_t quantity_s) : analysis_energy_t(quantity_s.data,quantity_s.unit()) {}
-// 
-// analysis_rastersize_t::analysis_rastersize_t(vector<double> data_s,unit_t unit_s) : quantity_t("analysis_rastersize",data_s,unit_s){}
-// analysis_rastersize_t::analysis_rastersize_t(quantity_t quantity_s) : analysis_rastersize_t(quantity_s.data,quantity_s.unit()) {}
+quantity::intensity_t::intensity_t(vector<double> data_s,unit_t unit_s) : quantity_t("intensity",data_s,unit_s){}
+quantity::intensity_t::intensity_t(quantity_t quantity_s) : intensity_t(quantity_s.data,quantity_s.unit()) {}
 
-intensity_t::intensity_t(vector<double> data_s,unit_t unit_s) : quantity_t("intensity",data_s,unit_s){}
-intensity_t::intensity_t(quantity_t quantity_s) : intensity_t(quantity_s.data,quantity_s.unit()) {}
+quantity::current_t::current_t(vector<double> data_s,unit_t unit_s) : quantity_t("current",data_s,unit_s){}
+quantity::current_t::current_t(quantity_t quantity_s) : current_t(quantity_s.data,quantity_s.unit()) {}
 
-current_t::current_t(vector<double> data_s,unit_t unit_s) : quantity_t("current",data_s,unit_s){}
-current_t::current_t(quantity_t quantity_s) : current_t(quantity_s.data,quantity_s.unit()) {}
+quantity::sputter_current_t::sputter_current_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_current_t",data_s,unit_s){}
+quantity::sputter_current_t::sputter_current_t(quantity_t quantity_s) : sputter_current_t(quantity_s.data,quantity_s.unit()) {}
 
-sputter_current_t::sputter_current_t(vector<double> data_s,unit_t unit_s) : quantity_t("primary_sputter_current",data_s,unit_s){}
-sputter_current_t::sputter_current_t(quantity_t quantity_s) : sputter_current_t(quantity_s.data,quantity_s.unit()) {}
+quantity::analysis_current_t::analysis_current_t(vector<double> data_s,unit_t unit_s) : quantity_t("primary_analysis_current",data_s,unit_s){}
+quantity::analysis_current_t::analysis_current_t(quantity_t quantity_s) : analysis_current_t(quantity_s.data,quantity_s.unit()) {}
 
-analysis_current_t::analysis_current_t(vector<double> data_s,unit_t unit_s) : quantity_t("primary_analysis_current",data_s,unit_s){}
-analysis_current_t::analysis_current_t(quantity_t quantity_s) : analysis_current_t(quantity_s.data,quantity_s.unit()) {}
+quantity::concentration_t::concentration_t(vector<double> data_s,unit_t unit_s) : quantity_t("concentration",data_s,unit_s){}
+quantity::concentration_t::concentration_t(quantity_t quantity_s) : concentration_t(quantity_s.data,quantity_s.unit()) {}
 
-concentration_t::concentration_t(vector<double> data_s,unit_t unit_s) : quantity_t("concentration",data_s,unit_s){}
-concentration_t::concentration_t(quantity_t quantity_s) : concentration_t(quantity_s.data,quantity_s.unit()) {}
+quantity::dose_t::dose_t(vector<double> data_s,unit_t unit_s) : quantity_t("dose",data_s,unit_s){}
+quantity::dose_t::dose_t(quantity_t quantity_s) : dose_t(quantity_s.data,quantity_s.unit()) {}
 
-dose_t::dose_t(vector<double> data_s,unit_t unit_s) : quantity_t("dose",data_s,unit_s){}
-dose_t::dose_t(quantity_t quantity_s) : dose_t(quantity_s.data,quantity_s.unit()) {}
+quantity::SF_t::SF_t(vector<double> data_s,unit_t unit_s) : quantity_t("sensitivity_factor",data_s,unit_s){}
+quantity::SF_t::SF_t(quantity_t quantity_s) : SF_t(quantity_s.data,quantity_s.unit()) {}
 
-SF_t::SF_t(vector<double> data_s,unit_t unit_s) : quantity_t("sensitivity_factor",data_s,unit_s){}
-SF_t::SF_t(quantity_t quantity_s) : SF_t(quantity_s.data,quantity_s.unit()) {}
+quantity::RSF_t::RSF_t(vector<double> data_s,unit_t unit_s) : quantity_t("relative_sensitivity_factor",data_s,unit_s){}
+quantity::RSF_t::RSF_t(quantity_t quantity_s) : RSF_t(quantity_s.data,quantity_s.unit()) {}
 
-RSF_t::RSF_t(vector<double> data_s,unit_t unit_s) : quantity_t("relative_sensitivity_factor",data_s,unit_s){}
-RSF_t::RSF_t(quantity_t quantity_s) : RSF_t(quantity_s.data,quantity_s.unit()) {}
+quantity::SR_t::SR_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_rate",data_s,unit_s){}
+quantity::SR_t::SR_t(quantity_t quantity_s) : SR_t(quantity_s.data,quantity_s.unit()) {}
 
-SR_t::SR_t(vector<double> data_s,unit_t unit_s) : quantity_t("sputter_rate",data_s,unit_s){}
-SR_t::SR_t(quantity_t quantity_s) : SR_t(quantity_s.data,quantity_s.unit()) {}
+quantity::secondary_voltage_t::secondary_voltage_t(vector<double> data_s, unit_t unit_s) : quantity_t("secondary_voltage",data_s,unit_s) {}
+quantity::secondary_voltage_t::secondary_voltage_t(quantity_t quantity_s) :secondary_voltage_t(quantity_s.data,quantity_s.unit()) {}
 
-secondary_voltage_t::secondary_voltage_t(vector<double> data_s, unit_t unit_s) : quantity_t("secondary_voltage",data_s,unit_s) {}
-secondary_voltage_t::secondary_voltage_t(quantity_t quantity_s) :secondary_voltage_t(quantity_s.data,quantity_s.unit()) {}
+quantity::substance_amount_t::substance_amount_t(vector<double> data_s, unit_t unit_s) : quantity_t("substance_amount",data_s,unit_s) {}
+quantity::substance_amount_t::substance_amount_t(quantity_t quantity_s) :substance_amount_t(quantity_s.data,quantity_s.unit()) {}
 
-substance_amount_t::substance_amount_t(vector<double> data_s, unit_t unit_s) : quantity_t("substance_amount",data_s,unit_s) {}
-substance_amount_t::substance_amount_t(quantity_t quantity_s) :substance_amount_t(quantity_s.data,quantity_s.unit()) {}
-
-electrical_charge_t::electrical_charge_t(vector<double> data_s, unit_t unit_s) : quantity_t("electrical_charge",data_s,unit_s) {}
-electrical_charge_t::electrical_charge_t(quantity_t quantity_s) :electrical_charge_t(quantity_s.data,quantity_s.unit()) {}
+quantity::electrical_charge_t::electrical_charge_t(vector<double> data_s, unit_t unit_s) : quantity_t("electrical_charge",data_s,unit_s) {}
+quantity::electrical_charge_t::electrical_charge_t(quantity_t quantity_s) :electrical_charge_t(quantity_s.data,quantity_s.unit()) {}
 
 
 

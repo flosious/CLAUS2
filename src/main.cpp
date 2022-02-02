@@ -1,10 +1,10 @@
 /* 
  * 	CLever AUtomated Scientist
- * 	Version 2020-11-11_1
- * 	Florian Bärwolf 2020
+ * 	Version 2021-10-17_1
+ * 	Florian Bärwolf 2021
  *	
  * 
- *  Copyright (C) 2020 Florian Bärwolf
+ *  Copyright (C) 2020-2021 Florian Bärwolf
 	floribaer@gmx.de
 	
     This program is free software: you can redistribute it and/or modify
@@ -77,18 +77,13 @@
  * 
  * Output:
  * 		evaluated measurement results as files
- *		graphs (needs gnuplot)
+ *		graphs
  * 
  * Necessities:
  * 		config file(s) (config.conf)
  * 		periodic table of elements (pse.csv)
  *		sqlite3 database filled with reference measurements
  
- 
- Program paradigms:
-	- object-oriented: 	for description of actual physical properties (samples, measurements, samples properties like concentrations, depths, etc.)
-	- kind of declarative:		for calculation/searching of missing properties (e.g. concentration of a cluster can be calculated be searching a similar measurement/database or by calculation from dose, or maximum implant concentration, etc.). 
-	- 							the algorithm is designed to iterate available calculation methos from highest priority (asuming lowest calc error) to lowest (asuming highest calc error), e.g. prefering dose over one concentration(depth) data point
  
  Main Classes Dependencies:
 	main(args) -> processor(args)	-> vector<string> filenames = args

@@ -78,7 +78,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 	{
 		for (auto& C : M->clusters)
 		{
-			intensity_t Iref = M->matrix_clusters().intensity_sum();
+			quantity::intensity_t Iref = M->matrix_clusters().intensity_sum();
 // 			cout << endl << Iref.to_string_detailed() << endl;
 			
 			if (C.intensity.is_set() && Iref.is_set() && !M->matrix_clusters().is_cluster_in_matrix(C))
@@ -93,59 +93,59 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 	return *this;
 }
 
-// map<sample_t::matrix_t,SR_t> mgroups_::sims_t::calc_t::matrices_to_SR()
+// map<sample_t::matrix_t,quantity::SR_t> mgroups_::sims_t::calc_t::matrices_to_SR()
 // {
-// 	vector<pair<sample_t::matrix_t,SR_t>> mats_to_SR;
-// 	map<sample_t::matrix_t,SR_t> mats_to_SR_map;
+// 	vector<pair<sample_t::matrix_t,quantity::SR_t>> mats_to_SR;
+// 	map<sample_t::matrix_t,quantity::SR_t> mats_to_SR_map;
 // 	
 // 	for (auto& M : measurements)
 // 	{
 // 		if (!M->sample->matrix().is_set()) continue;
 // 		if (!M->crater.SR.is_set()) continue;
-// 		mats_to_SR.push_back(pair<sample_t::matrix_t,SR_t>(M->sample->matrix(),M->crater.SR));
+// 		mats_to_SR.push_back(pair<sample_t::matrix_t,quantity::SR_t>(M->sample->matrix(),M->crater.SR));
 // 	}
 // 	
 // 	// now there could be entries with same matrices in vector mats_to_SR, lets filter them and take their mean
 // 	for (int i=0;i<mats_to_SR.size();i++)
 // 	{
-// 		SR_t SR = mats_to_SR.at(i).second;
+// 		quantity::SR_t SR = mats_to_SR.at(i).second;
 // 		for (int j=i+1;j<mats_to_SR.size();j++)
 // 		{
 // 			if (mats_to_SR.at(i).first == mats_to_SR.at(j).first)
 // 				SR << mats_to_SR.at(j).second;
 // 		}
 // 		if (SR.data.size() > 1)
-// 			SR = SR_t(SR.mean()); // take the mean, but don't tell anyone
-// 		mats_to_SR_map.insert(pair<sample_t::matrix_t,SR_t> (mats_to_SR.at(i).first,SR));
+// 			SR = quantity::SR_t(SR.mean()); // take the mean, but don't tell anyone
+// 		mats_to_SR_map.insert(pair<sample_t::matrix_t,quantity::SR_t> (mats_to_SR.at(i).first,SR));
 // 	}
 // 	
 // 	return mats_to_SR_map;
 // }
 // 
-// map<sample_t::matrix_t,RSF_t> mgroups_::sims_t::calc_t::matrices_to_RSF(const cluster_t& cluster)
+// map<sample_t::matrix_t,quantity::SF_t> mgroups_::sims_t::calc_t::matrices_to_RSF(const cluster_t& cluster)
 // {
-// 	map<sample_t::matrix_t,RSF_t> mat_to_RSF_map;
-// 	vector<pair<sample_t::matrix_t,RSF_t>> mat_to_RSF;
+// 	map<sample_t::matrix_t,quantity::SF_t> mat_to_RSF_map;
+// 	vector<pair<sample_t::matrix_t,quantity::SF_t>> mat_to_RSF;
 // 	for (auto& M : measurements)
 // 	{
 // 		if (!M->sample->matrix().is_set()) continue;
-// 		RSF_t RSF = M->cluster(cluster)->RSF;
+// 		quantity::SF_t RSF = M->cluster(cluster)->RSF;
 // 		if (!RSF.is_set()) continue;
-// 		mat_to_RSF.push_back(pair<sample_t::matrix_t,RSF_t>(M->sample->matrix(),RSF));
+// 		mat_to_RSF.push_back(pair<sample_t::matrix_t,quantity::SF_t>(M->sample->matrix(),RSF));
 // 	}
 // 	
 // 	// now there could be entries with same matrices in vector mat_to_RSF, lets filter them and take their mean
 // 	for (int i=0;i<mat_to_RSF.size();i++)
 // 	{
-// 		RSF_t RSF = mat_to_RSF.at(i).second;
+// 		quantity::SF_t RSF = mat_to_RSF.at(i).second;
 // 		for (int j=i+1;j<mat_to_RSF.size();j++)
 // 		{
 // 			if (mat_to_RSF.at(i).first == mat_to_RSF.at(j).first)
 // 				RSF << mat_to_RSF.at(j).second;
 // 		}
 // 		if (RSF.data.size() > 1)
-// 			RSF = SR_t(RSF.mean()); // take the mean, but don't tell anyone
-// 		mat_to_RSF_map.insert(pair<sample_t::matrix_t,RSF_t> (mat_to_RSF.at(i).first,RSF));
+// 			RSF = quantity::SR_t(RSF.mean()); // take the mean, but don't tell anyone
+// 		mat_to_RSF_map.insert(pair<sample_t::matrix_t,quantity::SF_t> (mat_to_RSF.at(i).first,RSF));
 // 	}
 // 	
 // 	return mat_to_RSF_map;
@@ -265,15 +265,15 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_median_ref(bo
 	{
 		if (overwrite || !rsf_to_ref.first->SF.is_set())
 		{
-			rsf_to_ref.first->SF = SF_t (rsf_to_ref.first->RSF / rsf_to_ref.second.median()); // this is the median of a sum; not the sum of the medians!
+			rsf_to_ref.first->SF = quantity::SF_t (rsf_to_ref.first->RSF / rsf_to_ref.second.median()); // this is the median of a sum; not the sum of the medians!
 		}
 	}
 	return calc;
 }
 
-const map<cluster_t*,intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs_to_ref_intensities()
+const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs_to_ref_intensities()
 {
-	map<cluster_t*,intensity_t> rsf_to_ref_intensity;
+	map<cluster_t*,quantity::intensity_t> rsf_to_ref_intensity;
 	for (auto& M : measurements)
 	{
 		auto matrix_clusters = M->matrix_clusters();
@@ -285,7 +285,7 @@ const map<cluster_t*,intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs_to_ref_in
 		for (auto& C : M->clusters)
 		{
 			if (!C.RSF.is_set()) continue;
-				rsf_to_ref_intensity.insert(pair<cluster_t*,intensity_t> (&C,matrix_clusters.intensity_sum()));
+				rsf_to_ref_intensity.insert(pair<cluster_t*,quantity::intensity_t> (&C,matrix_clusters.intensity_sum()));
 		}
 	}
 	return rsf_to_ref_intensity;
@@ -329,9 +329,9 @@ mgroups_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc) : MG(calc.MG), calc(calc), 
 {
 }
 
-const map<cluster_t*,intensity_t> mgroups_::sims_t::calc_t::RSF_c::SFs_to_ref_intensities()
+const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::RSF_c::SFs_to_ref_intensities()
 {
-	map<cluster_t*,intensity_t> sf_to_ref_intensity;
+	map<cluster_t*,quantity::intensity_t> sf_to_ref_intensity;
 	for (auto& M : measurements)
 	{
 		auto matrix_clusters = M->matrix_clusters();
@@ -343,7 +343,7 @@ const map<cluster_t*,intensity_t> mgroups_::sims_t::calc_t::RSF_c::SFs_to_ref_in
 		for (auto& C : M->clusters)
 		{
 			if (!C.SF.is_set()) continue;
-			sf_to_ref_intensity.insert(pair<cluster_t*,intensity_t> (&C,matrix_clusters.intensity_sum()));
+			sf_to_ref_intensity.insert(pair<cluster_t*,quantity::intensity_t> (&C,matrix_clusters.intensity_sum()));
 		}
 	}
 	return sf_to_ref_intensity;
@@ -354,7 +354,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_mean_ref(bool
 	for (auto& sf_to_ref : SFs_to_ref_intensities())
 	{
 		if (overwrite || !sf_to_ref.first->RSF.is_set())
-			sf_to_ref.first->RSF = RSF_t (sf_to_ref.first->SF * sf_to_ref.second.mean()); // this is the mean of a sum; not the sum of the means!
+			sf_to_ref.first->RSF = quantity::SF_t (sf_to_ref.first->SF * sf_to_ref.second.mean()); // this is the mean of a sum; not the sum of the means!
 	}
 	return calc;
 }
@@ -364,7 +364,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_median_ref(bo
 	for (auto& sf_to_ref : SFs_to_ref_intensities())
 	{
 		if (overwrite || !sf_to_ref.first->RSF.is_set())
-			sf_to_ref.first->RSF = RSF_t (sf_to_ref.first->SF * sf_to_ref.second.median()); // this is the median of a sum; not the sum of the medians!
+			sf_to_ref.first->RSF = quantity::SF_t (sf_to_ref.first->SF * sf_to_ref.second.median()); // this is the median of a sum; not the sum of the medians!
 	}
 	return calc;
 }
@@ -374,7 +374,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_pbp_ref(bool 
 	for (auto& sf_to_ref : SFs_to_ref_intensities())
 	{
 		if (overwrite || !sf_to_ref.first->RSF.is_set())
-			sf_to_ref.first->RSF = RSF_t (sf_to_ref.first->SF * sf_to_ref.second); // this is the median of a sum; not the sum of the medians!
+			sf_to_ref.first->RSF = quantity::SF_t (sf_to_ref.first->SF * sf_to_ref.second); // this is the median of a sum; not the sum of the medians!
 	}
 	return calc;
 }
@@ -435,5 +435,179 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(boo
 	return calc;
 }
 
+/****************************************************/
+/**********   Crel_to_Irel_c      *******************/
+/****************************************************/
 
+
+mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc) :
+																				zaehler(zaehler), nenner(nenner), calc(calc)
+{
+}
+
+const quantity::concentration_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_template = quantity::concentration_t({},units::SI::one);
+
+const quantity::intensity_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel(const measurements_::sims_t& M) const
+{
+	const cluster_t* Z = M.cluster(zaehler);
+	const cluster_t* N = M.cluster(nenner);
+	if (Z == nullptr || N == nullptr)
+	{
+		logger::error("mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel()","nullptr in M= " + M.to_string_short(),zaehler.to_string(),nenner.to_string());
+		return {};
+	}
+	if (!Z->intensity.is_set() || !N->intensity.is_set())
+		return {};
+	return {(Z->intensity) / (N->intensity)};
+}
+
+const quantity::intensity_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel_from_truncated_medians(const measurements_::sims_t& M) const
+{
+	const cluster_t* Z = M.cluster(zaehler);
+	const cluster_t* N = M.cluster(nenner);
+	if (Z == nullptr || N == nullptr)
+	{
+		logger::error("mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel()","nullptr in M= " + M.to_string_short(),zaehler.to_string(),nenner.to_string());
+		return {};
+	}
+	if (!Z->intensity.is_set() || !N->intensity.is_set())
+		return {};
+	const auto s = Z->intensity.data.size()/2;
+	return {(Z->intensity.remove_data_from_begin(s).median()) / (N->intensity.remove_data_from_begin(s).median())};
+}
+
+const quantity::concentration_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_from_sample(const measurements_::sims_t& M) const
+{
+	quantity::concentration_t Crel;
+	const auto matrix_isotopes = calc.MG.matrix_isotopes();
+	auto Zmat_iso = M.sample->matrix().isotope(zaehler.corresponding_isotope(matrix_isotopes));
+	auto Nmat_iso = M.sample->matrix().isotope(nenner.corresponding_isotope(matrix_isotopes));
+	if (Nmat_iso == nullptr || !Nmat_iso->substance_amount.is_set()) 
+		return {}; //division by 0
+	if (Zmat_iso == nullptr || !Zmat_iso->substance_amount.is_set())
+		return quantity::concentration_t({0},Crel_template.unit()); // always add 0
+	return quantity::concentration_t((Zmat_iso->substance_amount / Nmat_iso->substance_amount).data,Crel_template.unit());
+}
+
+const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median() const
+{
+	quantity::quantity_t Crels, Irels;
+	for (auto& M : calc.measurements)
+	{
+		if (!Crel_from_sample(*M).is_set()) continue;
+// 		if (!Irel(*M).is_set()) continue;
+// 		Irels << Irel(*M).remove_data_from_begin(Irel(*M).data.size()/2).median(); // this is the truncated_median from Irel and NOT Irel from truncated_medians; This is different!
+		if (!Irel_from_truncated_medians(*M).is_set()) continue;
+		Irels << Irel_from_truncated_medians(*M);
+		Crels << Crel_from_sample(*M);
+	}
+	return {Crels,Irels};
+}
+
+const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::Crel_to_Irel_c::known_Crels_from_Clusters_to_Irels() const
+{
+	quantity::quantity_t Crel, Irel;
+	for (auto& M : calc.measurements)
+	{
+// 		if (!M->sample->matrix().is_set()) continue;
+		auto Z = M->cluster(zaehler);
+		if (Z==nullptr) continue;
+		if (!Z->intensity.is_set()) continue;
+		if (!Z->concentration.is_set()) continue;
+		auto N = M->cluster(nenner);
+		if (N==nullptr) continue;
+		if (!N->intensity.is_set()) continue;
+		if (!N->concentration.is_set()) continue;
+		
+		Irel << (Z->intensity / N->intensity);
+		Crel << (Z->concentration / N->concentration);
+	}
+// 	Crel_template = quantity::quantity_t(Crel.name(),{},Crel.unit());
+	logger::debug(7,"mgroups_::sims_t::calc_t::Crel_to_Irel_c::known_Crels_from_Clusters_to_Irels()","Z="+zaehler.to_string()+" N="+nenner.to_string(),"Irel=" + Irel.to_string(), "Crel=" + Crel.to_string());
+	
+// 	plot_t plot;
+// 	plot.Y2.log10_scale=false;
+// 	plot.Y1.add_curve(Irel,Crel,"");
+// 	plot.Y2.add_curve(Irel,Crel,"");
+// 	plot.to_screen(zaehler.to_string() +" / " + nenner.to_string(),0);
+	
+	return {Crel,Irel};
+}
+
+/************************************************************/
+/******           polynom_fit_Crel_to_Irel_c          *******/
+/************************************************************/
+mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters) :
+																				Crel_to_Irel_c(zaehler,nenner,calc),
+																				polynom(rank,fit_start_parameters)
+{
+}
+
+void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double sleep_sec) const
+{
+	const unsigned int data_points_for_fit_resolution=100;
+	if (!polynom.fitted())	return;
+	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
+	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set()) return;
+	
+	plot_t plot(false);
+	
+	stringstream title_X, title_Y, title_window;
+	title_X << "Irel = (" << zaehler.to_string() << ") / (" << nenner.to_string() << ")";
+	title_Y << "Crel = [" << zaehler.corresponding_isotope(calc.MG.matrix_isotopes()).to_string() << "] / [";
+	title_Y << nenner.corresponding_isotope(calc.MG.matrix_isotopes()).to_string() << "]";
+	title_window << title_Y.rdbuf() << " over " << title_X.rdbuf() << " chisq=" << polynom.chisq();
+	
+	//generate data to show the fit in high resolution
+	const quantity::quantity_t x_res = Crel_to_Irel.second.resolution()/data_points_for_fit_resolution;
+	const quantity::quantity_t X(title_X.str(),(Crel_to_Irel.second.change_resolution(x_res/data_points_for_fit_resolution)).data,units::SI::one); 
+	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",Crel_to_Irel.second.to_string_detailed());
+	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",x_res.to_string_detailed());
+	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",X.to_string_detailed());
+	const quantity::quantity_t Y(title_Y.str(),polynom.fitted_y_data(X.data),units::SI::one);
+	plot.Y1.add_curve(X,Y,"fit rank: " + tools::vec::to_string(polynom.rank));
+	plot.Y1.add_points((quantity::quantity_t{X,Crel_to_Irel.second.data}),(quantity::quantity_t{Y,Crel_to_Irel.first.data}),"data"," ro");
+	plot.to_screen(title_window.str(),sleep_sec);
+}
+
+quantity::concentration_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel(measurements_::sims_t& M) const
+{
+// 	logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::polynom_c::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string(),"Crel=");
+	quantity::concentration_t result(polynom.fitted_y_data(Irel(M).data),Crel_template.unit());
+	logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string_detailed(),"Crel=" + result.to_string_detailed());
+// 	return {polynom.fitted_y_data(Irel(M).data),Crel_template.unit()};
+	return result;
+}
+
+bool mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()
+{
+	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
+	
+	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set())
+	{
+		logger::warning(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","known_Crels_from_sample_matrix_to_Irels_truncated_median() is not set","returning false");
+		return false;
+	}
+	map<double,double> X_to_Y_map;
+	tools::vec::combine_vecs_to_map(&Crel_to_Irel.second.data,&Crel_to_Irel.first.data, &X_to_Y_map); // Crel(Irel)
+	if (X_to_Y_map.size()<1 || X_to_Y_map.size() < polynom.rank.size())
+	{
+		logger::warning(3,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","to less data points: " + tools::to_string(X_to_Y_map.size()),"returning false");
+		return false;
+	}
+	if (!polynom.fit(X_to_Y_map))
+	{
+		//this should essentially never happen; if there is a GSL error, GSL handler will catch the exception
+		logger::error("mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","fit returned error","returning false");
+		logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","X_to_Y_map.size()=" + tools::to_string(X_to_Y_map.size()));
+		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","X_to_Y_map",tools::to_string(X_to_Y_map));
+		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","rank",tools::vec::to_string(polynom.rank));
+		return false;
+	}
+	else
+	{
+		logger::info(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","fit successful","zaehler=" + zaehler.to_string()+" nenner=" + nenner.to_string());
+	}
+	return true;
+}
 

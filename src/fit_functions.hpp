@@ -107,19 +107,22 @@ public:
 		vector<double> fitted_y_data(vector<double> x={}) const;
 	};
 	
-	///y=m*x
+	/// y = m*x
+	/// n == 0
 	class linear_t
 	{
 	private:
 		double chisq_p=-1;
 		bool fitted_p=false;
+		double cov_p;
+		double slope_p;
 	public:
-		double cov;
-		double slope;
-		double chisq();
+		const double cov() const;
+		const double slope() const;
+		double chisq() const;
 		bool fit(map<double,double> data_XY);
-		bool fitted();
-		vector<double> fitted_y_data(vector<double> x={});
+		bool fitted() const;
+		vector<double> Y(vector<double> x={});
 	};
 };
 

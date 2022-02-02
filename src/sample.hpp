@@ -81,7 +81,7 @@ public:
 		const bool is_set() const;
 		const string to_string() const;
 		///RELATIVE! in at%
-		const concentration_t concentration(isotope_t& iso) const;
+		const quantity::concentration_t concentration(isotope_t& iso) const;
 		bool operator==(const matrix_t& obj) const;
 		bool operator!=(const matrix_t& obj) const;
 		bool operator<(const matrix_t& obj) const;
@@ -106,10 +106,10 @@ private:
 	private:
 		static const int logger_verbosity_offset = 0;
 	public:
-		dose_t dose;
-		concentration_t concentration_maximum;
-		sputter_depth_t depth_at_concentration_maxium;
-		implant_s(dose_t dose={}, concentration_t concentration_maximum={}, sputter_depth_t depth_at_concentration_maxium={});
+		quantity::dose_t dose;
+		quantity::concentration_t concentration_maximum;
+		quantity::depth_t depth_at_concentration_maxium;
+		implant_s(quantity::dose_t dose={}, quantity::concentration_t concentration_maximum={}, quantity::depth_t depth_at_concentration_maxium={});
 	};
 	map<isotope_t,implant_s> implants;
 	///populates implants and matrix_p

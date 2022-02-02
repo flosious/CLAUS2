@@ -32,11 +32,11 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file,
 	crater.sputter_beam = dsims_file.contents.Ipr();
 	
 	if (dsims_file.contents.total_sputtering_time().is_set())
-		crater.total_sputter_time_s = total_sputter_time_t(dsims_file.contents.total_sputtering_time());
+		crater.total_sputter_time_s = quantity::sputter_time_t(dsims_file.contents.total_sputtering_time());
 	else if (crater.sputter_beam.sputter_time.is_set())
-		crater.total_sputter_time_s = total_sputter_time_t(crater.sputter_beam.sputter_time.max());
+		crater.total_sputter_time_s = quantity::sputter_time_t(crater.sputter_beam.sputter_time.max());
 	else
-		crater.total_sputter_time_s = total_sputter_time_t(dsims_file.contents.total_acquisition_time());
+		crater.total_sputter_time_s = quantity::sputter_time_t(dsims_file.contents.total_acquisition_time());
 	
 	if (clusters.size()==0)
 	{

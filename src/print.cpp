@@ -20,7 +20,7 @@
 // 	cout << prefix << "others: " << id->others << endl;
 // }
 // 
-// void print::quantity(quantity_t* quantity, string prefix)
+// void print::quantity(quantity::quantity_t* quantity, string prefix)
 // {
 // 	return;
 // }
@@ -29,3 +29,4 @@
 // {
 // 	return;
 // }
+

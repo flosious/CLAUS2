@@ -47,7 +47,7 @@ mgroups_::sims_t::calc_t mgroups_::sims_t::calc()
 
 void mgroups_::sims_t::check()
 {
-	quantity_t ST_resolution, SD_resolution;
+	quantity::quantity_t ST_resolution, SD_resolution;
 	for (auto& M :measurements())
 	{
 		if (M->crater.sputter_time.is_set() && !ST_resolution.is_set())
@@ -67,9 +67,9 @@ void mgroups_::sims_t::check()
 	}
 }
 
-const map<sample_t::matrix_t,RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluster_t& cluster)
+const map<sample_t::matrix_t,quantity::SF_t> mgroups_::sims_t::matrix_to_RSF(const cluster_t& cluster)
 {
-	map<sample_t::matrix_t,RSF_t> mat_to_RSF;
+	map<sample_t::matrix_t,quantity::SF_t> mat_to_RSF;
 	for (auto& M : measurements())
 	{
 		sample_t::matrix_t mat = M->sample->matrix();
@@ -77,7 +77,7 @@ const map<sample_t::matrix_t,RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluste
 		if (!mat.is_set()) continue;
 		cluster_t* C = M->cluster(cluster);
 		if (C==nullptr) continue;
-		RSF_t RSF =  C->RSF;
+		quantity::SF_t RSF =  C->RSF;
 		if (!RSF.is_set()) continue;
 		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()",M->sample->to_string());
 		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()","matrix:"+mat.to_string(),"\trRSF:"+RSF.to_string());
@@ -87,24 +87,24 @@ const map<sample_t::matrix_t,RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluste
 			RSF =  RSF.median();
 		}
 		if (mat_to_RSF.find(mat)==mat_to_RSF.end())
-			mat_to_RSF.insert(pair<sample_t::matrix_t, RSF_t> (mat,RSF));
+			mat_to_RSF.insert(pair<sample_t::matrix_t, quantity::SF_t> (mat,RSF));
 		else
 			mat_to_RSF.at(mat) << RSF;
 	}
 	
 	for (auto& m : mat_to_RSF)
-		m.second = RSF_t(m.second.mean());
+		m.second = quantity::SF_t(m.second.mean());
 	return mat_to_RSF;
 }
 
-const std::map< sample_t::matrix_t, SR_t > mgroups_::sims_t::matrix_to_SRs()
+const std::map< sample_t::matrix_t, quantity::SR_t > mgroups_::sims_t::matrix_to_SRs()
 {
-	map<sample_t::matrix_t,SR_t> mat_to_SRs;
+	map<sample_t::matrix_t,quantity::SR_t> mat_to_SRs;
 	for (auto& M : measurements())
 	{
 		sample_t::matrix_t mat = M->sample->matrix();
 		if (!mat.is_set()) continue;
-		SR_t SR = M->crater.SR;
+		quantity::SR_t SR = M->crater.SR;
 		if (!SR.is_set()) continue;
 		logger::debug(21,"mgroups_::sims_t::matrix_to_SRs()",M->sample->to_string());
 		logger::debug(21,"mgroups_::sims_t::matrix_to_SRs()","matrix:"+mat.to_string(),"\tSR:"+SR.to_string());
@@ -114,7 +114,7 @@ const std::map< sample_t::matrix_t, SR_t > mgroups_::sims_t::matrix_to_SRs()
 			SR = SR.median();
 		}
 		if (mat_to_SRs.find(mat)==mat_to_SRs.end())
-			mat_to_SRs.insert(pair<sample_t::matrix_t, SR_t> (mat,SR));
+			mat_to_SRs.insert(pair<sample_t::matrix_t, quantity::SR_t> (mat,SR));
 		else
 		{
 			mat_to_SRs.at(mat) << SR;
@@ -126,17 +126,17 @@ const std::map< sample_t::matrix_t, SR_t > mgroups_::sims_t::matrix_to_SRs()
 	return mat_to_SRs;
 }
 
-// const std::map< sample_t::matrix_t, intensity_t > mgroups_::sims_t::matrix_to_intensity_sum()
+// const std::map< sample_t::matrix_t, quantity::intensity_t > mgroups_::sims_t::matrix_to_intensity_sum()
 // {
-// 	map<sample_t::matrix_t,intensity_t> mat_to_I;
+// 	map<sample_t::matrix_t,quantity::intensity_t> mat_to_I;
 // 	for (auto& M : measurements())
 // 	{
 // 		sample_t::matrix_t mat = M->sample->matrix();
 // 		if (!mat.is_set()) continue;
-// 		intensity_t I = M->matrix_clusters().intensity_sum();
+// 		quantity::intensity_t I = M->matrix_clusters().intensity_sum();
 // 		if (!I.is_set()) continue;
 // 		if (mat_to_I.find(mat)==mat_to_I.end())
-// 			mat_to_I.insert(pair<sample_t::matrix_t, intensity_t> (mat,I.quantile(0.10)));
+// 			mat_to_I.insert(pair<sample_t::matrix_t, quantity::intensity_t> (mat,I.quantile(0.10)));
 // 		else
 // 			mat_to_I.at(mat) << I.quantile(0.10);
 // 	}
@@ -317,9 +317,9 @@ bool mgroups_::sims_t::check_matrix_cluster_consistency()
 	return true;
 }
 
-const map<cluster_t*,abundance_t> mgroups_::sims_t::matrix_cluster_to_matrix_iso_abundance()
+const map<cluster_t*,quantity::substance_amount_t> mgroups_::sims_t::matrix_cluster_to_matrix_iso_substance_amount()
 {
-	map<cluster_t*,abundance_t> matrix_C_to_I;
+	map<cluster_t*,quantity::substance_amount_t> matrix_C_to_I;
 	const auto MCs = matrix_clusters();
 	const auto MIs = matrix_isotopes();
 	for (auto& M : measurements())
@@ -329,16 +329,17 @@ const map<cluster_t*,abundance_t> mgroups_::sims_t::matrix_cluster_to_matrix_iso
 		{
 			if (M->cluster(MC)==nullptr)
 			{
-				logger::error("mgroups_::sims_t::matrix_cluster_to_matrix_iso()","matrix cluster: "+ MC.to_string() + " not found in measurement " + M->to_string_short(),"skipping");
+				logger::error("mgroups_::sims_t::matrix_cluster_to_matrix_iso_substance_amount()","matrix cluster: "+ MC.to_string() + " not found in measurement " + M->to_string_short(),"skipping");
 				continue;
 			}
 			auto corresponding_isotope = MC.corresponding_isotope(MIs);
-			abundance_t abu;
+			quantity::substance_amount_t amount;
 			if (M->sample->matrix().isotope(corresponding_isotope)==nullptr) 
-				abu = abundance_t({0});
+				amount = quantity::substance_amount_t({0});
 			else
-				abu = M->sample->matrix().isotope(corresponding_isotope)->abundance;
-			matrix_C_to_I.insert(pair<cluster_t*,abundance_t> (M->cluster(MC),abu) );
+				amount = M->sample->matrix().isotope(corresponding_isotope)->substance_amount;
+			matrix_C_to_I.insert(pair<cluster_t*,quantity::substance_amount_t> (M->cluster(MC),amount) );
+// 			logger::debug(9,"mgroups_::sims_t::matrix_cluster_to_matrix_iso_substance_amount()","MC="+MC.to_string()+" " + tools::to_string(M->cluster(MC)),"isotope="+corresponding_isotope.to_string() + " abu="+abu.to_string(),M->to_string());
 		}
 	}
 	return matrix_C_to_I;

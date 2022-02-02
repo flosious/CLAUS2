@@ -133,10 +133,10 @@ public:
 		{
 		private:
 			string filename_without_crater_depths_s="";
-			vector<total_sputter_depth_t> total_sputter_depths_p;
+			vector<quantity::depth_t> total_sputter_depths_p;
 			bool parse_sputter_energy_element_polarity();
 			string secondary_polarity_p="";
-			energy_t sputter_energy_p;
+			quantity::energy_t sputter_energy_p;
 			string sputter_element_p;
 		protected:
 			name_t(string& filename_with_path_s,const string delimiter_s,const set<string> OR_identifiers_s,const set<string> AND_identifiers_s);
@@ -144,11 +144,11 @@ public:
 			const vector<string>& not_parseable_filename_parts();
 			const string simple_name();
 			string to_string();
-			const energy_t sputter_energy();
+			const quantity::energy_t sputter_energy();
 			element_t sputter_element();
 			const string secondary_polarity();
 			///parses crater depths and populates filename_wo_crater
-			total_sputter_depth_t total_sputter_depths();
+			quantity::depth_t total_sputter_depths();
 			const string filename_without_crater_depths();
 			bool operator==(name_t& obj);
 			bool operator!=(name_t& obj);
@@ -206,7 +206,7 @@ public:
 			/// true, if Ipr was detected; false if no Ipr
 			bool is_Ipr;
 			///e.g. < sputter_time > = get_quantity_from_dimension_and_clustername("Time","Ipr")
-			const quantity_t get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername="");
+			const quantity::quantity_t get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername="");
 			
 			const vector<string>& units();
 			const vector<string>& dimensions();
@@ -216,10 +216,10 @@ public:
 // 			class Ipr_t
 // 			{
 // 			public:
-// 				sputter_current_t sputter_current;
-// 				sputter_time_t sputter_time;
-// 				sputter_depth_t sputter_depth;
-// 				Ipr_t(sputter_current_t sputter_current_s={}, sputter_time_t sputter_time={}, sputter_depth_t sputter_depth_s={});
+// 				quantity::current_t sputter_current;
+// 				quantity::sputter_time_t sputter_time;
+// 				quantity::depth_t sputter_depth;
+// 				Ipr_t(quantity::current_t sputter_current_s={}, quantity::sputter_time_t sputter_time={}, quantity::depth_t sputter_depth_s={});
 // 				const string to_string(const string del=", ") const;
 // 			};
 			vector<cluster_t> clusters();
@@ -227,24 +227,24 @@ public:
 			const tm creation_date_time();
 			///primary current (sputter_current vs time/depth)
 			const crater_t::sputter_beam_t Ipr();
-			const energy_t sputter_energy(const string find_this="Impact energy (eV)");
-			const secondary_voltage_t secondary_voltage(const string find_this="Secondary ion energy (V)");
+			const quantity::energy_t sputter_energy(const string find_this="Impact energy (eV)");
+			const quantity::secondary_voltage_t secondary_voltage(const string find_this="Secondary ion energy (V)");
 			const element_t sputter_element(const string find_this="Primary ions");
-			const rastersize_t sputter_rastersize(const string find_this="Raster size (um)");
-			const rastersize_t analyzed_area(const string find_this="Analyzed area size (um)");
+			const quantity::rastersize_t sputter_rastersize(const string find_this="Raster size (um)");
+			const quantity::rastersize_t analyzed_area(const string find_this="Analyzed area size (um)");
 			const string secondary_polarity(const string find_this="Secondary ion polarity");
-			const quantity_t chamber_pressure(const string find_this="Analysis chamber press (mbar)");
-			const quantity_t egate(const string find_this="EGate rate (%)");
-			const quantity_t mass_resolution(const string find_this="mass_resolution");
-			const quantity_t field_aperture(const string find_this="Field aperture (um)");
-			const quantity_t contrast_aperture(const string find_this="Contrast aperture (um)");
-			const quantity_t entrance_slit(const string find_this="Entrance slit (um)");
-			const quantity_t exit_slit(const string find_this="Exit slit (um)");
-			const quantity_t energy_window(const string find_this="Energy window (eV)");
-			const quantity_t em_yield(const string find_this="EM yield (%)");
-			const quantity_t em_voltage(const string find_this="EM HV (V)");
-			const quantity_t total_sputtering_time(const string find_this="Total sputtering time (s)");
-			const quantity_t total_acquisition_time(const string find_this="Total acquisition time (s)");
+			const quantity::quantity_t chamber_pressure(const string find_this="Analysis chamber press (mbar)");
+			const quantity::quantity_t egate(const string find_this="EGate rate (%)");
+			const quantity::quantity_t mass_resolution(const string find_this="mass_resolution");
+			const quantity::quantity_t field_aperture(const string find_this="Field aperture (um)");
+			const quantity::quantity_t contrast_aperture(const string find_this="Contrast aperture (um)");
+			const quantity::quantity_t entrance_slit(const string find_this="Entrance slit (um)");
+			const quantity::quantity_t exit_slit(const string find_this="Exit slit (um)");
+			const quantity::quantity_t energy_window(const string find_this="Energy window (eV)");
+			const quantity::quantity_t em_yield(const string find_this="EM yield (%)");
+			const quantity::quantity_t em_voltage(const string find_this="EM HV (V)");
+			const quantity::quantity_t total_sputtering_time(const string find_this="Total sputtering time (s)");
+			const quantity::quantity_t total_acquisition_time(const string find_this="Total acquisition time (s)");
 			const crater_t crater();
 			void to_screen(string prefix="");
 			contents_t(string& filename_with_path);
@@ -267,7 +267,7 @@ public:
 		public:
 			name_t(string& filename_with_path_s);
 			const element_t analysis_element();
-			const energy_t analysis_energy();
+			const quantity::energy_t analysis_energy();
 		};
 		class contents_t : public sims_t::contents_t
 		{
@@ -276,7 +276,7 @@ public:
 			string analysis_element_p;
 		public:
 			const element_t analysis_element();
-			const energy_t analysis_energy();
+			const quantity::energy_t analysis_energy();
 			contents_t(string& filename_with_path);
 		};
 		tofsims_t(string& filename);

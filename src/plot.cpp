@@ -35,7 +35,7 @@ int plot_t::Draw(mglGraph* gr)
 {	
 	logger::debug(15,"plot_t::Draw()","entering");
 	/*x axis*/
-	vector<const quantity_t*> Xs;
+	vector<const quantity::quantity_t*> Xs;
 	for (auto& c:Y1.curves)
 		Xs.push_back(&c.X);
 	for (auto& c:Y2.curves)
@@ -168,19 +168,19 @@ plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, dou
 
 void plot_t::axis_t::add_curve(const vector<double>& X, const vector<double>& Y, const string legend)
 {
-	quantity_t Xq ("X",X,0);
-	quantity_t Yq ("Y",Y,0);
+	quantity::quantity_t Xq ("X",X,0);
+	quantity::quantity_t Yq ("Y",Y,0);
 	add_curve(Xq,Yq,legend);
 }
 
-void plot_t::axis_t::add_curve(const quantity_t& X, const quantity_t& Y, const string legend)
+void plot_t::axis_t::add_curve(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend)
 {
 	logger::debug(15,"plot_t::axis_t::add_curve()","entering");
 	if (Y.is_set() && X.is_set())
 		curves.push_back({&X,&Y,legend});
 }
 
-void plot_t::axis_t::add_points(const quantity_t& X, const quantity_t& Y, const string legend, const string color)
+void plot_t::axis_t::add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend, const string color)
 {
 	logger::debug(15,"plot_t::axis_t::add_points()","entering");
 	if (Y.is_set() && X.is_set())
@@ -222,6 +222,26 @@ bool plot_t::axis_t::check()
 	return true;
 }
 
+
+
+// string plot_t::axis_t::unit_string(const unit_t& unit)
+// {
+// 	const vector<string> units = {"at%","at/ccm","nm","s"};
+// 	for (auto& u : units)
+// 		if (unit == unit_t(u))
+// 			return u;
+// 	return unit.to_string(); //any fitting unit string will do
+// }
+// 
+// string plot_t::axis_t::unit_string(quantity::quantity_t& quantity)
+// {
+// 	const vector<string> units = {"at%","at/ccm","nm","s"};
+// 	for (auto& u : units)
+// 		if (unit == unit_t(u))
+// 			return u;
+// 	return quantity.unit().to_string(); //any fitting unit string will do
+// }
+
 void plot_t::axis_t::draw(mglGraph* gr, double x_origin) 
 {
 	logger::debug(15,"plot_t::axis_t::draw()","curves: " + tools::to_string(curves.size()),"points: " + tools::to_string(points.size()),"entering");
@@ -245,6 +265,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		y_l << curves.front().Y.name() << " [" << curves.front().Y.unit().to_string() << "]";
 	else if (points.size()>0)
 		y_l << points.front().Y.name() << " [" << points.front().Y.unit().to_string() << "]";
+	
 	tools::str::filter_t y_f(y_l.str());
 	gr->Label('y',("#"+color+"{"+ y_f.escape_special_characters()+"}").c_str(),0);
 	
@@ -254,7 +275,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		mglData y(c.Y.data);
 // 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
 		tools::str::filter_t l_f("legend '"+ c.legende +"'");
-		gr->Plot(x,y," +",l_f.escape_special_characters().c_str()); 
+		gr->Plot(x,y,c.color.c_str(),l_f.escape_special_characters().c_str()); 
 	}
 	for (auto& c: curves)
 	{
@@ -296,7 +317,7 @@ plot_t::axis_t::range_t plot_t::axis_t::range()
 		return R;
 	}
 	
-	vector<const quantity_t*> Ys;
+	vector<const quantity::quantity_t*> Ys;
 	for (auto& c: curves)
 		Ys.push_back(&c.Y);
 	for (auto& c: points)
@@ -351,13 +372,13 @@ plot_t::axis_t::range_t::range_t(double start, double stop) : start(start), stop
 }
 
 
-plot_t::axis_t::range_t::range_t(const quantity_t* Ys)
+plot_t::axis_t::range_t::range_t(const quantity::quantity_t* Ys)
 {
-	vector<const quantity_t*> X {Ys};
+	vector<const quantity::quantity_t*> X {Ys};
 	*this = range_t(X);
 }
 
-plot_t::axis_t::range_t::range_t(const vector<const quantity_t *> Ys)
+plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys)
 {
 	logger::debug(15,"plot_t::axis_t::range_t::range_t()","entering");
 	double temp=-1;
@@ -388,7 +409,7 @@ plot_t::axis_t::range_t::range_t(const vector<const quantity_t *> Ys)
 /***********************************************/
 /*******    plot_t::axis_t::points_t    *********/
 /***********************************************/
-plot_t::axis_t::points_t::points_t(const quantity_t* X, const quantity_t* Y, const string legende, const string color) : X(*X),Y(*Y),legende(legende), color(color)
+plot_t::axis_t::points_t::points_t(const quantity::quantity_t* X, const quantity::quantity_t* Y, const string legende, const string color) : X(*X),Y(*Y),legende(legende), color(color)
 {
 }
 

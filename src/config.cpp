@@ -86,7 +86,7 @@ int config_t::parse(vector<string> config_lines) {
 // 		else if (key=="print_errors") { if (value.find("1")!=string::npos) 													processor::print_errors=true; }
 // 		else if (key=="use_jiang" || key=="jaing")  { if (value.find("0")!=string::npos) 									processor::use_jiang=false;}
 // 		else if (key=="use_mass_interference_filter" || key=="mass_interference_filter") { if (value.find("1")!=string::npos) processor::use_mass_interference_filter=true;}
-// 		else if (key=="force_RSF_to_foreign_matrix" || key=="force_RSF") { if (value.find("1")!=string::npos) 				processor::force_RSF_to_foreign_matrix=true;}
+// 		else if (key=="force_quantity::SF_to_foreign_matrix" || key=="force_RSF") { if (value.find("1")!=string::npos) 				processor::force_quantity::SF_to_foreign_matrix=true;}
 		
 // 		else if (key=="debug") { if (value.find("1")!=string::npos) 								logger::activate_debug=true;}
 		

@@ -43,11 +43,11 @@ public:
 	///nucleons_s=-1 -> isotope with highest natural abundance
 	isotope_t(string symbol_s, int nucleons_s, double abundance_s=-1, double amount_s=1);
 	isotope_t(string str, double abundance_s=-1, double amount_s=1);
-	const mass_t mass() const;
+	const quantity::mass_t mass() const;
 	const string symbol_alternative() const;
 	///isotopical signature; isotopenverhältnis; Häufigkeit eines Isotopes eines Elements
-	abundance_t abundance;
-	substance_amount_t substance_amount;
+	quantity::abundance_t abundance;
+	quantity::substance_amount_t substance_amount;
 	int nucleons;
 	string symbol;
 	const string to_string(const string del=" ") const;

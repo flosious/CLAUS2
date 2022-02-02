@@ -27,17 +27,17 @@
 /*****  files_::dsims_t::contents_t::Ipr_t       ****/
 /***************************************/
 
-// const sputter_depth_t files_::dsims_t::contents_t::Ipr_t::sputter_depth() const
+// const quantity::depth_t files_::dsims_t::contents_t::Ipr_t::sputter_depth() const
 // {
 // 	return sputter_depth_p;
 // }
 // 
-// const sputter_time_t files_::dsims_t::contents_t::Ipr_t::sputter_time const
+// const quantity::sputter_time_t files_::dsims_t::contents_t::Ipr_t::sputter_time const
 // {
 // 	return sputter_time_p;
 // }
 // 
-// const sputter_current_t files_::dsims_t::contents_t::Ipr_t::sputter_current() const
+// const quantity::current_t files_::dsims_t::contents_t::Ipr_t::sputter_current() const
 // {
 // 	return sputter_current_p;
 // }
@@ -127,18 +127,18 @@ vector<cluster_t> files_::dsims_t::contents_t::clusters()
 	{
 		
 		if (clustername=="Ipr") continue;
-		sputter_time_t sputter_time;
-		sputter_depth_t sputter_depth_s;
-		concentration_t concentration_s;
-		intensity_t intensity_s;
+		quantity::sputter_time_t sputter_time;
+		quantity::depth_t sputter_depth_s;
+		quantity::concentration_t concentration_s;
+		quantity::intensity_t intensity_s;
 		
 		for (auto& col:columns())
 		{
 			if (col.cluster_name != clustername) continue;
-			if (col.dimension=="Time") sputter_time = sputter_time_t(col.data,col.unit);
-			if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
-			if (col.dimension=="C") concentration_s = concentration_t(col.data,col.unit);
-			if (col.dimension=="I") intensity_s = intensity_t(col.data,col.unit);
+			if (col.dimension=="Time") sputter_time = quantity::sputter_time_t(col.data,col.unit);
+			if (col.dimension=="Depth") sputter_depth_s = quantity::depth_t(col.data,col.unit);
+			if (col.dimension=="C") concentration_s = quantity::concentration_t(col.data,col.unit);
+			if (col.dimension=="I") intensity_s = quantity::intensity_t(col.data,col.unit);
 		}
 		
 		cluster_t cluster(clustername,sputter_time,intensity_s,sputter_depth_s,concentration_s);
@@ -214,18 +214,18 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 
 const crater_t::sputter_beam_t files_::dsims_t::contents_t::Ipr()
 {
-	sputter_current_t sputter_current_s;
-	sputter_time_t sputter_time;
-	sputter_depth_t sputter_depth_s;
+	quantity::current_t sputter_current_s;
+	quantity::sputter_time_t sputter_time;
+	quantity::depth_t sputter_depth_s;
 // 	if (columns().size()==0)
 // 		logger::error("files_::dsims_t::contents_t::Ipr()","columns().size()==0","","return empty");
 	for (auto& col:columns())
 	{
 		if (col.cluster_name != "Ipr") continue;
-		if (col.dimension=="Time") sputter_time = sputter_time_t(col.data,col.unit);
-		if (col.dimension=="Depth") sputter_depth_s = sputter_depth_t(col.data,col.unit);
+		if (col.dimension=="Time") sputter_time = quantity::sputter_time_t(col.data,col.unit);
+		if (col.dimension=="Depth") sputter_depth_s = quantity::depth_t(col.data,col.unit);
 		if (col.dimension=="I") 
-		sputter_current_s = sputter_current_t(col.data,col.unit);
+		sputter_current_s = quantity::current_t(col.data,col.unit);
 	}
 	logger::debug(10,"files_::dsims_t::contents_t::Ipr()","sputter_current_s.to_string()",sputter_current_s.to_string());
 	return {sputter_current_s,sputter_time,sputter_depth_s};
@@ -417,7 +417,7 @@ bool files_::dsims_t::contents_t::ipr_shift_correction()
     return true;
 }
 
-const quantity_t files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
+const quantity::quantity_t files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
 {
 	string unit="";
 	vector<vector<double>> data_vecs;
@@ -433,7 +433,7 @@ const quantity_t files_::dsims_t::contents_t::get_quantity_from_dimension_and_cl
 		logger::error("files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername()","unit=''",to_string(),"returning {}");
 		return {};
 	}
-	return quantity_t{statistics::common_vector(data_vecs),unit};
+	return quantity::quantity_t{statistics::common_vector(data_vecs),unit};
 }
 
 const map<string,string>& files_::dsims_t::contents_t::infos_and_settings()
@@ -493,11 +493,11 @@ const string files_::dsims_t::contents_t::secondary_polarity(const string find_t
 	return infos_and_settings().at(find_this);
 }
 
-const energy_t files_::dsims_t::contents_t::sputter_energy(const string find_this)
+const quantity::energy_t files_::dsims_t::contents_t::sputter_energy(const string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
-	return energy_t(infos_and_settings_data(find_this),{"eV"});
+	return quantity::energy_t(infos_and_settings_data(find_this),{"eV"});
 }
 
 const element_t files_::dsims_t::contents_t::sputter_element(const string find_this)
@@ -510,78 +510,78 @@ const element_t files_::dsims_t::contents_t::sputter_element(const string find_t
 	return element_t({ele});
 }
 
-const secondary_voltage_t files_::dsims_t::contents_t::secondary_voltage(const string find_this)
+const quantity::secondary_voltage_t files_::dsims_t::contents_t::secondary_voltage(const string find_this)
 {
-	return secondary_voltage_t(infos_and_settings_data(find_this),{"V"});
+	return quantity::secondary_voltage_t(infos_and_settings_data(find_this),{"V"});
 }
 
-const rastersize_t files_::dsims_t::contents_t::sputter_rastersize(const string find_this)
+const quantity::rastersize_t files_::dsims_t::contents_t::sputter_rastersize(const string find_this)
 {
-	return rastersize_t(infos_and_settings_data(find_this),{"um"});
+	return quantity::rastersize_t(infos_and_settings_data(find_this),{"um"});
 }
 
-const rastersize_t files_::dsims_t::contents_t::analyzed_area(const string find_this)
+const quantity::rastersize_t files_::dsims_t::contents_t::analyzed_area(const string find_this)
 {
-	return rastersize_t(infos_and_settings_data(find_this),{"um"});
+	return quantity::rastersize_t(infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity_t files_::dsims_t::contents_t::chamber_pressure(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::chamber_pressure(const string find_this)
 {	
-	return quantity_t("chamber_pressure",infos_and_settings_data(find_this),{"mbar"});
+	return quantity::quantity_t("chamber_pressure",infos_and_settings_data(find_this),{"mbar"});
 }
 
-const quantity_t files_::dsims_t::contents_t::contrast_aperture(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::contrast_aperture(const string find_this)
 {
-	return quantity_t("contrast_aperture",infos_and_settings_data(find_this),{"um"});
+	return quantity::quantity_t("contrast_aperture",infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity_t files_::dsims_t::contents_t::egate(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::egate(const string find_this)
 {
-	return quantity_t("egate",infos_and_settings_data(find_this),{"%"});
+	return quantity::quantity_t("egate",infos_and_settings_data(find_this),{"%"});
 }
 
-const quantity_t files_::dsims_t::contents_t::em_voltage(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::em_voltage(const string find_this)
 {
-	return quantity_t("em_voltage",infos_and_settings_data(find_this),{"V"});
+	return quantity::quantity_t("em_voltage",infos_and_settings_data(find_this),{"V"});
 }
 
-const quantity_t files_::dsims_t::contents_t::em_yield(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::em_yield(const string find_this)
 {
-	return quantity_t("em_yield",infos_and_settings_data(find_this),{"%"});
+	return quantity::quantity_t("em_yield",infos_and_settings_data(find_this),{"%"});
 }
 
-const quantity_t files_::dsims_t::contents_t::entrance_slit(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::entrance_slit(const string find_this)
 {
-	return quantity_t("entrance_slit",infos_and_settings_data(find_this),{"um"});
+	return quantity::quantity_t("entrance_slit",infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity_t files_::dsims_t::contents_t::energy_window(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::energy_window(const string find_this)
 {
-	return quantity_t("energy_window",infos_and_settings_data(find_this),{"eV"});
+	return quantity::quantity_t("energy_window",infos_and_settings_data(find_this),{"eV"});
 }
 
-const quantity_t files_::dsims_t::contents_t::exit_slit(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::exit_slit(const string find_this)
 {
-	return quantity_t("exit_slit",infos_and_settings_data(find_this),{"um"});
+	return quantity::quantity_t("exit_slit",infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity_t files_::dsims_t::contents_t::field_aperture(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::field_aperture(const string find_this)
 {
-	return quantity_t("field_aperture",infos_and_settings_data(find_this),{"um"});
+	return quantity::quantity_t("field_aperture",infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity_t files_::dsims_t::contents_t::mass_resolution(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::mass_resolution(const string find_this)
 {
-	return quantity_t("mass_resolution",infos_and_settings_data(find_this),{""});
+	return quantity::quantity_t("mass_resolution",infos_and_settings_data(find_this),{""});
 }
 
-const quantity_t files_::dsims_t::contents_t::total_acquisition_time(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::total_acquisition_time(const string find_this)
 {
-	return quantity_t("total_acquisition_time",infos_and_settings_data(find_this),{"s"});
+	return quantity::quantity_t("total_acquisition_time",infos_and_settings_data(find_this),{"s"});
 }
 
-const quantity_t files_::dsims_t::contents_t::total_sputtering_time(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::total_sputtering_time(const string find_this)
 {
-	return quantity_t("total_sputtering_time",infos_and_settings_data(find_this),{"s"});
+	return quantity::quantity_t("total_sputtering_time",infos_and_settings_data(find_this),{"s"});
 }
 

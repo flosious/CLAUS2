@@ -41,7 +41,7 @@ public:
 		const string to_string(const string del = ", ") const;
 		const string to_string_short() const;
 		string secondary_polarity;
-		energy_t sputter_energy;
+		quantity::energy_t sputter_energy;
 		ion_t sputter_ion;
 		bool operator==(const sims_t& obj) const;
 		bool operator!=(const sims_t& obj) const;
@@ -56,20 +56,20 @@ public:
 		dsims_t(files_::dsims_t& file);
 		const string to_string(const string del=", ") const;
 		
-		total_sputter_time_t total_sputter_time;
-		total_sputter_time_t total_acquisition_time;
-		rastersize_t sputter_rastersize;
-		rastersize_t analyzed_area;
-		quantity_t chamber_pressure;
-		quantity_t egate;
-		quantity_t mass_resolution;
-		quantity_t field_aperture;
-		quantity_t contrast_aperture;
-		quantity_t entrance_slit;
-		quantity_t exit_slit;
-		quantity_t energy_window;
-		quantity_t em_yield;
-		quantity_t em_voltage;
+		quantity::sputter_time_t total_sputter_time;
+		quantity::sputter_time_t total_acquisition_time;
+		quantity::rastersize_t sputter_rastersize;
+		quantity::rastersize_t analyzed_area;
+		quantity::quantity_t chamber_pressure;
+		quantity::quantity_t egate;
+		quantity::quantity_t mass_resolution;
+		quantity::quantity_t field_aperture;
+		quantity::quantity_t contrast_aperture;
+		quantity::quantity_t entrance_slit;
+		quantity::quantity_t exit_slit;
+		quantity::quantity_t energy_window;
+		quantity::quantity_t em_yield;
+		quantity::quantity_t em_voltage;
 		
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;

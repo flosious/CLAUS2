@@ -32,8 +32,8 @@ crater_t::linescan_t files_::profiler_t::contents_t::linescan()
 	if (raw_data_tensor().size()==0) return crater_t::linescan_t();
 	vector<vector<double>> data_cols_lines = tools::mat::transpose_matrix(tools::mat::str_matrix_to_double_matrix(raw_data_tensor()[0]));
 	if (data_cols_lines.size()!=2) return {};
-	quantity_t xy("linescan_xy",data_cols_lines[0],{"um"});
-	quantity_t z("linescan_z",data_cols_lines[1],{"nm"});
+	quantity::quantity_t xy("linescan_xy",data_cols_lines[0],{"um"});
+	quantity::quantity_t z("linescan_z",data_cols_lines[1],{"nm"});
 
 	return crater_t::linescan_t(xy,z);
 }

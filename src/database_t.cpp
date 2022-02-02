@@ -698,7 +698,7 @@ bool sample_t::load_from_database ()
 		return false;
 	}
 	if (lines_map.size()==0) return false;
-	quantity_t implanted_dose;
+	quantity::quantity_t implanted_dose;
 	implanted_dose.name="dose";
 	implanted_dose.unit="at/cm^2";
 	implanted_dose.dimension = "amount*(length)^(-2)";

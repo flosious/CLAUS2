@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2021Florian Bärwolf
+	Copyright (C) 2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -76,13 +76,13 @@ const int element_t::protons()
 }
 
 
-const mass_t element_t::mass()
+const quantity::mass_t element_t::mass()
 {
 	if (symbol!="" && isotopes.size()==0)
 	{
-		return mass_t({PSE.element(symbol)->mass()});
+		return quantity::mass_t({PSE.element(symbol)->mass()});
 	}
-	mass_t mass_s({0});
+	quantity::mass_t mass_s({0});
 	for (int i=0;i<isotopes.size();i++)
 		mass_s += (isotopes.at(i).mass() * isotopes.at(i).abundance);
 	return mass_s;

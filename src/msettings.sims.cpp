@@ -60,7 +60,7 @@ const string msettings::sims_t::to_string_short() const
 {
 	if (!sputter_energy.is_scalar() || !sputter_ion.is_set()) 
 		return "";
-	energy_t SE;
+	quantity::energy_t SE;
 	stringstream ss;
 	if (sputter_energy.data.at(0)>=1000)
 		SE =sputter_energy.change_unit(units::prefixes::kilo * sputter_energy.unit());

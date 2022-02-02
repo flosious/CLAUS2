@@ -41,8 +41,8 @@ private:
 		{
 		public:
 			///asuming y axis starts at low values and grows to bigger (e.g. from 1 to 1000)
-			range_t(const quantity_t* Ys);
-			range_t(const vector<const quantity_t*> Ys);
+			range_t(const quantity::quantity_t* Ys);
+			range_t(const vector<const quantity::quantity_t*> Ys);
 			range_t(double start, double stop);
 			///changes start and stop to log10 values
 			range_t log10() const;
@@ -55,9 +55,9 @@ private:
 		class points_t
 		{
 		public:
-			points_t(const quantity_t* X,const quantity_t* Y, const string legende, const string color=" +");
-			const quantity_t X;
-			const quantity_t Y;
+			points_t(const quantity::quantity_t* X,const quantity::quantity_t* Y, const string legende, const string color=" +");
+			const quantity::quantity_t X;
+			const quantity::quantity_t Y;
 			const string color;
 			const string legende="";
 		};
@@ -76,16 +76,19 @@ private:
 		vector<line_t> lines;
 		double start=-1;
 		double stop=-1;
+		///prefered output units
+// 		static string unit_string(const unit_t& unit);
+// 		static string unit_string(quantity::quantity_t& quantity);
 	public:
 		///all the curves for this axis
 		vector<points_t> curves;
 		vector<points_t> points;
 		///e.g. "Intensity [c/s]"
-		void add_points(const quantity_t& X, const quantity_t& Y, const string legend="", const string color=" +");
+		void add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend="", const string color=" +");
 		///checks all curves for consistency (same physical quantities and units)
 		bool check();
 		///adds a new curve to this axis
-		void add_curve(const quantity_t& X, const quantity_t& Y, const string legend="");
+		void add_curve(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend="");
 		void add_curve(const vector<double>& X, const vector<double>& Y, const string legend="");
 		///draws the axis to graph object
 		void draw(mglGraph * gr, double x_origin=0);
@@ -108,9 +111,9 @@ public:
 	axis_t Y1;
 	axis_t Y2;
 	axis_t Y3;
-// 	plot_t(const quantity_t& X, const quantity_t& Y, string legend);
-// 	plot_t(const quantity_t& X, const quantity_t& Y1, string Y1_legend, const quantity_t& Y2, string Y2_legend);
-// 	plot_t(const quantity_t& X, vector<pair<const quantity_t*,string>> Y1_quantities_to_legends, vector<pair<const quantity_t*,string>> Y2_quantities_to_legends);
+// 	plot_t(const quantity::quantity_t& X, const quantity::quantity_t& Y, string legend);
+// 	plot_t(const quantity::quantity_t& X, const quantity::quantity_t& Y1, string Y1_legend, const quantity::quantity_t& Y2, string Y2_legend);
+// 	plot_t(const quantity::quantity_t& X, vector<pair<const quantity::quantity_t*,string>> Y1_quantities_to_legends, vector<pair<const quantity::quantity_t*,string>> Y2_quantities_to_legends);
 	
 	void to_screen(const string window_title="", double sleep_sec=2);
 	void to_file(const string filename);

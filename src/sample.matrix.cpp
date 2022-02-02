@@ -31,7 +31,6 @@ sample_t::matrix_t::matrix_t()
 
 sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes)
 {
-// 	cout << "isotopes.size() = " << isotopes.size() << endl;
 	///filter elements from isos and save in matrix
 	while (isotopes.size()>0)
 	{
@@ -134,7 +133,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 				for (auto& pse_iso: PSE.element(symbol)->isotopes ) 
 				{
 					isotope_t iso{symbol,pse_iso.nucleons,pse_iso.abundance};
-					iso.substance_amount = substance_amount_t({amount*pse_iso.abundance});
+					iso.substance_amount = quantity::substance_amount_t({amount*pse_iso.abundance});
 					new_isotopes_to_add.push_back(iso);
 				}
 				if (amount==-1)	unknown_amounts++;
@@ -144,11 +143,11 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 				isotope_t iso{symbol,nucleons};
 				if (amount==-1)  // e.g. "29Si" = 29Si->-1mol
 				{
-					iso.substance_amount = substance_amount_t({-1});
+					iso.substance_amount = quantity::substance_amount_t({-1});
 					unknown_amounts++;
 				}
 				else // e.g. "29Si5" = 29Si->5mol
-					iso.substance_amount = substance_amount_t({amount});
+					iso.substance_amount = quantity::substance_amount_t({amount});
 				new_isotopes_to_add.push_back(iso);
 			}
 			
@@ -220,7 +219,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 	{
 		if (iso.abundance.data.at(0)<0)
 		{
-			iso.abundance = abundance_t({iso.substance_amount.data.at(0)/symbol_to_total_amount.find(iso.symbol)->second});
+			iso.abundance = quantity::abundance_t({iso.substance_amount.data.at(0)/symbol_to_total_amount.find(iso.symbol)->second});
 		}
 	}
 	
@@ -247,13 +246,13 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 
 void sample_t::matrix_t::substance_amount_to_relative(vector<isotope_t>& isotopes)
 {
-	substance_amount_t sum({0});
+	quantity::substance_amount_t sum({0});
 	for (auto& iso : isotopes)
 		sum += iso.substance_amount;
 	
 	for (auto& iso : isotopes)
-		iso.substance_amount = substance_amount_t( quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent));
-// 		iso.substance_amount = substance_amount_t( quantity_t(iso.substance_amount/sum*100));
+		iso.substance_amount = quantity::substance_amount_t( quantity::quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent));
+// 		iso.substance_amount = quantity::substance_amount_t( quantity::quantity_t(iso.substance_amount/sum*100));
 	
 // 	for (auto& iso : isotopes)
 // 		cout << iso.substance_amount.to_string() << endl;
@@ -289,6 +288,9 @@ const bool sample_t::matrix_t::is_set() const
 {
 	if (isotopes().size()==0)
 		return false;
+	for (auto& iso : isotopes())
+		if (!iso.abundance.is_set())
+			return false;
 	return true;
 }
 

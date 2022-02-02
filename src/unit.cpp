@@ -4,74 +4,66 @@
 /*****  unit_t::base_exponents_t  *******/
 /****************************************/
 
+// unit_t units::SI::meter	=	({1,0,0,0,0,0,0},1);
 
-// const map<unit_t, std::string> unit_t::base_unit_to_symbol
-// {
-// 	{units::SI::meter,"m"},
-// 	{units::SI::kilogram,"kg"},
-// 	{units::SI::second,"s"},
-// 	{units::SI::Ampere,"A"},
-// 	{units::SI::mol,"mol"},
-// 	{units::SI::Kelvin,"K"},
-// 	{units::SI::Candela,"cd"}
-// };
+
 
 const map<std::string,unit_t> unit_t::symbol_to_base_unit
 {
-	{"m",units::SI::meter},
-	{"kg",units::SI::kilogram},
-	{"s",units::SI::second},
-	{"A",units::SI::Ampere},
-	{"mol",units::SI::mol},
-	{"K",units::SI::Kelvin},
-	{"cd",units::SI::Candela}
+	{"m",{units::SI::meter}},
+	{"kg",{units::SI::kilogram}},
+	{"s",{units::SI::second}},
+	{"A",{units::SI::Ampere}},
+	{"mol",{units::SI::mol}},
+	{"K",{units::SI::Kelvin}},
+	{"cd",{units::SI::Candela}}
 };
 
 const std::unordered_map<std::string, unit_t> unit_t::symbol_prefix_unit 
 {
-	{"d",units::prefixes::deci},
-	{"c",units::prefixes::centi},
-	{"m",units::prefixes::milli},
-	{"u",units::prefixes::micro},
-	{"n",units::prefixes::nano},
-	{"p",units::prefixes::pico},
-	{"f",units::prefixes::femto},
-	{"a",units::prefixes::atto},
-	{"z",units::prefixes::zepto},
-	{"y",units::prefixes::yocto},
+	{"d",{units::prefixes::deci}},
+	{"c",{units::prefixes::centi}},
+	{"m",{units::prefixes::milli}},
+	{"u",{units::prefixes::micro}},
+	{"n",{units::prefixes::nano}},
+	{"p",{units::prefixes::pico}},
+	{"f",{units::prefixes::femto}},
+	{"a",{units::prefixes::atto}},
+	{"z",{units::prefixes::zepto}},
+	{"y",{units::prefixes::yocto}},
 	
-	{"da",units::prefixes::deca},
-	{"h",units::prefixes::hecto},
-	{"k",units::prefixes::kilo},
-	{"M",units::prefixes::mega},
-	{"G",units::prefixes::giga},
-	{"T",units::prefixes::terra},
-	{"P",units::prefixes::peta},
-	{"E",units::prefixes::exa},
-	{"Z",units::prefixes::zetta},
-	{"Y",units::prefixes::yotta}
+	{"da",{units::prefixes::deca}},
+	{"h",{units::prefixes::hecto}},
+	{"k",{units::prefixes::kilo}},
+	{"M",{units::prefixes::mega}},
+	{"G",{units::prefixes::giga}},
+	{"T",{units::prefixes::terra}},
+	{"P",{units::prefixes::peta}},
+	{"E",{units::prefixes::exa}},
+	{"Z",{units::prefixes::zetta}},
+	{"Y",{units::prefixes::yotta}}
 };
 
 const map<std::string, unit_t> unit_t::symbol_to_unit 
 {
-	{"%",units::suffixes::percent},
-	{"bar",units::derived::bar},
-	{"cnt/s",units::derived::counts/units::SI::second},
-	{"c/s",units::derived::counts/units::SI::second},
-	{"e",constants::elementary_charge},
-	{"V",units::derived::volt},
-	{"eV",units::derived::electron_volt},
+	{"%",{units::suffixes::percent}},
+	{"bar",{units::derived::bar}},
+	{"cnt/s",{units::derived::counts/units::SI::second}},
+	{"c/s",{units::derived::counts/units::SI::second}},
+	{"e",{constants::elementary_charge}},
+	{"V",{units::derived::volt}},
+	{"eV",{units::derived::electron_volt}},
 	/*atoms*/
-	{"at",units::derived::atoms},
-	{"at%",units::derived::atom_percent},
-	{"nm/s",units::SI::meter/units::SI::second*units::prefixes::nano},
-	{"nm/min",units::SI::meter/units::derived::min*units::prefixes::nano},
-	{"at/ccm",units::derived::atoms/(units::SI::meter.pow(3)*units::prefixes::centi.pow(3))},
-	{"at/scm",units::derived::atoms/(units::SI::meter.pow(2)*units::prefixes::centi.pow(2))},
-	{"at/cm^3",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
-	{"atom/cm3",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)},
-	{"atom/cm3/(c/s)",units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)/(units::derived::counts/units::SI::second)},
-	{"at/cm^2",units::derived::atoms/units::SI::meter.pow(2)/units::prefixes::centi.pow(2)},
+	{"at",{units::derived::atoms}},
+	{"at%",{units::derived::atom_percent}},
+	{"nm/s",{units::SI::meter/units::SI::second*units::prefixes::nano}},
+	{"nm/min",{units::SI::meter/units::derived::min*units::prefixes::nano}},
+	{"at/ccm",{units::derived::atoms/(units::SI::meter.pow(3)*units::prefixes::centi.pow(3))}},
+	{"at/scm",{units::derived::atoms/(units::SI::meter.pow(2)*units::prefixes::centi.pow(2))}},
+	{"at/cm^3",{units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)}},
+	{"atom/cm3",{units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)}},
+	{"atom/cm3/(c/s)",{units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)/(units::derived::counts/units::SI::second)}},
+	{"at/cm^2",{units::derived::atoms/units::SI::meter.pow(2)/units::prefixes::centi.pow(2)}},
 	/*time*/
 	{"sec",{units::SI::second}},
 	{"min",{units::derived::min}},
@@ -261,7 +253,7 @@ unit_t::unit_t(string symbols)
 	if (symbol_to_unit.size()>0 && symbol_to_unit.find(symbols)!=symbol_to_unit.end())
 	{
 		logger::debug(21,"unit_t::unit_t","symbol_to_unit.at("+symbols+")",symbol_to_unit.at(symbols).base_units_exponents.to_string());
-		*this=symbol_to_unit.at(symbols);
+		*this={symbol_to_unit.at(symbols),symbols};
 		logger::debug(21,"unit_t::unit_t","symbols is a derived unit",symbols,base_units_exponents.to_string());
 		return;
 	}
@@ -272,7 +264,7 @@ unit_t::unit_t(string symbols)
 		{
 			if ((prefix_symbol.first + us.first) == symbols)
 			{
-				*this = us.second*prefix_symbol.second;
+				*this = {us.second*prefix_symbol.second,symbols};
 				logger::debug(21,"unit_t::unit_t","symbols is a combination of prefix and derived unit",symbols,base_units_exponents.to_string());
 				return;
 			}
@@ -283,7 +275,7 @@ unit_t::unit_t(string symbols)
 	if (symbol_to_base_unit.size()>0 && symbol_to_base_unit.find(symbols)!=symbol_to_base_unit.end())
 	{
 		logger::debug(21,"unit_t::unit_t","symbol_to_base_unit.at("+symbols+")",symbol_to_base_unit.at(symbols).base_units_exponents.to_string());
-		*this=symbol_to_base_unit.at(symbols);
+		*this={symbol_to_base_unit.at(symbols),symbols};
 		logger::debug(21,"unit_t::unit_t","symbols is a base unit",symbols,base_units_exponents.to_string());
 		return;
 	}
@@ -295,7 +287,7 @@ unit_t::unit_t(string symbols)
 			if ((prefix_symbol.first + is.first) == symbols)
 			{
 // 				logger::debug("symbols is a combination of prefix and base unit",symbols);
-				*this = is.second*prefix_symbol.second;
+				*this = {is.second*prefix_symbol.second,symbols};
 				logger::debug(21,"unit_t::unit_t","symbols is a combination of prefix and base unit",symbols,base_units_exponents.to_string());
 				return;
 			}
@@ -329,7 +321,19 @@ unit_t::unit_t(string symbols)
 const string unit_t::to_string() const
 {
 	if (!is_set()) return "";
-	if (!base_units_exponents.is_set()) return "*"+tools::to_string(multiplier);
+	if (prefered_output_string!="") 
+	{
+// 		cout << endl << endl << "PREFERED STRING '" << prefered_output_string << "'" << endl;
+		return prefered_output_string;
+	}
+	if (!base_units_exponents.is_set() )
+	{
+// 		logger::debug(21,"unit_t::to_string()","base_units_exponents not set");
+		if (base_units_exponents.is_relative()  && multiplier==1)
+			return "a.u.";
+		else
+			return "*"+tools::to_string(multiplier);
+	}
 	logger::debug(21,"unit_t::to_string()","base_units_exponents: "+ base_units_exponents.to_string(), "multiplier: " + tools::to_string(multiplier));
 	/*check SI*/
 	for (auto it=symbol_to_base_unit.begin();it!=symbol_to_base_unit.end();it++)

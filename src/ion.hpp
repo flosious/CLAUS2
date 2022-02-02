@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2021Florian Bärwolf
+	Copyright (C) 2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -38,14 +38,14 @@ class ion_t
 {
 private:
 // 	const vector<element_t> elements_p;
-// 	const electrical_charge_t electric_charge_p;
+// 	const quantity::electrical_charge_t electric_charge_p;
 // 	vector< element_t > elements_p;
 public:
 	ion_t();
-	ion_t(vector<element_t> elements_s, electrical_charge_t electric_charge_s);
-	ion_t(element_t element_s, electrical_charge_t electric_charge_s);
+	ion_t(vector<element_t> elements_s, quantity::electrical_charge_t electric_charge_s);
+	ion_t(element_t element_s, quantity::electrical_charge_t electric_charge_s);
 	vector< element_t > elements;
-	electrical_charge_t electric_charge;
+	quantity::electrical_charge_t electric_charge;
 	bool operator==(const ion_t& obj) const;
 	bool operator!=(const ion_t& obj) const;
 	string to_string(const string del="+") const;

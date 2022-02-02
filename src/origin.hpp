@@ -43,7 +43,7 @@ public:
 		vector<string> data;
 		vector<string> vec();
 		column_t(const vector<double>& data_s, string longname="",string unit="", string comment="");
-		column_t(const quantity_t& quantity, string prefix="", string suffix="");
+		column_t(const quantity::quantity_t& quantity, string prefix="", string suffix="");
 		/// superscript "^30Si" --> "\+(30)Si"
 		/// subscript "Si_2" --> "Si\-(2)"
 		void apply_origin_conform_replacements(string& in_here);

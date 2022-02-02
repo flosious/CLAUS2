@@ -31,7 +31,7 @@ files_::sims_t::name_t::name_t(string& filename_with_path_s,
 {
 }
 
-total_sputter_depth_t files_::sims_t::name_t::total_sputter_depths()
+quantity::depth_t files_::sims_t::name_t::total_sputter_depths()
 {
 	filename_without_crater_depths_s = filename();
 	if (total_sputter_depths_p.size()==0)
@@ -53,8 +53,8 @@ total_sputter_depth_t files_::sims_t::name_t::total_sputter_depths()
 			}
 		}
 	}
-	total_sputter_depth_t tspd;
-	for (total_sputter_depth_t& t : total_sputter_depths_p)
+	quantity::depth_t tspd;
+	for (quantity::depth_t& t : total_sputter_depths_p)
 		tspd << t;
 	return tspd;
 }
@@ -86,7 +86,7 @@ bool files_::sims_t::name_t::parse_sputter_energy_element_polarity()
 		reg = ("^([0-9]{1,2})(kV|keV)(O|Cs)(\\+|-)$"); 
 		if (regex_search(*FNp,match,reg)) 
 		{	
-			sputter_energy_p = energy_t{{tools::str::str_to_double(match[1])*1000},{"eV"}};
+			sputter_energy_p = quantity::energy_t{{tools::str::str_to_double(match[1])*1000},{"eV"}};
 			sputter_element_p = (match[3]);
 			secondary_polarity_p = match[4];
 			not_parseable_filename_parts_p.erase(FNp);
@@ -97,7 +97,7 @@ bool files_::sims_t::name_t::parse_sputter_energy_element_polarity()
 		reg = ("^([0-9]{2,5})(V|eV)(O|Cs)(\\+|-)$"); 
 		if (regex_search(*FNp,match,reg)) 
 		{
-			sputter_energy_p = energy_t{{tools::str::str_to_double(match[1])},{"eV"}};
+			sputter_energy_p = quantity::energy_t{{tools::str::str_to_double(match[1])},{"eV"}};
 			sputter_element_p = (match[3]);
 			secondary_polarity_p = match[4];
 			not_parseable_filename_parts_p.erase(FNp);
@@ -108,7 +108,7 @@ bool files_::sims_t::name_t::parse_sputter_energy_element_polarity()
 	return false;
 }
 
-const energy_t files_::sims_t::name_t::sputter_energy()
+const quantity::energy_t files_::sims_t::name_t::sputter_energy()
 {
 	if (!sputter_energy_p.is_set()) 
 		parse_sputter_energy_element_polarity();

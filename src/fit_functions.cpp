@@ -413,23 +413,33 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 /****  linear_t  ******/
 /**********************/
 
-double fit_functions::linear_t::chisq()
+const double fit_functions::linear_t::cov() const
+{
+	return cov_p;
+}
+
+const double fit_functions::linear_t::slope() const
+{
+	return slope_p;
+}
+
+double fit_functions::linear_t::chisq() const
 {
 	return chisq_p;
 }
 
-bool fit_functions::linear_t::fitted()
+bool fit_functions::linear_t::fitted() const
 {
 	return fitted_p;
 }
 
-vector<double> fit_functions::linear_t::fitted_y_data(vector<double> x)
+vector<double> fit_functions::linear_t::Y(vector<double> x)
 {
 	if (!fitted_p) return {};
 	vector<double> Y(x.size());
 	for (int i=0;i<x.size();i++)
 	{
-		Y[i] = x[i] * slope;
+		Y[i] = x[i] * slope();
 	}
 	return Y;
 }
@@ -446,7 +456,7 @@ bool fit_functions::linear_t::fit(map<double, double> data_XY)
 		y[i] = xy.second;
 		i++;
 	}
-	gsl_fit_mul(x,1,y,1,n,&slope,&cov,&chisq_p);
+	gsl_fit_mul(x,1,y,1,n,&slope_p,&cov_p,&chisq_p);
 	fitted_p = true;
 	return true;
 }
