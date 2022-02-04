@@ -62,14 +62,17 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	for (auto& MG : dsims.mgroups())
 	{	
-		auto MG_copy = MG;
-		MG_copy.calc().matrices.median_const_from_db();
-		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
-		
+// 		auto MG_copy = MG;
+// 		MG_copy.calc().matrices.median_const_from_db();
+// 		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
+		auto proportional_fit_Crels_to_Irels = MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters());
+		for (auto Crel_to_Irel : proportional_fit_Crels_to_Irels)
+		{
+			Crel_to_Irel.plot_to_screen();
+		}
 		for (auto& M : MG.measurements())
 		{
-			MG_copy.measurement(*M)->plot_now(0);
-			M->plot_now(0);
+// 			M->plot_now(0);
 		}
 	}
 	

@@ -25,19 +25,6 @@ mgroups_::sims_t::calc_t::~calc_t()
 
 mgroups_::sims_t::calc_t::calc_t(sims_t& MG) : MG(MG), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this), measurements(MG.measurements())
 {
-	
-// 	if (save_calc_esults)
-// 	{
-// 		for (auto& M : measurements)
-// 		{
-// 			MG.saved_calc_results.push_back(M->calc());
-// 		}
-// 	}
-// 	for (auto& c : saved_calc_results)
-// 	{
-// 		cout << c.first->crater.sputter_time.to_string() << endl;
-// 		cout << c.second.M.crater.sputter_time.to_string() << endl;
-// 	}
 }
 
 mgroups_::sims_t& mgroups_::sims_t::calc_t::references(bool overwrite)
@@ -56,12 +43,6 @@ mgroups_::sims_t& mgroups_::sims_t::calc_t::references(bool overwrite)
 	}
 	return MG;
 }
-
-// void mgroups_::sims_t::set_matrix_isotopes_in_measurements()
-// {
-// 	for (auto& M: measurements())
-// 		M->matrix_isotopes = matrix_isotopes();
-// }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_SF_from_implants_maxima(bool overwrite)
 {
@@ -93,63 +74,28 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 	return *this;
 }
 
-// map<sample_t::matrix_t,quantity::SR_t> mgroups_::sims_t::calc_t::matrices_to_SR()
-// {
-// 	vector<pair<sample_t::matrix_t,quantity::SR_t>> mats_to_SR;
-// 	map<sample_t::matrix_t,quantity::SR_t> mats_to_SR_map;
-// 	
-// 	for (auto& M : measurements)
-// 	{
-// 		if (!M->sample->matrix().is_set()) continue;
-// 		if (!M->crater.SR.is_set()) continue;
-// 		mats_to_SR.push_back(pair<sample_t::matrix_t,quantity::SR_t>(M->sample->matrix(),M->crater.SR));
-// 	}
-// 	
-// 	// now there could be entries with same matrices in vector mats_to_SR, lets filter them and take their mean
-// 	for (int i=0;i<mats_to_SR.size();i++)
-// 	{
-// 		quantity::SR_t SR = mats_to_SR.at(i).second;
-// 		for (int j=i+1;j<mats_to_SR.size();j++)
-// 		{
-// 			if (mats_to_SR.at(i).first == mats_to_SR.at(j).first)
-// 				SR << mats_to_SR.at(j).second;
-// 		}
-// 		if (SR.data.size() > 1)
-// 			SR = quantity::SR_t(SR.mean()); // take the mean, but don't tell anyone
-// 		mats_to_SR_map.insert(pair<sample_t::matrix_t,quantity::SR_t> (mats_to_SR.at(i).first,SR));
-// 	}
-// 	
-// 	return mats_to_SR_map;
-// }
-// 
-// map<sample_t::matrix_t,quantity::SF_t> mgroups_::sims_t::calc_t::matrices_to_RSF(const cluster_t& cluster)
-// {
-// 	map<sample_t::matrix_t,quantity::SF_t> mat_to_RSF_map;
-// 	vector<pair<sample_t::matrix_t,quantity::SF_t>> mat_to_RSF;
-// 	for (auto& M : measurements)
-// 	{
-// 		if (!M->sample->matrix().is_set()) continue;
-// 		quantity::SF_t RSF = M->cluster(cluster)->RSF;
-// 		if (!RSF.is_set()) continue;
-// 		mat_to_RSF.push_back(pair<sample_t::matrix_t,quantity::SF_t>(M->sample->matrix(),RSF));
-// 	}
-// 	
-// 	// now there could be entries with same matrices in vector mat_to_RSF, lets filter them and take their mean
-// 	for (int i=0;i<mat_to_RSF.size();i++)
-// 	{
-// 		quantity::SF_t RSF = mat_to_RSF.at(i).second;
-// 		for (int j=i+1;j<mat_to_RSF.size();j++)
-// 		{
-// 			if (mat_to_RSF.at(i).first == mat_to_RSF.at(j).first)
-// 				RSF << mat_to_RSF.at(j).second;
-// 		}
-// 		if (RSF.data.size() > 1)
-// 			RSF = quantity::SR_t(RSF.mean()); // take the mean, but don't tell anyone
-// 		mat_to_RSF_map.insert(pair<sample_t::matrix_t,quantity::SF_t> (mat_to_RSF.at(i).first,RSF));
-// 	}
-// 	
-// 	return mat_to_RSF_map;
-// }
+const vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> mgroups_::sims_t::calc_t::polynom_fit_Crels_to_Irels(
+											vector<cluster_t> 		cluster_names,
+											vector<unsigned int> 	rank, 
+											vector<double> 			fit_start_parameters)
+{
+	vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> polynom_fit_Crel_to_Irelvec;
+	for (auto cluster_name_zaehler:cluster_names)
+	{
+		for (auto cluster_name_nenner:cluster_names)
+		{
+			if (cluster_name_nenner == cluster_name_zaehler)
+				continue;
+			polynom_fit_Crel_to_Irelvec.push_back({cluster_name_zaehler,cluster_name_nenner,*this,rank,fit_start_parameters});
+		}
+	}
+	return polynom_fit_Crel_to_Irelvec;
+}
+
+const vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> mgroups_::sims_t::calc_t::proportional_fit_Crels_to_Irels(vector<cluster_t> 		cluster_names)
+{
+	return polynom_fit_Crels_to_Irels(cluster_names,{0,1},{0,1});
+}
 
 
 /*************************/
@@ -545,17 +491,18 @@ mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_fit_Crel_to_Irel_c
 
 void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double sleep_sec) const
 {
+	
 	const unsigned int data_points_for_fit_resolution=100;
 	if (!polynom.fitted())	return;
 	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
 	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set()) return;
-	
 	plot_t plot(false);
 	
 	stringstream title_X, title_Y, title_window;
 	title_X << "Irel = (" << zaehler.to_string() << ") / (" << nenner.to_string() << ")";
 	title_Y << "Crel = [" << zaehler.corresponding_isotope(calc.MG.matrix_isotopes()).to_string() << "] / [";
 	title_Y << nenner.corresponding_isotope(calc.MG.matrix_isotopes()).to_string() << "]";
+	stringstream fit_params;
 	title_window << title_Y.rdbuf() << " over " << title_X.rdbuf() << " chisq=" << polynom.chisq();
 	
 	//generate data to show the fit in high resolution

@@ -84,7 +84,6 @@ public:
 		bool fitted_p=false;
 		vector<double> Xdata;
 		vector<double> fit_parameters_s;
-		
 	public:
 		///degree means rank
 		polynom_t(int degree);

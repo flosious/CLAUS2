@@ -120,8 +120,13 @@ public:
 				quantity::concentration_t Crel(measurements_::sims_t& M) const;
 				void plot_to_screen(double sleep_sec=0) const;
 			};
+			///interpolates [E_i]/[E_j] = POLYNOM( (E_i)/(E_j) ) for all given clusters and all combinations
+			const vector<polynom_fit_Crel_to_Irel_c> polynom_fit_Crels_to_Irels(vector<cluster_t> cluster_names, vector<unsigned int> rank, vector<double> fit_start_parameters);
+			
 			sims_t& MG;
 		public:
+			///interpolates [E_i]/[E_j] = k * (E_i)/(E_j)  for all given clusters and all combinations
+			const vector<polynom_fit_Crel_to_Irel_c> proportional_fit_Crels_to_Irels(vector<cluster_t> cluster_names);
 			///sputter_rate
 			class SR_c
 			{
@@ -212,68 +217,9 @@ public:
 			class matrix_c
 			{
 			private:
-				/// [Si]/[Ge] = RSF(Si,Ge) * (Si)/(Ge); Si => zaehler; Ge => nenner
-				/// calculates the linear defined RSF from the inputs isotopes zaehler and nenner substance_amounts
-				class RSF_c
-				{
-				private:
-					const fit_functions::linear_t interp() const;
-					const fit_functions::linear_t interpolation;
-					calc_t& calc;
-				public:
-					const cluster_t zaehler;
-					const cluster_t nenner;
-					/// the interpolated RSF value
-					const quantity::RSF_t RSF_val() const;
-					const quantity::RSF_t RSF_val_cov() const;
-// 					quantity::quantity_t value();
-					RSF_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc);
-				};  // RSF_c
-				const RSF_c RSF(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc) const;
-				/* 
-				 *  [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
-				 */
-				///Crels and Irels interpolations of all matrix_clusters
-				class polynom_fit_Crels_to_Irels_c
-				{
-				private:
-					///WARNING DOES NOT WORK
-					///for one E_j === matrix_cluster : [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
-					class matrix_isotope_concentration_c
-					{
-					private:
-						calc_t& calc;
-						///creates the constant vector of polynoms of Crel to Irel and already fits them
-						const vector<polynom_fit_Crel_to_Irel_c> polynom_fits_Crels_to_Irels_f(vector<unsigned int> rank, vector<double> fit_start_parameters) const;
-					public:
-						/*for one E_j: [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
-						 * generates Irels { (E_i)/(matrix_cluster) } from measurement pointer and saves the internal related polynoms
-						 * to polynom_fits_Crels_to_Irels
-						 */
-						matrix_isotope_concentration_c(const cluster_t& matrix_cluster, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
-						const cluster_t matrix_cluster;
-						const vector<polynom_fit_Crel_to_Irel_c> polynom_fits_Crels_to_Irels;
-						///calculates [matrix_cluster](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[matrix_cluster]))^-1 using polynom_fits_Crels_to_Irels
-						quantity::concentration_t concentration(measurements_::sims_t& M) const;
-						///plots the polynoms
-						void plot_to_screen(double sleep_sec=0) const;
-					};
-					calc_t& calc;
-					const vector<matrix_isotope_concentration_c> matrix_isotopes_concentrations_f(vector<double> fit_start_parameters);
-				public:
-					polynom_fit_Crels_to_Irels_c(vector<unsigned int> rank, vector<double> fit_start_parameters, calc_t& calc);
-					///plots the polynoms
-					void plot_to_screen(double sleep_sec=0) const;
-					const vector<unsigned int> rank;
-					///for ALL E_j === matrix_clusterS : [E_j](Irel) =  ( 1 + SUM_(i!=j) ([E_i]/[E_j]))^-1  ;; Crel === [E_i]/[E_j] => [E_i]/[E_j](Irel)
-					const vector<matrix_isotope_concentration_c> matrix_isotopes_concentrations;
-					///uses polynom_fits_Crels_to_Irels to calculate all matrix_clusters concentrations within the measurement M
-					bool concentration(measurements_::sims_t& M);
-				}; // polynom_fit_Crels_to_Irels_c
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
-				
 				///checks whether all intensities of all matrix_clusters are set
 				bool intensities_are_set() const;
 			public:
@@ -281,7 +227,7 @@ public:
 				matrix_c(calc_t& calc);
 				///rank{0,1,0} -> 0*a0+1*a1*x+0*a2*x*x == 0*a0+1*a1*x =rank{0,1}
 				calc_t& interpolate(const vector<unsigned int> polynom_rank = {0,1}, bool overwrite = false);
-				
+				calc_t& linear_interpolated_elemental_concentration(bool overwrite = false);
 				calc_t& pbp_const_from_db(bool overwrite = false);
 				calc_t& mean_const_from_db(bool overwrite = false);
 				calc_t& median_const_from_db(bool overwrite = false);
