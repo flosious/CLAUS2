@@ -49,22 +49,34 @@ quantity::quantity_t::quantity_t(double data_s, unit_t unit_s) : unit_p(unit_s),
 {
 }
 
-fit_functions::polynom_t quantity::quantity_t::polynom(unsigned int polynom_grade) const
+const vector<double> quantity::quantity_t::data_X_1D() const
 {
-	fit_functions::polynom_t poly(polynom_grade);
-	if (!is_set()) 
-		return poly;
-	
-	std::map<double,double> data_XY;
 	vector<double> X(data.size());
 	for (int x=0;x<X.size();x++)
 		X[x]=x;
-	tools::vec::combine_vecs_to_map(&X,&data,&data_XY);
+	return X;
+}
 
-	if (!poly.fit(data_XY)) 
-	{
-		return poly;
-	}
+
+const std::map<double,double> quantity::quantity_t::data_XY_1D()
+{
+	std::map<double,double> data_XY; 
+	tools::vec::combine_vecs_to_map(data_X_1D(),&data,&data_XY);
+	return data_XY;
+}
+
+fit_functions::polynom_t quantity::quantity_t::polynom(unsigned int polynom_grade) const
+{
+	fit_functions::polynom_t poly(polynom_grade,data);
+// 	if (!is_set()) 
+// 		return poly;
+	
+// 	std::map<double,double> data_XY;
+// 	vector<double> X(data.size());
+// 	for (int x=0;x<X.size();x++)
+// 		X[x]=x;
+// 	tools::vec::combine_vecs_to_map(&X,&data,&data_XY);
+
 	return poly;
 }
 
@@ -140,16 +152,15 @@ quantity::quantity_t quantity::quantity_t::fit_polynom_by_x_data(quantity_t& x_d
 	if (!is_set()) return quantity_t();
 	if (polynom_grade==-1) polynom_grade=17; // seems to be good for implant profiles
 	
-	fit_functions::polynom_t polynom(polynom_grade);
+	
 	std::map<double,double> data_XY;
 	tools::vec::combine_vecs_to_map(&x_data.data,&data,&data_XY);
+	fit_functions::polynom_t polynom(polynom_grade,data_XY);
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_fit(" << name() << ")";
 	quantity_t fit(ss.str(),{},{unit()});
-	polynom.fit(data_XY);
-	
-	if (new_x_data.is_set()) fit.data=polynom.fitted_y_data(new_x_data.data);
-	else fit.data=polynom.fitted_y_data(x_data.data);
+	if (new_x_data.is_set()) fit.data=polynom.y_data(new_x_data.data);
+	else fit.data=polynom.y_data(x_data.data);
 	return fit;
 }
 
@@ -157,15 +168,15 @@ quantity::quantity_t quantity::quantity_t::polyfit_derivative(unsigned int polyn
 {
 	fit_functions::polynom_t polynom_s = polynom(polynom_grade);
 	
-	if (!polynom_s.fit(data)) 
+	if (!polynom_s.successfully_fitted()) 
 	{
-		logger::error("quantity::quantity_t::polyfit_derivative","polynom_s.derivative(derivative).fitted","returning empty");
+		logger::error("quantity::quantity_t::polyfit_derivative","!polynom_s.successfully_fitted()","returning empty");
 		return {};
 	}
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_derivative" << derivative<< "_fit(" << name() << ")";
 	quantity_t fit(ss.str(),{},{unit()});
-	fit.data=polynom_s.derivative(derivative).fitted_y_data();
+	fit.data=polynom_s.derivative(derivative).y_data(data_X_1D());
 	return fit;
 }
 
@@ -198,14 +209,14 @@ quantity::quantity_t quantity::quantity_t::polyfit(unsigned int polynom_grade) c
 	
 // 	cout << "data.size()=" << data.size() << endl;
 	fit_functions::polynom_t polynom_s = polynom(polynom_grade);
-	if (!polynom_s.fit(data)) 
+	if (!polynom_s.successfully_fitted()) 
 	{
 		return {};
 	}
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_fit(" << name() << ")";
 	quantity_t fit(ss.str(),{},{unit()});
-	fit.data=polynom_s.fitted_y_data();
+	fit.data=polynom_s.y_data(data_X_1D());
 	return fit;
 }
 

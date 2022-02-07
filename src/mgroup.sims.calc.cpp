@@ -426,8 +426,15 @@ const quantity::concentration_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_f
 {
 	quantity::concentration_t Crel;
 	const auto matrix_isotopes = calc.MG.matrix_isotopes();
-	auto Zmat_iso = M.sample->matrix().isotope(zaehler.corresponding_isotope(matrix_isotopes));
-	auto Nmat_iso = M.sample->matrix().isotope(nenner.corresponding_isotope(matrix_isotopes));
+	if (M.sample==nullptr)
+	{
+		cout << "M.sample==nullptr" << endl;
+		exit(1);
+	}
+	sample_t::matrix_t mat = M.sample->matrix();
+	cout << mat.to_string() << endl;
+	isotope_t* Zmat_iso = M.sample->matrix().isotope(zaehler.corresponding_isotope(matrix_isotopes));
+	isotope_t* Nmat_iso = M.sample->matrix().isotope(nenner.corresponding_isotope(matrix_isotopes));
 	if (Nmat_iso == nullptr || !Nmat_iso->substance_amount.is_set()) 
 		return {}; //division by 0
 	if (Zmat_iso == nullptr || !Zmat_iso->substance_amount.is_set())
@@ -438,14 +445,20 @@ const quantity::concentration_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_f
 const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median() const
 {
 	quantity::quantity_t Crels, Irels;
+// 	cout << "D1" << endl;
 	for (auto& M : calc.measurements)
 	{
+// 		cout << "D2" << endl;
 		if (!Crel_from_sample(*M).is_set()) continue;
+// 		cout << "D3" << endl;
 // 		if (!Irel(*M).is_set()) continue;
 // 		Irels << Irel(*M).remove_data_from_begin(Irel(*M).data.size()/2).median(); // this is the truncated_median from Irel and NOT Irel from truncated_medians; This is different!
 		if (!Irel_from_truncated_medians(*M).is_set()) continue;
+// 		cout << "C1" << endl;
 		Irels << Irel_from_truncated_medians(*M);
+// 		cout << "C2" << endl;
 		Crels << Crel_from_sample(*M);
+// 		cout << "C3" << endl;
 	}
 	return {Crels,Irels};
 }
@@ -485,16 +498,17 @@ const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::
 /************************************************************/
 mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters) :
 																				Crel_to_Irel_c(zaehler,nenner,calc),
-																				polynom(rank,fit_start_parameters)
+																				polynom(polynom_f(rank))
 {
 }
 
 void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double sleep_sec) const
 {
-	
 	const unsigned int data_points_for_fit_resolution=100;
-	if (!polynom.fitted())	return;
+	if (!polynom.successfully_fitted())	return;
+	
 	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
+// 	cout << "B2" << endl;
 	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set()) return;
 	plot_t plot(false);
 	
@@ -511,7 +525,8 @@ void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double
 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",Crel_to_Irel.second.to_string_detailed());
 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",x_res.to_string_detailed());
 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",X.to_string_detailed());
-	const quantity::quantity_t Y(title_Y.str(),polynom.fitted_y_data(X.data),units::SI::one);
+	const quantity::quantity_t Y(title_Y.str(),polynom.y_data(X.data),units::SI::one);
+	
 	plot.Y1.add_curve(X,Y,"fit rank: " + tools::vec::to_string(polynom.rank));
 	plot.Y1.add_points((quantity::quantity_t{X,Crel_to_Irel.second.data}),(quantity::quantity_t{Y,Crel_to_Irel.first.data}),"data"," ro");
 	plot.to_screen(title_window.str(),sleep_sec);
@@ -520,41 +535,54 @@ void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double
 quantity::concentration_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel(measurements_::sims_t& M) const
 {
 // 	logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::polynom_c::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string(),"Crel=");
-	quantity::concentration_t result(polynom.fitted_y_data(Irel(M).data),Crel_template.unit());
+	quantity::concentration_t result(polynom.y_data(Irel(M).data),Crel_template.unit());
 	logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string_detailed(),"Crel=" + result.to_string_detailed());
 // 	return {polynom.fitted_y_data(Irel(M).data),Crel_template.unit()};
 	return result;
 }
 
-bool mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()
+vector<double> mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::fit_start_parameters(const vector<unsigned int> rank)
 {
+	vector<double> out(rank.size());
+	for (int i=0;i<rank.size();i++)
+		out[i]=rank[i];
+	return out;
+}
+
+const fit_functions::polynom_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f(const vector<unsigned int> rank) const
+{
+// 	cout << "RANK" << endl;
+// 	print(rank);
 	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
+	const fit_functions::polynom_t polynom_empty(0,{0});
 	
 	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set())
 	{
-		logger::warning(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","known_Crels_from_sample_matrix_to_Irels_truncated_median() is not set","returning false");
-		return false;
+		logger::warning(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","known_Crels_from_sample_matrix_to_Irels_truncated_median() is not set","returning false");
+		return polynom_empty;
 	}
+	
 	map<double,double> X_to_Y_map;
 	tools::vec::combine_vecs_to_map(&Crel_to_Irel.second.data,&Crel_to_Irel.first.data, &X_to_Y_map); // Crel(Irel)
-	if (X_to_Y_map.size()<1 || X_to_Y_map.size() < polynom.rank.size())
+	if (X_to_Y_map.size()<1 || X_to_Y_map.size() < rank.size())
 	{
-		logger::warning(3,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","to less data points: " + tools::to_string(X_to_Y_map.size()),"returning false");
-		return false;
+		logger::warning(3,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","to less data points: " + tools::to_string(X_to_Y_map.size()),"returning false");
+		return polynom_empty;
 	}
-	if (!polynom.fit(X_to_Y_map))
+	const fit_functions::polynom_t polynom_result(rank,fit_start_parameters(rank),X_to_Y_map);
+	if (!polynom_result.successfully_fitted())
 	{
 		//this should essentially never happen; if there is a GSL error, GSL handler will catch the exception
-		logger::error("mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","fit returned error","returning false");
-		logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","X_to_Y_map.size()=" + tools::to_string(X_to_Y_map.size()));
-		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","X_to_Y_map",tools::to_string(X_to_Y_map));
-		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","rank",tools::vec::to_string(polynom.rank));
-		return false;
+		logger::error("mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","fit returned error","returning false");
+		logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","X_to_Y_map.size()=" + tools::to_string(X_to_Y_map.size()));
+		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","X_to_Y_map",tools::to_string(X_to_Y_map));
+		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","rank",tools::vec::to_string(rank));
+		return polynom_empty;
 	}
 	else
 	{
-		logger::info(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::execute_fit_polynom()","fit successful","zaehler=" + zaehler.to_string()+" nenner=" + nenner.to_string());
+		logger::info(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","fit successful","zaehler=" + zaehler.to_string()+" nenner=" + nenner.to_string());
 	}
-	return true;
+	return polynom_result;
 }
 

@@ -168,12 +168,18 @@ measurements_::sims_t* mgroups_::sims_t::measurement ( const measurements_::sims
 const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 {
 	set<isotope_t> isos;
+// 	cout << "F1" << endl;
 	for (auto& M : measurements())
 	{
+// 		cout << "F7" << endl;
 		if (!M->sample->matrix().is_set()) continue;
+// 		cout << "F4" << endl;
 		vector<isotope_t> mat_isos=M->sample->matrix().isotopes();
+// 		cout << "F5" << endl;
 		isos.insert(mat_isos.begin(),mat_isos.end());
+// 		cout << "F6" << endl;
 	}
+// 	cout << "F2" << endl;
 	vector<isotope_t> isos_vec = {isos.begin(),isos.end()};
 	
 	// keep abundance and/or substance_amount if there is only 1 known matrix from all reference samples within this group
@@ -182,7 +188,7 @@ const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 		logger::info(3,"mgroups_::sims_t::matrix_isotopes()","all references have same matrix, applying to whole group",matrices().begin()->to_string());
 		return isos_vec;
 	}
-	
+// 	cout << "F3" << endl;
 	// delete abundance and substance_amount because there are different ones in the group. calculate later
 	for (auto& I : isos_vec)
 	{

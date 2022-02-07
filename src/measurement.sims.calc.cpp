@@ -232,8 +232,8 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(qu
 // 	double deviation = 2*abs(Y.data.at(12)-Y.data.at(11));
 	double deviation = 0.01*statistics::get_mad_from_Y(Y.data);
 // 	Y = Y.moving_window_mean(10);
-	fit_functions::polynom_t poly(8);
-	poly.fit(Y.data);
+	fit_functions::polynom_t poly(8,Y.data);
+// 	poly.fit(Y.data);
 	double chi_rel = poly.chisq() / Y.data.size();
 // 	cout << "chi_rel=" << chi_rel << endl;
 // 	deviation = 4.5E-8 * pow(chi_rel,5);

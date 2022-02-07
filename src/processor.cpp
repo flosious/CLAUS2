@@ -65,15 +65,15 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 		auto MG_copy = MG;
 // 		MG_copy.calc().matrices.median_const_from_db();
 // 		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
-		auto proportional_fit_Crels_to_Irels = MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters());
-		for (auto Crel_to_Irel : proportional_fit_Crels_to_Irels)
+// 		auto proportional_fit_Crels_to_Irels = MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters());
+		for (auto Crel_to_Irel : MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters()))
 		{
-			Crel_to_Irel.plot_to_screen();
+			Crel_to_Irel.known_Crels_from_sample_matrix_to_Irels_truncated_median();
 		}
-		for (auto& M : MG.measurements())
-		{
+// 		for (auto& M : MG.measurements())
+// 		{
 // 			M->plot_now(0);
-		}
+// 		}
 	}
 	
 	if (!logger::instant_print_messages)

@@ -38,6 +38,7 @@ using namespace std;
 class fit_functions
 {
 public:
+	static const map<double,double> data_1D_to_2D(vector<double> data_1D);
 	/// like origin -> peak functions -> asym2sig
 	class asym2sig_t
 	{
@@ -79,31 +80,33 @@ public:
 	class polynom_t
 	{
 	private:
+		bool successfully_fitted_p=false;
 		double chisq_p=-1;
-		/// parameters
-		bool fitted_p=false;
-		vector<double> Xdata;
-		vector<double> fit_parameters_s;
+		vector<double> fit_parameters_p;
+		///perform the actual fit
+		bool fit(map<double,double> data_XY);
+// 		const vector<double> x_data_p;
 	public:
-		///degree means rank
-		polynom_t(int degree);
-		polynom_t(const vector<unsigned int> rank, vector<double> fit_parameters);
-// 		polynom_t(vector<double> fit_parameters);
-// 		polynom_t(const vector<unsigned int> rank);
+		///degree means rank; 2D data
+		polynom_t(int degree, const map<double,double>& data_XY);
+		///degree means rank; 1D data
+		polynom_t(int degree, const vector<double>& data);
+		///fitting 2D data
+		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, map<double,double> data_XY);
+		///fitting 1D data
+		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, vector<double> data);
 		///rank of polynom: 0 means discard, and non-0 means use
 		const vector<unsigned int> rank;
+		const double chisq() const;
+		const vector<double>& fit_parameters() const;
+		///the maximum rank
 		int degree() const;
-		polynom_t derivative(unsigned int derive=1);
-		double chisq() const;
-		const vector<double>& fit_parameters();
-		///performs the actual fit
-		bool fit(map<double,double> data_XY);
-		///performs the actual fit
-		bool fit(vector<double> Ydata);
-		///was data successfully fitted?
-		bool fitted() const;
-		string to_string(string prefix="");
-		vector<double> fitted_y_data(vector<double> x={}) const;
+		const polynom_t derivative(unsigned int derive=1) const;
+		string to_string(string prefix="") const;
+		bool successfully_fitted() const;
+		///returns the fitted Y_data using X_data and the successfully interpolated fit_parameters;
+		///returns empty if interpolation was not successfully
+		vector<double> y_data(const vector<double>& x_data) const;
 	};
 	
 	/// y = m*x

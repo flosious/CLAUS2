@@ -17,6 +17,19 @@
 */
 #include "fit_functions.hpp"
 
+
+const map<double, double> fit_functions::data_1D_to_2D(vector<double> data_1D)
+{
+	map<double,double> data_XY;
+	vector<double> X_d(data_1D.size());
+	
+	for (int x=0;x<X_d.size();x++)
+		X_d.at(x)=x;
+	tools::vec::combine_vecs_to_map(&X_d,&data_1D,&data_XY);
+	return data_XY;
+}
+
+
 /*************
  * asym2sig_t*
  *************/
@@ -234,114 +247,101 @@ string fit_functions::asym2sig_t::to_string(string prefix)
  **POLYNOM***
  ************/
 
-fit_functions::polynom_t::polynom_t(int degree) : fit_parameters_s(degree+1,1), rank(degree+1,1)
+fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, 
+									const vector<double>& fit_parameters, 
+									map<double, double> data_XY) : 
+									fit_parameters_p(fit_parameters), rank(rank)
+{
+	successfully_fitted_p = fit(data_XY); //fit the data only once
+}
+
+fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, 
+									const vector<double>& fit_parameters, 
+									vector<double> data) :
+									polynom_t(rank,fit_parameters,fit_functions::data_1D_to_2D(data))
 {
 }
 
-// fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank) : rank(rank)
-// // fit_parameters_s(fit_parameters), rank(fit_parameters.size(),1)
-// {
-// }
-
-// fit_functions::polynom_t::polynom_t(vector<double> fit_parameters) : rank(fit_parameters.size(),1), fit_parameters_s(fit_parameters)
-// // fit_parameters_s(fit_parameters), 
-// {
-// }
-
-fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, vector<double> fit_parameters) : rank(rank), fit_parameters_s(fit_parameters)
+fit_functions::polynom_t::polynom_t(int degree, const map<double, double>& data_XY) : 
+									polynom_t(vector<unsigned int>(1,degree+1),vector<double>(1,degree+1),data_XY)
 {
 }
 
+fit_functions::polynom_t::polynom_t(int degree, const vector<double>& data) : 
+									polynom_t(degree+1, fit_functions::data_1D_to_2D(data))
+{
+}
 
 int fit_functions::polynom_t::degree() const
 {
-	if (rank.size()>0)
-		return rank.size()-1;
-	return fit_parameters_s.size()-1;
+	return rank.size()-1;
 }
 
-const vector<double>& fit_functions::polynom_t::fit_parameters()
+const fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int derive) const
 {
-	return fit_parameters_s;
-}
-
-
-fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int derive)
-{
-	if (derive == 0) return *this;
 	polynom_t deriv = *this;
-	if (derive >= fit_parameters_s.size())
+	if (derive == 0) return deriv;
+	if (derive >= fit_parameters().size())
 	{
-		deriv.fit_parameters_s={0};
+		deriv.fit_parameters_p={0};
 		return deriv;
 	}
 	
 	for (int j=0;j<derive;j++)
 	{
-		int p = deriv.fit_parameters_s.size();
+		int p = deriv.fit_parameters().size();
 		vector<double> derived_parameters(p-1);
 		for (int i=1;i<p;i++) {
-			derived_parameters.at(i-1) = (i*deriv.fit_parameters_s[i]);
+			derived_parameters.at(i-1) = (i*deriv.fit_parameters()[i]);
 		}
-		deriv.fit_parameters_s = derived_parameters;
+		deriv.fit_parameters_p = derived_parameters;
 	}
 	
 	return deriv;
 }
 
-vector<double> fit_functions::polynom_t::fitted_y_data(vector<double> x) const
+vector<double> fit_functions::polynom_t::y_data(const vector<double>& x_data) const
 {
-	if (!fitted_p) return {};
-	if (x.size()==0)
-		x = Xdata;
-	vector<double> Y(x.size());
-	for (int i=0;i<x.size();i++)
+	if (!successfully_fitted()) return {};
+	vector<double> Y(x_data.size());
+	for (int i=0;i<x_data.size();i++)
 	{
-		Y[i]=fit_parameters_s[0];
-		for (int p=1;p<fit_parameters_s.size();p++)
+		Y[i]=fit_parameters()[0];
+		for (int p=1;p<fit_parameters().size();p++)
 		{
-// 			if (rank.at(p)!=0)
-			Y[i]+=fit_parameters_s[p]*pow(x[i],p);
+			Y[i]+=fit_parameters()[p]*pow(x_data[i],p);
 		}
 	}
 	return Y;
 }
 
-double fit_functions::polynom_t::chisq() const
+bool fit_functions::polynom_t::successfully_fitted() const
+{
+	return successfully_fitted_p;
+}
+
+
+const double fit_functions::polynom_t::chisq() const
 {
 	return chisq_p;
 }
 
-bool fit_functions::polynom_t::fitted() const
+const vector<double>& fit_functions::polynom_t::fit_parameters() const
 {
-	return fitted_p;
-}
-
-bool fit_functions::polynom_t::fit(vector<double> Ydata)
-{
-// 	for (int i=0;i<Y.size();i++)
-// 		if (i<100) cout << Y.at(i) << endl;
-	map<double,double> data_XY;
-	Xdata.resize(Ydata.size());
-	for (int x=0;x<Xdata.size();x++)
-		Xdata.at(x)=x;
-	tools::vec::combine_vecs_to_map(&Xdata,&Ydata,&data_XY);
-	return fit(data_XY);
+	return fit_parameters_p;
 }
 
 
 bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 {
 	if (rank.size()==0) 
-	{
 		return false;
-	}
+	if (data_XY.size()==0)
+		return false;
 	if (rank.size()>data_XY.size()) 
-	{
 		return false;
-	}
 	
-	fitted_p = false;
+	
 	int i, n;
 	gsl_matrix *X, *cov;
 	gsl_vector *y, *w, *c;
@@ -354,14 +354,15 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 	w = gsl_vector_alloc (n);
 	cov = gsl_matrix_alloc (p, p);
 	c = gsl_vector_alloc (p);
-// 	c = statistics::get_gsl_vec(fit_parameters_s);
-	for (int i=0;i<fit_parameters_s.size();i++)
+
+	for (int i=0;i<fit_parameters_p.size();i++)
 	{
-		gsl_vector_set (c, i, fit_parameters_s.at(i));
+		gsl_vector_set (c, i, fit_parameters_p.at(i));
 // 		cout << "i="<<i<<"\tc=" << *c->data << endl;
 	}
     
 	vector<double> Ydata;
+	vector<double> Xdata;
 	tools::vec::split_map_to_vecs(data_XY,&Xdata,&Ydata);
 	
 	chisq_p=-1;
@@ -387,23 +388,20 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 #define C(i) (gsl_vector_get(c,(i)))
 #define COV(i,j) (gsl_matrix_get(cov,(i),(j)))
     for (int ii=0;ii<p;ii++) {
-        fit_parameters_s.at(ii)=C(ii);
+        fit_parameters_p.at(ii)=C(ii);
     }
-    fitted_p = true;
     gsl_matrix_free (X);
     gsl_vector_free (y);
     gsl_vector_free (w);
     gsl_vector_free (c);
     gsl_matrix_free (cov);
 	
-	
-	chisq_p=0;
-	vector<double> YY = fitted_y_data(Xdata);
-	for (int i=0;i<YY.size();i++)
-	{
-		chisq_p +=  abs(YY.at(i)-Ydata.at(i));
-// 		if (i<100) cout << YY.at(i) <<"\t" << Ydata.at(i) << "chisq_p=" << chisq_p <<endl;
-	}
+// 	chisq_p=0;
+// 	vector<double> YY = Y_data(Xdata);
+// 	for (int i=0;i<YY.size();i++)
+// 	{
+// 		chisq_p +=  abs(YY.at(i)-Ydata.at(i));
+// 	}
 	
 	return true;
 }

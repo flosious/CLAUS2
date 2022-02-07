@@ -110,12 +110,13 @@ public:
 			///interpolates [E_i]/[E_j] = POLYNOM( (E_i)/(E_j) ) for 2 clusters (zaehler and nenner)
 			class polynom_fit_Crel_to_Irel_c : public Crel_to_Irel_c
 			{
+			private:
+				static vector<double> fit_start_parameters(const vector<unsigned int> rank);
+				///the polynomial fitting routine
+				const fit_functions::polynom_t polynom_f(const vector<unsigned int> rank) const;
 			public:
 				polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
-				///the polynomial fitting routine
-				fit_functions::polynom_t polynom;
-				///fits the polynom using known_Crels_from_sample_matrix_to_Irels_truncated_median
-				bool execute_fit_polynom();
+				const fit_functions::polynom_t polynom;
 				///returns Crel using Crel_template from Irel polynomfit; Crel===[E_i]/[E_j];; Irel===(E_i)/(E_j)
 				quantity::concentration_t Crel(measurements_::sims_t& M) const;
 				void plot_to_screen(double sleep_sec=0) const;

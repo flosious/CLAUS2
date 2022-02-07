@@ -40,6 +40,9 @@ namespace quantity
 	class quantity_t
 	{
 	private:
+		///{1,2,3,4,5,...data.size()}
+		const vector<double> data_X_1D() const;
+		const std::map<double,double> data_XY_1D();
 		fit_functions::polynom_t polynom(unsigned int polynom_grade) const; 
 		static int get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec);
 	public:
