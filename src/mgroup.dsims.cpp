@@ -72,14 +72,21 @@ string mgroups_::dsims_t::to_string(const string del)
 
 vector<measurements_::sims_t*> mgroups_::dsims_t::measurements()
 {
-// 	cout << "G1" << endl;
 	vector<measurements_::sims_t*> Ms(measurements_p.size());
-// 	cout << "G2" << endl;
 	for (int i=0;i<measurements_p.size();i++)
 		Ms.at(i)=&measurements_p.at(i);
-// 	cout << "G3" << endl;
 	return Ms;
 }
+
+vector<measurements_::sims_t> mgroups_::dsims_t::measurements_copy()
+{
+	vector<measurements_::sims_t> Ms;
+	for (int i=0;i<measurements_p.size();i++)
+		Ms.push_back(measurements_p.at(i));
+	return Ms;
+}
+
+
 
 const msettings::sims_t* mgroups_::dsims_t::settings() const
 {

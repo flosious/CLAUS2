@@ -197,6 +197,44 @@ void measurements_::sims_t::add_clusters(vector<cluster_t>& clusters)
 	}
 }
 
+bool measurements_::sims_t::are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const
+{
+	for (auto& C : clusters_s)
+	{
+		if (cluster(C)==nullptr)
+			return false;
+	}
+	return true;
+}
+
+bool measurements_::sims_t::are_clusters_in_measurement(const cluster_t& cluster_s) const
+{
+	if (cluster(cluster_s)==nullptr)
+		return false;
+	return true;
+}
+
+bool measurements_::sims_t::are_intensities_of_clusters_set(const vector<cluster_t>& clusters_s) const
+{
+	for (auto& C : clusters_s)
+	{
+		if (cluster(C)==nullptr)
+			return false;
+		if (!cluster(C)->intensity.is_set())
+			return false;
+	}
+	return true;
+}
+
+bool measurements_::sims_t::are_intensities_of_clusters_set(const cluster_t& cluster_s) const
+{
+	if (cluster(cluster_s)==nullptr)
+		return false;
+	if (!cluster(cluster_s)->intensity.is_set())
+		return false;
+	return true;
+}
+
 measurements_::sims_t::calc_t measurements_::sims_t::calc(bool overwrite)
 {
 	return calc_t{(*this),overwrite};

@@ -77,6 +77,13 @@ const quantity::mass_t isotope_t::mass() const
 // 	return PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
 // }
 
+const string isotope_t::to_string_short() const
+{
+	stringstream out;
+	out << nucleons << symbol;
+	return out.str();
+}
+
 const string isotope_t::to_string(const string del) const
 {
 	stringstream out;

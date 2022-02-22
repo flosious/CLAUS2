@@ -1,10 +1,10 @@
 /* 
  * 	CLever AUtomated Scientist
- * 	Version 2021-10-17_1
- * 	Florian Bärwolf 2021
+ * 	Version 2022-02-11_2
+ * 	Florian Bärwolf 2022
  *	
  * 
- *  Copyright (C) 2020-2021 Florian Bärwolf
+ *  Copyright (C) 2020-2022 Florian Bärwolf
 	floribaer@gmx.de
 	
     This program is free software: you can redistribute it and/or modify
@@ -82,114 +82,10 @@
  * Necessities:
  * 		config file(s) (config.conf)
  * 		periodic table of elements (pse.csv)
- *		sqlite3 database filled with reference measurements
+ *		sqlite3 database filled with reference measurements / samples / ...
  
- 
- Main Classes Dependencies:
-	main(args) -> processor(args)	-> vector<string> filenames = args
-	
-	-> <list>configs(args)
-	
-	//WARNING idk if this is neccessary
-	-> <inter mediate class> measurements(filenames)
-		-> <list>DSIMS() // returns all DSIMS measurements within the filenames
-		-> <list>TOFSIMS() // returns all TOFSIMS measurements with the filenames
-		-> ...
-		
-	-> D:SIMS:measurement	-> *sample
-							-> *measurement_group
-							-> *secondaries (measurements of this measurement)
-	-> TOF:SIMS:measurement	-> *sample
-							-> *measurement_group
-	-> XPS:measurement		-> *sample
-							-> *measurement_group
-	-> TEM/EDX:measurement	-> *sample
-							-> *measurement_group
-	-> Ref:measurement		-> *sample
-							-> *measurement_group
-	-> Profiler:measurement -> *sample
-							-> *secondary: this is special, because profiler measurements are (in general) secondary. that means they are a measurement of a measurement (crater depth)
-							
-	
-	-> Secondary:measurement	-> How to filter secondary measurements? What is the unique identifier -> filename (reduced by crater depth)? samplename+group? There could be multiple measurements of the same file within the same group
-								olcdb + lot + lot_split + wafer + chip + monitor + m_group + repetitor + settings (NOT METHOD!)
-	
-	-> <list>samples(filenames)
-	
-	-> sample	// sample properties, independend of measurement_settings, measurement_parameters, tools_parameters, ...
-				-> measurements()
-				-> measurement_groups()
-				
-	-> meausrement_group	// group of measurements with same measurement_settings, measurement_parameters, tool_parameters, ...
-				-> measurements()
-				-> samples()
-															
-	-> <list>measurement_groups(filenames)
-								
-	-> cluster	-> intensity
-				-> concentration
-				-> sputter_depth
-				-> sputter_time
-				
-	-> concentration	-> simulation 
-						-> reference
-						-> calculations
-						
-	-> depth	-> simulation
-				-> reference
-				-> calculations
-
-	-> quantity	-> unit
-				-> data
-				-> name
-				-> is_skalar()
-				-> is_vec()
-				-> is_mat()
-
-	-> fit_functions	-> polynom(degree)
-	
-	-> file		-> name/filename
- 
-	using std::list to maintain order and "pointer security"
-	// general ideas
-	-> samples
-	-> sample 								-> measurement_tool_groups (e.g. dsims_measurement_groups, xps_measurement_groups) + name (lot+split+wafer+chip+monitor)
-	-> measurement_group					-> measurements
-	-> measurement 							-> clusters + filename + crater
-	-> cluster								-> quantities
-	-> quantity								-> unit + name + data
-
-
-
-	basic processor algorithm:
-	-	load config ()
-	-	populate: <list>
-			
-			-	filenames
-			-	measurements(&filenames):
-                - dsims
-                - tofsims
-                - ...
-			-	measurement_groups(&filenames)
-                - dsims
-                - tofsims
-                - ...
-			-	samples(&filenames)
-		
-	-	populate cross reference pointers
-			-	*measurement 		-> secondary_measurement, measurement_group, sample
-			-	*measurement_group	-> measurement
-			-	*sample				-> measurement
-	-	load PSE (when used)
-	
  */
 
-
-// #include <stdio.h>
-// #include <execinfo.h>
-// #include <signal.h>
-// #include <stdlib.h>
-// #include <unistd.h>
 #include "processor.hpp"
 
 // void handler(int sig) {

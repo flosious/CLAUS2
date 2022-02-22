@@ -249,7 +249,7 @@ string fit_functions::asym2sig_t::to_string(string prefix)
 
 fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, 
 									const vector<double>& fit_parameters, 
-									map<double, double> data_XY) : 
+									const map<double, double>& data_XY) : 
 									fit_parameters_p(fit_parameters), rank(rank)
 {
 	successfully_fitted_p = fit(data_XY); //fit the data only once
@@ -257,7 +257,7 @@ fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank,
 
 fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, 
 									const vector<double>& fit_parameters, 
-									vector<double> data) :
+									const vector<double>& data) :
 									polynom_t(rank,fit_parameters,fit_functions::data_1D_to_2D(data))
 {
 }
@@ -319,6 +319,21 @@ bool fit_functions::polynom_t::successfully_fitted() const
 {
 	return successfully_fitted_p;
 }
+
+std::string fit_functions::polynom_t::to_string(std::string prefix) const
+{
+	stringstream out;
+	if (!successfully_fitted())
+		return "unsecesfull fit";
+	out << "chisq: " << chisq();
+	out << "; params: ";
+	for (auto p : fit_parameters())
+	{
+		out << p<<"; ";
+	}
+	return out.str();
+}
+
 
 
 const double fit_functions::polynom_t::chisq() const

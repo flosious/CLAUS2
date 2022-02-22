@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2021 Florian Bärwolf
+	Copyright (C) 2021-2022 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify

@@ -30,6 +30,13 @@ vector<measurements_::sims_t *> mgroups_::sims_t::measurements()
 	return {};
 }
 
+vector<measurements_::sims_t> mgroups_::sims_t::measurements_copy()
+{
+	logger::error("mgroups_::sims_t::measurements_copy()","called base virtual function","tell florian");
+	return {};
+}
+
+
 const msettings::sims_t* mgroups_::sims_t::settings() const
 {
 	logger::error("mgroups_::sims_t::settings()","called base virtual function","tell florian");

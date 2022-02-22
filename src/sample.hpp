@@ -74,8 +74,10 @@ public:
 		matrix_t(vector<isotope_t> isotopes);
 		
 		const vector<isotope_t> isotopes() const;
-		///points to the corresponding isotope of this cluster
+		///points to the corresponding isotope of this iso
 		isotope_t* isotope(isotope_t iso);
+		///returns the pointer to the element within this matrix
+		element_t* element(const element_t& ele);
 		vector<element_t> elements;
 		
 		const bool is_set() const;

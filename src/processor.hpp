@@ -40,6 +40,7 @@
 #include "files.hpp"
 #include "plot.hpp"
 #include "database_t.hpp"
+#include "calc.hpp"
 
 // #include "plc++demos.h"
 

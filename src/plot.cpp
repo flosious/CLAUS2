@@ -37,18 +37,18 @@ int plot_t::Draw(mglGraph* gr)
 	/*x axis*/
 	vector<const quantity::quantity_t*> Xs;
 	for (auto& c:Y1.curves)
-		Xs.push_back(&c.X);
+		Xs.push_back(&c.XY.X);
 	for (auto& c:Y2.curves)
-		Xs.push_back(&c.X);
+		Xs.push_back(&c.XY.X);
 	for (auto& c:Y3.curves)
-		Xs.push_back(&c.X);
+		Xs.push_back(&c.XY.X);
 	
 	for (auto& c:Y1.points)
-		Xs.push_back(&c.X);
+		Xs.push_back(&c.XY.X);
 	for (auto& c:Y2.points)
-		Xs.push_back(&c.X);
+		Xs.push_back(&c.XY.X);
 	for (auto& c:Y3.points)
-		Xs.push_back(&c.X);
+		Xs.push_back(&c.XY.X);
 	
 	if (Xs.size()==0)
 	{
@@ -58,12 +58,11 @@ int plot_t::Draw(mglGraph* gr)
 	
 	axis_t::range_t X_range(Xs);
 	
-	
-	
 	gr->SetFontSize(3);
 // 	X_range.log10();
 	gr->SetRange('x',X_range.start,X_range.stop);
-	gr->SetOrigin(0,-0.98);
+// 	gr->SetOrigin(0,-0.98);
+	gr->SetOrigin(0,-1);
 	gr->Axis("x");
 // 	mglData x(X->data.size());
 // 	x.Set(X->data);
@@ -76,7 +75,7 @@ int plot_t::Draw(mglGraph* gr)
 	/********/
 	
 	if (Y1.check())
-		Y1.draw(gr);
+		Y1.draw(gr,X_range.start);
 	if (Y2.check())
 	{
 		if (Y1.check())
@@ -166,6 +165,16 @@ plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, dou
 /*******************       plot_t::axis_t              ******************************/
 /************************************************************************************/
 
+void plot_t::axis_t::add_curve(const quantity::map_t& XY, const std::string legend)
+{
+	add_curve(XY.X,XY.Y,legend);
+}
+
+void plot_t::axis_t::add_points(const quantity::map_t& XY, const std::string legend, const std::string color)
+{
+	add_points(XY.X,XY.Y,legend,color);
+}
+
 void plot_t::axis_t::add_curve(const vector<double>& X, const vector<double>& Y, const string legend)
 {
 	quantity::quantity_t Xq ("X",X,0);
@@ -177,14 +186,14 @@ void plot_t::axis_t::add_curve(const quantity::quantity_t& X, const quantity::qu
 {
 	logger::debug(15,"plot_t::axis_t::add_curve()","entering");
 	if (Y.is_set() && X.is_set())
-		curves.push_back({&X,&Y,legend});
+		curves.push_back({quantity::map_t(X,Y),legend});
 }
 
 void plot_t::axis_t::add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend, const string color)
 {
 	logger::debug(15,"plot_t::axis_t::add_points()","entering");
 	if (Y.is_set() && X.is_set())
-		points.push_back({&X,&Y,legend,color});
+		points.push_back({quantity::map_t(X,Y),legend,color});
 }
 
 bool plot_t::axis_t::check()
@@ -197,25 +206,25 @@ bool plot_t::axis_t::check()
 	}
 	for (auto& c : curves)
 	{
-		if (c.X.name()!=curves.front().X.name())
+		if (c.XY.X.name()!=curves.front().XY.X.name())
 		{
-			logger::error("plot_t::axis_t::check()","quantity name of X axis do not match for all curves",c.X.name(),"false");
+			logger::error("plot_t::axis_t::check()","quantity name of X axis do not match for all curves",c.XY.X.name(),"false");
 			return false;
 		}
-		if (c.Y.name()!=curves.front().Y.name())
+		if (c.XY.X.unit()!=curves.front().XY.X.unit())
 		{
-			logger::warning(3,"plot_t::axis_t::check()","quantity name of Y axis do not match for all curves",c.Y.name());
+			logger::error("plot_t::axis_t::check()","quantity unit of X axis do not match for all curves",c.XY.X.unit().to_string(),"false");
+			return false;
+		}
+		if (c.XY.Y.unit()!=curves.front().XY.Y.unit())
+		{
+			logger::error("plot_t::axis_t::check()","quantity unit of Y axis do not match for all curves",c.XY.Y.unit().to_string(),"false");
+			return false;
+		}
+		if (c.XY.Y.name()!=curves.front().XY.Y.name())
+		{
+			logger::warning(3,"plot_t::axis_t::check()","quantity name of Y axis do not match for all curves",c.XY.Y.name());
 // 			return false;
-		}
-		if (c.X.unit()!=curves.front().X.unit())
-		{
-			logger::error("plot_t::axis_t::check()","quantity unit of X axis do not match for all curves",c.X.unit().to_string(),"false");
-			return false;
-		}
-		if (c.Y.unit()!=curves.front().Y.unit())
-		{
-			logger::error("plot_t::axis_t::check()","quantity unit of Y axis do not match for all curves",c.Y.unit().to_string(),"false");
-			return false;
 		}
 	}
 	logger::debug(15,"plot_t::axis_t::check()","exiting");
@@ -253,6 +262,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	if (curves.size() == 0 && points.size() == 0)
 		return;
 	gr->SetRange('y',range().start,range().stop);
+	cout << range().to_string() << endl;
 	gr->SetOrigin(x_origin,-1);
 
 	if (log10_scale) gr->SetFunc("","lg(y)");
@@ -262,34 +272,36 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	
 	stringstream y_l;
 	if (curves.size()>0)
-		y_l << curves.front().Y.name() << " [" << curves.front().Y.unit().to_string() << "]";
+		y_l << curves.front().XY.Y.name() << " [" << curves.front().XY.Y.unit().to_string() << "]";
 	else if (points.size()>0)
-		y_l << points.front().Y.name() << " [" << points.front().Y.unit().to_string() << "]";
+		y_l << points.front().XY.Y.name() << " [" << points.front().XY.Y.unit().to_string() << "]";
 	
 	tools::str::filter_t y_f(y_l.str());
 	gr->Label('y',("#"+color+"{"+ y_f.escape_special_characters()+"}").c_str(),0);
 	
 	for (auto& c: points)
 	{
-		mglData x(c.X.data);
-		mglData y(c.Y.data);
+		mglData x(c.XY.X.data);
+		mglData y(c.XY.Y.data);
 // 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
 		tools::str::filter_t l_f("legend '"+ c.legende +"'");
 		gr->Plot(x,y,c.color.c_str(),l_f.escape_special_characters().c_str()); 
 	}
 	for (auto& c: curves)
 	{
-		mglData x(c.X.data);
-		mglData y(c.Y.data);
+		if (!c.XY.is_set())
+			continue;
+		mglData x(c.XY.X.data);
+		mglData y(c.XY.Y.data);
 // 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
 		tools::str::filter_t l_f("legend '"+ c.legende +"'");
 		gr->Plot(x,y,color.c_str(),l_f.escape_special_characters().c_str());
-		if (c.Y.data.size()<11) continue;
+		if (c.XY.Y.data.size()<11) continue;
 		int y_offset=0;
 		if (log10_scale)
 			y_offset = 1;
 		gr->SetFontSize(2);
-		gr->Puts(mglPoint(c.X.data.at(c.Y.data.size()*0.1),c.Y.data.at(c.Y.data.size()*0.05)+y_offset),c.legende.c_str(),"m");
+		gr->Puts(mglPoint(c.XY.X.data.at(c.XY.Y.data.size()*0.1),c.XY.Y.data.at(c.XY.Y.data.size()*0.05)+y_offset),c.legende.c_str(),"m");
 		gr->SetFontSize(3); // default
 	}
 	for (auto& line : lines)
@@ -319,9 +331,9 @@ plot_t::axis_t::range_t plot_t::axis_t::range()
 	
 	vector<const quantity::quantity_t*> Ys;
 	for (auto& c: curves)
-		Ys.push_back(&c.Y);
+		Ys.push_back(&c.XY.Y);
 	for (auto& c: points)
-		Ys.push_back(&c.Y);
+		Ys.push_back(&c.XY.Y);
 	range_t range(Ys);
 	if (log10_scale) 
 		return range.log10();
@@ -381,37 +393,51 @@ plot_t::axis_t::range_t::range_t(const quantity::quantity_t* Ys)
 plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys)
 {
 	logger::debug(15,"plot_t::axis_t::range_t::range_t()","entering");
-	double temp=-1;
+
+	if (Ys.size()==0)
+		return;
+	quantity::quantity_t mins_maxs;
 	for (auto& y : Ys)
 	{
-		if (!y->is_set())
-		{
-			logger::error("plot_t::axis_t::range_t::range_t()","!y->is_set()",y->to_string(),"skipping");
-			continue;
-		}
-		temp = statistics::get_max_from_Y(y->data);
-		if (stop==-1 || temp > stop)
-			stop = temp;
-		temp = statistics::get_min_from_Y(y->data);
-		if (start==-1 || temp < start)
-			start = temp;
-		if (y->name() != Ys.front()->name())
-			logger::warning(3,"plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity names",y->to_string());
+		auto yr = y->remove_inf().remove_nan();
+		if (mins_maxs.is_set() && (yr.name() != mins_maxs.name()))
+			logger::warning(3,"plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity names",yr.to_string(),mins_maxs.to_string());
 		
-		if (y->unit() != Ys.front()->unit())
-			logger::error("plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity units",y->to_string(),"ignoring");
+		if (mins_maxs.is_set() && (yr.unit() != mins_maxs.unit()))
+			logger::error("plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity units",yr.to_string(),mins_maxs.to_string());
+		mins_maxs << yr.max();
+		mins_maxs << yr.min();
 	}
+	
+	auto start = mins_maxs.min().data.at(0);
+	auto stop = mins_maxs.max().data.at(0);
+	
+	///nur 1 punkt plotten
+	if (start==stop)
+	{
+		if (start<0)
+			range_t(2*start,0);
+		else
+			range_t(0,2*start);
+	}
+	
+	*this = range_t(start,stop);
 	logger::debug(15,"plot_t::axis_t::range_t::range_t()","exiting");
 }
 
 
 
 /***********************************************/
-/*******    plot_t::axis_t::points_t    *********/
+/*******    plot_t::axis_t::points_t    ********/
 /***********************************************/
-plot_t::axis_t::points_t::points_t(const quantity::quantity_t* X, const quantity::quantity_t* Y, const string legende, const string color) : X(*X),Y(*Y),legende(legende), color(color)
+// plot_t::axis_t::points_t::points_t(const quantity::quantity_t* X, const quantity::quantity_t* Y, const string legende, const string color) : X(*X),Y(*Y),legende(legende), color(color)
+// {
+// }
+
+plot_t::axis_t::points_t::points_t(const quantity::map_t& XY, const std::string legende, const std::string color) : XY(XY.remove_inf()), legende(legende), color(color)
 {
 }
+
 
 // double plot_t::axis_t::points_t::x_stop()
 // {

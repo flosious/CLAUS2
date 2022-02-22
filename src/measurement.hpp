@@ -86,7 +86,7 @@ public:
 		bool operator!=(const measurement_t& obj) const;
 		bool operator<(const measurement_t& obj) const;
 		bool operator>(const measurement_t& obj) const;
-	};
+	}; // measurement_t
 	
 	class profiler_t : public measurement_t
 	{
@@ -99,7 +99,7 @@ public:
 		profiler_t(files_::profiler_t& file, list<sample_t>& samples_list, database_t& sql_wrapper);
 		//creates instantly a plot
 		void plot_now(double sleep_sec=1);
-	};
+	}; //profiler_t
 	
 	class sims_t : public measurement_t
 	{
@@ -301,51 +301,6 @@ public:
 // 		unsigned int equilibrium_start_index_s=0;
 		cluster_t matrix_cluster_s;
 	public: 
-		class Crel_t
-		{
-		private:
-			const cluster_t zaehler;
-			const cluster_t nennber;
-		public:
-			Crel_t(const cluster_t& zaehler, const cluster_t& nenner);
-			///ratios of the concentrations of the coressponding cluster isotopes from the samples matrix
-			quantity::concentration_t from_sample_matrix_ratios() const;
-			///ratios of the concentrations of the median of clusters concentrations
-			quantity::concentration_t from_clusters_median_ratios() const;
-			///ratios of the concentrations of the mean of clusters concentrations
-			quantity::concentration_t from_clusters_mean_ratios() const;
-			///ratios of the concentrations of the last factor*data.size() mean of clusters concentrations; skip first 1-factor data
-			quantity::concentration_t from_clusters_cutted_mean_ratios(float factor=0.25) const;
-			///ratios of the concentrations of the last factor*data.size() median of clusters concentrations; skip first 1-factor data
-			quantity::concentration_t from_clusters_cutted_median_ratios(float factor=0.25) const;
-		};
-		class Irel_t
-		{
-		private:
-			const cluster_t zaehler;
-			const cluster_t nennber;
-		public:
-			Irel_t(const cluster_t& zaehler, const cluster_t& nenner);
-			///ratios of the concentrations of the median of clusters intensities
-			quantity::intensity_t from_clusters_median_ratios() const;
-			///ratios of the concentrations of the mean of clusters intensities
-			quantity::intensity_t from_clusters_mean_ratios() const;
-			///ratios of the concentrations of the last factor*data.size() mean of clusters intensities; skip first 1-factor data
-			quantity::intensity_t from_clusters_cutted_mean_ratios(float factor=0.25) const;
-			///ratios of the concentrations of the last factor*data.size() median of clusters intensities; skip first 1-factor data
-			quantity::intensity_t from_clusters_cutted_median_ratios(float factor=0.25) const;
-		};
-		class Crel_to_Irel_t
-		{
-		private:
-			const cluster_t zaehler;
-			const cluster_t nennber;
-		public:
-			Crel_to_Irel_t(const cluster_t& zaehler, const cluster_t& nenner);
-			Crel_t Crel() const;
-			Irel_t Irel() const;
-		};
-		
 		/*
 		 * matrix cluster should contain only unique isotope for its cluster;
 		 * that means e.g. SiGe matrix there can never be a SiGe cluster, just Si clusters and Ge clusters seperate
@@ -356,12 +311,12 @@ public:
 		private:
 		public:
 			///E.g. for 28Si 30Si 70Ge  matrix_clusters Crels={[28Si]/[30Si],[30Si]/[28Si],[28Si]/[70Ge],[70Ge]/[28Si],[30Si]/[70Ge],[70Ge]/[30Si]}
-			vector<Crel_t> Crels();
+// 			vector<Crel_t> Crels();
 			///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
-			vector<Crel_t> Irels();
+// 			vector<Crel_t> Irels();
 			///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
 			///and their corresponding Crels
-			vector<Crel_to_Irel_t> Crels_to_Irels();
+// 			vector<Crel_to_Irel_t> Crels_to_Irels();
 			cluster_t* cluster(const isotope_t iso);
 			vector<cluster_t*> clusters;
 			const vector<cluster_t> cluster_names();
@@ -375,6 +330,10 @@ public:
 			matrix_clusters_c();
 		};
 		
+		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
+		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
+		bool are_intensities_of_clusters_set(const vector<cluster_t>& clusters_s) const;
+		bool are_intensities_of_clusters_set(const cluster_t& cluster_s) const;
 		
 		calc_t calc(bool overwrite=false);
 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
@@ -408,7 +367,7 @@ public:
 		///returns pointer to the matching cluster within this measurement
 		cluster_t* cluster(const cluster_t& cluster_s);
 		const cluster_t* cluster(const cluster_t& cluster_s) const;
-	};
+	}; // sims_t
 	
 	class dsims_t : public sims_t
 	{
@@ -435,15 +394,15 @@ public:
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
 
-	};
+	}; // dsims_t
 	
 	class tofsims_t : public sims_t
 	{
 	public:
 // 		const msettings::tofsims_t settings;
 // 		tofsims_t(vector<files_::tofsims_t>& dsims_files, list<sample_t>& samples_list,vector<files_::jpg_t>* jpg_files=nullptr);
-	};
-};
+	}; // tofsims_t
+}; // measurements_
 
 // extern database_t db;
 

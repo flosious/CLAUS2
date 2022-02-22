@@ -47,7 +47,7 @@ private:
 			///changes start and stop to log10 values
 			range_t log10() const;
 			double start=-1;
-			double stop=-1;
+			double stop=1;
 			string to_string() const;
 		};
 	private:
@@ -55,9 +55,11 @@ private:
 		class points_t
 		{
 		public:
-			points_t(const quantity::quantity_t* X,const quantity::quantity_t* Y, const string legende, const string color=" +");
-			const quantity::quantity_t X;
-			const quantity::quantity_t Y;
+			points_t(const quantity::map_t& XY, const string legende, const string color=" +");
+// 			points_t(const quantity::quantity_t* X,const quantity::quantity_t* Y, const string legende, const string color=" +");
+			const quantity::map_t XY;
+// 			const quantity::quantity_t X;
+// 			const quantity::quantity_t Y;
 			const string color;
 			const string legende="";
 		};
@@ -83,11 +85,13 @@ private:
 		///all the curves for this axis
 		vector<points_t> curves;
 		vector<points_t> points;
+		void add_points(const quantity::map_t& XY, const string legend="", const string color=" +");
 		///e.g. "Intensity [c/s]"
 		void add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend="", const string color=" +");
 		///checks all curves for consistency (same physical quantities and units)
 		bool check();
 		///adds a new curve to this axis
+		void add_curve(const quantity::map_t& XY, const string legend="");
 		void add_curve(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend="");
 		void add_curve(const vector<double>& X, const vector<double>& Y, const string legend="");
 		///draws the axis to graph object
@@ -102,7 +106,7 @@ private:
 		
 		void add_line(double x_start, double y_star, double x_stop, double y_stop, string color="", string text="");
 		void add_arrow(double x_start, double y_star, double x_stop, double y_stop, string color="rA", string text="");
-	};
+	}; // axis_t
 	
 	int Draw(mglGraph * gr) override;
 public:

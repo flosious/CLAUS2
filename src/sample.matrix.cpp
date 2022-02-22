@@ -270,6 +270,16 @@ isotope_t* sample_t::matrix_t::isotope(isotope_t iso)
 	return nullptr;
 }
 
+element_t* sample_t::matrix_t::element(const element_t& ele)
+{
+	for (auto& E : elements)
+	{
+		if (E == ele)
+			return &E;
+	}
+	return nullptr;
+}
+
 const vector<isotope_t> sample_t::matrix_t::isotopes() const
 {
 	vector<isotope_t> isotopes;

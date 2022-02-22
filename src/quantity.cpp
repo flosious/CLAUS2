@@ -453,6 +453,32 @@ quantity::quantity_t quantity::quantity_t::mean() const
 	return mean;
 }
 
+quantity::quantity_t quantity::quantity_t::cut_mean(float alpha) const
+{
+	if (!is_set())
+		return {};
+	stringstream n;
+	n << "cut_"<< alpha << "mean(" << name() << ")";
+	int start = alpha * data.size();
+	int stop = (1-alpha) * data.size();
+	auto reduced = at(start,stop);
+	quantity_t mean(n.str(),{statistics::get_mean_from_Y(reduced.data)},unit());
+	return mean;
+}
+
+quantity::quantity_t quantity::quantity_t::cut_median(float alpha) const
+{
+	if (!is_set())
+		return {};
+	stringstream n;
+	n << "cut_"<< alpha << "median(" << name() << ")";
+	int start = alpha * data.size();
+	int stop = (1-alpha) * data.size();
+	auto reduced = at(start,stop);
+	quantity_t mean(n.str(),{statistics::get_median_from_Y(reduced.data)},unit());
+	return mean;
+}
+
 quantity::quantity_t quantity::quantity_t::trimmed_mean(float alpha) const
 {
 	if (!is_set())
@@ -623,6 +649,22 @@ quantity::quantity_t quantity::quantity_t::at(unsigned int pos) const
 	return {name(),{data.at(pos)},unit()};
 }
 
+quantity::quantity_t quantity::quantity_t::at(unsigned int start_pos, unsigned int end_pos) const
+{
+	if (!is_set())
+		return {};
+	if (data.size()>=end_pos)
+		end_pos = data.size()-1;
+	unsigned int new_size = end_pos - start_pos + 1;
+	vector<double> new_vec(new_size);
+	for (int i=start_pos;i<new_size;i++)
+	{
+		new_vec.at(i-start_pos) = data.at(i);
+	}
+	return {name(),new_vec,unit()};
+}
+
+
 quantity::quantity_t quantity::quantity_t::log10() const
 {
 	if (!is_set())
@@ -728,6 +770,24 @@ quantity::quantity_t quantity::quantity_t::filter_gaussian(int window_size, doub
 	n << "gaussian_filtered(" << name() << ")";
 	quantity_t gaussian_filtered(n.str(),{statistics::impulse_filter(data,window_size,alpha)},unit());
 	return gaussian_filtered;
+}
+
+const quantity::quantity_t quantity::quantity_t::remove_inf() const
+{
+	vector<unsigned int> remove_idx;
+	for (int i=0;i<data.size();i++)
+		if (isinf(data.at(i)))
+			remove_idx.push_back(i);
+	return remove_data_by_index(remove_idx);
+}
+
+const quantity::quantity_t quantity::quantity_t::remove_nan() const
+{
+	vector<unsigned int> remove_idx;
+	for (int i=0;i<data.size();i++)
+		if (isnan(data.at(i)))
+			remove_idx.push_back(i);
+	return remove_data_by_index(remove_idx);
 }
 
 
@@ -924,6 +984,26 @@ quantity::quantity_t quantity::quantity_t::remove_data_from_begin(const quantity
 // 		return {};
 // 	cout << remove_stop.change_unit(unit()).to_string() << endl;
 	return remove_data_from_begin(remove_stop.change_unit(unit()).data.front());
+}
+
+quantity::quantity_t quantity::quantity_t::remove_data_by_index(vector<unsigned int> remove_pos) const
+{
+	if (remove_pos.size()==0) 
+		return *this;
+	vector<double> new_data(data.size()-remove_pos.size()); 
+	int new_data_counter=0;
+	for (int i=0;i<data.size();i++)
+	{
+		for (const auto& skip : remove_pos)
+		{
+			if (skip==i)
+				continue;
+			new_data.at(new_data_counter) = data.at(i);
+			new_data_counter++;
+		}
+	}
+	const quantity_t new_q(name(),new_data,unit());
+	return new_q;
 }
 
 quantity::quantity_t quantity::quantity_t::remove_data_by_index(unsigned int start, unsigned int stop) const

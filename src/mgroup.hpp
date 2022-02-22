@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2020-2021 Florian Bärwolf
+	Copyright (C) 2020-2022 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -103,9 +103,9 @@ public:
 				const pair<quantity::quantity_t,quantity::quantity_t> known_Crels_from_Clusters_to_Irels() const;
 				///supporting points of all known intensities and concentrations ratios for the clusters zaehler and nenner
 				const pair<quantity::quantity_t,quantity::quantity_t> known_Crels_from_sample_matrix_to_Irels_truncated_median() const;
-				const quantity::intensity_t Irel(const measurements_::sims_t& M) const;
-				const quantity::intensity_t Irel_from_truncated_medians(const measurements_::sims_t& M) const;
-				const quantity::concentration_t Crel_from_sample(const measurements_::sims_t& M) const;
+				const quantity::intensity_t Irel(const measurements_::sims_t* M) const;
+				const quantity::intensity_t Irel_from_truncated_medians(const measurements_::sims_t* M) const;
+				const quantity::concentration_t Crel_from_sample(const measurements_::sims_t* M) const;
 			}; // Crel_to_Irel_c
 			///interpolates [E_i]/[E_j] = POLYNOM( (E_i)/(E_j) ) for 2 clusters (zaehler and nenner)
 			class polynom_fit_Crel_to_Irel_c : public Crel_to_Irel_c
@@ -118,7 +118,7 @@ public:
 				polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
 				const fit_functions::polynom_t polynom;
 				///returns Crel using Crel_template from Irel polynomfit; Crel===[E_i]/[E_j];; Irel===(E_i)/(E_j)
-				quantity::concentration_t Crel(measurements_::sims_t& M) const;
+				quantity::concentration_t Crel(const measurements_::sims_t* M) const;
 				void plot_to_screen(double sleep_sec=0) const;
 			};
 			///interpolates [E_i]/[E_j] = POLYNOM( (E_i)/(E_j) ) for all given clusters and all combinations
@@ -274,6 +274,7 @@ public:
 // 		const vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> sample_mats_to_mat_clusters();
 		sims_t(measurements_::sims_t& measurement);
 		virtual vector<measurements_::sims_t*> measurements();
+		virtual vector<measurements_::sims_t> measurements_copy();
 		virtual const msettings::sims_t* settings() const;
 		///listed RSF to coressponding cluster and matrix
 		quantity::SF_t RSF(cluster_t cluster, sample_t::matrix_t matrix);
@@ -303,6 +304,7 @@ public:
 		dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
 		dsims_t(measurements_::dsims_t& dsims_measurements);
 		vector<measurements_::sims_t*> measurements() override;
+		vector<measurements_::sims_t> measurements_copy() override;
 		string to_string(const string del=", ");
 		
 		/*normalize to primary current*/

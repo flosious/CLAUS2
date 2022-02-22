@@ -92,9 +92,9 @@ public:
 		///degree means rank; 1D data
 		polynom_t(int degree, const vector<double>& data);
 		///fitting 2D data
-		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, map<double,double> data_XY);
+		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, const map<double,double>& data_XY);
 		///fitting 1D data
-		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, vector<double> data);
+		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, const vector<double>& data);
 		///rank of polynom: 0 means discard, and non-0 means use
 		const vector<unsigned int> rank;
 		const double chisq() const;

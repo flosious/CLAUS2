@@ -154,3 +154,10 @@ void tools::vec::combine_vecs_to_map(vector<double> X, vector<double> Y, map<dou
 {
 	combine_vecs_to_map(&X,&Y,XY_mat);
 }
+
+map<double,double> tools::vec::combine_vecs_to_map(vector<double> X, vector<double> Y)
+{
+	map<double,double> XY_mat;
+	tools::vec::combine_vecs_to_map(&X,&Y,&XY_mat);
+	return XY_mat;
+}

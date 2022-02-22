@@ -260,6 +260,7 @@ public:
 		static void combine_vecs_to_map(const vector<double> *X, vector<double> Y, map<double,double>* XY_mat);
 		static void combine_vecs_to_map(vector<double> X, const vector<double> *Y, map<double,double>* XY_mat);
 		static void combine_vecs_to_map(vector<double> X, vector<double> Y, map<double,double>* XY_mat);
+		static map<double,double> combine_vecs_to_map(vector<double> X, vector<double> Y);
 		static string combine_vec_to_string(const vector<string>& vec, string delimiter="");
 // 		static string combine_vec_to_string(vector<string> vec, string delimiter="");
 		

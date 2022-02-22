@@ -79,7 +79,7 @@ public:
 		base_exponents_t operator*(const base_exponents_t& obj) const;
 		base_exponents_t operator/(const base_exponents_t& obj) const;
 		base_exponents_t invert() const;
-	};
+	}; //base_exponents_t
 
 
 // 	char* symbol = "";

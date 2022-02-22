@@ -36,6 +36,7 @@ using namespace std;
 ///physical quantities
 namespace quantity
 {
+	///dimension is not changed by purely mathematical operations (min, max, ...)
 	///generic physical quantity; TODO implement dimensions
 	class quantity_t
 	{
@@ -81,8 +82,10 @@ namespace quantity
 		
 		quantity_t log10() const;
 		
-		///returns the data point on fiven pos
+		///returns the data point on given pos
 		quantity_t at(unsigned int pos) const;
+		///returns the data between start and end (including start + end)
+		quantity_t at(unsigned int start_pos, unsigned int end_pos) const;
 		
 		bool operator>(const quantity_t& obj) const;
 		bool operator<(const quantity_t& obj) const;
@@ -100,6 +103,7 @@ namespace quantity
 		quantity_t operator*(const double factor) const;
 		quantity_t operator/(const quantity_t& quantity_p) const;
 		quantity_t operator/(const double divisor) const;
+		
 		
 		/*statistics*/
 		
@@ -125,6 +129,7 @@ namespace quantity
 		///
 		quantity_t get_data_by_index(unsigned int start, unsigned int stop) const;
 		quantity_t remove_data_by_index(unsigned int start, unsigned int stop) const;
+		quantity_t remove_data_by_index(vector<unsigned int> remove_pos) const;
 		quantity_t remove_data_from_begin(unsigned int stop) const;
 		quantity_t remove_data_from_begin(const quantity_t& remove_stop) const;
 		quantity_t absolute() const;
@@ -136,7 +141,12 @@ namespace quantity
 		quantity_t median() const;
 		quantity_t mean() const;
 		quantity_t geo_mean() const;
+		///statistically sorted
 		quantity_t trimmed_mean(float alpha=0.25) const;
+		///not sorted
+		quantity_t cut_mean(float alpha=0.25) const;
+		///not sorted
+		quantity_t cut_median(float alpha=0.25) const;
 		quantity_t gastwirth() const;
 		quantity_t sd() const;
 		quantity_t mad() const;
@@ -171,6 +181,10 @@ namespace quantity
 		quantity_t filter_recursive_median(int window_size=0) const;
 		quantity_t filter_impulse(int window_size=0, float factor=4) const;
 		quantity_t filter_gaussian(int window_size=0, double alpha=1) const;
+		
+		
+		const quantity_t remove_inf() const;
+		const quantity_t remove_nan() const;
 		
 		///clears all data in the cluster
 		void clear();
@@ -320,38 +334,26 @@ namespace quantity
 		electrical_charge_t(quantity_t quantity_s);
 	};
 
-	///maps quantity Y to quantity X
+	///maps quantity X to quantity Y
 	class map_t
 	{
+	private:
+// 		check_size() const
 	public:
 		map_t(const quantity_t& X, const quantity_t& Y);
-		///returns new_Y using akima splines
-		quantity_t quantity_interp_akima(const quantity_t new_X) const;
-		map_t map_interp_akima(const quantity_t new_X) const;
-		void plot(double time=0) const;
-	protected:
 		const quantity_t X;
 		const quantity_t Y;
-	private:
-	};
-	
-	///maps vector of quantities Ys to same quantity X
-	class multi_map_t
-	{
-	public:
-		multi_map_t(const quantity_t& X, const quantity_t& Y);
-		multi_map_t(const quantity_t& X, const vector<quantity_t>& Ys);
-		///if X does not match (is not regular) then Y will try to interpolate using akima splines
-		bool add(const quantity_t& X, const quantity_t& Y);
 		///returns new_Y using akima splines
-		quantity_t quantity_interp_akima(const quantity_t new_X) const;
-		map_t map_interp_akima(const quantity_t new_X) const;
-		void plot(double time=0) const;
+		const map_t map_interp_akima(const quantity_t new_X) const;
+		///removes pairwise all infinity values from the map
+		const map_t remove_inf() const;
+		const map_t remove_nan() const;
+		bool is_set() const;
+		const map<double,double> data_map() const;
 	protected:
-		const quantity_t X;
-		const vector<quantity_t> Ys;
+		
 	private:
-	};
+	}; // map_t
 }
 
 #endif // QUANTITY_HPP

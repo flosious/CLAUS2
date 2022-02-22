@@ -51,6 +51,7 @@ public:
 	int nucleons;
 	string symbol;
 	const string to_string(const string del=" ") const;
+	const string to_string_short() const;
 	
 	///NOT checking abundance or substance_amount
 	const bool operator==(const isotope_t& obj) const;

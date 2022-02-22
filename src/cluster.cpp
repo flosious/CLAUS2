@@ -59,6 +59,10 @@ cluster_t::cluster_t(const vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s
 {
 }
 
+cluster_t::cluster_t(const isotope_t isotope_s) : isotopes({isotope_s})
+{
+}
+
 string cluster_t::to_string(const string del) const
 {
 	

@@ -66,14 +66,23 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 		MG_copy.calc().matrices.median_const_from_db();
 // 		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
 // 		auto proportional_fit_Crels_to_Irels = MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters());
-		for (auto Crel_to_Irel : MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters()))
-		{
-			Crel_to_Irel.known_Crels_from_sample_matrix_to_Irels_truncated_median();
-		}
+
 // 		for (auto& M : MG.measurements())
 // 		{
-// 			M->plot_now(0);
+// 			M->plot_now (0);
 // 		}
+		calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+		for (const auto& RSF : mat.RSFs)
+		{
+// 			cout << RSF.polynom.to_string() << endl;
+// 			for (auto& d : RSF.Crel_to_Irel_data.first.data)
+// 				cout << "c=" << d << endl;
+// 			for (auto& d : RSF.Crel_to_Irel_data.second.data)
+// 				cout << "i=" << d << endl;
+// 			if (RSF.Crel_to_Irel_data.first.data.size()<2)
+// 				continue;
+			RSF.plot_to_screen(0);
+		}
 	}
 	
 	if (!logger::instant_print_messages)
