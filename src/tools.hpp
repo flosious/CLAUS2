@@ -251,6 +251,7 @@ public:
 // 		template <typename T> static vector<T> add(vector<T> *start,/*vector*/<T> *ende);
 		static void add(vector<string> *result_vec,vector<string> adder);
 		static void add(vector<double> *result_vec,vector<double> adder);
+		static vector<string> add(const vector<string>& result_vec,const string& adder);
 		static void remove(vector<double> *result_vec,vector<double> subtractors);
 		
 		static vector<string> double_to_string(const vector<double>& D);

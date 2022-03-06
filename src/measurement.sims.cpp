@@ -363,7 +363,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 				// unit is not same as unit(x)
 				quantity::quantity_t min = calc().implant(C).minimum_starting_position().change_unit(X.unit());
 				if (min.is_set())
-					plot.Y1.add_arrow(min.data.at(0),0.1,min.data.at(0),1E6,"bA",C.to_string() );
+					plot.Y1.add_arrow(min.data().at(0),0.1,min.data().at(0),1E6,"bA",C.to_string() );
 			}
 		}
 		if (C.concentration.is_set())
@@ -399,7 +399,7 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 	else
 		comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
 	if (crater.sputter_depth.is_set())
-		cols.push_back({crater.sputter_depth.data,longname.str(),crater.sputter_depth.unit().to_string(),comment.str()});
+		cols.push_back({crater.sputter_depth.data(),longname.str(),crater.sputter_depth.unit().to_string(),comment.str()});
 	for (auto& C : clusters)
 	{
 		comment.str("");
@@ -412,7 +412,7 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 		else
 			comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
 		if (C.concentration.is_set()) 
-			cols.push_back({C.concentration.data,longname.str() + " concentration",C.concentration.unit().to_string(),comment.str()});
+			cols.push_back({C.concentration.data(),longname.str() + " concentration",C.concentration.unit().to_string(),comment.str()});
 	}
 	comment.str("");
 	longname.str("");
@@ -425,7 +425,7 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 	if (crater.sputter_time.is_set())
 	{
 		
-		cols.push_back({crater.sputter_time.data,longname.str(),crater.sputter_time.unit().to_string(),comment.str()});
+		cols.push_back({crater.sputter_time.data(),longname.str(),crater.sputter_time.unit().to_string(),comment.str()});
 	}
 	for (auto& C : clusters)
 	{
@@ -439,7 +439,7 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 			comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
 
 		if (C.intensity.is_set()) 
-			cols.push_back({C.intensity.data,longname.str() + " intensity",C.intensity.unit().to_string(),comment.str()});
+			cols.push_back({C.intensity.data(),longname.str() + " intensity",C.intensity.unit().to_string(),comment.str()});
 	}
 	if (crater.sputter_current().is_set())
 	{
@@ -449,7 +449,7 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 			comment << sample->simple_name;
 		else
 			comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
-		cols.push_back({crater.sputter_current().data,"crater "+ crater.sputter_current().name(),crater.sputter_current().unit().to_string(),comment.str()});
+		cols.push_back({crater.sputter_current().data(),"crater "+ crater.sputter_current().name(),crater.sputter_current().unit().to_string(),comment.str()});
 	}
 	
 	vector<vector<string>> matrix;
@@ -625,7 +625,7 @@ measurements_::sims_t measurements_::sims_t::change_resolution(quantity::depth_t
 		logger::error("measurements_::sims_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
 		return *this;
 	}
-	if (sputter_depth_res.data.size()==1 && sputter_depth_res.data.at(0)<=0)
+	if (sputter_depth_res.data().size()==1 && sputter_depth_res.data().at(0)<=0)
 	{
 		logger::error("measurements_::sims_t::change_resolution","!sputter_depth_res is <= 0","","returning this");
 		return *this;
@@ -648,7 +648,7 @@ measurements_::sims_t measurements_::sims_t::change_resolution(quantity::sputter
 		logger::error("measurements_::sims_t::change_resolution","!sputter_time_res.is_set()","","returning this");
 		return *this;
 	}
-	if (sputter_time_res.data.size()==1 && sputter_time_res.data.at(0)<=0)
+	if (sputter_time_res.data().size()==1 && sputter_time_res.data().at(0)<=0)
 	{
 		logger::error("measurements_::sims_t::change_resolution","!sputter_time_res is <= 0","","returning this");
 		return *this;

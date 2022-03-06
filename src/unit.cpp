@@ -58,12 +58,13 @@ const map<std::string, unit_t> unit_t::symbol_to_unit
 	{"at%",{units::derived::atom_percent}},
 	{"nm/s",{units::SI::meter/units::SI::second*units::prefixes::nano}},
 	{"nm/min",{units::SI::meter/units::derived::min*units::prefixes::nano}},
-	{"at/ccm",{units::derived::atoms/(units::SI::meter.pow(3)*units::prefixes::centi.pow(3))}},
-	{"at/scm",{units::derived::atoms/(units::SI::meter.pow(2)*units::prefixes::centi.pow(2))}},
-	{"at/cm^3",{units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)}},
-	{"atom/cm3",{units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)}},
-	{"atom/cm3/(c/s)",{units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3)/(units::derived::counts/units::SI::second)}},
-	{"at/cm^2",{units::derived::atoms/units::SI::meter.pow(2)/units::prefixes::centi.pow(2)}},
+	{"at/scm",{units::derived::atoms / (units::SI::meter.pow(2)*units::prefixes::centi.pow(2))}},
+	{"at/ccm",units::derived::atoms_per_ccm},
+// 	{"at/cm^3",{units::derived::atoms / (units::SI::meter.pow(3)/units::prefixes::centi.pow(3))}},
+	{"at/cm^3",units::derived::atoms_per_ccm},
+	{"atom/cm3",units::derived::atoms_per_ccm},
+	{"atom/cm3/(c/s)",units::derived::atoms_per_ccm/(units::derived::counts/units::SI::second)},
+	{"at/cm^2",{units::derived::atoms / (units::SI::meter.pow(2)/units::prefixes::centi.pow(2))}},
 	/*time*/
 	{"sec",{units::SI::second}},
 	{"min",{units::derived::min}},
@@ -239,7 +240,7 @@ const string unit_t::base_exponents_t::to_string() const
 /*****  unit_t   *******/
 /***********************/
 
-unit_t::unit_t(string symbols)
+unit_t::unit_t(string symbols, string prefered_string) : prefered_output_string(prefered_string)
 {
 	tools::str::remove_spaces(&symbols);
 	
@@ -412,6 +413,10 @@ const string unit_t::to_string() const
 // 	return "unknown"; // will never be called
 }
 
+unit_t unit_t::operator^(int exp) const
+{
+	return pow(exp);
+}
 unit_t unit_t::pow(int pot) const
 {
 	unit_t powed = *this;

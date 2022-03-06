@@ -417,24 +417,25 @@ bool files_::dsims_t::contents_t::ipr_shift_correction()
     return true;
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
-{
-	string unit="";
-	vector<vector<double>> data_vecs;
-	for (auto& col:columns())
-	{
-		if (col.dimension!=col_dimension) continue;
-		if (col.cluster_name==ignore_clustername) continue;
-		data_vecs.push_back(col.data);
-		unit = col.unit;
-	}
-	if (unit=="") 
-	{
-		logger::error("files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername()","unit=''",to_string(),"returning {}");
-		return {};
-	}
-	return quantity::quantity_t{statistics::common_vector(data_vecs),unit};
-}
+// const quantity::quantity_t files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
+// {
+// 	string unit="";
+// 	vector<vector<double>> data_vecs;
+// 	for (auto& col:columns())
+// 	{
+// 		if (col.dimension!=col_dimension) continue;
+// 		if (col.cluster_name==ignore_clustername) continue;
+// 		data_vecs.push_back(col.data);
+// 		unit = col.unit;
+// 	}
+// 	if (unit=="") 
+// 	{
+// 		logger::error("files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername()","unit=''",to_string(),"returning {}");
+// 		return {};
+// 	}
+// 	statistics::common_vector({});
+// 	return quantity::quantity_t{statistics::common_vector(data_vecs),unit};
+// }
 
 const map<string,string>& files_::dsims_t::contents_t::infos_and_settings()
 {

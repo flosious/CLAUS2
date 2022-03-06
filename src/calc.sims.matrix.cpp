@@ -22,6 +22,9 @@ calc_t::sims_t::matrix_t::matrix_t(const vector<isotope_t>& matrix_isotopes,
 								   const vector<measurements_::sims_t>& measurements) : 
 								   matrix_isotopes(matrix_isotopes),measurements(measurements),matrix_clusters(matrix_clusters_p()), RSFs(RSFs_elemental_median())
 {
+// 	for (auto& M:measurements)
+// 		for (auto& i : M.sample->matrix().isotopes())
+// 			cout << i.substance_amount.to_string_detailed() << endl;
 }
 
 const set<cluster_t> calc_t::sims_t::matrix_t::matrix_clusters_p() const
@@ -51,6 +54,7 @@ const set<cluster_t> calc_t::sims_t::matrix_t::matrix_clusters_p() const
 
 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t::matrix_t::RSFs_elemental_median() const
 {
+	logger::debug(13,"calc_t::sims_t::matrix_t::RSFs_elemental_median()","entering");
 	vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
 	for (const auto& Z : matrix_clusters)
 	{
@@ -59,9 +63,11 @@ const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t:
 			if (Z==N)
 				continue;
 			calc_t::sims_t::Crel_to_Irel_data_collector_t Crel_to_Irel_data_collector(Z,N,measurements);
+// 			cout << Crel_to_Irel_data_collector.elemental_Crel().Irel_from_median().Crel_to_Irel_data.first.to_string_detailed() << endl;
 			Crels_to_Irels.push_back(Crel_to_Irel_data_collector.elemental_Crel().Irel_from_median().polynom({0,1},{0,1}));
 		}
 	}
+	logger::debug(13,"calc_t::sims_t::matrix_t::RSFs_elemental_median()","leaving");
 	return Crels_to_Irels;
 }
 
@@ -83,7 +89,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::relative_concentration(const
 	}
 	nenner += 1;
 	
-	return quantity::concentration_t((nenner.invert()*100).data,units::derived::atom_percent);
+	return quantity::concentration_t((nenner.invert()*100).data(),units::derived::atom_percent);
 }
 
 measurements_::sims_t calc_t::sims_t::matrix_t::relative_concentrations(const vector<cluster_t>& clusters, measurements_::sims_t measurement)

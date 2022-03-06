@@ -58,6 +58,15 @@ void tools::vec::add(vector<double> *result_vec,vector<double> adder)
 	result_vec->insert(result_vec->end(),adder.begin(),adder.end());
 }
 
+vector<string> tools::vec::add(const vector<string>& result_vec,const string& adder)
+{
+	if (adder=="")
+		return result_vec;
+	auto c = result_vec;
+	c.push_back(adder);
+	return c;
+}
+
 void tools::vec::remove(vector<double> *result_vec,vector<double> subtractors)
 {
 	for (auto& subtractor:subtractors)

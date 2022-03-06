@@ -171,7 +171,7 @@ string files_::sims_t::name_t::to_string()
 	stringstream out;
 	out << file_t::name_t::to_string();
 	if (sputter_energy().is_set())
-		out << "_" << sputter_energy().data.at(0) << sputter_energy().unit().to_string();
+		out << "_" << sputter_energy().data().at(0) << sputter_energy().unit().to_string();
 	if (sputter_element().is_set())
 		out << sputter_element().to_string() << secondary_polarity();
 	return out.str();

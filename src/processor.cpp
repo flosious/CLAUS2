@@ -60,17 +60,14 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		cout << "\t" << d.name.filename_without_crater_depths() << endl;
 	cout << endl;
 	
+	
+	
 	for (auto& MG : dsims.mgroups())
 	{	
 // 		auto MG_copy = MG;
 // 		MG_copy.calc().matrices.median_const_from_db();
 // 		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
 // 		auto proportional_fit_Crels_to_Irels = MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters());
-
-// 		for (auto& M : MG.measurements())
-// 		{
-// 			M->plot_now (0);
-// 		}
 		calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
 		for (const auto& RSF : mat.RSFs)
 		{
@@ -79,8 +76,12 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 				cout << "c=" << d << endl;
 // 			for (auto& d : RSF.Crel_to_Irel_data.second.data)
 // 				cout << "i=" << d << endl;
-// 			if (RSF.Crel_to_Irel_data.first.data.size()<2)
+// 			if (RSF.Crel_to_Irel_data.first.data().size()<2)
 // 				continue;
+// 			cout << RSF.to_string() << ":" << endl;
+// 			cout << RSF.Crel_to_Irel_data.first.to_string_detailed() << endl;
+// 			cout << RSF.Crel_to_Irel_data.second.to_string_detailed() << endl;
+				
 			RSF.plot_to_screen(0);
 		}
 	}

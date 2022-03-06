@@ -726,7 +726,7 @@ vector<vector<double>> statistics::get_moving_window_statistics_from_Y(vector<do
     return mat_results;
 }
 
-vector<double> statistics::get_moving_window_function(vector<double> Y, int window_size, statistics::functiontype function, const gsl_movstat_end_t gsl_movstat_end)
+vector<double> statistics::get_moving_window_function(const vector<double>& Y, int window_size, statistics::functiontype function, const gsl_movstat_end_t gsl_movstat_end)
 {
 	if (window_size<2) window_size=10;
     
@@ -747,7 +747,7 @@ vector<double> statistics::get_moving_window_function(vector<double> Y, int wind
 }
 
 
-vector<double> statistics::get_moving_window_qqr_from_Y(vector<double> Y, int window_size, double q)
+vector<double> statistics::get_moving_window_qqr_from_Y(const vector<double>& Y, int window_size, double q)
 {
 	if (window_size<2) window_size=10;
     
@@ -768,7 +768,7 @@ vector<double> statistics::get_moving_window_qqr_from_Y(vector<double> Y, int wi
     return sum;
 }
 
-vector<double> statistics::get_moving_window_min_from_Y(vector<double> Y, int window_size)
+vector<double> statistics::get_moving_window_min_from_Y(const vector<double>& Y, int window_size)
 {
 // 	if (window_size<2) window_size=10;
 //     
@@ -789,7 +789,7 @@ vector<double> statistics::get_moving_window_min_from_Y(vector<double> Y, int wi
 	return get_moving_window_function(Y,window_size,gsl_movstat_min);
 }
 
-vector<double> statistics::get_moving_window_max_from_Y(vector<double> Y, int window_size)
+vector<double> statistics::get_moving_window_max_from_Y(const vector<double>& Y, int window_size)
 {
 // 	if (window_size<2) window_size=10;
 //     
@@ -810,7 +810,7 @@ vector<double> statistics::get_moving_window_max_from_Y(vector<double> Y, int wi
 	return get_moving_window_function(Y,window_size,gsl_movstat_max);
 }
 
-vector<double> statistics::get_moving_window_sum_from_Y(vector<double> Y, int window_size)
+vector<double> statistics::get_moving_window_sum_from_Y(const vector<double>& Y, int window_size)
 {
 // 	if (window_size<2) window_size=10;
 //     
@@ -833,7 +833,7 @@ vector<double> statistics::get_moving_window_sum_from_Y(vector<double> Y, int wi
 
 
 
-vector<double> statistics::get_moving_window_mean_from_Y(vector<double> Y, int window_size) {
+vector<double> statistics::get_moving_window_mean_from_Y(const vector<double>& Y, int window_size) {
 //     if (window_size<2) window_size=10;
 //     vector<double> sd;
 //     int N=Y.size();
@@ -852,7 +852,7 @@ vector<double> statistics::get_moving_window_mean_from_Y(vector<double> Y, int w
 	return get_moving_window_function(Y,window_size,gsl_movstat_mean);
 }
 
-vector<double> statistics::get_moving_window_median_from_Y(vector<double> Y, int window_size) {
+vector<double> statistics::get_moving_window_median_from_Y(const vector<double>& Y, int window_size) {
 //     if (window_size<2) window_size=10;
 //     vector<double> sd;
 //     int N=Y.size();
@@ -871,7 +871,7 @@ vector<double> statistics::get_moving_window_median_from_Y(vector<double> Y, int
 	return get_moving_window_function(Y,window_size,gsl_movstat_median);
 }
 
-vector<double> statistics::get_moving_window_MAD_from_Y(vector<double> Y, int window_size) {
+vector<double> statistics::get_moving_window_MAD_from_Y(const vector<double>& Y, int window_size) {
     if (window_size<2) window_size=10;
     vector<double> sd;
     int N=Y.size();
@@ -891,7 +891,7 @@ vector<double> statistics::get_moving_window_MAD_from_Y(vector<double> Y, int wi
     return sd;
 }
 
-vector<double> statistics::get_moving_window_sd_from_Y(vector<double> Y, int window_size) {
+vector<double> statistics::get_moving_window_sd_from_Y(const vector<double>& Y, int window_size) {
 //     if (window_size<2) window_size=10;
 //     vector<double> sd;
 //     int N=Y.size();

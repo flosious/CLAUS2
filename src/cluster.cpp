@@ -121,9 +121,9 @@ int cluster_t::Draw(mglGraph* gr)
 {
 	int data_points=0;
 	if (sputter_depth.is_set())
-		data_points = sputter_depth.data.size();
+		data_points = sputter_depth.data().size();
 	else
-		data_points = sputter_time.data.size();
+		data_points = sputter_time.data().size();
 	
 	mglData y(data_points);
 	mglData x(data_points);
@@ -131,16 +131,16 @@ int cluster_t::Draw(mglGraph* gr)
 	
 	if (sputter_time.is_set())
 	{
-		gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data));
+		gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data()));
 // 		gr->Axis("X");
-		x.Set(sputter_time.data);
+		x.Set(sputter_time.data());
 		gr->Label('x',"sputter time",0);
 // 		gr->Plot(x);
 	}
 		
 	if (intensity.is_set())
 	{
-		y.Set(intensity.data);
+		y.Set(intensity.data());
 		
 		gr->SetRange('y',1,1E6);
 		gr->SetFunc("","lg(y)");
@@ -151,23 +151,23 @@ int cluster_t::Draw(mglGraph* gr)
 		gr->Label('y',"intensity",0);
 // 		gr->Plot(x,y);
 		gr->Plot(y,"k","legend 'intensity'");
-// 		concentration_p = quantity::concentration_t((intensity()*1E17).data);
+// 		concentration_p = quantity::concentration_t((intensity()*1E17).data());
 	}
 	
-	gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data));
+	gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data()));
 	gr->SetOrigin(0,1E6);
 	gr->Axis("x_");
 	
-// 	x.Set(sputter_time.data);
+// 	x.Set(sputter_time.data());
 // 	gr->Label('x',"");
 		
 	if (concentration.is_set())
 	{
-		y.Set(concentration.data);
+		y.Set(concentration.data());
 		
 		gr->SetRange('y',1E15,1E21);
 		
-		gr->SetOrigin(statistics::get_max_from_Y(sputter_time.data),0);
+		gr->SetOrigin(statistics::get_max_from_Y(sputter_time.data()),0);
 		
 		gr->Axis("yUE","B");
 // 		gr->SetFunc("","lg(y)");
@@ -212,7 +212,7 @@ isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_is
 	return *isos.begin();
 }
 
-cluster_t cluster_t::interpolate(quantity::quantity_t& new_Q, quantity::quantity_t& old_Q) const
+cluster_t cluster_t::interpolate(const quantity::quantity_t& new_Q, const quantity::quantity_t& old_Q) const
 {
 	if (!new_Q.is_set() || !old_Q.is_set())
 	{
@@ -240,7 +240,7 @@ cluster_t cluster_t::interpolate(quantity::quantity_t& new_Q, quantity::quantity
 	map<double,double> XY_data;
 // 	new_cluster.sputter_depth_p = new_sputter_depth;
 	if (sputter_depth.is_set())
-		new_cluster.sputter_depth = sputter_depth.interp(old_Q,new_Q);
+		new_cluster.sputter_depth = sputter_depth.interp(old_Q,new_Q); ///Exception safe???
 	
 	if (sputter_time.is_set())
 		new_cluster.sputter_time = sputter_time.interp(old_Q,new_Q);
@@ -251,13 +251,13 @@ cluster_t cluster_t::interpolate(quantity::quantity_t& new_Q, quantity::quantity
 	if (intensity.is_set())
 		new_cluster.intensity = intensity.interp(old_Q,new_Q);
 	
-// 	if (SR.is_set() && SR.data.size()>1)
+// 	if (SR.is_set() && SR.data().size()>1)
 // 		new_cluster.SR = SR.interp(old_Q,new_Q);
 	
-	if (SF.is_set() && SF.data.size()>1)
+	if (SF.is_set() && SF.data().size()>1)
 		new_cluster.SF = SF.interp(old_Q,new_Q);
 	
-	if (RSF.is_set() && RSF.data.size()>1)
+	if (RSF.is_set() && RSF.data().size()>1)
 		new_cluster.RSF = RSF.interp(old_Q,new_Q);
 	
 	return new_cluster;

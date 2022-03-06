@@ -76,6 +76,7 @@ public:
 		bool is_set() const;
 		bool operator==(const base_exponents_t& obj) const;
 		bool operator!=(const base_exponents_t& obj) const;
+		base_exponents_t operator^(int pow) const;
 		base_exponents_t operator*(const base_exponents_t& obj) const;
 		base_exponents_t operator/(const base_exponents_t& obj) const;
 		base_exponents_t invert() const;
@@ -98,7 +99,7 @@ public:
 	unit_t(const unit_t& unit_, double multiplier, string prefered_unit_string = "" ) : base_units_exponents(unit_.base_units_exponents), multiplier(multiplier), prefered_output_string(prefered_unit_string) {};
 	unit_t(const unit_t& unit_, string prefered_unit_string ) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(prefered_unit_string) {};
 	unit_t(base_exponents_t unit_exponents, double multiplier,string prefered_unit_string ="" ) : base_units_exponents(unit_exponents),multiplier(multiplier),prefered_output_string(prefered_unit_string) {};
-	unit_t(string symbols);
+	unit_t(string symbols,string prefered_string="");
 	
 // 	static unit_t string_to_unit(string unit_s);
 // 	constexpr unit_t(unit_t unit, double multiplier);
@@ -114,9 +115,11 @@ public:
 	bool operator<(const unit_t& obj) const;
 	bool operator==(const unit_t& obj) const;
 	bool operator!=(const unit_t& obj) const;
-	unit_t pow(int pot) const;
+	
 	unit_t operator*(const unit_t& obj) const;
 	unit_t operator/(const unit_t& obj) const;
+	unit_t pow(int pot) const;
+	unit_t operator^(int exp) const;
 	unit_t invert() const;
 	double multiplier=1;
 	/*tests*/
@@ -185,7 +188,8 @@ namespace units
 		const unit_t atom_percent 	= {{0,0,0,0,0,0,0,true},0.01,"at%"};
 		const unit_t bar 			= {newton / SI::meter / SI::meter,0.001,"bar"};
 		const unit_t min 			= {SI::second,60};
-		const unit_t atoms_per_ccm 	= {{-3,0,0,0,1,0,0},1E-6};
+// 		const unit_t atoms_per_ccm 	= {{-3,0,0,0,1,0,0},1E-6,"at/ccm"};
+		const unit_t atoms_per_ccm 	= {atoms/((SI::meter*prefixes::centi)^3),"at/ccm"};
 	}
 }
 

@@ -44,7 +44,7 @@ using namespace std;
 class statistics {
 private:  
 	typedef int (* functiontype) (const gsl_movstat_end_t, const gsl_vector*, gsl_vector*, gsl_movstat_workspace* );
-	static vector<double> get_moving_window_function(vector<double> Y, int window_size, functiontype function,const gsl_movstat_end_t gsl_movstat_end = GSL_MOVSTAT_END_TRUNCATE);
+	static vector<double> get_moving_window_function(const vector<double>& Y, int window_size, functiontype function,const gsl_movstat_end_t gsl_movstat_end = GSL_MOVSTAT_END_TRUNCATE);
 public:
 	static gsl_vector* get_gsl_vec(const vector<double>& Y);
 	static vector<double> get_gsl_vec(gsl_vector* Y);
@@ -55,15 +55,15 @@ public:
 	/*moving windows*/
 	static vector<vector<double>> get_moving_window_statistics_on_dataX_YY(vector<vector<double>> *data_X_YY, int window_size, int column);
 	static vector<vector<double>> get_moving_window_statistics_from_Y(vector<double> *Y, int window_size);
-	static vector<double> get_moving_window_median_from_Y(vector<double> Y, int window_size);
-	static vector<double> get_moving_window_mean_from_Y(vector<double> Y, int window_size);
-	static vector<double> get_moving_window_sd_from_Y(vector<double> Y, int window_size);
-	static vector<double> get_moving_window_MAD_from_Y(vector<double> Y, int window_size);
+	static vector<double> get_moving_window_median_from_Y(const vector<double>& Y, int window_size);
+	static vector<double> get_moving_window_mean_from_Y(const vector<double>& Y, int window_size);
+	static vector<double> get_moving_window_sd_from_Y(const vector<double>& Y, int window_size);
+	static vector<double> get_moving_window_MAD_from_Y(const vector<double>& Y, int window_size);
 	///default q=0.25 = IQR (difference between the 75th and 25th percentiles of Y)
-	static vector<double> get_moving_window_qqr_from_Y(vector<double> Y, int window_size, double q=0.25);
-	static vector<double> get_moving_window_min_from_Y(vector<double> Y, int window_size);
-	static vector<double> get_moving_window_max_from_Y(vector<double> Y, int window_size);
-	static vector<double> get_moving_window_sum_from_Y(vector<double> Y, int window_size);
+	static vector<double> get_moving_window_qqr_from_Y(const vector<double>& Y, int window_size, double q=0.25);
+	static vector<double> get_moving_window_min_from_Y(const vector<double>& Y, int window_size);
+	static vector<double> get_moving_window_max_from_Y(const vector<double>& Y, int window_size);
+	static vector<double> get_moving_window_sum_from_Y(const vector<double>& Y, int window_size);
 	
 // 	static int get_moving_window_max_index_from_Y(vector<double> Y, int window_size);
 	

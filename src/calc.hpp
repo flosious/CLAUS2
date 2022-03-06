@@ -62,6 +62,8 @@ public:
 		};
 		class Crel_t : public cluster_relations_t
 		{
+		private:
+// 			static const quantity::substance_amount_t rel_zero;
 		public:
 			Crel_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner);
 			///from measurement->matrix->sample; always set
@@ -100,6 +102,7 @@ public:
 		public:
 			Crel_to_Irel_data_fit_routine_template(const cluster_t& zaehler, const cluster_t& nenner, const pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data);
 			virtual ~Crel_to_Irel_data_fit_routine_template();
+			string to_string() const;
 			///just the isotopes are saved without data
 			const cluster_t zaehler;
 			///just the isotopes are saved without data
@@ -135,13 +138,13 @@ public:
 		{
 		private:
 			///this is a helper class to have a nice interface
-			class Crel_data_to_Irel_t
+			class collect_Irels_t
 			{
 			private:
 				static bool add_Crel_Irel_to_pair(pair<quantity::concentration_t,quantity::intensity_t>& Crel_to_Irel_pair, 
 												  const quantity::concentration_t& Crel, const quantity::intensity_t& Irel);
 			public:
-				Crel_data_to_Irel_t(const std::map< const quantity::concentration_t, const calc_t::sims_t::Irel_t >& Crel_data_to_Irels, const cluster_t& zaehler, const cluster_t& nenner);
+				collect_Irels_t(const std::map< const quantity::concentration_t, const calc_t::sims_t::Irel_t >& Crel_data_to_Irels, const cluster_t& zaehler, const cluster_t& nenner);
 				const cluster_t& zaehler;
 				const cluster_t& nenner;
 				const map<const quantity::concentration_t, const calc_t::sims_t::Irel_t> Crel_data_to_Irels;
@@ -153,16 +156,15 @@ public:
 				const Crel_to_Irel_data_fits_t Irel_from_cut_mean(float cut=0.25) const;
 				///cut=0.25 discards the first and last 25% of data; checking all measurements
 				const Crel_to_Irel_data_fits_t Irel_from_cut_median(float cut=0.25) const;
-			}; //Crel_data_to_Irel_t
+			}; //collect_Irels_t
 		protected:
 			const vector<measurements_::sims_t>& measurements;
-			
 		public:
 			Crel_to_Irel_data_collector_t(const cluster_t& zaehler, const cluster_t& nenner, const vector<measurements_::sims_t>& measurements);
 			const cluster_t& zaehler;
 			const cluster_t& nenner;
-			const Crel_data_to_Irel_t elemental_Crel();
-			const Crel_data_to_Irel_t isotopical_Crel();
+			const collect_Irels_t elemental_Crel();
+			const collect_Irels_t isotopical_Crel();
 		}; //Crel_to_Irel_data_collector_t
 	public:
 		sims_t(const vector<measurements_::sims_t>& measurements);

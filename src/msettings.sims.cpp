@@ -62,7 +62,7 @@ const string msettings::sims_t::to_string_short() const
 		return "";
 	quantity::energy_t SE;
 	stringstream ss;
-	if (sputter_energy.data.at(0)>=1000)
+	if (sputter_energy.data().at(0)>=1000)
 		SE =sputter_energy.change_unit(units::prefixes::kilo * sputter_energy.unit());
 	else
 		SE = sputter_energy;
@@ -70,7 +70,7 @@ const string msettings::sims_t::to_string_short() const
 // 	element_t E = sputter_ion.elements.at(0);
 // 	PSE.isotope()
 	
-	ss << SE.data.at(0) << SE.unit().to_string();
+	ss << SE.data().at(0) << SE.unit().to_string();
 	
 	for (auto& ele : sputter_ion.elements)
 		ss << ele.isotopes.at(0).symbol;

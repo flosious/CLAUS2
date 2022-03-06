@@ -45,14 +45,15 @@ bool crater_t::linescan_t::is_set()
 quantity::quantity_t crater_t::linescan_t::fit()
 {
 	if (!is_set()) return {};
-	quantity::quantity_t fitted_z_profile("linescan_z_fitted",{},z.unit());
-// 	fitted_z_profile.name = "linescan_z_fitted";
-// 	fitted_z_profile.data={};
 	
-	if (z.data.size()<21) return {};
+// 	fitted_z_profile.name = "linescan_z_fitted";
+// 	fitted_z_profile.data()={};
+	
+	if (z.data().size()<21) 
+		return {};
 	map<double,double> data_XY;
 	// sampling rate: 3000 points for 600um scan length 10%=300 points window size is a good value
-	tools::vec::combine_vecs_to_map(&xy.data,z.filter_impulse(0,2).data,&data_XY);
+	tools::vec::combine_vecs_to_map(&xy.data(),&z.filter_impulse(0,2).data(),&data_XY);
 	if (!fitted) 
 	{
 		double chisq_rel = 1;
@@ -68,14 +69,16 @@ quantity::quantity_t crater_t::linescan_t::fit()
 		}
 		fitted=asym2sig.fitted();
 	}
-	if (!fitted) return fitted_z_profile;
-	fitted_z_profile.data=asym2sig.fitted_y_data(xy.data);
-// 	plot_t::fast_plot({xy,xy},{z,fitted_z_profile},"/tmp/linescan"+to_string((int)z.median().data[0]),false);
+	if (!fitted) 
+		return {};
+	quantity::quantity_t fitted_z_profile("linescan_z_fitted",asym2sig.fitted_y_data(xy.data()),z.unit(),quantity::dimensions::SI::length);
+
+// 	plot_t::fast_plot({xy,xy},{z,fitted_z_profile},"/tmp/linescan"+to_string((int)z.median().data()[0]),false);
 	return fitted_z_profile;
 }
 
 quantity::quantity_t crater_t::linescan_t::depth()
-{	
+{
 	if (!is_set()) return {};
 	quantity::quantity_t fitted_z_profile = fit();
 	
@@ -86,15 +89,15 @@ quantity::quantity_t crater_t::linescan_t::depth()
 	}
 	
 	double y0=asym2sig.fitted_y_data({0})[0];
-	double m=(asym2sig.fitted_y_data({xy.data.back()})[0]-y0)/xy.data.back();
-	quantity::quantity_t linescan_depth("total_sputter_depth",{},fitted_z_profile.unit());
+	double m=(asym2sig.fitted_y_data({xy.data().back()})[0]-y0)/xy.data().back();
+	
 	
 	// fitted function value in the centre of the crater minus the valu at the same position on the (virtual) surface
-	linescan_depth.data={abs(asym2sig.fitted_y_data({asym2sig.xc})[0] - (y0+m*asym2sig.xc))};
-// 	linescan_depth.data={abs(asym2sig.fitted_y_data({asym2sig.xc})[0]-asym2sig.y0-asym2sig.m*asym2sig.xc)};
-// 	linescan_depth.data={abs(asym2sig.fitted_y_data({asym2sig.xc})[0]-asym2sig.fitted_y_data({0})[0]-asym2sig.y0-asym2sig.m*asym2sig.xc)};
+	vector<double> D ={abs(asym2sig.fitted_y_data({asym2sig.xc})[0] - (y0+m*asym2sig.xc))};
+// 	linescan_depth.data()={abs(asym2sig.fitted_y_data({asym2sig.xc})[0]-asym2sig.y0-asym2sig.m*asym2sig.xc)};
+// 	linescan_depth.data()={abs(asym2sig.fitted_y_data({asym2sig.xc})[0]-asym2sig.fitted_y_data({0})[0]-asym2sig.y0-asym2sig.m*asym2sig.xc)};
 	
-	return linescan_depth;
+	return {"total_sputter_depth",D,fitted_z_profile.unit(),quantity::dimensions::SI::length};
 }
 
 string crater_t::linescan_t::to_string(string prefix)
@@ -148,7 +151,7 @@ quantity::sputter_time_t& crater_t::total_sputter_time(vector<cluster_t>* cluste
 	
 	if (sputter_time.is_set())
 	{
-		total_sputter_time_s = quantity::sputter_time_t(sputter_time.max());
+		total_sputter_time_s = sputter_time.max();
 	}
 	
 	if (clusters==nullptr || clusters->size()==0) 
@@ -157,7 +160,7 @@ quantity::sputter_time_t& crater_t::total_sputter_time(vector<cluster_t>* cluste
 	for (auto& C : *clusters)
 	{
 		if (!C.sputter_time.is_set()) continue;
-		quantity::sputter_time_t TST(C.sputter_time.max());
+		quantity::sputter_time_t TST = C.sputter_time.max();
 		if (TST > total_sputter_time() || !total_sputter_time().is_set())
 			total_sputter_time_s= TST;
 	}
@@ -173,15 +176,17 @@ quantity::depth_t crater_t::total_sputter_depth()
 	if (linescans.size()>0)
 	{
 		for (auto& LS : linescans)
+		{
 			if (LS.fit_params().gof()>0.5)
 				TSD << LS.depth();
+		}
 	}
 	if (TSD.is_set())
 		return TSD.median();
 	return {};
 }
 
-const quantity::quantity_t * crater_t::X() const
+const quantity::quantity_t* crater_t::X() const
 {
 	const quantity::quantity_t* X;
 	if (sputter_depth.is_set())
@@ -203,11 +208,11 @@ quantity::quantity_t crater_t::common_X_quantity(const vector<quantity::quantity
 	/*asuming same units*/
 	for (auto& ST : X_quantities)
 	{
-		mins.push_back(statistics::get_min_from_Y(ST.data));
-		maxs.push_back(statistics::get_max_from_Y(ST.data));
+		mins.push_back(statistics::get_min_from_Y(ST.data()));
+		maxs.push_back(statistics::get_max_from_Y(ST.data()));
 	}
 	quantity::quantity_t X(X_quantities.begin()->name(),X_quantities.begin()->unit());
-	resolution = abs(X_quantities.begin()->data.front() - X_quantities.begin()->data.back()); 
+	resolution = abs(X_quantities.begin()->data().front() - X_quantities.begin()->data().back()); 
 	
 	
 	if (mins.size()==0 || maxs.size()==0)
@@ -239,11 +244,11 @@ quantity::quantity_t crater_t::common_X_quantity(const vector<quantity::quantity
 	else
 		logger::debug(11,"crater_t::common_X_quantity()","common_dimension_data_size: ", tools::to_string(common_dimension_data_size));
 	
-	X.data.resize(common_dimension_data_size);
+	vector<double> X_data(common_dimension_data_size);
 	for (int i=0;i<common_dimension_data_size;i++)
-		X.data.at(i)=resolution*i+x_min;
+		X_data.at(i)=resolution*i+x_min;
 	
-	return X;
+	return {X,X_data};
 }
 
 quantity::depth_t crater_t::common_sputter_depth(vector<cluster_t>& clusters)
@@ -301,7 +306,7 @@ crater_t crater_t::change_resolution(quantity::depth_t sputter_depth_res)
 		logger::error("crater_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
 		return *this;
 	}
-	if (sputter_depth_res.data.size()==1 && sputter_depth_res.data.at(0)==0)
+	if (sputter_depth_res.data().size()==1 && sputter_depth_res.data().at(0)==0)
 	{
 		logger::error("crater_t::change_resolution","!sputter_depth_res is 0","","returning this");
 		return *this;
@@ -329,7 +334,7 @@ crater_t crater_t::change_resolution(quantity::sputter_time_t sputter_time_res)
 		logger::error("crater_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
 		return *this;
 	}
-	if (sputter_time_res.data.size()==1 && sputter_time_res.data.at(0)==0)
+	if (sputter_time_res.data().size()==1 && sputter_time_res.data().at(0)==0)
 	{
 		logger::error("crater_t::change_resolution","!sputter_depth_res is 0","","returning this");
 		return *this;

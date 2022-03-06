@@ -88,7 +88,7 @@ const map<sample_t::matrix_t,quantity::SF_t> mgroups_::sims_t::matrix_to_RSF(con
 		if (!RSF.is_set()) continue;
 		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()",M->sample->to_string());
 		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()","matrix:"+mat.to_string(),"\trRSF:"+RSF.to_string());
-		if (RSF.data.size()>1)
+		if (RSF.data().size()>1)
 		{
 			logger::warning(3,"mgroups_::sims_t::matrix_to_RSF()","RSF is not a scalar, using median");
 			RSF =  RSF.median();
@@ -115,7 +115,7 @@ const std::map< sample_t::matrix_t, quantity::SR_t > mgroups_::sims_t::matrix_to
 		if (!SR.is_set()) continue;
 		logger::debug(21,"mgroups_::sims_t::matrix_to_SRs()",M->sample->to_string());
 		logger::debug(21,"mgroups_::sims_t::matrix_to_SRs()","matrix:"+mat.to_string(),"\tSR:"+SR.to_string());
-		if (SR.data.size()>1)
+		if (SR.data().size()>1)
 		{
 			logger::warning(3,"mgroups_::sims_t::matrix_to_SRs()","SR is not a scalar, using median");
 			SR = SR.median();

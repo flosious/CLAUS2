@@ -418,7 +418,7 @@ const quantity::intensity_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel_from_
 	}
 	if (!Z->intensity.is_set() || !N->intensity.is_set())
 		return {};
-	const auto s = Z->intensity.data.size()/2;
+	const auto s = Z->intensity.data().size()/2;
 	return {(Z->intensity.remove_data_from_begin(s).median()) / (N->intensity.remove_data_from_begin(s).median())};
 }
 
@@ -455,7 +455,7 @@ const quantity::concentration_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_f
 		return {}; //division by 0
 	if (Zmat_iso == nullptr || !Zmat_iso->substance_amount.is_set())
 		return quantity::concentration_t({0},Crel_template.unit()); // always add 0
-	return quantity::concentration_t((Zmat_iso->substance_amount / Nmat_iso->substance_amount).data,Crel_template.unit());
+	return quantity::concentration_t((Zmat_iso->substance_amount / Nmat_iso->substance_amount).data(),Crel_template.unit());
 }
 
 const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::Crel_to_Irel_c::known_Crels_from_sample_matrix_to_Irels_truncated_median() const
@@ -470,7 +470,7 @@ const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::
 			cout << "known_Crels_from_sample_matrix_to_Irels_truncated_median:\t" << M << endl;
 		if (!Crel_from_sample(M).is_set()) continue;
 // // 		if (!Irel(*M).is_set()) continue;
-// // 		Irels << Irel(*M).remove_data_from_begin(Irel(*M).data.size()/2).median(); // this is the truncated_median from Irel and NOT Irel from truncated_medians; This is different!
+// // 		Irels << Irel(*M).remove_data_from_begin(Irel(*M).data().size()/2).median(); // this is the truncated_median from Irel and NOT Irel from truncated_medians; This is different!
 // 		if (!Irel_from_truncated_medians(M).is_set()) continue;
 // 		Irels << Irel_from_truncated_medians(M);
 // 		Crels << Crel_from_sample(M);
@@ -536,23 +536,23 @@ void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double
 	
 	//generate data to show the fit in high resolution
 	const quantity::quantity_t x_res = Crel_to_Irel.second.resolution()/data_points_for_fit_resolution;
-	const quantity::quantity_t X(title_X.str(),(Crel_to_Irel.second.change_resolution(x_res/data_points_for_fit_resolution)).data,units::SI::one); 
+	const quantity::quantity_t X(title_X.str(),(Crel_to_Irel.second.change_resolution(x_res/data_points_for_fit_resolution)).data(),units::SI::one); 
 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",Crel_to_Irel.second.to_string_detailed());
 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",x_res.to_string_detailed());
 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",X.to_string_detailed());
-	const quantity::quantity_t Y(title_Y.str(),polynom.y_data(X.data),units::SI::one);
+	const quantity::quantity_t Y(title_Y.str(),polynom.y_data(X.data()),units::SI::one);
 	
 	plot.Y1.add_curve(X,Y,"fit rank: " + tools::vec::to_string(polynom.rank));
-	plot.Y1.add_points((quantity::quantity_t{X,Crel_to_Irel.second.data}),(quantity::quantity_t{Y,Crel_to_Irel.first.data}),"data"," ro");
+	plot.Y1.add_points((quantity::quantity_t{X,Crel_to_Irel.second.data()}),(quantity::quantity_t{Y,Crel_to_Irel.first.data()}),"data"," ro");
 	plot.to_screen(title_window.str(),sleep_sec);
 }
 
 quantity::concentration_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel(const measurements_::sims_t* M) const
 {
 // 	logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::polynom_c::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string(),"Crel=");
-	quantity::concentration_t result(polynom.y_data(Irel(M).data),Crel_template.unit());
+	quantity::concentration_t result(polynom.y_data(Irel(M).data()),Crel_template.unit());
 	logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string_detailed(),"Crel=" + result.to_string_detailed());
-// 	return {polynom.fitted_y_data(Irel(M).data),Crel_template.unit()};
+// 	return {polynom.fitted_y_data(Irel(M).data()),Crel_template.unit()};
 	return result;
 }
 
@@ -578,7 +578,7 @@ const fit_functions::polynom_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Ire
 	}
 	
 	map<double,double> X_to_Y_map;
-	tools::vec::combine_vecs_to_map(&Crel_to_Irel.second.data,&Crel_to_Irel.first.data, &X_to_Y_map); // Crel(Irel)
+	tools::vec::combine_vecs_to_map(&Crel_to_Irel.second.data(),&Crel_to_Irel.first.data(), &X_to_Y_map); // Crel(Irel)
 	if (X_to_Y_map.size()<1 || X_to_Y_map.size() < rank.size())
 	{
 		logger::warning(3,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","to less data points: " + tools::to_string(X_to_Y_map.size()),"returning false");

@@ -218,23 +218,23 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(ve
 
 /*
  * lets keep it stupid simple:
- * 0)	asume the quantity.data are ordered from lowest to highest corresponding X
+ * 0)	asume the quantity.data() are ordered from lowest to highest corresponding X
  * 1)	find the nearest local minimum, beginning from the end (highest X-axis value)
  */
 unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(quantity::quantity_t Y)
 {
 	
-	if (!Y.is_set() || Y.data.size()<5)
+	if (!Y.is_set() || Y.data().size()<5)
 		return 0;
 	vector<int> maxIdx, minIdx;
 	Y = Y.filter_gaussian(10,1).moving_window_median(5);
 // 	Y = Y.filter_gaussian(10,1).log10() +0.001;
-// 	double deviation = 2*abs(Y.data.at(12)-Y.data.at(11));
-	double deviation = 0.01*statistics::get_mad_from_Y(Y.data);
+// 	double deviation = 2*abs(Y.data().at(12)-Y.data().at(11));
+	double deviation = 0.01*statistics::get_mad_from_Y(Y.data());
 // 	Y = Y.moving_window_mean(10);
-	fit_functions::polynom_t poly(8,Y.data);
-// 	poly.fit(Y.data);
-	double chi_rel = poly.chisq() / Y.data.size();
+	fit_functions::polynom_t poly(8,Y.data());
+// 	poly.fit(Y.data());
+	double chi_rel = poly.chisq() / Y.data().size();
 // 	cout << "chi_rel=" << chi_rel << endl;
 // 	deviation = 4.5E-8 * pow(chi_rel,5);
 // 	deviation = 215 * log10(chi_rel);
@@ -242,7 +242,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(qu
 // 	deviation = 250;
 // 	cout << "deviation=" << deviation << endl;
 
-	if (!statistics::get_extrema_indices(maxIdx,minIdx,Y.data,deviation))
+	if (!statistics::get_extrema_indices(maxIdx,minIdx,Y.data(),deviation))
 	{
 		logger::error("measurements_::sims_t::calc_t::implant_c::minimum_index_position()","statistics::get_extrema_indices","false","returning 0");
 		return 0;
@@ -252,7 +252,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(qu
 
 	map<double,int> area_to_min_pos;
 	
-	int min_pos = Y.data.size()-1;
+	int min_pos = Y.data().size()-1;
 	int max_pos = -1;
 	for (int i=maxIdx.size()-1;i>=0;i--)
 	{
@@ -263,7 +263,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(qu
 			{
 				min_pos=  minIdx.at(j);
 				max_pos = maxIdx.at(i);
-				double area = Y.sum(min_pos,max_pos).data.at(0);
+				double area = Y.sum(min_pos,max_pos).data().at(0);
 				area_to_min_pos.insert(pair<double,int> (area,min_pos));
 				break;
 			}
@@ -295,9 +295,9 @@ quantity::depth_t measurements_::sims_t::calc_t::implant_c::minimum_sputter_dept
 	if (!M.crater.sputter_depth.is_set())
 		return {};
 	if (cluster.intensity.is_set())
-		return quantity::quantity_t{M.crater.sputter_depth, M.crater.sputter_depth.data.at(minimum_index_position(cluster.intensity))};
+		return quantity::quantity_t{M.crater.sputter_depth, M.crater.sputter_depth.data().at(minimum_index_position(cluster.intensity))};
 	else if (cluster.concentration.is_set())
-		return quantity::quantity_t{M.crater.sputter_depth, M.crater.sputter_depth.data.at(minimum_index_position(cluster.concentration))};
+		return quantity::quantity_t{M.crater.sputter_depth, M.crater.sputter_depth.data().at(minimum_index_position(cluster.concentration))};
 	logger::error("measurements_::sims_t::calc_t::implant_c::minimum_sputter_depth_position()","neither intensity nor concentration set","","returning 0");
 	return {};
 }
@@ -307,9 +307,9 @@ quantity::sputter_time_t measurements_::sims_t::calc_t::implant_c::minimum_sputt
 	if (!M.crater.sputter_time.is_set())
 		return {};
 	if (cluster.intensity.is_set())
-		return quantity::quantity_t{M.crater.sputter_time, M.crater.sputter_time.data.at(minimum_index_position(cluster.intensity))};
+		return quantity::quantity_t{M.crater.sputter_time, M.crater.sputter_time.data().at(minimum_index_position(cluster.intensity))};
 	else if (cluster.concentration.is_set())
-		return quantity::quantity_t{M.crater.sputter_time, M.crater.sputter_time.data.at(minimum_index_position(cluster.concentration))};
+		return quantity::quantity_t{M.crater.sputter_time, M.crater.sputter_time.data().at(minimum_index_position(cluster.concentration))};
 	logger::error("measurements_::sims_t::calc_t::implant_c::minimum_sputter_depth_position()","neither intensity nor concentration set","","returning 0");
 	return {};
 }
@@ -323,9 +323,9 @@ quantity::quantity_t measurements_::sims_t::calc_t::implant_c::minimum_starting_
 	}
 
 	if (cluster.intensity.is_set())
-		return {*M.crater.X(),M.crater.X()->data.at(minimum_index_position(cluster.intensity))};
+		return {*M.crater.X(),M.crater.X()->data().at(minimum_index_position(cluster.intensity))};
 	else if (cluster.concentration.is_set())
-		return {*M.crater.X(),M.crater.X()->data.at(minimum_index_position(cluster.concentration))};
+		return {*M.crater.X(),M.crater.X()->data().at(minimum_index_position(cluster.concentration))};
 	logger::error("measurements_::sims_t::calc_t::implant_c::minimum_starting_position()","neither intensity nor concentration set","","returning 0");
 	return {};
 }
@@ -364,21 +364,21 @@ void measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos
 // 	logger::warning(3,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()","Y:" + Y.to_string(), "cluster.intensity:" + cluster.intensity.to_string());
 	
 	start_idx = minimum_index_position(Y);
-	int max_idx = statistics::get_max_index_from_Y(Y.remove_data_from_begin(start_idx).polyfit(17).data) + start_idx;
+	int max_idx = statistics::get_max_index_from_Y(Y.remove_data_from_begin(start_idx).polyfit(17).data()) + start_idx;
 	int delta = (max_idx - start_idx)*8/10;
 	int stop_idx = max_idx + delta;
 	start_idx = max_idx - delta;
 	auto intensity_poly6 = Y.get_data_by_index(start_idx,stop_idx).polyfit(6);
-	maximum_pos_index_s = statistics::get_max_index_from_Y(intensity_poly6.data) + start_idx;
+	maximum_pos_index_s = statistics::get_max_index_from_Y(intensity_poly6.data()) + start_idx;
 	
-	if (maximum_pos_index_s > intensity_poly6.data.size()-2) // maximum at the end of profile -> no clear maximum
+	if (maximum_pos_index_s > intensity_poly6.data().size()-2) // maximum at the end of profile -> no clear maximum
 	{
 		sputter_time_at_maximum_s = {};
 		maximum_intensity_s = {};
 	}
 	else
 	{
-		sputter_time_at_maximum_s = intensity_poly6.max_at_x(crater.sputter_time.get_data_by_index(start_idx,stop_idx));
+		sputter_time_at_maximum_s = intensity_poly6.x_at_max(crater.sputter_time.get_data_by_index(start_idx,stop_idx));
 		maximum_intensity_s = intensity_poly6.max();
 	}
 	
@@ -548,7 +548,7 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_dose()
 		logger::error("measurements_::sims_t::calc_t::implant_c::SF_from_dose()","!maximum_intensity().is_set()","returning empty");
 		return {};
 	}
-	if (cluster.intensity.data.back() / maximum_intensity().data.front() > 0.1)
+	if (cluster.intensity.data().back() / maximum_intensity().data().front() > 0.1)
 		logger::warning(2,"measurements_::sims_t::calc_t::implant_c::SF_from_dose()","intensity background higher than 10\% of maximum","recommanding: sputter deeper, substract background, use implant maximum");
 	auto min_pos = minimum_index_position(cluster.intensity);
 	logger::debug(11,"measurements_::sims_t::calc_t::implant_c::SF_from_dose()","min_pos="+tools::to_string(min_pos),"cluster.intensity="+cluster.intensity.to_string());

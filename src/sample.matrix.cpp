@@ -31,6 +31,9 @@ sample_t::matrix_t::matrix_t()
 
 sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes)
 {
+// 	cout << endl << "IN-matrix::isotopes.size()=" << isotopes.size() << endl;
+// 	for (auto& i : isotopes)
+// 		cout << "iso=" << i.substance_amount.to_string_detailed() << endl;
 	///filter elements from isos and save in matrix
 	while (isotopes.size()>0)
 	{
@@ -51,6 +54,10 @@ sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes)
 		elements.push_back({isos_in_ele});
 		isotopes = tools::vec::erase(isotopes,vec_positions_to_erase);
 	}
+// 	cout << endl << "OUT-matrix::isotopes.size()=" << isotopes.size() << endl;
+// 	for (auto& e : elements)
+// 		for (auto& i : e.isotopes)
+// 			cout << "iso=" << i.substance_amount.to_string() << endl;
 }
 
 sample_t::matrix_t::matrix_t(const string matrix_elements_s)
@@ -161,7 +168,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 					logger::error("sample_t::matrix_t::matrix_t(): indistinguishable isotopes, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
 					return;
 				}
-				if (new_iso.substance_amount.is_set() && new_iso.substance_amount.data.at(0)>0) total_amount+=new_iso.substance_amount.data.at(0);
+				if (new_iso.substance_amount.is_set() && new_iso.substance_amount.data().at(0)>0) total_amount+=new_iso.substance_amount.data().at(0);
 				/*add to matrix isotopes*/
 				isotopes.push_back(new_iso);
 			}
@@ -191,7 +198,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 	/*calculate not given substance_amount*/
 	for (auto& iso : isotopes)
 	{
-		if (iso.substance_amount.is_set() && iso.substance_amount.data.at(0)<0) 
+		if (iso.substance_amount.is_set() && iso.substance_amount.data().at(0)<0) 
 			iso.substance_amount =  iso.substance_amount * (total_amount - max_ ) ;
 	}
 	
@@ -199,7 +206,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 	map<string,double> symbol_to_total_amount;
 	for (auto& iso : isotopes)
 	{
-		if (iso.abundance.data.at(0)<0)
+		if (iso.abundance.data().at(0)<0)
 		{
 			if (!iso.substance_amount.is_set())
 			{
@@ -208,28 +215,24 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 				return;
 			}
 			if (symbol_to_total_amount.find(iso.symbol)==symbol_to_total_amount.end())
-				symbol_to_total_amount.insert(pair<string,double> (iso.symbol,iso.substance_amount.data.at(0)));
+				symbol_to_total_amount.insert(pair<string,double> (iso.symbol,iso.substance_amount.data().at(0)));
 			else
-				symbol_to_total_amount.find(iso.symbol)->second+=iso.substance_amount.data.at(0);
+				symbol_to_total_amount.find(iso.symbol)->second+=iso.substance_amount.data().at(0);
 		}
 	}
 	
 	/*calculate unset(-1) abundance*/
 	for (auto& iso:isotopes)
 	{
-		if (iso.abundance.data.at(0)<0)
+		if (iso.abundance.data().at(0)<0)
 		{
-			iso.abundance = quantity::abundance_t({iso.substance_amount.data.at(0)/symbol_to_total_amount.find(iso.symbol)->second});
+			iso.abundance = quantity::abundance_t({iso.substance_amount.data().at(0)/symbol_to_total_amount.find(iso.symbol)->second});
 		}
 	}
 	
 	///calc relative substance_amount (at%)
 	substance_amount_to_relative(isotopes);
-	
-// 	cout << endl << "matrix::isotopes.size()=" << isotopes.size() << endl;
-// 	for (auto& i : isotopes)
-// 		cout << "iso=" << i.to_string() << endl;
-	
+
 	*this = matrix_t(isotopes);
 	
 	
@@ -240,22 +243,32 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 // 	{
 // 		sum += iso.substance_amount.data.at(0);
 // 		sum1 += iso.abundance.data.at(0);
-// 		cout << iso.to_string() << iso.abundance.to_string() << "\tsum=" << sum<< "\tsum1=" << sum1 <<  endl;;
+// 		cout << iso.to_string() << iso.abundance.to_string() << "\tsum=" << sum<< "\tsum1=" << sum1 <<  endl;
 // 	}
 }
 
 void sample_t::matrix_t::substance_amount_to_relative(vector<isotope_t>& isotopes)
 {
-	quantity::substance_amount_t sum({0});
+	quantity::quantity_t sum;
 	for (auto& iso : isotopes)
-		sum += iso.substance_amount;
-	
+		sum << iso.substance_amount;
+	sum = sum.sum();
 	for (auto& iso : isotopes)
-		iso.substance_amount = quantity::substance_amount_t( quantity::quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent));
-// 		iso.substance_amount = quantity::substance_amount_t( quantity::quantity_t(iso.substance_amount/sum*100));
-	
+	{
+// 		cout << "iso.substance_amount=" << iso.substance_amount.to_string_detailed() << endl;
+// 		cout << "sum.substance_amount=" << sum.to_string_detailed() << endl;
+// 		quantity::quantity_t Q = (iso.substance_amount/sum);
+// 		cout << "Q.substance_amount=" << Q.to_string_detailed() << endl;
+		auto Q = (iso.substance_amount/sum);
+// 		cout << "Q.substance_amount=" << Q.to_string_detailed() << endl;
+		iso.substance_amount = Q.change_unit("at%");
+// 		cout << "AFTER - iso.substance_amount=" << iso.substance_amount.to_string_detailed() << endl;
+// 		iso.substance_amount = quantity::substance_amount_t( quantity::quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent));
+// 		iso.substance_amount = quantity::quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent) ;
+	}
+// 	cout << endl << "substance_amount_to_relative: sum:" << sum.to_string_detailed() << endl;
 // 	for (auto& iso : isotopes)
-// 		cout << iso.substance_amount.to_string() << endl;
+// 		cout << iso.substance_amount.to_string_detailed() << endl;
 }
 
 isotope_t* sample_t::matrix_t::isotope(isotope_t iso)
@@ -287,8 +300,8 @@ const vector<isotope_t> sample_t::matrix_t::isotopes() const
 	for (auto& E : elements)
 	{
 // 		cout <<endl<< E.symbol << endl;
-// 		for (auto& I : E.isotopes)
-// 			cout << endl << "iso = " << I.to_string() << endl;
+// 		for (auto& i : E.isotopes)
+// 			cout << "iso=" << i.substance_amount.to_string_detailed() << endl;
 		isotopes.insert(isotopes.end(), E.isotopes.begin(),E.isotopes.end());
 	}
 	return isotopes;
@@ -369,7 +382,7 @@ const string sample_t::matrix_t::to_string() const
 	{
 		out << isotopes().at(i).nucleons << isotopes().at(i).symbol;
 		if (isotopes().at(i).substance_amount.is_set()) 
-			out << isotopes().at(i).substance_amount.data.at(0);
+			out << isotopes().at(i).substance_amount.data().at(0);
 // 		out << isotopes.at(i).to_string();
 		if (i<isotopes().size()-1) out << " ";
 	}

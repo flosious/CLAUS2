@@ -73,7 +73,7 @@ public:
 	quantity::SF_t SF;
 	quantity::SF_t RSF;
 	///cahnges resolution of all
-	cluster_t interpolate(quantity::quantity_t& new_Q, quantity::quantity_t& old_Q) const;
+	cluster_t interpolate(const quantity::quantity_t& new_Q, const quantity::quantity_t& old_Q) const;
 	cluster_t filter_impulse(int window_size=0, float factor=5);
 
 	vector<isotope_t> isotopes;
