@@ -235,7 +235,7 @@ namespace quantity
 		quantity_t round_() const;
 		quantity_t diff() const;
 		quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
-		quantity_t fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade=17 ) const;
+		quantity_t fit_polynom_by_x_data(const quantity_t& x_data, quantity_t new_x_data, int polynom_grade=17 ) const;
 		///polynomial interpolation from idx_start to idx_stop
 		quantity_t polyfit(unsigned int polynom_grade) const;
 		///deviation = 1 -> 1st deviation; 0 no deviation == polyfit
@@ -420,7 +420,7 @@ namespace quantity
 	class map_t
 	{
 	private:
-// 		check_size() const
+		fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
 	public:
 		map_t(const quantity_t& X, const quantity_t& Y);
 		const quantity_t X;
@@ -434,6 +434,7 @@ namespace quantity
 		const map<double,double> data_map() const;
 		string to_string() const;
 		string to_string_detailed() const;
+		quantity_t polyfit(const quantity_t& x_vals, unsigned int polynom_grade) const;
 	protected:
 		
 	private:

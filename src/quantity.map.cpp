@@ -50,3 +50,13 @@ std::string quantity::map_t::to_string_detailed() const
 	ss << "X: " << X.to_string_detailed() << "; Y: " << Y.to_string_detailed() << endl;
 	return ss.str();
 }
+
+fit_functions::polynom_t quantity::map_t::polynom(unsigned int polynom_grade) const
+{
+	return fit_functions::polynom_t(polynom_grade,data_map());
+}
+
+quantity::quantity_t quantity::map_t::polyfit(const quantity_t& x_vals, unsigned int polynom_grade) const
+{
+	return Y.fit_polynom_by_x_data(X,x_vals,polynom_grade);
+}

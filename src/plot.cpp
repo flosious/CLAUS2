@@ -174,6 +174,15 @@ void plot_t::axis_t::add_curve(const quantity::map_t& XY, const std::string lege
 	add_curve(XY.X,XY.Y,legend);
 }
 
+bool plot_t::axis_t::add_polynom(const fit_functions::polynom_t& polynom_s)
+{
+	if (polynom_s.successfully_fitted())
+		polynoms.push_back(polynom_s);
+	else
+		return false;
+	return true;
+}
+
 void plot_t::axis_t::add_points(const quantity::map_t& XY, const std::string legend, const std::string color)
 {
 	add_points(XY.X,XY.Y,legend,color);
@@ -299,7 +308,6 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	{
 		mglData x(c.XY.X.data());
 		mglData y(c.XY.Y.data());
-// 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
 		tools::str::filter_t l_f("legend '"+ c.legende +"'");
 		gr->Plot(x,y,c.color.c_str(),l_f.escape_special_characters().c_str()); 
 	}
@@ -331,6 +339,17 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 			gr->SetFontSize(3);
 		}
 	}
+// 	for (auto& polynom : polynoms)
+// 	{
+// 		if (!polynom.successfully_fitted())
+// 			continue;
+// 		unsigned int number_of_points = 100;
+// 		vector<double> x_data(number_of_points);
+// 		double res = (range().stop - range().start) / (number_of_points-1);
+// 		for (int i=0;i<x_data.size();i++)
+// 			x_data.at(i) = i * res + range().start;
+// 		
+// 	}
 // 	gr->SetSize(1000,1000);
 	logger::debug(15,"plot_t::axis_t::draw()","exiting");
 }

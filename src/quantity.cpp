@@ -198,7 +198,7 @@ quantity::quantity_t quantity::quantity_t::interp(const quantity_t& old_X, const
 }
 
 
-quantity::quantity_t quantity::quantity_t::fit_polynom_by_x_data(quantity_t& x_data, quantity_t new_x_data, int polynom_grade) const
+quantity::quantity_t quantity::quantity_t::fit_polynom_by_x_data(const quantity_t& x_data, quantity_t new_x_data, int polynom_grade) const
 {
 	if (!is_set())
 		return {};
