@@ -69,8 +69,15 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
 // 		auto proportional_fit_Crels_to_Irels = MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters());
 		calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
-		for (const auto& RSF : mat.RSFs)
-		{
+// 		for (auto& M:MG.measurements())
+// 		{
+// 			M->cluster({"30Si"})->concentration = mat.relative_elemental_concentration({"30Si"},*M);
+// 			cout << mat.relative_elemental_concentration({"70Ge"},*M).to_string() << endl;
+// 			M->plot_now(0);
+// 		}
+		cout << "mat.RSFs.size()=" << mat.RSFs.size() << endl;
+// 		for (const auto& RSF : mat.RSFs)
+// 		{
 // 			cout << RSF.polynom.to_string() << endl;
 // 			for (auto& d : RSF.Crel_to_Irel_data.first.data)
 // 				cout << "c=" << d << endl;
@@ -82,8 +89,8 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 			cout << RSF.Crel_to_Irel_data.first.to_string_detailed() << endl;
 // 			cout << RSF.Crel_to_Irel_data.second.to_string_detailed() << endl;
 				
-			RSF.plot_to_screen(0);
-		}
+// 			RSF.plot_to_screen(0);
+// 		}
 	}
 	
 	if (!logger::instant_print_messages)

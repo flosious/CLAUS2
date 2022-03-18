@@ -37,7 +37,7 @@ using namespace std;
 namespace quantity
 {
 	
-	///generic physical quantity; TODO implement dimensions
+	///generic physical quantity;
 	class quantity_t
 	{
 	private:
@@ -200,6 +200,8 @@ namespace quantity
 		quantity_t get_data_by_index(unsigned int start, unsigned int stop)  const;
 		quantity_t remove_data_by_index(unsigned int start, unsigned int stop)  const;
 		quantity_t remove_data_by_index(vector<unsigned int> remove_pos)  const;
+		///deletes last entry
+		quantity_t pop_back()  const;
 		quantity_t remove_data_from_begin(unsigned int stop)  const;
 		quantity_t remove_data_from_begin(quantity_t& remove_stop)  const;
 		quantity_t absolute()  const;
@@ -387,12 +389,12 @@ namespace quantity
 		SF_t(vector<double> data_s={},unit_t unit_s=units::derived::atoms/ ((units::SI::meter*units::prefixes::centi).pow(3)) / (units::derived::counts/units::SI::second) , dimension_t dim_s=dimensions::SI::substance_amount/((dimensions::SI::length)^3) / (dimensions::SI::substance_amount/dimensions::SI::time) );
 		SF_t(const quantity_t& quantity_s);
 	}; 
-	
-// 	class RSF_t : public quantity_t
+	///matrix RSF
+// 	class mRSF_t : public quantity_t
 // 	{
 // 	public:
-// 		RSF_t(vector<double> data_s={},unit_t unit_s=units::derived::atoms/units::SI::meter.pow(3)/units::prefixes::centi.pow(3));
-// 		RSF_t(quantity_t quantity_s);
+// 		mRSF_t(vector<double> data_s={},unit_t unit_s=units::SI::one,dimension_t dim_s=dimensions::SI::relative);
+// 		mRSF_t(const quantity_t& quantity_s);
 // 	}; 
 	
 	class SR_t : public quantity_t
@@ -420,7 +422,7 @@ namespace quantity
 	class map_t
 	{
 	private:
-		fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
+		
 	public:
 		map_t(const quantity_t& X, const quantity_t& Y);
 		const quantity_t X;
@@ -430,14 +432,22 @@ namespace quantity
 		///removes pairwise all infinity values from the map
 		const map_t remove_inf() const;
 		const map_t remove_nan() const;
+		///remove map entry by given X position
+		const map_t remove_by_X(quantity_t X_s) const;
+		unsigned int fitable_data_size() const;
+		///delete last element
+		const map_t pop_back() const;
 		bool is_set() const;
 		const map<double,double> data_map() const;
 		string to_string() const;
 		string to_string_detailed() const;
-		quantity_t polyfit(const quantity_t& x_vals, unsigned int polynom_grade) const;
-	protected:
 		
-	private:
+		fit_functions::polynom_t polynom(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
+		fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
+		quantity_t polyfit(const quantity_t& x_vals, fit_functions::polynom_t polynom_s) const;
+		quantity_t polyfit(const quantity_t& x_vals, unsigned int polynom_grade) const;
+		quantity_t polyfit(const quantity_t& x_vals, const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
+		
 	}; // map_t
 	
 	

@@ -84,7 +84,7 @@ public:
 	}
 	///returns the pointer to key in V<keys>
 	template <typename F,typename V>
-	static F* find_in_V(F& f,V& keys)
+	static const F* find_in_V(const F& f,const V& keys)
 	{
 		for (auto& key : keys)
 		{
@@ -215,7 +215,7 @@ public:
 		}
 		///returns the pointer to key in keys_list
 		template <typename F>
-		static F* find_in_vec(F& key,vector<F>& keys)
+		static const F* find_in_vec(const F& key,const vector<F>& keys)
 		{
 			return find_in_V(key,keys);
 		}

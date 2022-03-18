@@ -841,11 +841,13 @@ quantity::quantity_t quantity::quantity_t::remove_nan() const
 
 quantity::quantity_t quantity::quantity_t::change_resolution(unsigned int new_data_size) const
 {
+	if (!is_set())
+		return {};
 	if (new_data_size<=1)
-		return {};
-	if (data().size()<=1)
-		return {};
-	quantity_t new_res = resolution() * (new_data_size-1)/(data().size()-1);
+		return *this;
+	if (data().size()==1)
+		return *this;
+	quantity_t new_res = resolution() * (data().size()-1)/(new_data_size-1);
 	return change_resolution(new_res);
 }
 
@@ -883,7 +885,7 @@ quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
 		return {};
 	if (new_res==0) //the momentary resolutiion
 	{
-		return diff().absolute().mean();
+		return diff().absolute().back();
 	}
 	if (new_res<0) 
 		return {};
@@ -906,11 +908,11 @@ const string quantity::quantity_t::to_string() const
 {
 	ostringstream out;
 	if (data().size()>1)
-		out <<  name()  << operations_history_to_string() << " = " <<"<" << data().size() << ">" << " [" << unit().to_string() << "]";
+		out <<  name()  << operations_history_to_string() << " = " <<"<" << data().size() << ">" << " [" << unit().to_string() << "]" << " {" << dimension().to_string() << "}";
 	else if (data().size()==1)
-		out <<  name() << operations_history_to_string() << " = " << data_s.front() << " [" << unit().to_string() << "]";
+		out <<  name() << operations_history_to_string() << " = " << data_s.front() << " [" << unit().to_string() << "]" << " {" << dimension().to_string() << "}";
 	else
-		out <<  name() << operations_history_to_string() << " = " <<"<0>" << " []";
+		out <<  name() << operations_history_to_string() << " = " <<"<0>" << " []" << " {" << dimension().to_string() << "}";
 	return out.str();
 }
 
@@ -1009,6 +1011,13 @@ quantity::quantity_t quantity::quantity_t::remove_data_from_begin(quantity_t& re
 // 		return {};
 // 	cout << remove_stop.change_unit(unit).to_string() << endl;
 	return remove_data_from_begin(remove_stop.change_unit(unit()).data().front());
+}
+
+
+quantity::quantity_t quantity::quantity_t::pop_back() const
+{
+	unsigned int pos_last = data().size()-1;
+	return remove_data_by_index({pos_last});
 }
 
 quantity::quantity_t quantity::quantity_t::remove_data_by_index(vector<unsigned int> remove_pos) const
@@ -1369,75 +1378,76 @@ void quantity::quantity_t::operator+=(const double summand)
 
 void quantity::quantity_t::operator+=(quantity_t quantity_p)
 {
+	quantity_p = quantity_p.change_unit(unit());
 	*this = *this + quantity_p;
 }
 
 /*********************/
 
 quantity::mass_t::mass_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("mass",data_s,unit_s,dim_s){}
-quantity::mass_t::mass_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::mass_t::mass_t(const quantity_t& quantity_s) : mass_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::abundance_t::abundance_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("abundance",data_s,unit_s,dim_s){}
-quantity::abundance_t::abundance_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::abundance_t::abundance_t(const quantity_t& quantity_s) : abundance_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::energy_t::energy_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("energy",data_s,unit_s,dim_s){}
-quantity::energy_t::energy_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::energy_t::energy_t(const quantity_t& quantity_s) : energy_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::rastersize_t::rastersize_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t( "rastersize",data_s,unit_s,dim_s){}
-quantity::rastersize_t::rastersize_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::rastersize_t::rastersize_t(const quantity_t& quantity_s) : rastersize_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::depth_t::depth_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("depth",data_s,unit_s,dim_s){}
-quantity::depth_t::depth_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::depth_t::depth_t(const quantity_t& quantity_s) : depth_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::sputter_depth_t::sputter_depth_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_depth",data_s,unit_s,dim_s){}
-quantity::sputter_depth_t::sputter_depth_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::sputter_depth_t::sputter_depth_t(const quantity_t& quantity_s) : sputter_depth_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::total_sputter_depth_t::total_sputter_depth_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("total_sputter_depth",data_s,unit_s,dim_s){}
-quantity::total_sputter_depth_t::total_sputter_depth_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::total_sputter_depth_t::total_sputter_depth_t(const quantity_t& quantity_s) : total_sputter_depth_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::sputter_time_t::sputter_time_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_time",data_s,unit_s,dim_s){}
-quantity::sputter_time_t::sputter_time_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::sputter_time_t::sputter_time_t(const quantity_t& quantity_s) : sputter_time_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::total_sputter_time_t::total_sputter_time_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("total_sputter_time",data_s,unit_s,dim_s){}
-quantity::total_sputter_time_t::total_sputter_time_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::total_sputter_time_t::total_sputter_time_t(const quantity_t& quantity_s) : total_sputter_time_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::intensity_t::intensity_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("intensity",data_s,unit_s,dim_s){}
-quantity::intensity_t::intensity_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::intensity_t::intensity_t(const quantity_t& quantity_s) : intensity_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::current_t::current_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("current",data_s,unit_s,dim_s){}
-quantity::current_t::current_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::current_t::current_t(const quantity_t& quantity_s) : current_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::sputter_current_t::sputter_current_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_current_t",data_s,unit_s,dim_s){}
-quantity::sputter_current_t::sputter_current_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::sputter_current_t::sputter_current_t(const quantity_t& quantity_s) : sputter_current_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::analysis_current_t::analysis_current_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("primary_analysis_current",data_s,unit_s,dim_s){}
-quantity::analysis_current_t::analysis_current_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::analysis_current_t::analysis_current_t(const quantity_t& quantity_s) : analysis_current_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::concentration_t::concentration_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("concentration",data_s,unit_s,dim_s){}
-quantity::concentration_t::concentration_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::concentration_t::concentration_t(const quantity_t& quantity_s) : concentration_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::dose_t::dose_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("dose",data_s,unit_s,dim_s){}
-quantity::dose_t::dose_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::dose_t::dose_t(const quantity_t& quantity_s) : dose_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::SF_t::SF_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sensitivity_factor",data_s,unit_s,dim_s){}
-quantity::SF_t::SF_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::SF_t::SF_t(const quantity_t& quantity_s) : SF_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 ///difficult to define: there are at least 2 very different definitions I know of ..
 // quantity::RSF_t::RSF_t(vector<double> data_s,unit_t unit_s) : quantity_t("relative_sensitivity_factor",data_s,unit_s){}
 // quantity::RSF_t::RSF_t(quantity_t quantity_s) : RSF_t(quantity_s.data(),quantity_s.unit()) {}
 
 quantity::SR_t::SR_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_rate",data_s,unit_s,dim_s){}
-quantity::SR_t::SR_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::SR_t::SR_t(const quantity_t& quantity_s) : SR_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 ///dim ML2T-3I-1
 quantity::secondary_voltage_t::secondary_voltage_t(vector<double> data_s, unit_t unit_s, dimension_t dim_s) : quantity_t("secondary_voltage",data_s,unit_s,dim_s) {}
-quantity::secondary_voltage_t::secondary_voltage_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::secondary_voltage_t::secondary_voltage_t(const quantity_t& quantity_s) : secondary_voltage_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::substance_amount_t::substance_amount_t(vector<double> data_s, unit_t unit_s,dimension_t dim_s) : quantity_t("substance_amount",data_s,unit_s,dim_s) {}
-quantity::substance_amount_t::substance_amount_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::substance_amount_t::substance_amount_t(const quantity_t& quantity_s) : substance_amount_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::electrical_charge_t::electrical_charge_t(vector<double> data_s, unit_t unit_s, dimension_t dim_s) : quantity_t("electrical_charge",data_s,unit_s,dim_s) {}
-quantity::electrical_charge_t::electrical_charge_t(const quantity_t& quantity_s) : quantity_t(quantity_s) {}
+quantity::electrical_charge_t::electrical_charge_t(const quantity_t& quantity_s) : electrical_charge_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 
 

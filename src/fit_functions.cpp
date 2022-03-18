@@ -341,6 +341,11 @@ const double fit_functions::polynom_t::chisq() const
 	return chisq_p;
 }
 
+const double fit_functions::polynom_t::chisq_relative() const
+{
+	return chisq_relative_p;
+}
+
 const vector<double>& fit_functions::polynom_t::fit_parameters() const
 {
 	return fit_parameters_p;
@@ -349,12 +354,16 @@ const vector<double>& fit_functions::polynom_t::fit_parameters() const
 
 bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 {
+// 	cout << "rank.size(): " << rank.size() << endl;
+// 	cout << "data_XY.size(): " << data_XY.size() << endl;
+// 	print(data_XY);
 	if (rank.size()==0) 
 		return false;
 	if (data_XY.size()==0)
 		return false;
 	if (rank.size()>data_XY.size()) 
 		return false;
+	
 	
 	
 	int i, n;
@@ -411,12 +420,13 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
     gsl_vector_free (c);
     gsl_matrix_free (cov);
 	
-// 	chisq_p=0;
-// 	vector<double> YY = Y_data(Xdata);
-// 	for (int i=0;i<YY.size();i++)
-// 	{
-// 		chisq_p +=  abs(YY.at(i)-Ydata.at(i));
-// 	}
+	chisq_relative_p =-1;
+	vector<double> YY = y_data(Xdata);
+	for (int i=0;i<YY.size();i++)
+	{
+		chisq_relative_p +=  (abs(YY.at(i)-Ydata.at(i)))/Ydata.at(i);
+	}
+	chisq_relative_p = chisq_relative_p / (Xdata.size());
 	
 	return true;
 }

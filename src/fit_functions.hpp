@@ -82,6 +82,7 @@ public:
 	private:
 		bool successfully_fitted_p=false;
 		double chisq_p=-1;
+		double chisq_relative_p=-1;
 		vector<double> fit_parameters_p;
 		///perform the actual fit
 		bool fit(map<double,double> data_XY);
@@ -98,6 +99,8 @@ public:
 		///rank of polynom: 0 means discard, and non-0 means use
 		const vector<unsigned int> rank;
 		const double chisq() const;
+		///
+		const double chisq_relative() const;
 		const vector<double>& fit_parameters() const;
 		///the maximum rank
 		int degree() const;

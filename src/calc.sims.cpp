@@ -173,10 +173,17 @@ const quantity::intensity_t calc_t::sims_t::Irel_t::from_clusters_cut_mean_ratio
 /*****    Crel_to_Irel_data_fit_routine_template   *****/
 /*******************************************************/
 
+// calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel_to_Irel_data_fit_routine_template(const cluster_t& zaehler, 
+// 																							   const cluster_t& nenner, 
+// 																							   const pair<quantity::concentration_t, quantity::intensity_t> Crel_to_Irel_data) :
+// 																							   zaehler(zaehler.isotopes), nenner(nenner.isotopes),Crel_to_Irel_data(Crel_to_Irel_data)
+// {
+// }
+
 calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel_to_Irel_data_fit_routine_template(const cluster_t& zaehler, 
 																							   const cluster_t& nenner, 
-																							   const pair<quantity::concentration_t, quantity::intensity_t> Crel_to_Irel_data) :
-																							   zaehler(zaehler.isotopes), nenner(nenner.isotopes),Crel_to_Irel_data(Crel_to_Irel_data)
+																							   const quantity::map_t& Crel_to_Irel_map) :
+																							   zaehler(zaehler.isotopes), nenner(nenner.isotopes),Crel_to_Irel_map(Crel_to_Irel_map)
 {
 }
 
@@ -205,7 +212,7 @@ void calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::plot_to_screen(doub
 string calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::to_string() const
 {
 	stringstream ss;
-	ss << "Z:" << zaehler.to_string() << "; N:" << nenner.to_string() << "; Crel_to_Irel_data.size()=" << Crel_to_Irel_data.first.data().size();
+	ss << "Z:" << zaehler.to_string() << "; N:" << nenner.to_string() << "; Crel_to_Irel_data.size()=" << Crel_to_Irel_map.X.data().size();
 	return ss.str();
 }
 
@@ -214,10 +221,10 @@ string calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::to_string() const
 /*******************************************************/
 calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::Crel_to_Irel_data_polynomial_fit_t(const cluster_t& zaehler, 
 																					   const cluster_t& nenner, 
-																					   const pair<quantity::concentration_t, 
-																					   quantity::intensity_t> Crel_to_Irel_data, 
+// 																					   const pair<quantity::concentration_t, quantity::intensity_t> Crel_to_Irel_data, 
+																					   const quantity::map_t& Crel_to_Irel_map,
 																					   fit_functions::polynom_t polynom) : 
-										Crel_to_Irel_data_fit_routine_template(zaehler,nenner,Crel_to_Irel_data), 
+										Crel_to_Irel_data_fit_routine_template(zaehler,nenner,Crel_to_Irel_map), 
 										polynom(polynom)
 {
 }
@@ -228,7 +235,9 @@ const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_polynomial_fit
 		return {};
 	if (!polynom.successfully_fitted())
 		return {};
-	return quantity::concentration_t(polynom.y_data(Irel.data()),units::SI::one);
+// 	cout << "Crel_to_Irel_map.polyfit=" << Crel_to_Irel_map.polyfit(Irel,polynom).to_string_detailed() << endl;
+	return Crel_to_Irel_map.polyfit(Irel,polynom);
+// 	return polynom.y_data(Irel.data());
 }
 
 const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::Crel(const measurements_::sims_t& measurement) const
@@ -238,9 +247,8 @@ const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_polynomial_fit
 		logger::warning(3,"calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::Crel()","!measurement.are_intensities_of_clusters_set( "+measurement.to_string_short() +" )","returning empty");
 		return {};
 	}
-	quantity::intensity_t Irel = measurement.cluster(zaehler)->intensity / measurement.cluster(nenner)->intensity;
-	if (!Irel.is_set())
-		return {};
+	auto Irel = measurement.cluster(zaehler)->intensity / measurement.cluster(nenner)->intensity;
+	
 	return Crel(Irel);
 }
 
@@ -250,19 +258,19 @@ void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double s
 	stringstream plot_title;
 // 	if (!Crel_to_Irel_data.first.is_set() || Crel_to_Irel_data.second.is_set())
 // 		return;
-	quantity::map_t XY(Crel_to_Irel_data.second,Crel_to_Irel_data.first);
-	auto XYr = XY.remove_inf();
+// 	quantity::map_t XY(Crel_to_Irel_data.second,Crel_to_Irel_data.first);
+	auto Crel_to_Irel_map_withot_infs = Crel_to_Irel_map.remove_inf();
 	
-	cout << XYr.to_string_detailed() << endl;
+// 	cout << XYr.to_string_detailed() << endl;
 	
-	plot.Y1.add_points(XYr,"data"," ro");
+	plot.Y1.add_points(Crel_to_Irel_map_withot_infs,"data"," ro");
 	if (polynom.successfully_fitted())
 	{
-		///create some points on the curve to be plotted
-// 		auto Irel_fit = Crel_to_Irel_data.second.change_resolution(Crel_to_Irel_data.first.data().size()*50); // Exception save???
-// 		quantity::concentration_t Crel_fit(polynom.y_data(Irel_fit.data()),Crel_to_Irel_data.first.unit());
-// 		auto Crel_fit(polynom.y_data(Irel_fit.data()));
-// 		plot.Y1.add_curve(Irel_fit,Crel_fit,polynom.to_string());
+// 		cout << "Z: " << zaehler.to_string() << " N:" << nenner.to_string() << endl;
+// 		cout << polynom.to_string() << endl;
+		auto Irel_points = Crel_to_Irel_map_withot_infs.X.change_resolution(100);
+		auto Crel_points = Crel_to_Irel_map_withot_infs.polyfit(Irel_points,polynom);
+		plot.Y1.add_curve(Irel_points,Crel_points,"interpolation");
 	}
 	plot_title << "{" << zaehler.to_string() << "} / {" << nenner.to_string() <<  "}";
 	plot.to_screen(plot_title.str(),sleep_sec);
@@ -273,16 +281,16 @@ void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double s
 /*****          Crel_to_Irel_data_fits_t           *****/
 /*******************************************************/
 
-calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_data_fits_t(const pair<quantity::concentration_t, quantity::intensity_t> Crel_to_Irel_data, const cluster_t& zaehler, const cluster_t& nenner) :
-													Crel_to_Irel_data(Crel_to_Irel_data), zaehler(zaehler),nenner(nenner)
+calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_data_fits_t(const quantity::map_t& Crel_to_Irel_map, const cluster_t& zaehler, const cluster_t& nenner) :
+													Crel_to_Irel_map(Crel_to_Irel_map), zaehler(zaehler),nenner(nenner)
 {
 }
 
 const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t calc_t::sims_t::Crel_to_Irel_data_fits_t::polynom(const vector<unsigned int> polynom_rank, const vector<double> polynom_start_parameters) const
 {
-	const auto data = tools::vec::combine_vecs_to_map(Crel_to_Irel_data.second.data(), Crel_to_Irel_data.first.data());
-	fit_functions::polynom_t poly(polynom_rank,polynom_start_parameters,data);
-	Crel_to_Irel_data_polynomial_fit_t crel_irel_polyfit(zaehler,nenner,Crel_to_Irel_data,poly);
+// 	const auto data = tools::vec::combine_vecs_to_map(Crel_to_Irel_data.second.data(), Crel_to_Irel_data.first.data());
+// 	fit_functions::polynom_t poly(polynom_rank,polynom_start_parameters,data);
+	Crel_to_Irel_data_polynomial_fit_t crel_irel_polyfit(zaehler,nenner,Crel_to_Irel_map,Crel_to_Irel_map.remove_inf().remove_nan().polynom(polynom_rank,polynom_start_parameters));
 	return crel_irel_polyfit;
 }
 
@@ -355,58 +363,82 @@ bool calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t::add_Crel_Ir
 /*templates would be nice here ... but I dont know how to give a class/object-function as template argument :(*/
 const calc_t::sims_t::Crel_to_Irel_data_fits_t calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t::Irel_from_mean() const
 {
-	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+// 	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+	quantity::quantity_t X;
+	quantity::quantity_t Y;
 	for (const auto& C_to_I : Crel_data_to_Irels)
 	{
 		auto Irel = C_to_I.second.from_clusters_mean_ratios();
 		auto Crel = C_to_I.first;
-		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
+		X << Irel;
+		Y << Crel;
+// 		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
 	}
-	return {Crel_to_Irel_data,zaehler,nenner};
+	return {{X,Y},zaehler,nenner};
 }
 const calc_t::sims_t::Crel_to_Irel_data_fits_t calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t::Irel_from_median() const
 {
-	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+// 	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+	quantity::quantity_t X;
+	quantity::quantity_t Y;
 	for (const auto& C_to_I : Crel_data_to_Irels)
 	{
 		auto Irel = C_to_I.second.from_clusters_median_ratios();
 		auto Crel = C_to_I.first;
-		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
+		X << Irel;
+		Y << Crel;
+// 		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
 	}
-	return {Crel_to_Irel_data,zaehler,nenner};
+// 	return {Crel_to_Irel_data,zaehler,nenner};
+	return {{X,Y},zaehler,nenner};
 }
 const calc_t::sims_t::Crel_to_Irel_data_fits_t calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t::Irel_from_cut_mean(float cut) const
 {
-	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+// 	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+	quantity::quantity_t X;
+	quantity::quantity_t Y;
 	for (const auto& C_to_I : Crel_data_to_Irels)
 	{
 		auto Irel = C_to_I.second.from_clusters_cut_mean_ratios(cut);
 		auto Crel = C_to_I.first;
-		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
+		X << Irel;
+		Y << Crel;
+// 		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
 	}
-	return {Crel_to_Irel_data,zaehler,nenner};
+// 	return {Crel_to_Irel_data,zaehler,nenner};
+	return {{X,Y},zaehler,nenner};
 }
 const calc_t::sims_t::Crel_to_Irel_data_fits_t calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t::Irel_from_cut_median(float cut) const
 {
-	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+// 	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+	quantity::quantity_t X;
+	quantity::quantity_t Y;
 	for (const auto& C_to_I : Crel_data_to_Irels)
 	{
 		auto Irel = C_to_I.second.from_clusters_cut_median_ratios(cut);
 		auto Crel = C_to_I.first;
-		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
+		X << Irel;
+		Y << Crel;
+// 		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
 	}
-	return {Crel_to_Irel_data,zaehler,nenner};
+// 	return {Crel_to_Irel_data,zaehler,nenner};
+	return {{X,Y},zaehler,nenner};
 }
 const calc_t::sims_t::Crel_to_Irel_data_fits_t calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t::Irel_from_trimmed_mean(float trim) const
 {
-	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+// 	pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+	quantity::quantity_t X;
+	quantity::quantity_t Y;
 	for (const auto& C_to_I : Crel_data_to_Irels)
 	{
 		auto Irel = C_to_I.second.from_clusters_trimmed_mean_ratios(trim);
 		auto Crel = C_to_I.first;
-		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
+		X << Irel;
+		Y << Crel;
+// 		add_Crel_Irel_to_pair(Crel_to_Irel_data,Crel,Irel);
 	}
-	return {Crel_to_Irel_data,zaehler,nenner};
+// 	return {Crel_to_Irel_data,zaehler,nenner};
+	return {{X,Y},zaehler,nenner};
 }
 
 
