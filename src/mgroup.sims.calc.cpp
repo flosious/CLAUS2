@@ -542,7 +542,7 @@ void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double
 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",X.to_string_detailed());
 	const quantity::quantity_t Y(title_Y.str(),polynom.y_data(X.data()),units::SI::one);
 	
-	plot.Y1.add_curve(X,Y,"fit rank: " + tools::vec::to_string(polynom.rank));
+	plot.Y1.add_curve(X,Y,"fit rank: " + tools::vec::to_string(polynom.rank()));
 	plot.Y1.add_points((quantity::quantity_t{X,Crel_to_Irel.second.data()}),(quantity::quantity_t{Y,Crel_to_Irel.first.data()}),"data"," ro");
 	plot.to_screen(title_window.str(),sleep_sec);
 }

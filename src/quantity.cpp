@@ -968,7 +968,7 @@ quantity::quantity_t quantity::quantity_t::change_unit(const unit_t& target_unit
 		return *this;
 	if (unit().base_units_exponents != target_unit.base_units_exponents) 
 	{
-		logger::error("quantity::quantity_t::change_unit","unit.base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
+		logger::info(4,"quantity::quantity_t::change_unit","unit.base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
 		return {};
 	}
 	auto data_c = data();
@@ -1162,11 +1162,12 @@ bool quantity::quantity_t::operator==(quantity_t obj) const
 {
 	if (dimension()!=obj.dimension())
 		return false;
+	obj = obj.change_unit(unit());
 	if (unit()!=obj.unit()) 
 		return false;
 	if (data().size()!=obj.data().size())	 
 		return false;
-	obj.change_unit(unit());
+	
 	for (int i=0;i<data().size();i++)
 		if (data_s.at(i)!=obj.data_s.at(i)) 
 			return false;
@@ -1380,6 +1381,35 @@ void quantity::quantity_t::operator+=(quantity_t quantity_p)
 {
 	quantity_p = quantity_p.change_unit(unit());
 	*this = *this + quantity_p;
+}
+
+vector<int> quantity::quantity_t::bin_data(const int bins_count) const
+{
+	if (data().size()==0 || bins_count == 0 || bins_count > data().size())
+		return {};
+	auto MIN = data().at(statistics::get_min_index_from_Y(data()));
+	auto MAX = data().at(statistics::get_max_index_from_Y(data()))*1.01; // make it a little bit bigger, so every data fits in
+	vector<double> bins(bins_count);
+	double bins_size = (MAX-MIN)/bins_count;
+	for (int i=0;i<bins_count;i++)
+	{
+		bins.at(i*bins_size+MIN);
+	}
+	return bin_data(bins);
+}
+
+vector<int> quantity::quantity_t::bin_data(const vector<double>& bins) const
+{
+	vector<int> count_number_in_bins(bins.size()-1,0);
+	for (auto d:data() )
+	{
+		for (int i=0;i<bins.size()-1;i++)
+		{
+			if (bins[i] <= d && d < bins[i+1])
+				count_number_in_bins.at(i)++;
+		}
+	}
+	return count_number_in_bins;
 }
 
 /*********************/

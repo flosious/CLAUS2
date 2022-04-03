@@ -37,18 +37,18 @@ int plot_t::Draw(mglGraph* gr)
 	/*x axis*/
 	vector<const quantity::quantity_t*> Xs;
 	for (auto& c:Y1.curves)
-		Xs.push_back(&c.XY.X);
+		Xs.push_back(&c.XY.X());
 	for (auto& c:Y2.curves)
-		Xs.push_back(&c.XY.X);
+		Xs.push_back(&c.XY.X());
 	for (auto& c:Y3.curves)
-		Xs.push_back(&c.XY.X);
+		Xs.push_back(&c.XY.X());
 	
 	for (auto& c:Y1.points)
-		Xs.push_back(&c.XY.X);
+		Xs.push_back(&c.XY.X());
 	for (auto& c:Y2.points)
-		Xs.push_back(&c.XY.X);
+		Xs.push_back(&c.XY.X());
 	for (auto& c:Y3.points)
-		Xs.push_back(&c.XY.X);
+		Xs.push_back(&c.XY.X());
 	
 	if (Xs.size()==0)
 	{
@@ -171,7 +171,7 @@ plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, dou
 
 void plot_t::axis_t::add_curve(const quantity::map_t& XY, const std::string legend)
 {
-	add_curve(XY.X,XY.Y,legend);
+	add_curve(XY.X(),XY.Y(),legend);
 }
 
 bool plot_t::axis_t::add_polynom(const fit_functions::polynom_t& polynom_s)
@@ -185,7 +185,7 @@ bool plot_t::axis_t::add_polynom(const fit_functions::polynom_t& polynom_s)
 
 void plot_t::axis_t::add_points(const quantity::map_t& XY, const std::string legend, const std::string color)
 {
-	add_points(XY.X,XY.Y,legend,color);
+	add_points(XY.X(),XY.Y(),legend,color);
 }
 
 void plot_t::axis_t::add_curve(const vector<double>& X, const vector<double>& Y, const string legend)
@@ -219,24 +219,24 @@ bool plot_t::axis_t::check()
 	}
 	for (auto& c : curves)
 	{
-		if (c.XY.X.name()!=curves.front().XY.X.name())
+		if (c.XY.X().name()!=curves.front().XY.X().name())
 		{
-			logger::error("plot_t::axis_t::check()","quantity name of X axis do not match for all curves",c.XY.X.name(),"false");
+			logger::error("plot_t::axis_t::check()","quantity name of X axis do not match for all curves",c.XY.X().name(),"false");
 			return false;
 		}
-		if (c.XY.X.unit()!=curves.front().XY.X.unit())
+		if (c.XY.X().unit()!=curves.front().XY.X().unit())
 		{
-			logger::error("plot_t::axis_t::check()","quantity unit of X axis do not match for all curves",c.XY.X.unit().to_string(),"false");
+			logger::error("plot_t::axis_t::check()","quantity unit of X axis do not match for all curves",c.XY.X().unit().to_string(),"false");
 			return false;
 		}
-		if (c.XY.Y.unit()!=curves.front().XY.Y.unit())
+		if (c.XY.Y().unit()!=curves.front().XY.Y().unit())
 		{
-			logger::error("plot_t::axis_t::check()","quantity unit of Y axis do not match for all curves",c.XY.Y.unit().to_string(),"false");
+			logger::error("plot_t::axis_t::check()","quantity unit of Y axis do not match for all curves",c.XY.Y().unit().to_string(),"false");
 			return false;
 		}
-		if (c.XY.Y.name()!=curves.front().XY.Y.name())
+		if (c.XY.Y().name()!=curves.front().XY.Y().name())
 		{
-			logger::warning(3,"plot_t::axis_t::check()","quantity name of Y axis do not match for all curves",c.XY.Y.name());
+			logger::warning(3,"plot_t::axis_t::check()","quantity name of Y axis do not match for all curves",c.XY.Y().name());
 // 			return false;
 		}
 	}
@@ -287,16 +287,16 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	string y_name="", y_unit="", y_rel="";
 	if (curves.size()>0)
 	{
-		y_name =curves.front().XY.Y.name();
-		y_unit = curves.front().XY.Y.unit().to_string();
-		if (curves.front().XY.Y.is_relative())
+		y_name =curves.front().XY.Y().name();
+		y_unit = curves.front().XY.Y().unit().to_string();
+		if (curves.front().XY.Y().is_relative())
 			y_rel = "rel. ";
 	}
 	else if (points.size()>0)
 	{
-		y_name =points.front().XY.Y.name();
-		y_unit = points.front().XY.Y.unit().to_string();
-		if (points.front().XY.Y.is_relative())
+		y_name =points.front().XY.Y().name();
+		y_unit = points.front().XY.Y().unit().to_string();
+		if (points.front().XY.Y().is_relative())
 			y_rel = "rel. ";
 	}
 	y_l << y_rel << y_name << " [" << y_unit << "]";
@@ -306,8 +306,8 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	
 	for (auto& c: points)
 	{
-		mglData x(c.XY.X.data());
-		mglData y(c.XY.Y.data());
+		mglData x(c.XY.X().data());
+		mglData y(c.XY.Y().data());
 		tools::str::filter_t l_f("legend '"+ c.legende +"'");
 		gr->Plot(x,y,c.color.c_str(),l_f.escape_special_characters().c_str()); 
 	}
@@ -315,17 +315,17 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	{
 		if (!c.XY.is_set())
 			continue;
-		mglData x(c.XY.X.data());
-		mglData y(c.XY.Y.data());
+		mglData x(c.XY.X().data());
+		mglData y(c.XY.Y().data());
 // 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
 		tools::str::filter_t l_f("legend '"+ c.legende +"'");
 		gr->Plot(x,y,color.c_str(),l_f.escape_special_characters().c_str());
-		if (c.XY.Y.data().size()<11) continue;
+		if (c.XY.Y().data().size()<11) continue;
 		int y_offset=0;
 		if (log10_scale)
 			y_offset = 1;
 		gr->SetFontSize(2);
-		gr->Puts(mglPoint(c.XY.X.data().at(c.XY.Y.data().size()*0.1),c.XY.Y.data().at(c.XY.Y.data().size()*0.05)+y_offset),c.legende.c_str(),"m");
+		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1),c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),c.legende.c_str(),"m");
 		gr->SetFontSize(3); // default
 	}
 	for (auto& line : lines)
@@ -366,9 +366,9 @@ plot_t::axis_t::range_t plot_t::axis_t::range()
 	
 	vector<const quantity::quantity_t*> Ys;
 	for (auto& c: curves)
-		Ys.push_back(&c.XY.Y);
+		Ys.push_back(&c.XY.Y());
 	for (auto& c: points)
-		Ys.push_back(&c.XY.Y);
+		Ys.push_back(&c.XY.Y());
 	range_t range(Ys);
 	if (log10_scale) 
 		return range.log10();

@@ -188,11 +188,9 @@ measurements_::sims_t::filter_t measurements_::sims_t::filter() const
 
 void measurements_::sims_t::add_clusters(vector<cluster_t>& clusters)
 {
-	cluster_t* C_p;
 	for (auto& C: clusters)
 	{
-		C_p = tools::find_in_V(C,clusters);
-		if (C_p==nullptr)
+		if (tools::find_in_V(C,clusters)==nullptr)
 			clusters.push_back(C);
 	}
 }

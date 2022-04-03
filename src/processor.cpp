@@ -75,7 +75,18 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 // 			cout << mat.relative_elemental_concentration({"70Ge"},*M).to_string() << endl;
 // 			M->plot_now(0);
 // 		}
-		cout << "mat.RSFs.size()=" << mat.RSFs.size() << endl;
+// 		Crel_to_Irel_lin_fits
+		
+		
+// 		cout << "mat.Crel_to_Irel_lin_fits.size()=" << mat.RSFs().Crel_to_Irel_lin_fits().size() << endl;
+// 		for (auto& fit : mat.RSFs().Crel_to_Irel_lin_fits())
+// 			cout << "mat.Crel_to_Irel_lin_fit: " << fit.to_string() << endl;
+		
+		for (auto& RSF : mat.RSFs().unknown_RSFs())
+		{
+			cout << "RSF: " << RSF.to_string() << endl;
+		}
+		
 // 		for (const auto& RSF : mat.RSFs)
 // 		{
 // 			cout << RSF.polynom.to_string() << endl;

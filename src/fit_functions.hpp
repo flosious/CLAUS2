@@ -86,6 +86,7 @@ public:
 		vector<double> fit_parameters_p;
 		///perform the actual fit
 		bool fit(map<double,double> data_XY);
+		vector<unsigned int> rank_p;
 // 		const vector<double> x_data_p;
 	public:
 		///degree means rank; 2D data
@@ -97,10 +98,10 @@ public:
 		///fitting 1D data
 		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, const vector<double>& data);
 		///rank of polynom: 0 means discard, and non-0 means use
-		const vector<unsigned int> rank;
+		const vector<unsigned int>& rank() const;
 		const double chisq() const;
 		///
-		const double chisq_relative() const;
+		double chisq_relative() const;
 		const vector<double>& fit_parameters() const;
 		///the maximum rank
 		int degree() const;

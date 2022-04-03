@@ -93,6 +93,17 @@ public:
 		}
 		return nullptr;
 	}
+	///returns the pointer to key in V<keys>
+	template <typename F,typename V>
+	static F* find_in_V(F& f,V& keys)
+	{
+		for (auto& key : keys)
+		{
+			if (key==f)
+				return &key;
+		}
+		return nullptr;
+	}
 	class web {
 	public:
 		static const string get_contents(string url);

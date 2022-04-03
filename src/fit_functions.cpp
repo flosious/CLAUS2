@@ -250,7 +250,7 @@ string fit_functions::asym2sig_t::to_string(string prefix)
 fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, 
 									const vector<double>& fit_parameters, 
 									const map<double, double>& data_XY) : 
-									fit_parameters_p(fit_parameters), rank(rank)
+									fit_parameters_p(fit_parameters), rank_p(rank)
 {
 	successfully_fitted_p = fit(data_XY); //fit the data only once
 }
@@ -274,7 +274,12 @@ fit_functions::polynom_t::polynom_t(int degree, const vector<double>& data) :
 
 int fit_functions::polynom_t::degree() const
 {
-	return rank.size()-1;
+	return rank_p.size()-1;
+}
+
+const vector<unsigned int>& fit_functions::polynom_t::rank() const
+{
+	return rank_p;
 }
 
 const fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int derive) const
@@ -341,7 +346,7 @@ const double fit_functions::polynom_t::chisq() const
 	return chisq_p;
 }
 
-const double fit_functions::polynom_t::chisq_relative() const
+double fit_functions::polynom_t::chisq_relative() const
 {
 	return chisq_relative_p;
 }
@@ -357,11 +362,11 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 // 	cout << "rank.size(): " << rank.size() << endl;
 // 	cout << "data_XY.size(): " << data_XY.size() << endl;
 // 	print(data_XY);
-	if (rank.size()==0) 
+	if (rank().size()==0) 
 		return false;
 	if (data_XY.size()==0)
 		return false;
-	if (rank.size()>data_XY.size()) 
+	if (rank().size()>data_XY.size()) 
 		return false;
 	
 	
@@ -369,7 +374,7 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 	int i, n;
 	gsl_matrix *X, *cov;
 	gsl_vector *y, *w, *c;
-	const int p = rank.size();
+	const int p = rank().size();
     
 	n = data_XY.size();
     
@@ -396,7 +401,7 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 		gsl_vector_set (y, i, Ydata[i]);
 		for (int ii=0;ii<p;ii++)  // create reference data (polynom)
 		{
-			if (rank.at(ii)==0)
+			if (rank().at(ii)==0)
 				gsl_matrix_set (X, i, ii, 0);
 			else
 				gsl_matrix_set (X, i, ii, pow(Xdata[i],ii));

@@ -250,6 +250,12 @@ namespace quantity
 		quantity_t remove_nan()  const;
 		///clears all data: data={}
 		quantity_t& clear();
+		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
+		/// bins is the number of bins, all having same sizes
+		vector<int> bin_data(int bins_count) const;
+		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
+		/// returning the number of bins , where each idx of the result vector is containing the amount of data within the bin
+		vector<int> bin_data(const vector<double>& bins) const;
 	};
 	
 	
@@ -422,11 +428,18 @@ namespace quantity
 	class map_t
 	{
 	private:
-		
+		vector<pair<double,double>> XYdata_pairs() const;
+		static bool sort_by_x(const pair<double,double>& P1, const pair<double,double>& P2);
+		static bool sort_by_y(const pair<double,double>& P1, const pair<double,double>& P2);
+		quantity_t X_p;
+		quantity_t Y_p;
 	public:
+		map_t();
 		map_t(const quantity_t& X, const quantity_t& Y);
-		const quantity_t X;
-		const quantity_t Y;
+		///overwrites X and Y quantities by XYdata_pairs
+		map_t(const quantity_t& X, const quantity_t& Y, const vector<pair<double,double>>& XYdata_pairs);
+		const quantity_t& X() const;
+		const quantity_t& Y() const;
 		///returns new_Y using akima splines
 		const map_t map_interp_akima(const quantity_t new_X) const;
 		///removes pairwise all infinity values from the map
@@ -434,20 +447,71 @@ namespace quantity
 		const map_t remove_nan() const;
 		///remove map entry by given X position
 		const map_t remove_by_X(quantity_t X_s) const;
-		unsigned int fitable_data_size() const;
 		///delete last element
 		const map_t pop_back() const;
 		bool is_set() const;
 		const map<double,double> data_map() const;
 		string to_string() const;
 		string to_string_detailed() const;
-		
+		///removes outliners until chisqr_relative is below treshold (default 10%)
+		map_t remove_outliners(const fit_functions::polynom_t& polynom_s,float chisqr_relative_treshold=0.1) const;
 		fit_functions::polynom_t polynom(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
 		fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
+		///max of Y
+		map_t max() const;
+		///min of Y
+		map_t min() const;
+		///absolute of Y
+		map_t absolute() const;
+		map_t sort_X_from_low_to_high() const;
+		map_t sort_Y_from_low_to_high() const;
+		map_t sort_X_from_high_to_low() const;
+		map_t sort_Y_from_high_to_low() const;
+		/// Y1(X1) ... Yn(Xn) will be inversed: Yn(Xn) ... Y1(X1)
+		map_t reverse_order() const;
+		///difference of Y and polynomial fitted Y -> the error
+		map_t delta_y(const fit_functions::polynom_t& polynom_s) const;
+		///difference of Y and Y_ref
+		map_t delta_y(const map_t& Y_ref) const;
+		///difference of Y and Y_ref
+		map_t delta_y(const quantity_t& Y_ref) const;
+		///the polynomial fitted map (X(),Y_fitted())
+		map_t polyfit(fit_functions::polynom_t polynom_s) const;
+		///the polynomial fitted map (X(),Y_fitted())
+		map_t polyfit(unsigned int polynom_grade) const;
+		///the polynomial fitted map (X(),Y_fitted())
+		map_t polyfit(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
 		quantity_t polyfit(const quantity_t& x_vals, fit_functions::polynom_t polynom_s) const;
 		quantity_t polyfit(const quantity_t& x_vals, unsigned int polynom_grade) const;
 		quantity_t polyfit(const quantity_t& x_vals, const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
-		
+		///using radius (X^2 + Y^2)
+		quantity_t distance() const;
+		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
+		/// bins is the number of bins, all having same sizes
+		///using radius (X^2 + Y^2)
+		vector<int> bin_data(int bins_count) const;
+		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
+		/// returning the number of bins , where each idx of the result vector is containing the amount of data within the bin
+		///using radius (X^2 + Y^2)
+		vector<int> bin_data(const vector<double>& bins) const;
+		/// returns the number of filled data bins
+		int filled_data_bins(int bins_count) const;
+		int size() const;
+		/*********OPERATORS*********/
+		///appends obj to the map, if quantitys dimension and units allow it
+		map_t& operator<<(map_t obj);
+		///returns {X() , Y()+obj.Y()}, if quantitys dimension and units allow it
+		map_t operator+(map_t obj) const;
+		map_t operator+(quantity_t Y_o) const;
+		///returns {X() , Y()-obj.Y()}, if quantitys dimension and units allow it
+		map_t operator-(map_t obj) const;
+		map_t operator-(quantity_t Y_o) const;
+		///returns {X() , Y()*obj.Y()}, if quantitys dimension and units allow it
+		map_t operator*(map_t obj) const;
+		map_t operator*(quantity_t Y_o) const;
+		///returns {X() , Y()/obj.Y()}, if quantitys dimension and units allow it
+		map_t operator/(map_t obj) const;
+		map_t operator/(quantity_t Y_o) const;
 	}; // map_t
 	
 	
