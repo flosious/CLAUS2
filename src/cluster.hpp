@@ -84,4 +84,32 @@ public:
 	bool operator!=(const cluster_t& obj) const;
 };
 
+
+class matrix_clusters_c
+{
+private:
+public:
+	matrix_clusters_c(vector<cluster_t>& clusters, const vector<isotope_t> matrix_isotopes);
+	///only clusters with exactly ONE element can be a matrix_cluster, e.g. 30Si2 28Si; but NOT 28Si70Ge
+	matrix_clusters_c(vector<cluster_t>& clusters);
+	matrix_clusters_c();
+	///E.g. for 28Si 30Si 70Ge  matrix_clusters Crels={[28Si]/[30Si],[30Si]/[28Si],[28Si]/[70Ge],[70Ge]/[28Si],[30Si]/[70Ge],[70Ge]/[30Si]}
+// 	vector<Crel_t> Crels();
+	///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
+// 	vector<Crel_t> Irels();
+	///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
+	///and their corresponding Crels
+// 	vector<Crel_to_Irel_t> Crels_to_Irels();
+	cluster_t* cluster(const isotope_t iso);
+	vector<cluster_t*> clusters;
+	const vector<cluster_t> cluster_names();
+	const vector<isotope_t> isotopes() const;
+	quantity::intensity_t intensity_sum() const;
+	quantity::concentration_t concentration_sum() const;
+	string to_string(const string del = "") const;
+	bool is_cluster_in_matrix(const cluster_t& cluster);
+	
+	
+};
+
 #endif // CLUSTER_T_HPP

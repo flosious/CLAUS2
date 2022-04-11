@@ -306,29 +306,7 @@ public:
 		 * that means e.g. SiGe matrix there can never be a SiGe cluster, just Si clusters and Ge clusters seperate
 		 * SiGeB cluster or SiB cluster will be treatet as NON-matrix clusters, that means (implanted) isotopical cluster
 		 */
-		class matrix_clusters_c
-		{
-		private:
-		public:
-			///E.g. for 28Si 30Si 70Ge  matrix_clusters Crels={[28Si]/[30Si],[30Si]/[28Si],[28Si]/[70Ge],[70Ge]/[28Si],[30Si]/[70Ge],[70Ge]/[30Si]}
-// 			vector<Crel_t> Crels();
-			///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
-// 			vector<Crel_t> Irels();
-			///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
-			///and their corresponding Crels
-// 			vector<Crel_to_Irel_t> Crels_to_Irels();
-			cluster_t* cluster(const isotope_t iso);
-			vector<cluster_t*> clusters;
-			const vector<cluster_t> cluster_names();
-			const vector<isotope_t> isotopes() const;
-			quantity::intensity_t intensity_sum() const;
-			quantity::concentration_t concentration_sum() const;
-			string to_string(const string del = "") const;
-			bool is_cluster_in_matrix(const cluster_t& cluster);
-			///returns the cluster corresponding to matrix
-			matrix_clusters_c(vector<cluster_t>& clusters, const vector<isotope_t> matrix_isotopes);
-			matrix_clusters_c();
-		};
+		
 		
 		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;

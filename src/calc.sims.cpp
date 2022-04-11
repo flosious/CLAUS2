@@ -188,6 +188,12 @@ const quantity::intensity_t calc_t::sims_t::Irel_t::from_clusters_cut_mean_ratio
 	return zaehler->intensity.cut_mean(cut) / nenner->intensity.cut_mean(cut);
 }
 
+const quantity::intensity_t calc_t::sims_t::Irel_t::from_clusters_pbp() const
+{
+	if (!intensities_are_set_in_clusters())
+		return {};
+	return quantity::intensity_t(zaehler->intensity / nenner->intensity);
+}
 
 /*******************************************************/
 /*****    Crel_to_Irel_data_fit_routine_template   *****/

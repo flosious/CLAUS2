@@ -61,32 +61,31 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	cout << endl;
 	
 	
-	
 	for (auto& MG : dsims.mgroups())
 	{	
+		calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+// 		mat.RSFs();
 // 		auto MG_copy = MG;
 // 		MG_copy.calc().matrices.median_const_from_db();
 // 		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
 // 		auto proportional_fit_Crels_to_Irels = MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters());
-		calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
-// 		for (auto& M:MG.measurements())
-// 		{
-// 			M->cluster({"30Si"})->concentration = mat.relative_elemental_concentration({"30Si"},*M);
-// 			cout << mat.relative_elemental_concentration({"70Ge"},*M).to_string() << endl;
-// 			M->plot_now(0);
-// 		}
+// 		calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+		for (auto& M:MG.measurements_copy())
+		{
+			calc_t::sims_t::matrix_t::concentration_c Concentration(mat.RSFs(),M);
+			Concentration.measurement().plot_now(0);
+// 			for (auto& cluster : Concentration.measurement().clusters)
+// 			{
+// 				cout << cluster.concentration.to_string() << endl;
+// 			}
+		}
 // 		Crel_to_Irel_lin_fits
 		
 		
 // 		cout << "mat.Crel_to_Irel_lin_fits.size()=" << mat.RSFs().Crel_to_Irel_lin_fits().size() << endl;
 // 		for (auto& fit : mat.RSFs().Crel_to_Irel_lin_fits())
 // 			cout << "mat.Crel_to_Irel_lin_fit: " << fit.to_string() << endl;
-		
-		for (auto& RSF : mat.RSFs().unknown_RSFs())
-		{
-			cout << "RSF: " << RSF.to_string() << endl;
-		}
-		
+
 // 		for (const auto& RSF : mat.RSFs)
 // 		{
 // 			cout << RSF.polynom.to_string() << endl;

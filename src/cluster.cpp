@@ -282,3 +282,130 @@ cluster_t cluster_t::filter_impulse(int window_size, float factor)
 	
 	return c_out;
 }
+
+
+/********************************************/
+/* matrix_clusters_c */
+/********************************************/
+
+string matrix_clusters_c::to_string(const string del) const
+{
+	stringstream out;
+	unsigned int i=0;
+	unsigned int s = clusters.size();
+	for (auto& C : clusters)
+	{
+		out << C->to_string();
+		if (i < s-1)
+			out << "+";
+		i++;
+	}
+	return out.str();
+}
+
+/*"30Si" can be a reference cluster for elemental Si or isotopical purified Si*/
+/*"30Si 28Si" can be a reference cluster for elemental Si or isotopical purified Si*/
+/*"74Ge 28Si" can be a reference cluster for elemental Si+Ge or isotopical purified Si+Ge*/
+matrix_clusters_c::matrix_clusters_c(vector<cluster_t>& clusters_s, const vector<isotope_t> matrix_isotopes)
+{
+	if (matrix_isotopes.size()==0)
+		return;
+	if (clusters_s.size()==0)
+		return;
+	
+	bool insert=false;
+	for (auto& C : clusters_s) 
+	{
+		insert = true;
+		for (auto& I : C.isotopes)
+		{
+			
+			if (find(matrix_isotopes.begin(),matrix_isotopes.end(),I)==matrix_isotopes.end())
+			{
+				insert=false;
+				break;
+			}
+		}
+		// if all isotopes within the cluster are isotopes within the matrix, then this is a matrix-cluster
+		// that means: if at least 1 isotope within the cluster is NOT an isotope within the matrix, then this is no matrix-cluster
+		if (insert) clusters.push_back(&C);
+	}
+}
+
+bool matrix_clusters_c::is_cluster_in_matrix(const cluster_t& cluster)
+{
+	for (auto& C : clusters)
+		if (*C == cluster)
+			return true;
+	return false;
+}
+
+quantity::intensity_t matrix_clusters_c::intensity_sum() const
+{
+	quantity::intensity_t intensity;
+	for (auto& C : clusters)
+	{
+		if (!intensity.is_set())
+			intensity = C->intensity;
+		else
+			intensity += C->intensity;
+	}
+	return intensity;
+}
+
+quantity::concentration_t matrix_clusters_c::concentration_sum() const
+{
+	quantity::intensity_t concentration;
+	for (auto& C : clusters)
+	{
+		if (!C->concentration.is_set()) return {};
+		if (!concentration.is_set())
+			concentration = C->concentration;
+		else
+			concentration += C->concentration;
+	}
+	return concentration;
+}
+
+const vector<cluster_t> matrix_clusters_c::cluster_names()
+{
+	if (clusters.size()==0)
+		return {};
+	vector<cluster_t> c_names(clusters.size());
+	int i = 0;
+	for (auto& C : clusters)
+	{
+		c_names.at(i) = C->isotopes;
+		i++;
+	}
+	return c_names;
+}
+
+const std::vector< isotope_t > matrix_clusters_c::isotopes() const
+{
+	set<isotope_t> isotopes;
+	if (clusters.size()==0)
+		return {};
+	for (auto& C : clusters)
+	{
+		isotopes.insert(C->isotopes.begin(),C->isotopes.end());
+	}
+	return {isotopes.begin(),isotopes.end()};
+}
+
+cluster_t * matrix_clusters_c::cluster(const isotope_t iso)
+{
+	for (auto& C: clusters)
+	{
+		logger::debug(12,"matrix_clusters_c::cluster("+iso.to_string()+")","cluster=" + C->to_string());
+		for (auto& I : C->isotopes)
+		{
+			logger::debug(12,"matrix_clusters_c::cluster("+iso.to_string()+")","cluster->isotope="+I.to_string());
+			if (I==iso)
+				return C;
+		}
+	}
+	return nullptr;
+}
+
+
