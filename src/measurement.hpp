@@ -252,7 +252,7 @@ public:
 				quantity::sputter_time_t sputter_time_at_maximum_s;
 				quantity::intensity_t maximum_intensity_s;
 				///populates maximum_intensity_s + sputter_time_at_maximum_s ;seconds_for_fit_plot < 0 no plot;
-				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=-1);
+				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=0);
 			public:
 				implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor=0.1);
 				static unsigned int minimum_index_position(quantity::quantity_t Y);

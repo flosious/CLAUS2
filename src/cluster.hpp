@@ -78,7 +78,7 @@ public:
 
 	vector<isotope_t> isotopes;
 	static vector<isotope_t> parse_clustername(const string clustername);
-	
+	///checks isotopes and their substance_amount, e.g. 11B 28Si != 11B 28Si2
 	bool operator==(const cluster_t& obj) const;
 	bool operator<(const cluster_t& obj) const;
 	bool operator!=(const cluster_t& obj) const;

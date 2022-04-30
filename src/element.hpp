@@ -44,6 +44,7 @@ public:
 	element_t();
 	element_t(string symbol_s, double abs_amount=1, bool use_naturale_abundance=true);
 	element_t(vector<isotope_t> isotopes_s);
+	element_t(isotope_t isotope_s);
 
 	vector<isotope_t> isotopes;
 	quantity::substance_amount_t substance_amount;

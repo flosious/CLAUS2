@@ -46,6 +46,10 @@ element_t::element_t(string symbol_s, double abs_amount, bool use_natural_abunda
 	}
 }
 
+element_t::element_t(isotope_t isotope_s) : element_t(vector<isotope_t>{isotope_s})
+{
+}
+
 element_t::element_t(std::vector< isotope_t > isotopes_s) : 
 													isotopes(isotopes_s),
 													symbol(isotopes_s.at(0).symbol)

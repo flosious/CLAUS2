@@ -93,8 +93,13 @@ bool cluster_t::operator==(const cluster_t& obj) const
 {
 	if (isotopes.size()!=obj.isotopes.size()) return false;
 	for (auto& iso : isotopes)
-		if (find(obj.isotopes.begin(),obj.isotopes.end(),iso)==obj.isotopes.end())
+	{
+		auto found = find(obj.isotopes.begin(),obj.isotopes.end(),iso);
+		if (found ==obj.isotopes.end())
 			return false;
+		if (found->substance_amount != iso.substance_amount)
+			return false;
+	}
 	return true;
 }
 
@@ -183,7 +188,6 @@ string cluster_t::name() const
 {
 	return to_string("");
 }
-
 
 isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_isotopes) const
 {

@@ -52,7 +52,7 @@ public:
 	string symbol;
 	const string to_string(const string del=" ") const;
 	const string to_string_short() const;
-	
+	bool is_set() const;
 	///NOT checking abundance or substance_amount
 	const bool operator==(const isotope_t& obj) const;
 	const bool operator!=(const isotope_t& obj) const;

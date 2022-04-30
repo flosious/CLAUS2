@@ -36,10 +36,18 @@ pse_t::pse_isotope_t::pse_isotope_t(const double abundance_s,
 
 const pse_t::pse_isotope_t * pse_t::isotope(string symbol, int nucleons)
 {
-	if (isotopes(symbol)==nullptr) return nullptr;
-	for (int i=0;i<isotopes(symbol)->size();i++)
-		if (isotopes(symbol)->at(i).nucleons==nucleons)
-			return &isotopes()->at(i);
+	auto const isos = isotopes(symbol);
+	if (isos==nullptr) return nullptr;
+// 	cout << endl << "PSE " << isotopes(symbol)->size() << endl;
+	for (int i=0;i<isos->size();i++)
+	{
+// 		cout << isotopes(symbol)->at(i).nucleons << endl;
+		if (isos->at(i).nucleons==nucleons)
+		{
+// 			cout << "PSE IN1" << endl;
+			return &isos->at(i);
+		}
+	}
 	return nullptr;
 }
 

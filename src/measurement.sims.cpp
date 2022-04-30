@@ -244,9 +244,9 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 		if (C.concentration.is_set())
 		{
 			if (C.concentration.unit().base_units_exponents.relative)
-				plot.Y3.add_curve(X,C.concentration,C.to_string());
-			else /*if ((C.concentration.unit() == units::derived::atoms_per_ccm))*/
-				plot.Y2.add_curve(X,C.concentration,C.to_string());
+				plot.Y3.add_curve(X,C.concentration.change_unit(units::derived::atom_percent),C.to_string());
+			else
+				plot.Y2.add_curve(X,C.concentration.change_unit(units::derived::atoms_per_ccm),C.to_string());
 		}
 // 		else if (C.RSF.is_set() && C.RSF.data.size()>1) // vector
 // 			plot.Y2.add_curve(X,C.RSF,C.to_string());

@@ -21,10 +21,12 @@
 calc_t::sims_t::matrix_t::matrix_t(const vector<isotope_t>& matrix_isotopes, 
 								   const vector<measurements_::sims_t>& measurements, 
 								   const vector<RSF_t>& RSFs) : 
+								   
 								   matrix_isotopes_p(matrix_isotopes),
 								   measurements_p(measurements),
 								   matrix_clusters_p(matrix_clusters_from_matrix_isotopes()),
 								   RSFs_p(matrix_clusters(),isotopical_Crel_to_median_Irel_linear_fitted(),RSFs)
+// 								   RSFs_p(matrix_clusters(),elemental_Crel_to_median_Irel_linear_fitted(),RSFs)
 {
 // 	for (auto& M:measurements)
 // 		for (auto& i : M.sample->matrix().isotopes())
@@ -210,23 +212,25 @@ const calc_t::sims_t::matrix_t::clusters_t clusters_from_RSFs(const vector<calc_
 
 calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler, 
 									   const cluster_t nenner,
-									   const quantity::quantity_t& quantity_s) :
-									   RSF_t(zaehler,nenner,quantity_s.data(),quantity_s.unit(),quantity_s.dimension())
+									   const quantity::quantity_t& quantity_s, const quantity::abundance_t& abundance_ratio) :
+									   RSF_t(zaehler,nenner,quantity_s.data(),abundance_ratio,quantity_s.unit(),quantity_s.dimension())
 {
 }
 
 calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler, 
 									   const cluster_t nenner, 
-									   double data_s) : RSF_t(zaehler,nenner,vector<double>{data_s})
+									   double data_s, 
+									   const quantity::abundance_t& abundance_ratio) : RSF_t(zaehler,nenner,vector<double>{data_s}, abundance_ratio)
 {
 }
 
 calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler, 
 									   const cluster_t nenner, 
-									   vector<double> data_s, 
+									   vector<double> data_s,
+									   const quantity::abundance_t& abundance_ratio,
 									   unit_t unit_s, 
 									   quantity::quantity_t::dimension_t dim_s) :
-									   cluster_relations_copies_t(zaehler,nenner),
+									   cluster_relations_copies_t(zaehler,nenner,abundance_ratio),
 									   quantity::quantity_t("mRSF",data_s,unit_s,dim_s)
 {
 	if (!is_relative())
@@ -295,7 +299,7 @@ bool calc_t::sims_t::matrix_t::RSF_t::operator>(const calc_t::sims_t::matrix_t::
 /*********     clusters_t    ************/
 /****************************************/
 
-calc_t::sims_t::matrix_t::clusters_t::clusters_t::clusters_t(const set<cluster_t>& matrix_clusters) 
+calc_t::sims_t::matrix_t::clusters_t::clusters_t(const set<cluster_t>& matrix_clusters) 
 {
 	for (auto& C : matrix_clusters)
 	{
@@ -303,27 +307,68 @@ calc_t::sims_t::matrix_t::clusters_t::clusters_t::clusters_t(const set<cluster_t
 	}
 }
 
-calc_t::sims_t::matrix_t::clusters_t::clusters_t::clusters_t(const vector<cluster_t>& matrix_clusters) : 
+calc_t::sims_t::matrix_t::clusters_t::clusters_t(const vector<cluster_t>& matrix_clusters) : 
 								clusters_t(set<cluster_t>{matrix_clusters.begin(),matrix_clusters.end()})
 {
 }
 
-const set<cluster_t>& calc_t::sims_t::matrix_t::clusters_t::clusters_t::clusters() const
+const set<cluster_t>& calc_t::sims_t::matrix_t::clusters_t::clusters() const
 {
 	return clusters_p;
 }
 
-const cluster_t calc_t::sims_t::matrix_t::clusters_t::cluster(const isotope_t& iso) const
+const vector<isotope_t> calc_t::sims_t::matrix_t::clusters_t::isotopes() const
 {
-// 	cluster_t iso_c(iso);
-// 	for (const auto& c : clusters_p)
-// 	{
-// 		if (c == iso_c)
-// 			return c;
-// 	}
+	vector<isotope_t> isos;
+	isos.reserve(clusters().size());
+	for (const auto& c : clusters())
+	{
+		isos.push_back(c.isotopes.front());
+	}
+	return isos;
 }
 
-bool calc_t::sims_t::matrix_t::clusters_t::clusters_t::contains(const cluster_t& cluster) const
+const cluster_t calc_t::sims_t::matrix_t::clusters_t::cluster(const isotope_t& iso) const
+{
+	const auto cs = clusters(iso);
+	if (cs.size()==1)
+		return cs.front();
+	logger::error("calc_t::sims_t::matrix_t::clusters_t::cluster()","found multiple clusters for 1 corresponding isotope","returning empty");
+	return {};
+}
+
+// const cluster_t calc_t::sims_t::matrix_t::clusters_t::cluster(const element_t& ele) const
+// {
+// 	const auto cs = clusters(ele);
+// 	if (cs.size()==1)
+// 		return cs.front();
+// 	logger::info(4,"calc_t::sims_t::matrix_t::clusters_t::cluster()","found multiple clusters for 1 corresponding element","returning empty");
+// 	return {};
+// }
+
+const vector<cluster_t> calc_t::sims_t::matrix_t::clusters_t::clusters(const element_t& ele) const
+{
+	set<cluster_t> clusters;
+	for (const auto& c : clusters_p)
+	{
+		if (c.isotopes.front().symbol == ele.symbol)
+			clusters.insert(c);
+	}
+	return {clusters.begin(),clusters.end()};
+}
+
+const vector<cluster_t> calc_t::sims_t::matrix_t::clusters_t::clusters(const isotope_t& iso) const
+{
+	set<cluster_t> clusters;
+	for (const auto& c : clusters_p)
+	{
+		if (c.isotopes.front() == iso)
+			clusters.insert(c);
+	}
+	return {clusters.begin(),clusters.end()};
+}
+
+bool calc_t::sims_t::matrix_t::clusters_t::contains(const cluster_t& cluster) const
 {
 	if (clusters_p.find(cluster)!=clusters_p.end())
 		return true;
@@ -370,6 +415,15 @@ bool calc_t::sims_t::matrix_t::clusters_t::has_mixed_elements_in_clusters() cons
 	return false;
 }
 
+vector<element_t> calc_t::sims_t::matrix_t::clusters_t::elements() const
+{
+	set<element_t> eles;
+	sample_t::matrix_t s_mat(isotopes());
+	for (const auto iso : isotopes())
+		eles.insert(iso);
+	return s_mat.elements;
+}
+
 /****************************************/
 /***********     RSFs_t    **************/
 /****************************************/
@@ -377,14 +431,14 @@ bool calc_t::sims_t::matrix_t::clusters_t::has_mixed_elements_in_clusters() cons
 calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters, 
 										 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
 										 const vector<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
-										 matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs.begin(),RSFs.end())
+										 matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs)
 {
 }
 
 calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters, 
 										 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
 										 const set<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
-										 matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs)
+										 matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs.begin(),RSFs.end())
 {
 }
 /*getter functions for logical consts*/
@@ -392,7 +446,7 @@ const calc_t::sims_t::matrix_t::clusters_t& calc_t::sims_t::matrix_t::RSFs_t::ma
 {
 	return matrix_clusters_p;
 }
-const set<calc_t::sims_t::matrix_t::RSF_t>& calc_t::sims_t::matrix_t::RSFs_t::RSFs_manually_set() const
+const vector<calc_t::sims_t::matrix_t::RSF_t>& calc_t::sims_t::matrix_t::RSFs_t::RSFs_manually_set() const
 {
 	return RSFs_manually_set_p;
 }
@@ -406,7 +460,7 @@ calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSFs_t::RSF(const Crel
 {
 	if (Crel_to_Irel_lin_fit.polynom().successfully_fitted())
 	{
-		RSF_t T(Crel_to_Irel_lin_fit.zaehler(),Crel_to_Irel_lin_fit.nenner(),Crel_to_Irel_lin_fit.polynom().fit_parameters().at(1));
+		RSF_t T(Crel_to_Irel_lin_fit.zaehler(),Crel_to_Irel_lin_fit.nenner(),Crel_to_Irel_lin_fit.polynom().fit_parameters().at(1),Crel_to_Irel_lin_fit.abundance_ratio);
 		return T;
 	}
 	return RSF_t{Crel_to_Irel_lin_fit.zaehler(),Crel_to_Irel_lin_fit.nenner()};
@@ -417,9 +471,9 @@ unsigned int calc_t::sims_t::matrix_t::RSFs_t::RSFs_count_from_clusters() const
 	return (matrix_clusters_p.clusters().size()*matrix_clusters_p.clusters().size()-matrix_clusters_p.clusters().size());
 }
 
-const set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs_from_fits() const
+const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs_from_fits() const
 {
-	set<RSF_t> RSFs_set;
+	vector<RSF_t> RSFs_set;
 	for (auto& F : Crel_to_Irel_lin_fits())
 	{
 		const auto RSF_F = RSF(F);
@@ -428,7 +482,7 @@ const set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSF
 			continue;
 		}
 		
-		RSFs_set.insert(RSF_F);
+		RSFs_set.push_back(RSF_F);
 	}
 	return RSFs_set;
 }
@@ -456,7 +510,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 {
 	if (all_available_RSFs().size() == RSFs_count_from_clusters())
 		return *this;
-	set<RSF_t> RSFs_copy = RSFs_manually_set();
+	vector<RSF_t> RSFs_copy = RSFs_manually_set();
 	for (auto& Z : matrix_clusters().clusters())
 	{
 		for (auto& N : matrix_clusters().clusters())
@@ -467,7 +521,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 			{
 // 				RSF_t RSF_adder(N,Z,RSF(Z,N).invert());
 // 				RSFs_copy.insert(RSF_adder);
-				RSFs_copy.insert(RSF_from_inverse(Z,N));
+				RSFs_copy.push_back(RSF_from_inverse(Z,N));
 			}
 		}
 	}
@@ -478,8 +532,10 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_Crel_t
 {
 	vector<Crel_to_Irel_data_polynomial_fit_t> residual_fits;
 	for (auto& F : Crel_to_Irel_lin_fits())
-	if (RSFs_manually_set().find(RSF(F))==RSFs_manually_set().end())
+	{
+	if (tools::vec::find_in_vec(RSF(F),RSFs_manually_set())==nullptr)
 		residual_fits.push_back(F);
+	}
 	return {matrix_clusters(),residual_fits,RSFs_manually_set()};
 }
 
@@ -521,16 +577,16 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 	return add_missing_RSFs_from_inverse().add_missing_RSFs_from_virtual_cluster();
 }
 
-const set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs(const cluster_t& nenner) const
+const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs(const cluster_t& nenner) const
 {
-	set<calc_t::sims_t::matrix_t::RSF_t> rsfs;
+	vector<calc_t::sims_t::matrix_t::RSF_t> rsfs;
 	for (auto& mc : matrix_clusters().clusters())
 	{
 		if (mc == nenner)
 			continue;
 		const auto rsf = RSF(mc,nenner);
 // 		if (rsf.is_set())
-		rsfs.insert(rsf);
+		rsfs.push_back(rsf);
 	}
 	return rsfs;
 }
@@ -553,7 +609,7 @@ calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSFs_t::RSF(const clus
 			continue;
 		if (Crel_to_Irel.nenner()!= nenner)
 			continue;
-		RSF_t rsf(zaehler,nenner,Crel_to_Irel.polynom().fit_parameters().at(1));
+		RSF_t rsf(zaehler,nenner,Crel_to_Irel.polynom().fit_parameters().at(1),Crel_to_Irel.abundance_ratio);
 		return rsf;
 	}
 	return {zaehler,nenner};
@@ -585,7 +641,8 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs(c
 	auto new_RSFs = RSFs_manually_set();
 	for (auto& rsf : rsfs_s)
 	{
-		new_RSFs.erase(rsf);
+		remove(new_RSFs.begin(),new_RSFs.end(),rsf);
+// 		new_RSFs.erase(rsf);
 	}
 	vector<Crel_to_Irel_data_polynomial_fit_t> new_Crel_to_Irels_lin_fits;
 	new_Crel_to_Irels_lin_fits.reserve(Crel_to_Irel_lin_fits().size());
@@ -649,9 +706,13 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs_a
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replace_RSF(const RSF_t& RSF) const
 {
-	set<RSF_t> new_RSFs = RSFs_manually_set();
-	new_RSFs.erase(RSF);
-	new_RSFs.insert(RSF);
+	vector<RSF_t> new_RSFs = RSFs_manually_set();
+	if (tools::find_in_V(RSF,new_RSFs) == nullptr)
+		new_RSFs.push_back(RSF);
+	else
+		std::replace(new_RSFs.begin(),new_RSFs.end(),RSF,RSF);
+// 	new_RSFs.insert(RSF);
+// 	new_RSFs.erase(RSF);
 	return RSFs_t(matrix_clusters(),Crel_to_Irel_lin_fits(),new_RSFs);
 }
 
@@ -660,8 +721,10 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replac
 	auto new_RSFs = RSFs_manually_set();
 	for (auto& RSF : RSFs_s)
 	{
-		new_RSFs.erase(RSF);
-		new_RSFs.insert(RSF);
+		if (tools::find_in_V(RSF,new_RSFs) == nullptr)
+			new_RSFs.push_back(RSF);
+		else
+			std::replace(new_RSFs.begin(),new_RSFs.end(),RSF,RSF);
 	}
 	return RSFs_t(matrix_clusters(),Crel_to_Irel_lin_fits(),new_RSFs);
 }
@@ -689,7 +752,41 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::symmetrical_R
 	return {matrix_clusters(),Crel_to_Irel_lin_fits(),new_RSFs};
 }
 
-const set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_available_RSFs() const
+calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances() const
+{
+	RSFs_t new_RSFs = *this;
+	
+	for (auto& rsf : new_RSFs.RSFs_manually_set_p)
+	{
+		if (rsf.abundance_ratio.is_set()) // already set
+			continue;
+		if (PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)==nullptr) continue;
+		if (PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)==nullptr) continue;
+		quantity::abundance_t abu_Z ({PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)->abundance});
+		quantity::abundance_t abu_N ({PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)->abundance});
+		rsf.abundance_ratio = abu_Z / abu_N;
+	}
+	
+	for (auto& rsf : new_RSFs.Crel_to_Irel_lin_fits_p)
+	{
+		
+		if (rsf.abundance_ratio.is_set()) // already set
+			continue;
+		if (PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)==nullptr) continue;
+		if (PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)==nullptr) continue;
+		quantity::abundance_t abu_Z ({PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)->abundance});
+		quantity::abundance_t abu_N ({PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)->abundance});
+		rsf.abundance_ratio = abu_Z / abu_N;
+// 		cout << endl << rsf.to_string()<< "; rsf.abundance_relation: " << rsf.abundance_relation.to_string() << endl;
+	}
+// 	for (auto& rsf : new_RSFs.RSFs_from_fits())
+// 	{
+// 		cout << endl << rsf.to_string()<< "; rsf.abundance_relation: " << rsf.abundance_ratio.to_string() << endl;
+// 	}
+	return new_RSFs;
+}
+
+const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_available_RSFs() const
 {
 	auto fitted_RSFs = RSFs_from_fits();
 	auto manual_RSFs = RSFs_manually_set();
@@ -699,9 +796,9 @@ const set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all
 		all_RSFs.insert(fitted_RSFs.begin(),fitted_RSFs.end());
 	if (manual_RSFs.size()>0)
 		all_RSFs.insert(manual_RSFs.begin(),manual_RSFs.end());
-	return all_RSFs;
+	return {all_RSFs.begin(),all_RSFs.end()};
 } 
-const set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_possible_RSFs() const
+const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_possible_RSFs() const
 {
 	set<RSF_t> all_possible_RFS;
 	for (auto& Z : matrix_clusters().clusters())
@@ -713,17 +810,17 @@ const set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all
 			all_possible_RFS.insert({Z,N,{}});
 		}
 	}
-	return all_possible_RFS;
+	return {all_possible_RFS.begin(),all_possible_RFS.end()};
 }
-const set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::unknown_RSFs() const
+const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::unknown_RSFs() const
 {
-	set<RSF_t> all_possible_RFS = all_possible_RSFs();
-	
+	vector<RSF_t> all_possible_RFS = all_possible_RSFs();
 	//now substract the known
 	for (auto& rsf : RSFs_manually_set())
-		all_possible_RFS.erase(rsf);
+		all_possible_RFS.erase(find(all_possible_RFS.begin(),all_possible_RFS.end(),rsf));
 	for (auto& Crel_to_Irel : Crel_to_Irel_lin_fits())
-		all_possible_RFS.erase(RSF(Crel_to_Irel));
+		all_possible_RFS.erase(find(all_possible_RFS.begin(),all_possible_RFS.end(),RSF(Crel_to_Irel)));
+// 		all_possible_RFS.erase(RSF(Crel_to_Irel));
 	
 	return all_possible_RFS;
 }
@@ -755,7 +852,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 calc_t::sims_t::matrix_t::concentration_c::concentration_c(const RSFs_t& RSFs, const measurements_::sims_t& measurement) : 
 			RSFs_p(RSFs), measurement_p(measurement),matrix_clusters(RSFs.matrix_clusters())
 {
-	clear_concentrations_of_mcs();
+// 	clear_concentrations_of_mcs();
 }
 
 // const calc_t::sims_t::matrix_t::clusters_t calc_t::sims_t::matrix_t::concentration_c::matrix_clusters() const
@@ -763,67 +860,168 @@ calc_t::sims_t::matrix_t::concentration_c::concentration_c(const RSFs_t& RSFs, c
 // 	return RSFs().matrix_clusters;
 // }
 
-vector<cluster_t> calc_t::sims_t::matrix_t::concentration_c::calcable_concentrations()
+calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()
 {
-	vector<cluster_t> results;
+	quantity::concentration_t residual_concentration({100},units::derived::atom_percent,quantity::dimensions::SI::relative);
+	set<cluster_t> clusters_with_unknown_concentrations;
+	for (const auto& mc : matrix_clusters.clusters())
+	{
+		auto C = measurement_p.cluster(mc);
+		if (C==nullptr)
+		{
+			logger::error("calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","measurement_p.cluster(mc)==nullptr",mc.to_string(),"returning this");
+			return *this;
+		}
+		if (!C->concentration.is_set())
+		{
+			clusters_with_unknown_concentrations.insert(C->isotopes);
+			continue;
+		}
+		auto substract = (C->concentration.change_unit(units::derived::atom_percent));
+		if (!substract.is_set())
+		{
+			logger::error("calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","!substract.is_set()",C->to_string(),"returning this");
+			return *this;
+		}
+		if (use_elemental())
+		{
+			const auto iso = C->corresponding_isotope(matrix_clusters.isotopes());
+			substract = substract / PSE.isotope(iso.symbol,iso.nucleons)->abundance;
+		}
+		residual_concentration = residual_concentration - substract;
+	}
+	logger::info(3,"calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","clusters_with_unknown_concentrations: " + to_string(clusters_with_unknown_concentrations.size()),"residual_concentration: " + residual_concentration.to_string());
+	//ATTENTION does not work yet, ignores abundances
+	if (clusters_with_unknown_concentrations.size()==1)
+	{
+		if (use_elemental())
+		{
+			const auto iso = clusters_with_unknown_concentrations.begin()->corresponding_isotope(matrix_clusters.isotopes());
+			residual_concentration = residual_concentration * PSE.isotope(iso.symbol,iso.nucleons)->abundance;
+		}
+		measurement_p.cluster(*clusters_with_unknown_concentrations.begin())->concentration = residual_concentration;
+	}
+	return *this;
+}
+
+calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentration_c::concentrations_by_RSFs()
+{
+// 	vector<cluster_t> results;
+// 	for (auto& mc : matrix_clusters.clusters())
+// 	{
+// 		if (measurement().cluster(mc) != nullptr) // copy the cluster from the measurement, if (still available)
+// 			results.push_back(*measurement().cluster(mc));
+// 	}
 	for (auto& mc : matrix_clusters.clusters())
 	{
-		if (measurement().cluster(mc) != nullptr) // copy the cluster from the measurement, if (still available)
-			results.push_back(*measurement().cluster(mc));
+		const auto C = measurement_p.cluster(mc);
+		if (C==nullptr) continue;
+		if (C->concentration.is_set()) continue;
+		C->concentration = cluster(mc);
 	}
-	return results;
+	return *this;
+}
+
+bool calc_t::sims_t::matrix_t::concentration_c::use_elemental() const
+{
+	///IF there is exactly 1 cluster per element, use elemental; ELSE use isotopical
+	for (auto ele : matrix_clusters.elements())
+	{
+		const auto s = matrix_clusters.clusters(ele).size();
+		if (s!=1)
+		{
+			logger::info(3,"calc_t::sims_t::matrix_t::concentration_c::use_elemental()","matrix_clusters.clusters("+ele.to_string()+")="+to_string(s)+"!=1","using isotopical");
+			return false;
+		}
+	}
+	return true;
 }
 
 quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::cluster(const cluster_t& cluster)
 {
-	quantity::concentration_t cluster_conc({1},units::SI::one,quantity::dimensions::SI::relative);
-	if (!matrix_clusters.contains(cluster))
+	/// decide here, whether to take isotropical or elemental calculation
+	/// for isotropical there have to be all isotopes (resp. their corresponding clusters) for all elements measured
+	/// OR the abundances of all measured isotopes are known
+	/// ... but there could be samples, where it is not necessary to monitor all isotopes of all elements, because they are not
+	/// in the sample ... hmm: what to do? future florian may solve this minor logical issue
+	const isotope_t cor_iso = cluster.corresponding_isotope(matrix_clusters.isotopes());
+	if (!cor_iso.is_set())
 	{
-		logger::error("calc_t::sims_t::matrix_t::concentration_c::concentration()","matrix_clusters().contains("+cluster.to_string()+")","returning empty");
+		logger::error("calc_t::sims_t::matrix_t::concentration_c::cluster","corresponding isotope not found",cluster.to_string(),"returning empty");
 		return {};
 	}
-	const auto rsfs = RSFs().RSFs(cluster);
+	if (use_elemental())
+	{
+		return element(cor_iso)*PSE.isotope(cor_iso.symbol,cor_iso.nucleons)->abundance;
+	}
+	return isotope(cor_iso);
+}
+
+quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::isotope(const isotope_t& isotope)
+{
+	quantity::concentration_t cluster_conc({1},units::SI::one,quantity::dimensions::SI::relative);
+	const auto cluster = matrix_clusters.cluster(isotope);
+	if (!cluster.is_set())
+		return {};
+	const auto rsfs = RSFs().RSFs(isotope);
 	
 	for (const auto& rsf : rsfs)
 	{
 		if (!rsf.is_set())
 		{
-			logger::error("calc_t::sims_t::matrix_t::concentration_c::concentration()","!rsf.is_set()",rsf.to_string(), "returning empty");
+			logger::error("calc_t::sims_t::matrix_t::concentration_c::isotope()","!rsf.is_set()",rsf.to_string(), "returning empty");
 			return {};
 		}
 		calc_t::sims_t::Irel_t irel(measurement_p,rsf.zaehler(),rsf.nenner());
 		if (!irel.from_clusters_pbp().is_set())
 		{
-			logger::error("calc_t::sims_t::matrix_t::concentration_c::concentration()","!rsf.is_set()",rsf.to_string(), "returning empty");
+			logger::error("calc_t::sims_t::matrix_t::concentration_c::isotope()","!rsf.is_set()",rsf.to_string(), "returning empty");
 			return {};
 		}
-		quantity::concentration_t relativ_concentration(rsf*irel.from_clusters_pbp());
-// 		cout << "rsf: " << rsf.to_string() << endl;
-// 		cout << "relativ_concentration: "  << relativ_concentration.to_string() << endl;
+		quantity::concentration_t relativ_concentration((rsf)*irel.from_clusters_pbp());
 		cluster_conc += relativ_concentration;
 	}
 	quantity::concentration_t resulting_cluster_conc(cluster_conc.invert().change_unit(units::derived::atom_percent));
-// 	cout << "cluster_conc: "  << cluster_conc.to_string() << endl;
-// 	cout << "resulting_cluster_conc: "  << resulting_cluster_conc.to_string() << endl;
 	return resulting_cluster_conc;
 }
 
-quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::isotope(const isotope_t& isotope)
+quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::element(const element_t& element)
 {
+	const auto clusters = matrix_clusters.clusters(element);
+	if (clusters.size()!=1)
+	{
+		logger::error("calc_t::sims_t::matrix_t::concentration_c::element()","clusters.size()= " + to_string(clusters.size()) + " !=1", element.to_string(), "returning empty");
+		return {};
+	}
 	
+	quantity::concentration_t cluster_conc({1},units::SI::one,quantity::dimensions::SI::relative);
+	const auto rsfs = RSFs().RSFs(clusters.front());
+	for (const auto& rsf : rsfs)
+	{
+		if (!rsf.is_set())
+		{
+			logger::debug(7,"calc_t::sims_t::matrix_t::concentration_c::element()","!rsf.is_set()",rsf.to_string(), "returning empty");
+			return {};
+		}
+		calc_t::sims_t::Irel_t irel(measurement_p,rsf.zaehler(),rsf.nenner());
+		if (!irel.from_clusters_pbp().is_set())
+		{
+			logger::error("calc_t::sims_t::matrix_t::concentration_c::element()","!rsf.is_set()",rsf.to_string(), "returning empty");
+			return {};
+		}
+		quantity::concentration_t relativ_concentration((rsf/rsf.abundance_ratio)*irel.from_clusters_pbp());
+		cluster_conc += relativ_concentration;
+	}
+	quantity::concentration_t resulting_cluster_conc(cluster_conc.invert().change_unit(units::derived::atom_percent));
+	return resulting_cluster_conc;
 }
 
+/*
+ * 	calculates the isotopical concentration of each cluster resp. corresponding isotope 
+ *  OR, if not sufficient clusters resp. isotopes were measured, calculating elemental concentration, using natural abundance
+ */
 measurements_::sims_t calc_t::sims_t::matrix_t::concentration_c::measurement()
 {
-	cluster_t test1 ("30Si2");
-	cout << "test1 " << test1.to_string() << endl;
-	for (auto& mc : matrix_clusters.clusters())
-	{
-		if (measurement_p.cluster(mc)==nullptr) continue;
-		if (measurement_p.cluster(mc)->concentration.is_set()) continue;
-		measurement_p.cluster(mc)->concentration = cluster(mc); 
-// 		cout << endl << "cluster(mc): " << cluster(mc).to_string() << endl;
-	}
 	return measurement_p;
 }
  
@@ -832,13 +1030,15 @@ const calc_t::sims_t::matrix_t::RSFs_t& calc_t::sims_t::matrix_t::concentration_
 	return RSFs_p;
 }
 
-void calc_t::sims_t::matrix_t::concentration_c::clear_concentrations_of_mcs()
+calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentration_c::clear_concentrations_of_mcs()
 {
 	for (auto& mc : matrix_clusters.clusters())
 	{
-		if (measurement_p.cluster(mc)==nullptr)
+		const auto C = measurement_p.cluster(mc);
+		if (C==nullptr)
 			continue;
-		measurement_p.cluster(mc)->concentration.clear();
+		C->concentration.clear();
 	}
+	return *this;
 }
  

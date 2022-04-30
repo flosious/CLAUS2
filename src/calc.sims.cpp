@@ -25,7 +25,7 @@ calc_t::sims_t::sims_t(const vector<measurements_::sims_t>& measurements) : meas
 /********    cluster_relations_copies_t     ************/
 /*******************************************************/
 
-calc_t::sims_t::cluster_relations_copies_t::cluster_relations_copies_t(const cluster_t& Z, const cluster_t& N) : zaehler_p(Z), nenner_p(N)
+calc_t::sims_t::cluster_relations_copies_t::cluster_relations_copies_t(const cluster_t& Z, const cluster_t& N, const quantity::abundance_t& abundance_ratio) : zaehler_p(Z), nenner_p(N), abundance_ratio(abundance_ratio)
 {
 }
 

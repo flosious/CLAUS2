@@ -263,7 +263,7 @@ fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank,
 }
 
 fit_functions::polynom_t::polynom_t(int degree, const map<double, double>& data_XY) : 
-									polynom_t(vector<unsigned int>(1,degree+1),vector<double>(1,degree+1),data_XY)
+									polynom_t(vector<unsigned int>(degree+1,1),vector<double>(degree+1,1),data_XY)
 {
 }
 

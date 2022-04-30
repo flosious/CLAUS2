@@ -124,21 +124,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SR_c::from_implant_max(bool
 {
 	for (auto& M : measurements)
 	{
-// 		cout<< "B\t" << M->crater.sputter_time.to_string() << endl;
 		if (!overwrite && M->crater.SR.is_set()) continue;
-		
-// 		for (auto& m : MG.saved_calc_results)
-// 		{
-// 			if (m.M != *M) continue;
-// 			m.SR.from_implant_max();
-// 			cout << M->crater.SR.to_string() << endl;
-// 		}
-		
-// 		if (save_calc_esults)
-// 		{
-// 			MG.saved_calc_results.at(M).SR.from_implant_max();
-// 		}
-// 		else
 		auto C = M->calc();
 		C.SR.from_implant_max();
 	}

@@ -77,6 +77,16 @@ const quantity::mass_t isotope_t::mass() const
 // 	return PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
 // }
 
+bool isotope_t::is_set() const
+{
+	if (symbol=="")
+		return false;
+	if (nucleons<1)
+		return false;
+	return true;
+}
+
+
 const string isotope_t::to_string_short() const
 {
 	stringstream out;

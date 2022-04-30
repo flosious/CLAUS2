@@ -240,6 +240,7 @@ quantity::quantity_t quantity::quantity_t::polyfit(unsigned int polynom_grade) c
 	ss << "poly" << polynom_grade << "_fit";
 // 	operations_history_s.push_back(ss.str());
 // 	data_s = polynom(polynom_grade).y_data(data_X_1D());
+// 	cout << endl << "polynom: " << polynom(polynom_grade).to_string() << endl;
 	return {*this,polynom(polynom_grade).y_data(data_X_1D()),ss.str()};
 }
 
@@ -382,7 +383,7 @@ quantity::quantity_t quantity::quantity_t::x_at_max(const quantity_t& X) const
 	double x_at_max_p = X.data().at(idx);
 // 	data_s = {x_at_max_p};
 // 	operations_history_s.push_back(ss.str());
-	return {*this,x_at_max_p,ss.str()};
+	return {X,x_at_max_p,ss.str()};
 }
 
 quantity::quantity_t quantity::quantity_t::get_data_within_limits(double lower_limit, double upper_limit) const
@@ -998,9 +999,9 @@ quantity::quantity_t quantity::quantity_t::remove_data_from_begin(unsigned int s
 {
 // 	cout << "stop=" << stop << endl;
 	if (stop==0)
-		return {};
-	if (stop==data().size())
 		return *this;
+	if (stop==data().size())
+		return {};
 	
 	return remove_data_by_index(0,stop);
 }
@@ -1060,16 +1061,23 @@ quantity::quantity_t quantity::quantity_t::remove_data_by_index(unsigned int sta
 		stop=data().size();
 	}
 
-	vector<double> new_data(stop-start);
+	vector<double> new_data(data().size() - (stop - start) );
 	int new_data_c = 0;
+	
 	for (int i=0;i<start;i++)
 	{
-		new_data.at(new_data_c);
+		new_data.at(new_data_c) = data().at(i);
 		new_data_c++;
 	}
+// 	cout << endl << "start= " << start << endl;
+// 	cout << "stop= " << stop << endl;
+// 	cout << "data.size()= " << data().size() << endl;
+// 	cout << "new_data.size()= " << new_data.size() << endl;
+// 	cout << "new_data_c= " << new_data_c << endl;
+	
 	for (int i=stop;i<data().size();i++)
 	{
-		new_data.at(new_data_c);
+		new_data.at(new_data_c) = data().at(i);
 		new_data_c++;
 	}
 	stringstream ss;

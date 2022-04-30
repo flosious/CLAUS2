@@ -62,45 +62,32 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	
 	for (auto& MG : dsims.mgroups())
-	{	
-		calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
-// 		mat.RSFs();
-// 		auto MG_copy = MG;
-// 		MG_copy.calc().matrices.median_const_from_db();
-// 		MG.calc().matrices.median_const_from_db().matrices.interpolate({0,1},true);
-// 		auto proportional_fit_Crels_to_Irels = MG.calc().proportional_fit_Crels_to_Irels(MG.matrix_clusters());
-// 		calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
-		for (auto& M:MG.measurements_copy())
+	{
+		if (MG.matrix_isotopes().size()>2)
 		{
-			calc_t::sims_t::matrix_t::concentration_c Concentration(mat.RSFs(),M);
-			Concentration.measurement().plot_now(0);
-// 			for (auto& cluster : Concentration.measurement().clusters)
-// 			{
-// 				cout << cluster.concentration.to_string() << endl;
-// 			}
+			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+			const auto RSFs = mat.RSFs().add_natural_abundances();
+// 			for (auto& M:MG.measurements_copy())
+			for (auto& M:MG.measurements_p)
+			{
+				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,M);
+				const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
+				///copy the results - this is really ugly
+				for (auto C : M_with_Cs.clusters)
+				{
+					if (!C.concentration.is_set()) continue;
+					M.cluster(C)->concentration = C.concentration;
+				}
+			}
 		}
-// 		Crel_to_Irel_lin_fits
-		
-		
-// 		cout << "mat.Crel_to_Irel_lin_fits.size()=" << mat.RSFs().Crel_to_Irel_lin_fits().size() << endl;
-// 		for (auto& fit : mat.RSFs().Crel_to_Irel_lin_fits())
-// 			cout << "mat.Crel_to_Irel_lin_fit: " << fit.to_string() << endl;
-
-// 		for (const auto& RSF : mat.RSFs)
-// 		{
-// 			cout << RSF.polynom.to_string() << endl;
-// 			for (auto& d : RSF.Crel_to_Irel_data.first.data)
-// 				cout << "c=" << d << endl;
-// 			for (auto& d : RSF.Crel_to_Irel_data.second.data)
-// 				cout << "i=" << d << endl;
-// 			if (RSF.Crel_to_Irel_data.first.data().size()<2)
-// 				continue;
-// 			cout << RSF.to_string() << ":" << endl;
-// 			cout << RSF.Crel_to_Irel_data.first.to_string_detailed() << endl;
-// 			cout << RSF.Crel_to_Irel_data.second.to_string_detailed() << endl;
-				
-// 			RSF.plot_to_screen(0);
-// 		}
+		// SR + SD
+		MG.calc().SRs.from_crater_depths().SRs.from_implant_max().SDs.from_SR();
+		// SF + RSF
+		MG.calc().SFs.from_implant_dose().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().SFs.from_implant_max();
+		// C
+		MG.calc().concentrations.from_SF();
+		for (auto M : MG.measurements())
+			M->plot_now(0);
 	}
 	
 	if (!logger::instant_print_messages)
