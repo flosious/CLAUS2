@@ -965,8 +965,8 @@ quantity::quantity_t quantity::quantity_t::change_unit(const unit_t& target_unit
 {	
 	if (!is_set())
 		return {};
-	if (unit()==target_unit) // nothing to change
-		return *this;
+	if (unit()==target_unit) // nothing to change, EXCEPT the prefered_output_string might change
+		return {*this,target_unit};
 	if (unit().base_units_exponents != target_unit.base_units_exponents) 
 	{
 		logger::info(4,"quantity::quantity_t::change_unit","unit.base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
@@ -1122,6 +1122,16 @@ quantity::quantity_t quantity::quantity_t::absolute() const
 	return {*this,data_c,"absolute"};
 }
 
+quantity::quantity_t quantity::quantity_t::pbp_sum() const
+{
+	if (!is_set()) 
+		return {};
+
+	vector<double> summe(0,data().size());
+	for (int i=1;i<summe.size();i++)
+		summe.at(i) = data_s.at(i);
+}
+
 quantity::quantity_t quantity::quantity_t::sum(int start, int stop) const
 {
 	if (!is_set()) 
@@ -1235,6 +1245,8 @@ quantity::quantity_t& quantity::quantity_t::operator<<(const quantity_t& obj)
 
 quantity::quantity_t quantity::quantity_t::operator+(quantity_t quantity) const
 {
+	if (!is_set())
+		return quantity;
 	if (name()!=quantity.name()) 
 		return {}; // only allow addition within the same Größenart
 		
@@ -1387,6 +1399,8 @@ void quantity::quantity_t::operator+=(const double summand)
 
 void quantity::quantity_t::operator+=(quantity_t quantity_p)
 {
+	if (!is_set())
+		*this = quantity_p;
 	quantity_p = quantity_p.change_unit(unit());
 	*this = *this + quantity_p;
 }

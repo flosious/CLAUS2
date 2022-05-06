@@ -850,9 +850,14 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 // }
 
 calc_t::sims_t::matrix_t::concentration_c::concentration_c(const RSFs_t& RSFs, const measurements_::sims_t& measurement) : 
-			RSFs_p(RSFs), measurement_p(measurement),matrix_clusters(RSFs.matrix_clusters())
+			measurement_p(measurement),matrix_clusters(measurement_p.clusters,RSFs.matrix_clusters().isotopes()),RSFs_p(RSFs)
 {
 // 	clear_concentrations_of_mcs();
+	if (use_elemental()) // add natural isotope ratios
+	{
+		set_natural_abundances_in_clusters();
+		RSFs.add_natural_abundances(); 
+	}
 }
 
 // const calc_t::sims_t::matrix_t::clusters_t calc_t::sims_t::matrix_t::concentration_c::matrix_clusters() const
@@ -864,12 +869,12 @@ calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentrati
 {
 	quantity::concentration_t residual_concentration({100},units::derived::atom_percent,quantity::dimensions::SI::relative);
 	set<cluster_t> clusters_with_unknown_concentrations;
-	for (const auto& mc : matrix_clusters.clusters())
+	for (const auto& C : matrix_clusters.clusters)
 	{
-		auto C = measurement_p.cluster(mc);
+// 		auto C = measurement_p.cluster(mc);
 		if (C==nullptr)
 		{
-			logger::error("calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","measurement_p.cluster(mc)==nullptr",mc.to_string(),"returning this");
+			logger::error("calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","measurement_p.cluster(mc)==nullptr",C->to_string(),"returning this");
 			return *this;
 		}
 		if (!C->concentration.is_set())
@@ -904,6 +909,22 @@ calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentrati
 	return *this;
 }
 
+void calc_t::sims_t::matrix_t::concentration_c::set_natural_abundances_in_clusters()
+{
+	for (auto& C: matrix_clusters.clusters)
+	{
+		for (auto& I : C->isotopes)
+		{
+// 			if (I.abundance.is_set()) continue;
+			const auto P = PSE.isotope(I.symbol,I.nucleons);
+			if (P==nullptr)
+				continue;
+			
+			I.abundance = quantity::abundance_t({P->abundance});
+		}
+	}
+}
+
 calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentration_c::concentrations_by_RSFs()
 {
 // 	vector<cluster_t> results;
@@ -912,22 +933,28 @@ calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentrati
 // 		if (measurement().cluster(mc) != nullptr) // copy the cluster from the measurement, if (still available)
 // 			results.push_back(*measurement().cluster(mc));
 // 	}
-	for (auto& mc : matrix_clusters.clusters())
+	for (auto& C : matrix_clusters.clusters)
 	{
-		const auto C = measurement_p.cluster(mc);
+// 		auto C = measurement_p.cluster(mc);
 		if (C==nullptr) continue;
 		if (C->concentration.is_set()) continue;
-		C->concentration = cluster(mc);
+		C->concentration = cluster(*C);
 	}
 	return *this;
 }
 
 bool calc_t::sims_t::matrix_t::concentration_c::use_elemental() const
 {
+	/// decide here, whether to take isotropical or elemental calculation
+	/// for isotropical there have to be all isotopes (resp. their corresponding clusters) for all elements measured
+	/// OR the abundances of all measured isotopes are known
+	/// ... but there could be samples, where it is not necessary to monitor all isotopes of all elements, because they are not
+	/// in the sample ... hmm: what to do? future florian may solve this minor logical issue
+	
 	///IF there is exactly 1 cluster per element, use elemental; ELSE use isotopical
 	for (auto ele : matrix_clusters.elements())
 	{
-		const auto s = matrix_clusters.clusters(ele).size();
+		const auto s = matrix_clusters.clusters_from_ele(ele).size();
 		if (s!=1)
 		{
 			logger::info(3,"calc_t::sims_t::matrix_t::concentration_c::use_elemental()","matrix_clusters.clusters("+ele.to_string()+")="+to_string(s)+"!=1","using isotopical");
@@ -939,11 +966,6 @@ bool calc_t::sims_t::matrix_t::concentration_c::use_elemental() const
 
 quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::cluster(const cluster_t& cluster)
 {
-	/// decide here, whether to take isotropical or elemental calculation
-	/// for isotropical there have to be all isotopes (resp. their corresponding clusters) for all elements measured
-	/// OR the abundances of all measured isotopes are known
-	/// ... but there could be samples, where it is not necessary to monitor all isotopes of all elements, because they are not
-	/// in the sample ... hmm: what to do? future florian may solve this minor logical issue
 	const isotope_t cor_iso = cluster.corresponding_isotope(matrix_clusters.isotopes());
 	if (!cor_iso.is_set())
 	{
@@ -961,7 +983,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::isotope(con
 {
 	quantity::concentration_t cluster_conc({1},units::SI::one,quantity::dimensions::SI::relative);
 	const auto cluster = matrix_clusters.cluster(isotope);
-	if (!cluster.is_set())
+	if (cluster != nullptr)
 		return {};
 	const auto rsfs = RSFs().RSFs(isotope);
 	
@@ -987,7 +1009,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::isotope(con
 
 quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::element(const element_t& element)
 {
-	const auto clusters = matrix_clusters.clusters(element);
+	const auto clusters = matrix_clusters.clusters_from_ele(element);
 	if (clusters.size()!=1)
 	{
 		logger::error("calc_t::sims_t::matrix_t::concentration_c::element()","clusters.size()= " + to_string(clusters.size()) + " !=1", element.to_string(), "returning empty");
@@ -995,7 +1017,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::element(con
 	}
 	
 	quantity::concentration_t cluster_conc({1},units::SI::one,quantity::dimensions::SI::relative);
-	const auto rsfs = RSFs().RSFs(clusters.front());
+	const auto rsfs = RSFs().RSFs(*clusters.front());
 	for (const auto& rsf : rsfs)
 	{
 		if (!rsf.is_set())
@@ -1032,9 +1054,9 @@ const calc_t::sims_t::matrix_t::RSFs_t& calc_t::sims_t::matrix_t::concentration_
 
 calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentration_c::clear_concentrations_of_mcs()
 {
-	for (auto& mc : matrix_clusters.clusters())
+	for (auto& C : matrix_clusters.clusters)
 	{
-		const auto C = measurement_p.cluster(mc);
+// 		const auto C = measurement_p.cluster(mc);
 		if (C==nullptr)
 			continue;
 		C->concentration.clear();

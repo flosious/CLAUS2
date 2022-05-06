@@ -29,7 +29,8 @@
 #include <map>
 // #include "filecontents.hpp"
 #include "element.hpp"
-// #include "sample.hpp"
+// #include "sample.hpp"  // geht nicht wegen sample_t->files_ -> cluster_t->sample_t
+
 // #include "crater.hpp"
 #include <mgl2/fltk.h>
 // #include "measurement.hpp"
@@ -61,7 +62,7 @@ public:
 	///e.g. 11B for cluster {28Si 11B}
 	isotope_t corresponding_isotope(const vector<isotope_t> reference_isotopes) const;
 	quantity::quantity_t mass();
-	quantity::quantity_t abundance();
+	quantity::abundance_t abundance();
 	string name() const;
 	string to_string(const string del=" ") const;
 	const bool is_set() const;
@@ -102,8 +103,10 @@ public:
 // 	vector<Crel_to_Irel_t> Crels_to_Irels();
 	cluster_t* cluster(const isotope_t iso);
 	vector<cluster_t*> clusters;
+	const vector<cluster_t*> clusters_from_ele(element_t ele) const;
 	const vector<cluster_t> cluster_names();
 	const vector<isotope_t> isotopes() const;
+	const vector<element_t> elements() const;
 	quantity::intensity_t intensity_sum() const;
 	quantity::concentration_t concentration_sum() const;
 	string to_string(const string del = "") const;

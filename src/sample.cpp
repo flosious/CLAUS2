@@ -372,6 +372,7 @@ const string sample_t::wafer_string() const
 	return ss.str();
 }
 
+
 sample_t::matrix_t& sample_t::matrix()
 {
 	if (matrix_p.is_set()) return matrix_p;

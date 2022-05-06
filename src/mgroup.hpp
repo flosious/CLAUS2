@@ -35,6 +35,7 @@
 #include "definitions.hpp"
 #include "measurement.hpp"
 #include "fit_functions.hpp"
+#include "calc.hpp"
 
 using namespace std;
 
@@ -85,6 +86,43 @@ public:
 	{
 	private:
 	protected:
+		///collects data into a quantity::map_t
+		class data_collectors_t
+		{
+		private:
+			///collect data from these measurements
+			mgroups_::sims_t& MG;
+			/// a table of quantities using measurement pointers as reference to sort lines
+// 			class measurements_to_quantities_t
+// 			{
+// 			private:
+// 				///Ms are unique, so it is effectively a set
+// 				///sort data using measurement as reference column to sort lines   	/*************************/
+// 				vector<const measurements_::sims_t*> Ms;							// M1* // Q1 // Q2 // .. //
+// 				///quantity columns													// M2* // Q1 // Q2 // .. //
+// 				vector<quantity::quantity_t> Qs;									// M3* // Q1 // Q2 // .. //
+// 			public:
+// 				//adds a point (1 col with 1 line)
+// 				measurements_to_quantities_t& add_line(const measurements_::sims_t* M, const quantity::quantity_t& Q);
+// 				//adds a map (1 col with multiple line)
+// 				measurements_to_quantities_t& add_lines(const vector<const measurements_::sims_t*> Ms, const quantity::quantity_t& Q);
+// 				//adds a tensor (multiple cols with multiple line)
+// 				measurements_to_quantities_t& add_lines(const vector<const measurements_::sims_t*> Ms, const vector<quantity::quantity_t>& Qs);
+// 				//adds a column
+// 				measurements_to_quantities_t& add_column(const vector<const measurements_::sims_t*> Ms, quantity::quantity_t& Q);
+// 				//adds multiple columns
+// 				measurements_to_quantities_t& add_columns(const vector<const measurements_::sims_t*> Ms, vector<quantity::quantity_t>& Qs);
+// 			};
+		public:
+			data_collectors_t(mgroups_::sims_t& MG);
+			///ignore the first 50% of data
+			quantity::map_t SR_scalar_vs_C_truncated_mean_from_cluster(const cluster_t& cluster) const;
+			quantity::map_t SR_scalar_vs_C_median_from_cluster(const cluster_t& cluster) const;
+			quantity::map_t SR_scalar_vs_C_from_matrix(const isotope_t& C_iso) const;
+			quantity::map_t SR_scalar_vs_C_from_matrix(const element_t& C_ele) const;
+// 			quantity::map_t RSF_scalar_vs_C_from_matrx(const ::calc_t::sims_t::RSF_t& RSF, const isotope_t& C_iso) const;
+// 			quantity::map_t RSF_scalar_vs_C_from_matrx(const ::calc_t::sims_t::RSF_t& RSF, const element_t& C_ele) const;
+		};
 		class calc_t
 		{
 		protected:
@@ -145,7 +183,7 @@ public:
 				///sets SR for known matrices
 				calc_t& copy_to_same_matrices(bool overwrite = false);
 				///uses SR from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24
-				calc_t& interpolate_from_known_matrices(vector<unsigned int> rank={1,1,1}, bool overwrite = false);
+				calc_t& interpolate_from_known_matrix_clusters(vector<unsigned int> rank={1,1,1}, bool overwrite = false);
 			};
 			///sputter_depth
 			class SD_c

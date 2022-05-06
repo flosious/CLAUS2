@@ -49,7 +49,6 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	dsims_t dsims(filenames,samples_list,profiler,camera,sql_wrapper);
 	
 	
-	
 // 	cout << "filenames.size()=" << filenames.size() << endl;
 // 	cout << "dsims.files().size()=" << dsims.files().size() << endl;
 // 	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
@@ -67,27 +66,30 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		{
 			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
 			const auto RSFs = mat.RSFs().add_natural_abundances();
-// 			for (auto& M:MG.measurements_copy())
 			for (auto& M:MG.measurements_p)
 			{
+// 				cout << "M.clusters.size()=" << M.clusters.size() << endl;
 				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,M);
 				const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
 				///copy the results - this is really ugly
 				for (auto C : M_with_Cs.clusters)
 				{
 					if (!C.concentration.is_set()) continue;
-					M.cluster(C)->concentration = C.concentration;
+					*M.cluster(C) = C;
 				}
 			}
 		}
+
 		// SR + SD
-		MG.calc().SRs.from_crater_depths().SRs.from_implant_max().SDs.from_SR();
+		MG.calc().SRs.from_crater_depths().SRs.from_implant_max().SRs.interpolate_from_known_matrix_clusters({1,1}).SDs.from_SR();
 		// SF + RSF
 		MG.calc().SFs.from_implant_dose().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().SFs.from_implant_max();
 		// C
 		MG.calc().concentrations.from_SF();
+		
 		for (auto M : MG.measurements())
 			M->plot_now(0);
+		MG.export_origin_ascii();
 	}
 	
 	if (!logger::instant_print_messages)

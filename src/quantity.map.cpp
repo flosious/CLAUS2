@@ -7,7 +7,11 @@ quantity::map_t::map_t() : X_p(), Y_p()
 quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y) : X_p(X), Y_p(Y)
 {
 	if (X.data().size()!=Y.data().size())
-		logger::error("quantity::map_t::map_t()","X and Y have different sizes: X=" + std::to_string(X.data().size())+"; Y="+ std::to_string(Y.data().size()));
+	{
+		logger::error("quantity::map_t::map_t()","X and Y have different sizes: X=" + X.to_string()+"; Y="+ Y.to_string(),"setting to empty");
+		*this = {};
+	}
+	
 }
 
 quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y, const vector<pair<double,double>>& XYdata_pairs) : X_p(X), Y_p(Y)
@@ -101,6 +105,13 @@ bool quantity::map_t::is_set() const
 	return true;
 }
 
+bool quantity::map_t::is_single_point() const
+{
+	if (!X().is_scalar()) return false;
+	if (!Y().is_scalar()) return false;
+	return true;
+}
+
 std::string quantity::map_t::to_string() const
 {
 	stringstream ss;
@@ -127,7 +138,13 @@ fit_functions::polynom_t quantity::map_t::polynom(const vector<unsigned>& rank, 
 	return poly;
 }
 
-
+quantity::map_t quantity::map_t::polyfit(fit_functions::polynom_t polynom_s) const
+{
+	if (!polynom_s.successfully_fitted())
+		return {};
+	quantity_t fitted_Y(Y(),polynom_s.y_data(X().data()));
+	return {X(),fitted_Y};
+}
 
 quantity::quantity_t quantity::map_t::polyfit(const quantity_t& x_vals, fit_functions::polynom_t polynom_s) const
 {
@@ -197,6 +214,11 @@ quantity::map_t quantity::map_t::remove_outliners(const fit_functions::polynom_t
 		result_map = result_map.delta_y(polynom_s).sort_Y_from_low_to_high().pop_back();
 	}
 	return result_map;
+}
+
+quantity::map_t quantity::map_t::swap_X_Y() const
+{
+	return {Y(),X()};
 }
 
 quantity::map_t quantity::map_t::max() const
@@ -290,6 +312,11 @@ bool quantity::map_t::sort_by_y(const pair<double,double>& P1, const pair<double
 
 quantity::map_t& quantity::map_t::operator<<(map_t obj)
 {
+	if (!is_set())
+	{
+		*this = obj;
+		return *this;
+	}
 	obj.X_p=obj.X().change_unit(X().unit());
 	obj.Y_p=obj.Y().change_unit(Y().unit());
 	if (obj.is_set())

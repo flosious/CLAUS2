@@ -16,7 +16,12 @@ isotope_t::isotope_t(string symbol_s, int nucleons_s, double abundance_s, double
 																																   nucleons(nucleons_s),
 																																   abundance({abundance_s}),
 																																   substance_amount({amount_s})
-{}
+{
+	if (abundance_s<0)
+		abundance.clear();
+	if (amount_s<0)
+		substance_amount.clear();
+}
 
 isotope_t::isotope_t(string str, double abundance_s, double amount_s)
 {

@@ -149,7 +149,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices(
 					/*	this is unhandled at the moment, but will be important when reference samples with layer of different matrices are used.
 					 *	one could use all the mean(SR point at matrix concentration) ... yeah maybe later...;-)
 					 */
-					logger::error("mgroups_::sims_t::calc_t::SR_c::from_others()","SR is a vector, dont know how to handle, tell florian",M->to_string(),"ignoring");
+					logger::error("mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices()","SR is a vector, dont know how to handle, tell florian",M->to_string(),"ignoring");
 				}
 				if (overwrite || !M->crater.SR.is_set())
 					M->crater.SR = mat_to_SR.second;
@@ -157,6 +157,67 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices(
 		}
 	}
 	
+	return calc;
+}
+
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_matrix_clusters(vector<unsigned int> rank, bool overwrite)
+{
+// 	::calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+	if (MG.matrix_clusters().size()!=2)
+	{
+		logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_matrix_clusters()","MG.matrix_isotopes().size()!=2","returning calc");
+		return calc;
+	}
+	const isotope_t relevant_isotope = MG.matrix_isotopes().front();
+	quantity::concentration_t C;
+	quantity::SR_t SR;
+	for (const auto& M : MG.measurements()) // collecting data for the relevant_isotope
+	{
+		if (!M->crater.SR.is_set())
+			continue;
+		if (M->crater.SR.is_vector())
+		{
+			logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_matrix_clusters()","SR is a vector, dont know how to handle, tell florian",M->to_string()+"  "+M->crater.SR.to_string(),"continue");
+			continue;
+		}
+		const cluster_t* relevant_cluster = M->matrix_clusters(MG.matrix_isotopes()).cluster(relevant_isotope);
+		if (relevant_cluster==nullptr) // could not find cluster in measurement
+			C << quantity::concentration_t({0},units::derived::atom_percent,quantity::dimensions::SI::relative);
+		else
+		{
+			if (!relevant_cluster->concentration.is_set())
+				continue;
+			//median
+			C << relevant_cluster->concentration.median().change_unit(units::derived::atom_percent);
+		}
+		SR << M->crater.SR;
+	}
+	quantity::map_t SR_vs_C(C,SR);
+	const auto P =SR_vs_C.polynom(rank,{rank.begin(),rank.end()});
+	
+	//plot
+	if (!P.successfully_fitted())
+		return calc;
+	plot_t plot(false,false);
+	plot.Y1.add_points(SR_vs_C,"SR vs " + relevant_isotope.to_string(),"ro");
+	plot.Y2.add_curve(SR_vs_C.polyfit(P),P.to_string());
+	plot.to_screen("SR_vs_C",0);
+	
+	//copy to other measurements
+	for (auto& M : MG.measurements())
+	{
+		if (!overwrite && M->crater.SR.is_set())
+			continue;
+		cluster_t* relevant_C = M->matrix_clusters(MG.matrix_isotopes()).cluster(relevant_isotope);
+		if (relevant_C==nullptr)
+			continue;
+		if (!relevant_C->concentration.is_set())
+			continue;
+		
+		M->crater.SR = SR_vs_C.polyfit(relevant_C->concentration,P); //SR point by point
+		cout << "M->crater.SR: " << M->crater.SR.to_string() << endl;
+	}
+
 	return calc;
 }
 

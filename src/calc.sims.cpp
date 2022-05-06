@@ -360,7 +360,16 @@ const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t calc_t::sims_t::Crel_to
 {
 // 	const auto data = tools::vec::combine_vecs_to_map(Crel_to_Irel_data.second.data(), Crel_to_Irel_data.first.data());
 // 	fit_functions::polynom_t poly(polynom_rank,polynom_start_parameters,data);
-	Crel_to_Irel_data_polynomial_fit_t crel_irel_polyfit(zaehler(),nenner(),Crel_to_Irel_map(),Crel_to_Irel_map().remove_inf().remove_nan().polynom(polynom_rank,polynom_start_parameters));
+	const auto P = Crel_to_Irel_map().remove_inf().remove_nan().polynom(polynom_rank,polynom_start_parameters);
+	
+	if (P.successfully_fitted()) //plot
+	{
+		plot_t plot(false,false);
+		plot.Y1.add_points(Crel_to_Irel_map(),zaehler().to_string() + " / " + nenner().to_string(),"ro");
+		plot.Y2.add_curve(Crel_to_Irel_map().polyfit(P), P.to_string());
+		plot.to_screen(zaehler().to_string() + " / " + nenner().to_string(),0);
+	}
+	Crel_to_Irel_data_polynomial_fit_t crel_irel_polyfit(zaehler(),nenner(),Crel_to_Irel_map(),P);
 	return crel_irel_polyfit;
 }
 

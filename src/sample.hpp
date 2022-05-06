@@ -83,7 +83,8 @@ public:
 		const bool is_set() const;
 		const string to_string() const;
 		///RELATIVE! in at%
-		const quantity::concentration_t concentration(isotope_t& iso) const;
+		const quantity::concentration_t concentration(isotope_t iso) const;
+		const quantity::concentration_t concentration(element_t ele) const;
 		bool operator==(const matrix_t& obj) const;
 		bool operator!=(const matrix_t& obj) const;
 		bool operator<(const matrix_t& obj) const;
@@ -177,6 +178,7 @@ public:
 	const string wafer_string() const;
 	
 	matrix_t& matrix();
+	
 	
 	/*database stuff*/
 	bool save_to_database();

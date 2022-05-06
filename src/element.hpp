@@ -39,6 +39,7 @@ class element_t
 private:
 	
 // 	vector<isotope_t> isotopes_p;
+	void set_elemental_substance_amount();
 // 	quantity::substance_amount_t substance_amount_p;
 public:
 	element_t();

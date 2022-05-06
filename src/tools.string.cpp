@@ -24,7 +24,7 @@
 
 set<string> tools::str::filter_t::special_characters{"_","#","{","}"};
 
-string tools::str::filter_t::escape_special_characters(string prefix_escape_string)
+string tools::str::filter_t::escape_special_characters(string filter_this)
 {
 	for (auto& s : special_characters)
 		tools::str::replace_chars(&filter_this,s,prefix_escape_string+s);
@@ -32,7 +32,7 @@ string tools::str::filter_t::escape_special_characters(string prefix_escape_stri
 	return filter_this;
 }
 
-tools::str::filter_t::filter_t(const string& filter_this) : filter_this(filter_this)
+tools::str::filter_t::filter_t(const string prefix_escape_string) : prefix_escape_string(prefix_escape_string)
 {
 }
 

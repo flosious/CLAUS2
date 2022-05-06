@@ -379,3 +379,100 @@ const map<cluster_t*,quantity::substance_amount_t> mgroups_::sims_t::matrix_clus
 // 	}
 // 	return matrix_C_to_I;
 }
+
+
+/*****************************************************/
+/********     sims_t::data_collectors_t     **********/
+/*****************************************************/
+
+mgroups_::sims_t::data_collectors_t::data_collectors_t(mgroups_::sims_t& MG) : MG(MG)
+{
+}
+
+quantity::map_t mgroups_::sims_t::data_collectors_t::SR_scalar_vs_C_from_matrix(const isotope_t& C_iso) const
+{
+	quantity::map_t SR_vs_C;
+	if (!C_iso.is_set())
+		return SR_vs_C;
+	const auto ref_isotopes = MG.matrix_isotopes();
+	for (const auto& M : MG.measurements())
+	{
+		if (!M->crater.SR.is_set())
+			continue;
+		if (!M->crater.SR.is_scalar())
+			continue;
+		if (!M->sample->matrix().is_set())
+			continue;
+		if (!M->sample->matrix().concentration(C_iso).is_set())
+			continue;
+		SR_vs_C << quantity::map_t(M->sample->matrix().concentration(C_iso),M->crater.SR);
+	}
+	return SR_vs_C;
+}
+
+quantity::map_t mgroups_::sims_t::data_collectors_t::SR_scalar_vs_C_from_matrix(const element_t& C_ele) const
+{
+	quantity::map_t SR_vs_C;
+	if (C_ele.isotopes.size()==0)
+		return SR_vs_C;
+	const auto ref_isotopes = MG.matrix_isotopes();
+	for (const auto& M : MG.measurements())
+	{
+		if (!M->crater.SR.is_set())
+			continue;
+		if (!M->crater.SR.is_scalar())
+			continue;
+		if (!M->sample->matrix().is_set())
+			continue;
+		if (!M->sample->matrix().concentration(C_ele).is_set())
+			continue;
+		SR_vs_C << quantity::map_t(M->sample->matrix().concentration(C_ele),M->crater.SR);
+	}
+	return SR_vs_C;
+}
+
+quantity::map_t mgroups_::sims_t::data_collectors_t::SR_scalar_vs_C_median_from_cluster(const cluster_t& cluster) const
+{
+	quantity::map_t SR_vs_C;
+	if (!cluster.is_set())
+		return SR_vs_C;
+	const auto ref_isotopes = MG.matrix_isotopes();
+	for (const auto& M : MG.measurements())
+	{
+		if (!M->crater.SR.is_set())
+			continue;
+		if (!M->crater.SR.is_scalar())
+			continue;
+		if (M->cluster(cluster)==nullptr)
+			continue;
+		if (!M->cluster(cluster)->concentration.is_set())
+			continue;
+		SR_vs_C << quantity::map_t(M->cluster(cluster)->concentration.median(),M->crater.SR);
+	}
+	return SR_vs_C;
+}
+
+quantity::map_t mgroups_::sims_t::data_collectors_t::SR_scalar_vs_C_truncated_mean_from_cluster(const cluster_t& cluster) const
+{
+	quantity::map_t SR_vs_C;
+	if (!cluster.is_set())
+		return SR_vs_C;
+	const auto ref_isotopes = MG.matrix_isotopes();
+	for (const auto& M : MG.measurements())
+	{
+		if (!M->crater.SR.is_set())
+			continue;
+		if (!M->crater.SR.is_scalar())
+			continue;
+		if (M->cluster(cluster)==nullptr)
+			continue;
+		const auto conc = M->cluster(cluster)->concentration;
+		if (!conc.is_set())
+			continue;
+		SR_vs_C << quantity::map_t(conc.remove_data_by_index(0,conc.data().size()/2).mean(),M->crater.SR);
+	}
+	return SR_vs_C;
+}
+
+
+

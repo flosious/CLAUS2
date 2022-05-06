@@ -44,6 +44,7 @@ element_t::element_t(string symbol_s, double abs_amount, bool use_natural_abunda
 		else
 			isotopes.push_back({symbol_s,iso.nucleons,-1,-1});
 	}
+	set_elemental_substance_amount();
 }
 
 element_t::element_t(isotope_t isotope_s) : element_t(vector<isotope_t>{isotope_s})
@@ -54,20 +55,44 @@ element_t::element_t(std::vector< isotope_t > isotopes_s) :
 													isotopes(isotopes_s),
 													symbol(isotopes_s.at(0).symbol)
 {
-	if (isotopes.size()==0) return;
-	substance_amount=isotopes.front().substance_amount;
-	auto start = (isotopes.begin());
-	start++;
-	for (auto I = start;I!=isotopes.end();I++)
+// 	if (isotopes.size()==0) return;
+// 	substance_amount=isotopes.front().substance_amount;
+// 	auto start = (isotopes.begin());
+// 	start++;
+// 	for (auto I = start;I!=isotopes.end();I++)
+// 	{
+// 		if (!I->substance_amount.is_set())
+// 		{
+// 			substance_amount.clear();
+// 			break;
+// 		}
+// 		substance_amount += I->substance_amount;
+// 	}
+	set_elemental_substance_amount();
+}
+
+void element_t::set_elemental_substance_amount()
+{
+	for (auto& iso : isotopes)
 	{
-		if (!I->substance_amount.is_set())
+		if (!iso.substance_amount.is_set())
+			continue;
+		if (!iso.abundance.is_set())
+			continue;
+		substance_amount = substance_amount / iso.abundance;
+		return;
+	}
+	for (auto& iso : isotopes)
+	{
+		if (!iso.substance_amount.is_set())
 		{
 			substance_amount.clear();
-			break;
+			return;
 		}
-		substance_amount += I->substance_amount;
+		substance_amount += iso.substance_amount;
 	}
 }
+
 
 const int element_t::protons()
 {
@@ -79,6 +104,31 @@ const int element_t::protons()
 	return PSE.element(symbol)->protons;
 }
 
+// quantity::substance_amount_t& element_t::substance_amount() const
+// {
+// 	if (substance_amount.is_set())
+// 		return substance_amount;
+// // 	quantity::substance_amount_t sum;
+// 	for (auto& iso : isotopes)
+// 	{
+// 		if (!iso.substance_amount.is_set())
+// 			continue;
+// 		if (!iso.abundance.is_set())
+// 			continue;
+// 		substance_amount = substance_amount / iso.abundance;
+// 		return substance_amount;
+// 	}
+// 	for (auto& iso : isotopes)
+// 	{
+// 		if (!iso.substance_amount.is_set())
+// 		{
+// 			substance_amount.clear();
+// 			return substance_amount;
+// 		}
+// 		substance_amount += iso.substance_amount;
+// 	}
+// 	return substance_amount();
+// }
 
 const quantity::mass_t element_t::mass()
 {

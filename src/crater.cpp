@@ -117,7 +117,7 @@ string crater_t::linescan_t::to_string(string prefix)
 /********************/
 crater_t::sputter_beam_t::sputter_beam_t(quantity::current_t sputter_current_s, 
 							 quantity::sputter_time_t sputter_time, 
-							 quantity::depth_t sputter_depth_s) 
+							 quantity::sputter_depth_t sputter_depth_s) 
 																	: 	sputter_current(sputter_current_s), 
 																		sputter_time(sputter_time), 
 																		sputter_depth(sputter_depth_s)
@@ -168,9 +168,9 @@ quantity::sputter_time_t& crater_t::total_sputter_time(vector<cluster_t>* cluste
 	return total_sputter_time_s;
 }
 
-quantity::depth_t crater_t::total_sputter_depth()
+quantity::sputter_depth_t crater_t::total_sputter_depth()
 {
-	quantity::depth_t TSD;
+	quantity::sputter_depth_t TSD;
 	if (total_sputter_depths.is_set())
 		TSD = total_sputter_depths;
 	if (linescans.size()>0)
@@ -251,7 +251,7 @@ quantity::quantity_t crater_t::common_X_quantity(const vector<quantity::quantity
 	return {X,X_data};
 }
 
-quantity::depth_t crater_t::common_sputter_depth(vector<cluster_t>& clusters)
+quantity::sputter_depth_t crater_t::common_sputter_depth(vector<cluster_t>& clusters)
 {
 	if(clusters.size()==0)
 	{
@@ -270,7 +270,7 @@ quantity::depth_t crater_t::common_sputter_depth(vector<cluster_t>& clusters)
 		logger::error("crater_t::common_sputter_depth()","sputter_depths.size() != clusters.size()","check exported clusters for sputter_depth","returning empty");
 		return {};
 	}
-	return quantity::depth_t{common_X_quantity(sputter_depths)};
+	return quantity::sputter_depth_t{common_X_quantity(sputter_depths)};
 }
 
 quantity::sputter_time_t crater_t::common_sputter_time(vector<cluster_t>& clusters)
@@ -294,7 +294,7 @@ quantity::sputter_time_t crater_t::common_sputter_time(vector<cluster_t>& cluste
 	return quantity::sputter_time_t{common_X_quantity(sputter_times)};
 }
 
-crater_t crater_t::change_resolution(quantity::depth_t sputter_depth_res)
+crater_t crater_t::change_resolution(quantity::sputter_depth_t sputter_depth_res)
 {
 	if (!sputter_depth.is_set())
 	{
@@ -316,7 +316,7 @@ crater_t crater_t::change_resolution(quantity::depth_t sputter_depth_res)
 	if (sputter_time.is_set())
 		copy_C.sputter_time = sputter_time.interp(sputter_depth,copy_C.sputter_depth);
 	if (SR.is_set())
-		copy_C.SR = SR.interp(sputter_depth,copy_C.sputter_depth);
+		copy_C.SR = quantity::SR_t(SR.interp(sputter_depth,copy_C.sputter_depth));
 	if (sputter_current().is_set())
 		copy_C.sputter_current() = sputter_current().interp(sputter_depth,copy_C.sputter_depth);
 	return copy_C;
@@ -344,7 +344,7 @@ crater_t crater_t::change_resolution(quantity::sputter_time_t sputter_time_res)
 	if (sputter_depth.is_set())
 		copy_C.sputter_depth = sputter_depth.interp(sputter_time,copy_C.sputter_time);
 	if (SR.is_set())
-		copy_C.SR = SR.interp(sputter_time,copy_C.sputter_time);
+		copy_C.SR = quantity::SR_t( SR.interp(sputter_time,copy_C.sputter_time));
 	if (sputter_current().is_set())
 		copy_C.sputter_current() = sputter_current().interp(sputter_time,copy_C.sputter_time);
 	return copy_C;

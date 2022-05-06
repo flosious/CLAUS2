@@ -39,6 +39,8 @@ private:
 	public:
 		class range_t
 		{
+		private:
+			
 		public:
 			///asuming y axis starts at low values and grows to bigger (e.g. from 1 to 1000)
 			range_t(const quantity::quantity_t* Ys);
@@ -87,7 +89,7 @@ private:
 		vector<points_t> points;
 		vector<fit_functions::polynom_t> polynoms;
 		///not working
-		bool add_polynom(const fit_functions::polynom_t& polynom_s);
+// 		bool add_polynom(const quantity::quantity_t& X, const fit_functions::polynom_t& polynom_s);
 		void add_points(const quantity::map_t& XY, const string legend="", const string color=" +");
 		///e.g. "Intensity [c/s]"
 		void add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend="", const string color=" +");

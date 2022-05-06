@@ -331,10 +331,10 @@ std::string fit_functions::polynom_t::to_string(std::string prefix) const
 	if (!successfully_fitted())
 		return "unsecesfull fit";
 	out << "chisq: " << chisq();
-	out << "; params: ";
+	out << " params: ";
 	for (auto p : fit_parameters())
 	{
-		out << p<<"; ";
+		out << p<<", ";
 	}
 	return out.str();
 }

@@ -33,6 +33,7 @@ plot_t::plot_t(bool Y1_log10, bool Y2_log10, bool Y3_log10)
 
 int plot_t::Draw(mglGraph* gr)
 {
+	tools::str::filter_t filter;
 	logger::debug(15,"plot_t::Draw()","entering");
 	/*x axis*/
 	vector<const quantity::quantity_t*> Xs;
@@ -73,9 +74,8 @@ int plot_t::Draw(mglGraph* gr)
 	if (Xs.front()->is_relative())
 		x_l << "rel. ";
 	x_l << Xs.front()->name() << " [" << Xs.front()->unit().to_string() << "]";
-	tools::str::filter_t str_f(x_l.str());
 	//will escape special characters
-	gr->Label('x',str_f.escape_special_characters().c_str(),0);
+	gr->Label('x',filter.escape_special_characters(x_l.str()).c_str(),0);
 	/********/
 	
 	if (Y1.check())
@@ -174,14 +174,14 @@ void plot_t::axis_t::add_curve(const quantity::map_t& XY, const std::string lege
 	add_curve(XY.X(),XY.Y(),legend);
 }
 
-bool plot_t::axis_t::add_polynom(const fit_functions::polynom_t& polynom_s)
-{
-	if (polynom_s.successfully_fitted())
-		polynoms.push_back(polynom_s);
-	else
-		return false;
-	return true;
-}
+// bool plot_t::axis_t::add_polynom(const quantity::quantity_t& X, const fit_functions::polynom_t& polynom_s)
+// {
+// 	if (polynom_s.successfully_fitted())
+// 	{
+// 		add_curve(X,polynom_s.);
+// 	}
+// 	return true;
+// }
 
 void plot_t::axis_t::add_points(const quantity::map_t& XY, const std::string legend, const std::string color)
 {
@@ -221,7 +221,7 @@ bool plot_t::axis_t::check()
 	{
 		if (c.XY.X().name()!=curves.front().XY.X().name())
 		{
-			logger::error("plot_t::axis_t::check()","quantity name of X axis do not match for all curves",c.XY.X().name(),"false");
+			logger::error("plot_t::axis_t::check()","quantity name of X axis do not match for all curves",c.XY.X().name() + " vs " + curves.front().XY.X().name(),"false");
 			return false;
 		}
 		if (c.XY.X().unit()!=curves.front().XY.X().unit())
@@ -266,6 +266,7 @@ bool plot_t::axis_t::check()
 
 void plot_t::axis_t::draw(mglGraph* gr, double x_origin) 
 {
+	tools::str::filter_t filter;
 	logger::debug(15,"plot_t::axis_t::draw()","curves: " + tools::to_string(curves.size()),"points: " + tools::to_string(points.size()),"entering");
 	if (!check()) 
 	{
@@ -301,15 +302,13 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	}
 	y_l << y_rel << y_name << " [" << y_unit << "]";
 	
-	tools::str::filter_t y_f(y_l.str());
-	gr->Label('y',("#"+color+"{"+ y_f.escape_special_characters()+"}").c_str(),0);
+	gr->Label('y',("#"+color+"{"+ filter.escape_special_characters(y_l.str())+"}").c_str(),0);
 	
 	for (auto& c: points)
 	{
 		mglData x(c.XY.X().data());
 		mglData y(c.XY.Y().data());
-		tools::str::filter_t l_f("legend '"+ c.legende +"'");
-		gr->Plot(x,y,c.color.c_str(),l_f.escape_special_characters().c_str()); 
+		gr->Plot(x,y,c.color.c_str(),filter.escape_special_characters("legend '"+ c.legende +"'").c_str()); 
 	}
 	for (auto& c: curves)
 	{
@@ -317,15 +316,15 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 			continue;
 		mglData x(c.XY.X().data());
 		mglData y(c.XY.Y().data());
-// 		tools::str::filter_t l_f("legend '"+ c.legende +" "+ c.Y.name()+"'");
-		tools::str::filter_t l_f("legend '"+ c.legende +"'");
-		gr->Plot(x,y,color.c_str(),l_f.escape_special_characters().c_str());
+		
+// 		gr->Plot(x,y,color.c_str(),.c_str());
+		gr->Plot(x,y,color.c_str(),("legend '"+ filter.escape_special_characters(c.legende) +"'").c_str());
 		if (c.XY.Y().data().size()<11) continue;
 		int y_offset=0;
 		if (log10_scale)
 			y_offset = 1;
 		gr->SetFontSize(2);
-		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1),c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),c.legende.c_str(),"m");
+		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1),c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),filter.escape_special_characters(c.legende).c_str(),"m");
 		gr->SetFontSize(3); // default
 	}
 	for (auto& line : lines)
@@ -345,10 +344,9 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 // 			continue;
 // 		unsigned int number_of_points = 100;
 // 		vector<double> x_data(number_of_points);
-// 		double res = (range().stop - range().start) / (number_of_points-1);
+// 		double res = (range().stop - range().start) / (number_of_points-1); // X achse nicht Y!!
 // 		for (int i=0;i<x_data.size();i++)
 // 			x_data.at(i) = i * res + range().start;
-// 		
 // 	}
 // 	gr->SetSize(1000,1000);
 	logger::debug(15,"plot_t::axis_t::draw()","exiting");

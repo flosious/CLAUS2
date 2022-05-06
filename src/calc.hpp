@@ -334,10 +334,11 @@ public:
 			class concentration_c
 			{
 			private:
-				clusters_t matrix_clusters;
-				RSFs_t RSFs_p;
+// 				clusters_t matrix_clusters;
 				measurements_::sims_t measurement_p;
-				
+				matrix_clusters_c matrix_clusters;
+				RSFs_t RSFs_p;
+				void set_natural_abundances_in_clusters();
 			public:
 // 				concentration_c(const set<RSF_t>& RSFs);
 				concentration_c(const RSFs_t& RSFs, const measurements_::sims_t& measurement);
@@ -410,7 +411,12 @@ public:
 		}; // SF_t
 		class sputter_rate_t
 		{
-			
+		public:
+			sputter_rate_t(const quantity::quantity_t& SR_s);
+// 			sputter_rate_t();
+			quantity::map_t SRs_vs_cluster_concentration_medians() const;
+			quantity::map_t SRs_vs_cluster_concentration_means() const;
+			quantity::map_t SRs_vs_sample_matrix_concentrations() const;
 		}; // sputter_rate_t
 		class sputter_depth_t
 		{

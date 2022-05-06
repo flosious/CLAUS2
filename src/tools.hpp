@@ -111,15 +111,25 @@ public:
     class str {
     public:
 		///filter within strings for substrings / chars
+// 		class filter_t
+// 		{
+// 		private:
+// 			string filter_this;
+// 			static set<string> special_characters;
+// 		public:
+// 			filter_t(const string& filter_this);
+// 			string escape_special_characters(string prefix_escape_string="\\");
+// 		};
 		class filter_t
 		{
 		private:
-			string filter_this;
+			string prefix_escape_string;
 			static set<string> special_characters;
 		public:
-			filter_t(const string& filter_this);
-			string escape_special_characters(string prefix_escape_string="\\");
+			filter_t(const string prefix_escape_string="\\");
+			string escape_special_characters(string filter_this);
 		};
+		
 		static string to_ascii(string mainstring);
 		static string remove_NOTchars_from_string(string mainstring, string NOTchars);
 		/// checks wheter the input contains just empty strings ("") --> true or not --> false

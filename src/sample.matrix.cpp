@@ -317,6 +317,37 @@ const bool sample_t::matrix_t::is_set() const
 	return true;
 }
 
+const quantity::concentration_t sample_t::matrix_t::concentration(element_t ele) const
+{
+	quantity::substance_amount_t sum;
+	for (const auto& e : elements)
+	{
+		if (!e.substance_amount.is_set())
+			continue;
+		if (e == ele)
+			ele.substance_amount = e.substance_amount;
+		sum += e.substance_amount;
+	}
+	quantity::concentration_t T(ele.substance_amount/sum);
+	return T.change_unit(units::derived::atom_percent);
+}
+
+const quantity::concentration_t sample_t::matrix_t::concentration(isotope_t iso) const
+{
+	quantity::substance_amount_t sum;
+	for (const auto& i : isotopes())
+	{
+		if (i == iso) 
+			iso.substance_amount = i.substance_amount;
+		if (!sum.is_set())
+			sum = i.substance_amount;
+		else
+			sum += i.substance_amount;
+	}
+	quantity::concentration_t result(iso.substance_amount / sum);
+	return result.change_unit(units::derived::atom_percent);
+}
+
 bool sample_t::matrix_t::operator==(const matrix_t& obj) const
 {
 	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator==()","entering");

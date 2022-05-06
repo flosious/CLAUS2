@@ -252,18 +252,19 @@ public:
 				quantity::sputter_time_t sputter_time_at_maximum_s;
 				quantity::intensity_t maximum_intensity_s;
 				///populates maximum_intensity_s + sputter_time_at_maximum_s ;seconds_for_fit_plot < 0 no plot;
-				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=0);
+				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=-1);
+				quantity::map_t fitted_curve_p;
 			public:
 				implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor=0.1);
 				static unsigned int minimum_index_position(quantity::quantity_t Y);
 				static unsigned int minimum_index_position(vector<double> data);
 				unsigned int minimum_index_position();
-				int maximum_pos_index();
+				int maximum_pos_index() const;
 				quantity::intensity_t background_intensity();
 				///quantity::sputter_time_t of maximum of intensity of implant
-				const quantity::sputter_time_t& sputter_time_at_maximum();
+				const quantity::sputter_time_t& sputter_time_at_maximum() const;
 				///maximum of intensity of implant
-				const quantity::intensity_t& maximum_intensity();
+				const quantity::intensity_t& maximum_intensity() const;
 				quantity::quantity_t minimum_starting_position() const;
 				quantity::sputter_time_t minimum_sputter_time_position() const;
 				quantity::depth_t minimum_sputter_depth_position() const;
@@ -271,13 +272,13 @@ public:
 				quantity::depth_t sputter_depth_from_minimum();
 				///calc dose from concentration and sputter_depth; returns {} if C or SD not set
 				quantity::dose_t dose() const;
-				quantity::SR_t SR();
+				quantity::SR_t SR() const;
 				quantity::SF_t SF();
 				quantity::SF_t SF_from_dose();
 				quantity::SF_t SF_from_max();
 				quantity::SF_t RSF();
 				quantity::concentration_t concentration();
-				///populates the whole measurement from implanted values
+				const quantity::map_t& fitted_curve() const;
 			};
 		private:
 			map<cluster_t* const, implant_c> implants_s;
@@ -338,12 +339,16 @@ public:
 		
 		//changes sputter_time axis and all others accordingly
 		sims_t change_resolution(quantity::sputter_time_t sputter_time_res);
-		sims_t change_resolution(quantity::depth_t sputter_depth_res);
+		sims_t change_resolution(quantity::sputter_depth_t sputter_depth_res);
 		
 		crater_t crater;
 		vector<cluster_t> clusters;
 		///returns pointer to the matching cluster within this measurement
 		cluster_t* cluster(const cluster_t& cluster_s);
+		///returns pointer to the matching cluster with the corresponding_isotope within this measurement
+		cluster_t* cluster(const isotope_t& iso, const vector<isotope_t>& reference_isos);
+		///returns pointer to the matching cluster with the corresponding_isotope within this measurement
+// 		cluster_t* cluster(const element_t& ele);
 		const cluster_t* cluster(const cluster_t& cluster_s) const;
 	}; // sims_t
 	

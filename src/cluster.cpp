@@ -184,6 +184,21 @@ int cluster_t::Draw(mglGraph* gr)
 	return 0;
 }
 
+quantity::abundance_t cluster_t::abundance()
+{
+	quantity::abundance_t abu;
+	for (auto& iso : isotopes)
+	{
+		if (!iso.abundance.is_set()) 
+			continue;
+		if (!abu.is_set())
+			abu = iso.abundance;
+		else
+			abu = abu * iso.abundance;
+	}
+	return abu;
+}
+
 string cluster_t::name() const
 {
 	return to_string("");
@@ -317,13 +332,16 @@ matrix_clusters_c::matrix_clusters_c(vector<cluster_t>& clusters_s, const vector
 	if (clusters_s.size()==0)
 		return;
 	
+// 	cout << "matrix_isotopes.size(): " << matrix_isotopes.size() << endl;
+// 	cout << "clusters_s.size(): " << clusters_s.size() << endl;
+	
 	bool insert=false;
 	for (auto& C : clusters_s) 
 	{
+// 		cout << "C: " << C.to_string() << endl;
 		insert = true;
 		for (auto& I : C.isotopes)
 		{
-			
 			if (find(matrix_isotopes.begin(),matrix_isotopes.end(),I)==matrix_isotopes.end())
 			{
 				insert=false;
@@ -371,6 +389,18 @@ quantity::concentration_t matrix_clusters_c::concentration_sum() const
 	return concentration;
 }
 
+const vector<cluster_t*> matrix_clusters_c::clusters_from_ele(element_t ele) const
+{
+	vector<cluster_t*> clusters_res;
+	for (const auto& c : clusters)
+	{
+		//asuming that there can be just 1 element per matrix_cluster
+		if (c->isotopes.front().symbol == ele.symbol)
+			clusters_res.push_back(c);
+	}
+	return clusters_res;
+}
+
 const vector<cluster_t> matrix_clusters_c::cluster_names()
 {
 	if (clusters.size()==0)
@@ -383,6 +413,14 @@ const vector<cluster_t> matrix_clusters_c::cluster_names()
 		i++;
 	}
 	return c_names;
+}
+
+const vector<element_t> matrix_clusters_c::elements() const
+{
+	set<element_t> eles;
+	for (const auto& iso : isotopes())
+		eles.insert(iso);
+	return {eles.begin(),eles.end()};
 }
 
 const std::vector< isotope_t > matrix_clusters_c::isotopes() const

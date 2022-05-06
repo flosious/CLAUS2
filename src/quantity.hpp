@@ -209,6 +209,7 @@ namespace quantity
 		quantity_t abs_sum()  const;
 		///sums up all data in the data.vector
 		quantity_t sum(int start=0, int stop = -1)  const;
+		quantity_t pbp_sum()  const;
 		quantity_t quantile(double percentile=0.75)  const;
 		quantity_t median()  const;
 		quantity_t mean()  const;
@@ -450,6 +451,8 @@ namespace quantity
 		///delete last element
 		const map_t pop_back() const;
 		bool is_set() const;
+		//scalar vs scalar
+		bool is_single_point() const;
 		const map<double,double> data_map() const;
 		string to_string() const;
 		string to_string_detailed() const;
@@ -457,6 +460,7 @@ namespace quantity
 		map_t remove_outliners(const fit_functions::polynom_t& polynom_s,float chisqr_relative_treshold=0.1) const;
 		fit_functions::polynom_t polynom(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
 		fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
+		map_t swap_X_Y() const;
 		///max of Y
 		map_t max() const;
 		///min of Y
@@ -513,8 +517,37 @@ namespace quantity
 		map_t operator/(map_t obj) const;
 		map_t operator/(quantity_t Y_o) const;
 	}; // map_t
-	
-	
+	class table_t
+	{
+	public:
+		class column_t
+		{
+		private:
+		public:
+			quantity_t quantity;
+			string name;
+			///compares name and quantity
+			bool operator==(const column_t& col);
+			bool operator!=(const column_t& col);
+		}; // table_t::column_t
+	private:
+		vector<column_t> columns_p;
+	public:
+		table_t(const quantity_t& q);
+		table_t(const vector<quantity_t>& qs);
+		///true on success
+		bool add_column();
+		const vector<column_t>& columns() const;
+		//empty if table.columns().size()!=2
+		map_t map() const;
+		///X and Y, do not need to be filled, just comparing name and quantity
+		map_t map(const column_t& X, const column_t& Y) const;
+		table_t add_lines(const vector<column_t>& columns_s) const;
+		//numer of lines
+		int size() const;
+		//numer of lines
+		int lines() const;
+	}; //table_t
 }
 
 #endif // QUANTITY_HPP

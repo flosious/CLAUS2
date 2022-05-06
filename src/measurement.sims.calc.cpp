@@ -48,7 +48,10 @@ measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SD_c::from_SR(bool
 	{
 		if (overwrite || !M.crater.sputter_depth.is_set())
 		{
-			M.crater.sputter_depth = M.crater.SR * M.crater.sputter_time;
+			if (M.crater.SR.is_scalar())
+				M.crater.sputter_depth = M.crater.SR * M.crater.sputter_time;
+			else
+				M.crater.sputter_depth = M.crater.SR.integrate_pbp(M.crater.sputter_time);
 			logger::info(3,"measurements_::sims_t::calc_t::SD_c::from_SR()","M.crater.SR.is_set() && M.crater.sputter_time.is_set()");
 		}
 	}
@@ -204,6 +207,7 @@ quantity::SF_t measurements_::sims_t::calc_t::RSF_c::from_SF_mean_ref(const clus
 
 measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor) : M(measurement), cluster(cluster), X_resolution_factor(X_resolution_factor)
 {
+	fit_maximum_intensity_val_and_pos();
 	logger::debug(11,"measurements_::sims_t::calc_t::implant_c::implant_c()","new implant object created",cluster.to_string(),M.to_string());
 }
 
@@ -344,6 +348,12 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::RSF()
 	return cluster.SF * M.matrix_clusters().intensity_sum();
 }
 
+const quantity::map_t& measurements_::sims_t::calc_t::implant_c::fitted_curve() const
+{
+	return fitted_curve_p;
+}
+
+
 void measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot)
 {
 	// current X resoluttion
@@ -365,20 +375,16 @@ void measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos
 		logger::warning(3,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()","!res_new.is_set()","could not calculate new resolution","using old");
 	}
 	
-// 	logger::warning(3,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()","Y:" + Y.to_string(), "cluster.intensity:" + cluster.intensity.to_string());
 	
 	start_idx = minimum_index_position(Y);
-// 	cout << endl << "start_idx: " << start_idx << endl;
-// 	cout << Y.to_string_detailed() << endl;
-// 	cout << Y.remove_data_from_begin(start_idx).to_string_detailed() << endl; 
-// 	cout << Y.remove_data_from_begin(start_idx).polyfit(17).to_string_detailed() << endl; 
-	
+
 	int max_idx = statistics::get_max_index_from_Y(Y.remove_data_from_begin(start_idx).polyfit(17).data()) + start_idx;
 // 	cout << endl << "max_idx: " << max_idx << endl;
 	int delta = (max_idx - start_idx)*8/10;
 	int stop_idx = max_idx + delta;
 	start_idx = max_idx - delta;
-	auto intensity_poly6 = Y.get_data_by_index(start_idx,stop_idx).polyfit(6);
+	auto reduced_q = Y.get_data_by_index(start_idx,stop_idx);
+	auto intensity_poly6 = reduced_q.polyfit(6);
 	maximum_pos_index_s = statistics::get_max_index_from_Y(intensity_poly6.data()) + start_idx;
 	
 	if (maximum_pos_index_s > intensity_poly6.data().size()-2) // maximum at the end of profile -> no clear maximum
@@ -397,6 +403,8 @@ void measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos
 	logger::debug(11,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()",cluster.to_string(),Y.to_string(), " minimum_index_position()=" + tools::to_string(start_idx)+ "\tmax_idx=" + tools::to_string(max_idx) + "\tstop_idx=" + tools::to_string(stop_idx));
 	logger::debug(7,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()","maximum_pos_index_s="+tools::to_string(maximum_pos_index_s),"max: " + sputter_time_at_maximum_s.to_string() +" " + maximum_intensity_s.to_string());
 	
+	fitted_curve_p = quantity::map_t(crater.sputter_time.get_data_by_index(start_idx,stop_idx),intensity_poly6);
+	
 	if (seconds_for_fit_plot>=0)
 	{
 		plot_t plot(true,true); //log, lin
@@ -404,15 +412,16 @@ void measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos
 		plot.Y2.range(1,1E6,true);
 		plot.Y3.range(1,1E6,true);
 		plot.Y1.add_curve(M.crater.sputter_time,cluster.intensity,cluster.to_string());
-		plot.Y2.add_curve(crater.sputter_time.get_data_by_index(start_idx,stop_idx),intensity_poly6,cluster.to_string());
-		plot.to_screen("measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()",seconds_for_fit_plot);
+// 		plot.Y2.add_curve(crater.sputter_time.get_data_by_index(start_idx,stop_idx),intensity_poly6,cluster.to_string());
+		plot.Y2.add_curve(fitted_curve_p,cluster.to_string());
+		plot.to_screen(M.to_string() + "fit_maximum_intensity_val_and_pos()",seconds_for_fit_plot);
 	}
 }
 
-int measurements_::sims_t::calc_t::implant_c::maximum_pos_index()
+int measurements_::sims_t::calc_t::implant_c::maximum_pos_index() const
 {
-	if (maximum_pos_index_s<0)
-		fit_maximum_intensity_val_and_pos();
+// 	if (maximum_pos_index_s<0)
+// 		fit_maximum_intensity_val_and_pos();
 	return maximum_pos_index_s;
 }
 
@@ -446,25 +455,25 @@ quantity::dose_t measurements_::sims_t::calc_t::implant_c::dose() const
 	return cluster.concentration.integrate(M.crater.sputter_depth.change_unit("cm"),minimum_sputter_depth_position());
 }
 
-const quantity::sputter_time_t&  measurements_::sims_t::calc_t::implant_c::sputter_time_at_maximum()
+const quantity::sputter_time_t&  measurements_::sims_t::calc_t::implant_c::sputter_time_at_maximum() const
 {
-	if (!sputter_time_at_maximum_s.is_set())
-		fit_maximum_intensity_val_and_pos();
+// 	if (!sputter_time_at_maximum_s.is_set())
+// 		fit_maximum_intensity_val_and_pos();
 
 	return sputter_time_at_maximum_s;
 
 }
 
-const quantity::intensity_t& measurements_::sims_t::calc_t::implant_c::maximum_intensity()
+const quantity::intensity_t& measurements_::sims_t::calc_t::implant_c::maximum_intensity() const
 {
-	if (!maximum_intensity_s.is_set())
-		fit_maximum_intensity_val_and_pos();
+// 	if (!maximum_intensity_s.is_set())
+// 		fit_maximum_intensity_val_and_pos();
 
 	return maximum_intensity_s;
 
 }
 
-quantity::SR_t measurements_::sims_t::calc_t::implant_c::SR()
+quantity::SR_t measurements_::sims_t::calc_t::implant_c::SR() const
 {
 	if (M.matrix_clusters().is_cluster_in_matrix(cluster))
 	{
