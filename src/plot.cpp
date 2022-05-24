@@ -133,7 +133,11 @@ void plot_t::to_screen(const string window_title, double sleep_sec)
 	else
 	{
 		gr.RunThr();
+#ifdef __unix__
 		usleep(sleep_sec*1000*1000);
+#else
+		Sleep(sleep_sec*1000);
+#endif
 	}
 }
 
@@ -174,18 +178,23 @@ void plot_t::axis_t::add_curve(const quantity::map_t& XY, const std::string lege
 	add_curve(XY.X(),XY.Y(),legend);
 }
 
-// bool plot_t::axis_t::add_polynom(const quantity::quantity_t& X, const fit_functions::polynom_t& polynom_s)
-// {
-// 	if (polynom_s.successfully_fitted())
-// 	{
-// 		add_curve(X,polynom_s.);
-// 	}
-// 	return true;
-// }
+void plot_t::axis_t::add_polynom(const quantity::map_t& XY, const fit_functions::polynom_t& polynom_s, const string legend, const string color, const unsigned int  points)
+{
+	const quantity::quantity_t new_X=XY.X().change_resolution(points) ;
+	add_curve(XY.polyfit(polynom_s,new_X),legend);
+}
 
 void plot_t::axis_t::add_points(const quantity::map_t& XY, const std::string legend, const std::string color)
 {
-	add_points(XY.X(),XY.Y(),legend,color);
+	if (XY.Y().is_set() && XY.X().is_set())
+		points.push_back({XY,legend,color});
+// 	add_points(XY.X(),XY.Y(),legend,color);
+}
+void plot_t::axis_t::add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend, const string color)
+{
+	logger::debug(15,"plot_t::axis_t::add_points()","entering");
+	if (Y.is_set() && X.is_set())
+		points.push_back({quantity::map_t(X,Y),legend,color});
 }
 
 void plot_t::axis_t::add_curve(const vector<double>& X, const vector<double>& Y, const string legend)
@@ -202,12 +211,7 @@ void plot_t::axis_t::add_curve(const quantity::quantity_t& X, const quantity::qu
 		curves.push_back({quantity::map_t(X,Y),legend});
 }
 
-void plot_t::axis_t::add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend, const string color)
-{
-	logger::debug(15,"plot_t::axis_t::add_points()","entering");
-	if (Y.is_set() && X.is_set())
-		points.push_back({quantity::map_t(X,Y),legend,color});
-}
+
 
 bool plot_t::axis_t::check()
 {
@@ -310,6 +314,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		mglData y(c.XY.Y().data());
 		gr->Plot(x,y,c.color.c_str(),filter.escape_special_characters("legend '"+ c.legende +"'").c_str()); 
 	}
+	int legends_above_curves = 1;
 	for (auto& c: curves)
 	{
 		if (!c.XY.is_set())
@@ -319,12 +324,18 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		
 // 		gr->Plot(x,y,color.c_str(),.c_str());
 		gr->Plot(x,y,color.c_str(),("legend '"+ filter.escape_special_characters(c.legende) +"'").c_str());
-		if (c.XY.Y().data().size()<11) continue;
+		if (c.legende.length()>5)
+			continue;
+		if (c.XY.Y().data().size()<11) 
+			continue;
 		int y_offset=0;
 		if (log10_scale)
 			y_offset = 1;
 		gr->SetFontSize(2);
-		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1),c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),filter.escape_special_characters(c.legende).c_str(),"m");
+		/// write legend above the curve
+		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1)*0.9/legends_above_curves,c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),filter.escape_special_characters(c.legende).c_str(),"m");
+		legends_above_curves++;
+// 		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1),c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),filter.escape_special_characters(c.legende).c_str(),"m");
 		gr->SetFontSize(3); // default
 	}
 	for (auto& line : lines)
@@ -462,6 +473,16 @@ plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys)
 			stop = 2*stop;
 			start = 0;
 		}
+	}
+	else // bereich etwas vergrößern
+	{
+		
+		auto delta = stop-start;
+// 		stop = stop+0.05*delta;
+		start = start*0.95;
+		if (start<2)
+			start = start-0.05*delta;
+		stop = stop * 1.05;
 	}
 	logger::debug(12,"plot_t::axis_t::range_t::range_t()",Ys.front()->to_string(),"start=" + std::to_string(start) + " stop=" + std::to_string(stop));
 	*this = range_t(start,stop);

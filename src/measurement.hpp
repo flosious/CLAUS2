@@ -72,7 +72,7 @@ public:
 	public:
 		measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, list<sample_t>& samples_list, string method,database_t& sql_wrapper);
 		measurement_t(files_::file_t::name_t& filename, list<sample_t>& samples_list, string method,database_t& sql_wrapper);
-		
+		long long unsigned int memory_address() const;
 		string filename_with_path;
 		string to_string(const string del = ", ") const;
 		bool is_set() const;
@@ -90,6 +90,7 @@ public:
 	
 	class profiler_t : public measurement_t
 	{
+		
 	private:
 		string primary_method_p="";
 	public:
@@ -108,10 +109,11 @@ public:
 		///some general data filters
 		class filter_t
 		{
+			
 		private:
 			const sims_t& M;
 		public:
-			filter_t(const sims_t& M);
+			filter_t(const sims_t& M) ;
 			///filters out pulses/spikes/gaps in data
 			sims_t impulses();
 		};
@@ -119,7 +121,7 @@ public:
 		///calculation of everything within this measurement
 		class calc_t
 		{
-// 			friend class mgroups_::sims_t; // geht nicht
+			// 			friend class mgroups_::sims_t; // geht nicht
 		public:
 			sims_t& M;
 			///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
@@ -197,23 +199,23 @@ public:
 				RSF_c(const quantity::SF_t& SF, const quantity::intensity_t& reference);
 				
 				calc_t& from_SF_mean_ref(bool overwrite=false);
-				quantity::SF_t from_SF_mean_ref(const cluster_t& cluster);
+				cluster_t::RSF_t from_SF_mean_ref(const cluster_t& cluster);
 				
 				calc_t& from_SF_median_ref(bool overwrite=false);
-				quantity::SF_t from_SF_median_ref(const cluster_t& cluster);
+				cluster_t::RSF_t from_SF_median_ref(const cluster_t& cluster);
 				
 				calc_t& from_SF_trimmed_mean_ref(bool overwrite=false);
-				quantity::SF_t from_SF_trimmed_mean_ref(const cluster_t& cluster);
+				cluster_t::RSF_t from_SF_trimmed_mean_ref(const cluster_t& cluster);
 				
 				calc_t& from_SF_pbp_ref(bool overwrite=false);
-				quantity::SF_t from_SF_pbp_ref(const cluster_t& cluster);
+				cluster_t::RSF_t from_SF_pbp_ref(const cluster_t& cluster);
 				
 				calc_t& from_SF_percentile_ref(double percentile, bool overwrite=false);
-				quantity::SF_t from_SF_percentile_ref(const cluster_t& cluster, double percentile);
+				cluster_t::RSF_t from_SF_percentile_ref(const cluster_t& cluster, double percentile);
 				
 				///reference_intensity could be percentile, mean, median, trimmed_mean, a vector (pbp), or anything other ...
 				calc_t& from_SF_ref(const quantity::intensity_t& reference_intensity, bool overwrite=false);
-				quantity::SF_t from_SF_ref(const cluster_t& cluster, const quantity::intensity_t& reference_intensity, bool overwrite=false);
+				cluster_t::RSF_t from_SF_ref(const cluster_t& cluster, const quantity::intensity_t& reference_intensity, bool overwrite=false);
 			};
 			class concentration_c
 			{
@@ -308,7 +310,6 @@ public:
 		 * SiGeB cluster or SiB cluster will be treatet as NON-matrix clusters, that means (implanted) isotopical cluster
 		 */
 		
-		
 		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
 		bool are_intensities_of_clusters_set(const vector<cluster_t>& clusters_s) const;
@@ -328,7 +329,6 @@ public:
 		isotope_t isotope_corresponding_to_cluster(const cluster_t& cluster);
 		///get or set matrix_isotopes
 		matrix_clusters_c matrix_clusters(const vector<isotope_t> matrix_isotopes={});
-// 		vector<isotope_t> matrix_isotopes;
 		
 		//creates instantly a plot
 		void plot_now(double sleep_sec=1);
@@ -347,9 +347,16 @@ public:
 		cluster_t* cluster(const cluster_t& cluster_s);
 		///returns pointer to the matching cluster with the corresponding_isotope within this measurement
 		cluster_t* cluster(const isotope_t& iso, const vector<isotope_t>& reference_isos);
-		///returns pointer to the matching cluster with the corresponding_isotope within this measurement
-// 		cluster_t* cluster(const element_t& ele);
 		const cluster_t* cluster(const cluster_t& cluster_s) const;
+		///returns a copy of the RSF of the specified cluster
+		cluster_t::RSF_t RSF(const cluster_t& cluster_s) const;
+		///returns a copy of the SF of the specified cluster
+		quantity::SF_t SF(const cluster_t& cluster_s) const;
+		///returns a copy of the intensity of the specified cluster
+		quantity::intensity_t intensity(const cluster_t& cluster_s) const;
+		///returns a copy of the concentration of the specified cluster
+		quantity::concentration_t concentration(const cluster_t& cluster_s) const;
+		
 	}; // sims_t
 	
 	class dsims_t : public sims_t

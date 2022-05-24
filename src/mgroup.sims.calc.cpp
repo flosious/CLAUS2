@@ -74,28 +74,28 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 	return *this;
 }
 
-const vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> mgroups_::sims_t::calc_t::polynom_fit_Crels_to_Irels(
-											vector<cluster_t> 		cluster_names,
-											vector<unsigned int> 	rank, 
-											vector<double> 			fit_start_parameters)
-{
-	vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> polynom_fit_Crel_to_Irelvec;
-	for (auto cluster_name_zaehler:cluster_names)
-	{
-		for (auto cluster_name_nenner:cluster_names)
-		{
-			if (cluster_name_nenner == cluster_name_zaehler)
-				continue;
-			polynom_fit_Crel_to_Irelvec.push_back({cluster_name_zaehler,cluster_name_nenner,*this,rank,fit_start_parameters});
-		}
-	}
-	return polynom_fit_Crel_to_Irelvec;
-}
-
-const vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> mgroups_::sims_t::calc_t::proportional_fit_Crels_to_Irels(vector<cluster_t> 		cluster_names)
-{
-	return polynom_fit_Crels_to_Irels(cluster_names,{0,1},{0,1});
-}
+// const vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> mgroups_::sims_t::calc_t::polynom_fit_Crels_to_Irels(
+// 											vector<cluster_t> 		cluster_names,
+// 											vector<unsigned int> 	rank, 
+// 											vector<double> 			fit_start_parameters)
+// {
+// 	vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> polynom_fit_Crel_to_Irelvec;
+// 	for (auto cluster_name_zaehler:cluster_names)
+// 	{
+// 		for (auto cluster_name_nenner:cluster_names)
+// 		{
+// 			if (cluster_name_nenner == cluster_name_zaehler)
+// 				continue;
+// 			polynom_fit_Crel_to_Irelvec.push_back({cluster_name_zaehler,cluster_name_nenner,*this,rank,fit_start_parameters});
+// 		}
+// 	}
+// 	return polynom_fit_Crel_to_Irelvec;
+// }
+// 
+// const vector<mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c> mgroups_::sims_t::calc_t::proportional_fit_Crels_to_Irels(vector<cluster_t> 		cluster_names)
+// {
+// 	return polynom_fit_Crels_to_Irels(cluster_names,{0,1},{0,1});
+// }
 
 
 /*************************/
@@ -160,47 +160,27 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices(
 	return calc;
 }
 
-mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_matrix_clusters(vector<unsigned int> rank, bool overwrite)
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrices(vector<unsigned int> rank, bool overwrite)
 {
-// 	::calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
 	if (MG.matrix_clusters().size()!=2)
 	{
-		logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_matrix_clusters()","MG.matrix_isotopes().size()!=2","returning calc");
+		logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
 		return calc;
 	}
 	const isotope_t relevant_isotope = MG.matrix_isotopes().front();
-	quantity::concentration_t C;
-	quantity::SR_t SR;
-	for (const auto& M : MG.measurements()) // collecting data for the relevant_isotope
-	{
-		if (!M->crater.SR.is_set())
-			continue;
-		if (M->crater.SR.is_vector())
-		{
-			logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_matrix_clusters()","SR is a vector, dont know how to handle, tell florian",M->to_string()+"  "+M->crater.SR.to_string(),"continue");
-			continue;
-		}
-		const cluster_t* relevant_cluster = M->matrix_clusters(MG.matrix_isotopes()).cluster(relevant_isotope);
-		if (relevant_cluster==nullptr) // could not find cluster in measurement
-			C << quantity::concentration_t({0},units::derived::atom_percent,quantity::dimensions::SI::relative);
-		else
-		{
-			if (!relevant_cluster->concentration.is_set())
-				continue;
-			//median
-			C << relevant_cluster->concentration.median().change_unit(units::derived::atom_percent);
-		}
-		SR << M->crater.SR;
-	}
-	quantity::map_t SR_vs_C(C,SR);
+	data_collectors_t::sims_t dc(MG.measurements());
+	quantity::table_t SR_vs_C_table;
+	SR_vs_C_table.add(dc.get_column_concentrations_from_sample_matrix(relevant_isotope));
+	SR_vs_C_table.add(dc.get_column_sputter_rates());
+	auto SR_vs_C = SR_vs_C_table.remove_empty_lines().get_map();
 	const auto P =SR_vs_C.polynom(rank,{rank.begin(),rank.end()});
 	
 	//plot
 	if (!P.successfully_fitted())
 		return calc;
 	plot_t plot(false,false);
-	plot.Y1.add_points(SR_vs_C,"SR vs " + relevant_isotope.to_string(),"ro");
-	plot.Y2.add_curve(SR_vs_C.polyfit(P),P.to_string());
+	plot.Y1.add_points(SR_vs_C,"SR vs " + relevant_isotope.to_string()," Ro");
+	plot.Y1.add_curve(SR_vs_C.polyfit(P),P.to_string());
 	plot.to_screen("SR_vs_C",0);
 	
 	//copy to other measurements
@@ -215,9 +195,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
 			continue;
 		
 		M->crater.SR = SR_vs_C.polyfit(relevant_C->concentration,P); //SR point by point
-		cout << "M->crater.SR: " << M->crater.SR.to_string() << endl;
 	}
-
 	return calc;
 }
 
@@ -269,7 +247,7 @@ const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs
 	map<cluster_t*,quantity::intensity_t> rsf_to_ref_intensity;
 	for (auto& M : measurements)
 	{
-		auto matrix_clusters = M->matrix_clusters();
+		auto matrix_clusters = M->matrix_clusters(MG.matrix_isotopes());
 		if (!matrix_clusters.intensity_sum().is_set())
 		{
 			logger::error("mgroups_::sims_t::calc_t::RSF_c::RSFs_to_ref_intensities()","!M->reference_intensity().is_set()","continue");
@@ -293,7 +271,9 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_dose(boo
 			//skip cluster belonging to matrix
 			if (M->matrix_clusters().is_cluster_in_matrix(C)) continue;
 			if (overwrite || !C.SF.is_set())
-				C.SF = M->calc().SF.from_db_dose(C);
+			{
+				C.SF = M->calc().SF.from_db_dose(C).change_unit(units::derived::atoms_per_ccm/(units::derived::counts/units::SI::second));
+			}
 		}
 	}
 	return calc;
@@ -322,76 +302,93 @@ mgroups_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc) : MG(calc.MG), calc(calc), 
 {
 }
 
-const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::RSF_c::SFs_to_ref_intensities()
+const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::RSF_c::clusters_to_ref_intensities()
 {
-	map<cluster_t*,quantity::intensity_t> sf_to_ref_intensity;
+	map<cluster_t*,quantity::intensity_t> clusters_to_ref_intensity;
 	for (auto& M : measurements)
 	{
-		auto matrix_clusters = M->matrix_clusters();
+		auto matrix_clusters = M->matrix_clusters(MG.matrix_isotopes());
 		if (!matrix_clusters.intensity_sum().is_set())
 		{
-			logger::error("mgroups_::sims_t::calc_t::RSF_c::SFs_to_ref_intensities()","!M->reference_intensity().is_set()","continue");
+			logger::error("mgroups_::sims_t::calc_t::RSF_c::clusters_to_ref_intensities()","!M->reference_intensity().is_set(), " + M->to_string_short(),"continue");
 			continue;
 		}
 		for (auto& C : M->clusters)
 		{
 			if (!C.SF.is_set()) continue;
-			sf_to_ref_intensity.insert(pair<cluster_t*,quantity::intensity_t> (&C,matrix_clusters.intensity_sum()));
+			clusters_to_ref_intensity.insert(pair<cluster_t*,quantity::intensity_t> (&C,matrix_clusters.intensity_sum()));
 		}
 	}
-	return sf_to_ref_intensity;
+	return clusters_to_ref_intensity;
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_mean_ref(bool overwrite)
 {
-	for (auto& sf_to_ref : SFs_to_ref_intensities())
+	for (auto& sf_to_ref : clusters_to_ref_intensities())
 	{
 		if (overwrite || !sf_to_ref.first->RSF.is_set())
-			sf_to_ref.first->RSF = quantity::SF_t (sf_to_ref.first->SF * sf_to_ref.second.mean()); // this is the mean of a sum; not the sum of the means!
+			sf_to_ref.first->RSF = cluster_t::RSF_t (sf_to_ref.first->SF * sf_to_ref.second.mean()).change_unit(units::derived::atoms_per_ccm); // this is the mean of a sum; not the sum of the means! But math says it should be the same
 	}
+// 	quantity::quantity_t q_ref;
+// 	const quantity::table_t table_refs(MG.ref_intensities());
+// 	if (!table_refs.is_set())
+// 	{
+// 		logger::error("mgroups_::sims_t::calc_t::RSF_c::from_SF_mean_ref","!table_refs.is_set()","returning");
+// 		return calc;
+// 	}
+// 	
+// 	for (auto C : MG.clusters())
+// 	{
+// 		quantity::table_t SF_table(table_refs);
+// 		SF_table.add(MG.intensities(C));
+// 	}
 	return calc;
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_median_ref(bool overwrite)
 {
-	for (auto& sf_to_ref : SFs_to_ref_intensities())
+	for (auto& sf_to_ref : clusters_to_ref_intensities())
 	{
 		if (overwrite || !sf_to_ref.first->RSF.is_set())
-			sf_to_ref.first->RSF = quantity::SF_t (sf_to_ref.first->SF * sf_to_ref.second.median()); // this is the median of a sum; not the sum of the medians!
+			sf_to_ref.first->RSF = cluster_t::RSF_t (sf_to_ref.first->SF * sf_to_ref.second.median()).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
 	}
 	return calc;
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_pbp_ref(bool overwrite)
 {
-	for (auto& sf_to_ref : SFs_to_ref_intensities())
+	for (auto& sf_to_ref : clusters_to_ref_intensities())
 	{
 		if (overwrite || !sf_to_ref.first->RSF.is_set())
-			sf_to_ref.first->RSF = quantity::SF_t (sf_to_ref.first->SF * sf_to_ref.second); // this is the median of a sum; not the sum of the medians!
+			sf_to_ref.first->RSF = cluster_t::RSF_t (sf_to_ref.first->SF * sf_to_ref.second).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
 	}
 	return calc;
 }
 
 mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::copy_to_same_matrices(bool overwrite)
 {
-	auto cs = MG.clusters();
+	const auto cs = MG.clusters();
 	
 	for (auto& C : cs)
 	{
 		//for the specific cluster C
 		auto mat_to_RSF = MG.matrix_to_RSF(C);
-		if (mat_to_RSF.size()==0) continue; // no RSFs at all for this cluster at all
+		if (mat_to_RSF.size()==0) 
+			continue; // no RSFs at all for this cluster at all
 		for (auto& M : measurements)
 		{
-			if (!M->sample->matrix().is_set()) continue; // unknown matrix
+			if (!M->sample->matrix().is_set()) 
+				continue; // unknown matrix
 			auto mat = mat_to_RSF.find(M->sample->matrix());
-			if (mat==mat_to_RSF.end()) continue; // no RSF for this matrix and cluster
+			if (mat==mat_to_RSF.end()) 
+				continue; // no RSF for this matrix and cluster
 			if (mat->second.is_vector())
 			{
 				/*	this is unhandled at the moment, but will be important when reference samples with layer of different matrices are used.
 				*	one could use all the mean(RSF point at matrix concentration) ... yeah maybe later...;-)
 				*/
 				logger::error("mgroups_::sims_t::calc_t::RSF_c::from_others()","RSF is a vector, dont know how to handle, tell florian",M->to_string(),"ignoring");
+				continue;
 			}
 			if (overwrite || !M->cluster(C)->RSF.is_set())
 				M->cluster(C)->RSF = mat->second;
@@ -400,6 +397,56 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::copy_to_same_matrice
 	return calc;
 }
 
+mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrices(vector<unsigned int> rank, bool overwrite)
+{
+	const set<cluster_t> clusters = MG.clusters();
+	for (const auto& c : clusters)
+		interpolate_from_known_sample_matrices(c);
+	return calc;
+}
+
+mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrices(const cluster_t& cluster, vector<unsigned int> rank, bool overwrite)
+{
+	if (MG.matrix_clusters().size()!=2)
+	{
+		logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
+		return calc;
+	}
+	const isotope_t relevant_isotope = MG.matrix_isotopes().front();
+	data_collectors_t::sims_t dc(MG.measurements());
+	quantity::table_t RSF_vs_C_table;
+	RSF_vs_C_table.add(dc.get_column_concentrations_from_sample_matrix(relevant_isotope));
+	RSF_vs_C_table.add(dc.get_column_RSFs_from_cluster(cluster));
+	auto RSF_vs_C = RSF_vs_C_table.remove_empty_lines().get_map();
+	const auto P =RSF_vs_C.polynom(rank,{rank.begin(),rank.end()});
+	
+	//plot
+	if (!P.successfully_fitted())
+		return calc;
+	plot_t plot(false,false);
+	plot.Y1.add_points(RSF_vs_C,"RSF("+ cluster.to_string() +") vs " + relevant_isotope.to_string()," Ro");
+// 	plot.Y1.add_curve(RSF_vs_C.polyfit(P,100),P.to_string());
+	plot.Y1.add_polynom(RSF_vs_C,P,P.to_string());
+	plot.to_screen("RSF("+ cluster.to_string() +")_vs_C",0);
+	
+	//copy to other measurements
+	for (auto& M : MG.measurements())
+	{
+		const auto c_in_m = M->cluster(cluster);
+		if (c_in_m == nullptr)
+			continue;
+		if (!overwrite && c_in_m->RSF.is_set())
+			continue;
+		cluster_t* relevant_C = M->matrix_clusters(MG.matrix_isotopes()).cluster(relevant_isotope);
+		if (relevant_C==nullptr)
+			continue;
+		if (!relevant_C->concentration.is_set())
+			continue;
+		c_in_m->RSF = RSF_vs_C.polyfit(relevant_C->concentration,P); //SR point by point
+		logger::debug(5,"mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrices","RSF: "+c_in_m->RSF.to_string()+" of "+ c_in_m->to_string() +" copied");
+	}
+	return calc;
+}
 
 
 /*************************/
@@ -558,93 +605,93 @@ const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::
 /************************************************************/
 /******           polynom_fit_Crel_to_Irel_c          *******/
 /************************************************************/
-mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters) :
-																				Crel_to_Irel_c(zaehler,nenner,calc),
-																				polynom(polynom_f(rank))
-{
-}
-
-void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double sleep_sec) const
-{
-	const unsigned int data_points_for_fit_resolution=100;
-	if (!polynom.successfully_fitted())	return;
-
-	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
-// 	cout << "B2" << endl;
-	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set()) return;
-	plot_t plot(false);
-	
-	stringstream title_X, title_Y, title_window;
-	title_X << "Irel = (" << zaehler.to_string() << ") / (" << nenner.to_string() << ")";
-	title_Y << "Crel = [" << zaehler.corresponding_isotope(calc.MG.matrix_isotopes()).to_string() << "] / [";
-	title_Y << nenner.corresponding_isotope(calc.MG.matrix_isotopes()).to_string() << "]";
-	stringstream fit_params;
-	title_window << title_Y.rdbuf() << " over " << title_X.rdbuf() << " chisq=" << polynom.chisq();
-	
-	//generate data to show the fit in high resolution
-	const quantity::quantity_t x_res = Crel_to_Irel.second.resolution()/data_points_for_fit_resolution;
-	const quantity::quantity_t X(title_X.str(),(Crel_to_Irel.second.change_resolution(x_res/data_points_for_fit_resolution)).data(),units::SI::one); 
-	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",Crel_to_Irel.second.to_string_detailed());
-	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",x_res.to_string_detailed());
-	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",X.to_string_detailed());
-	const quantity::quantity_t Y(title_Y.str(),polynom.y_data(X.data()),units::SI::one);
-	
-	plot.Y1.add_curve(X,Y,"fit rank: " + tools::vec::to_string(polynom.rank()));
-	plot.Y1.add_points((quantity::quantity_t{X,Crel_to_Irel.second.data()}),(quantity::quantity_t{Y,Crel_to_Irel.first.data()}),"data"," ro");
-	plot.to_screen(title_window.str(),sleep_sec);
-}
-
-quantity::concentration_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel(const measurements_::sims_t* M) const
-{
-// 	logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::polynom_c::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string(),"Crel=");
-	quantity::concentration_t result(polynom.y_data(Irel(M).data()),Crel_template.unit());
-	logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string_detailed(),"Crel=" + result.to_string_detailed());
-// 	return {polynom.fitted_y_data(Irel(M).data()),Crel_template.unit()};
-	return result;
-}
-
-vector<double> mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::fit_start_parameters(const vector<unsigned int> rank)
-{
-	vector<double> out(rank.size());
-	for (int i=0;i<rank.size();i++)
-		out[i]=rank[i];
-	return out;
-}
-
-const fit_functions::polynom_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f(const vector<unsigned int> rank) const
-{
-// 	cout << "RANK" << endl;
-// 	print(rank);
-	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
-	const fit_functions::polynom_t polynom_empty(0,{0});
-	
-	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set())
-	{
-		logger::warning(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","known_Crels_from_sample_matrix_to_Irels_truncated_median() is not set","returning false");
-		return polynom_empty;
-	}
-	
-	map<double,double> X_to_Y_map;
-	tools::vec::combine_vecs_to_map(&Crel_to_Irel.second.data(),&Crel_to_Irel.first.data(), &X_to_Y_map); // Crel(Irel)
-	if (X_to_Y_map.size()<1 || X_to_Y_map.size() < rank.size())
-	{
-		logger::warning(3,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","to less data points: " + tools::to_string(X_to_Y_map.size()),"returning false");
-		return polynom_empty;
-	}
-	const fit_functions::polynom_t polynom_result(rank,fit_start_parameters(rank),X_to_Y_map);
-	if (!polynom_result.successfully_fitted())
-	{
-		//this should essentially never happen; if there is a GSL error, GSL handler will catch the exception
-		logger::error("mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","fit returned error","returning false");
-		logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","X_to_Y_map.size()=" + tools::to_string(X_to_Y_map.size()));
-		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","X_to_Y_map",tools::to_string(X_to_Y_map));
-		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","rank",tools::vec::to_string(rank));
-		return polynom_empty;
-	}
-	else
-	{
-		logger::info(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","fit successful","zaehler=" + zaehler.to_string()+" nenner=" + nenner.to_string());
-	}
-	return polynom_result;
-}
+// mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters) :
+// 																				Crel_to_Irel_c(zaehler,nenner,calc),
+// 																				polynom(polynom_f(rank))
+// {
+// }
+// 
+// void mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen(double sleep_sec) const
+// {
+// 	const unsigned int data_points_for_fit_resolution=100;
+// 	if (!polynom.successfully_fitted())	return;
+// 
+// 	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
+// // 	cout << "B2" << endl;
+// 	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set()) return;
+// 	plot_t plot(false);
+// 	
+// 	stringstream title_X, title_Y, title_window;
+// 	title_X << "Irel = (" << zaehler.to_string() << ") / (" << nenner.to_string() << ")";
+// 	title_Y << "Crel = [" << zaehler.corresponding_isotope(calc.MG.matrix_isotopes()).to_string() << "] / [";
+// 	title_Y << nenner.corresponding_isotope(calc.MG.matrix_isotopes()).to_string() << "]";
+// 	stringstream fit_params;
+// 	title_window << title_Y.rdbuf() << " over " << title_X.rdbuf() << " chisq=" << polynom.chisq();
+// 	
+// 	//generate data to show the fit in high resolution
+// 	const quantity::quantity_t x_res = Crel_to_Irel.second.resolution()/data_points_for_fit_resolution;
+// 	const quantity::quantity_t X(title_X.str(),(Crel_to_Irel.second.change_resolution(x_res/data_points_for_fit_resolution)).data(),units::SI::one); 
+// 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",Crel_to_Irel.second.to_string_detailed());
+// 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",x_res.to_string_detailed());
+// 	logger::debug(15,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::plot_to_screen()",X.to_string_detailed());
+// 	const quantity::quantity_t Y(title_Y.str(),polynom.y_data(X.data()),units::SI::one);
+// 	
+// 	plot.Y1.add_curve(X,Y,"fit rank: " + tools::vec::to_string(polynom.rank()));
+// 	plot.Y1.add_points((quantity::quantity_t{X,Crel_to_Irel.second.data()}),(quantity::quantity_t{Y,Crel_to_Irel.first.data()}),"data"," ro");
+// 	plot.to_screen(title_window.str(),sleep_sec);
+// }
+// 
+// quantity::concentration_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel(const measurements_::sims_t* M) const
+// {
+// // 	logger::debug(11,"mgroups_::sims_t::calc_t::matrix_c::polynom_c::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string(),"Crel=");
+// 	quantity::concentration_t result(polynom.y_data(Irel(M).data()),Crel_template.unit());
+// 	logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::Crel()","Irel= " + Irel(M).to_string_detailed(),"Crel=" + result.to_string_detailed());
+// // 	return {polynom.fitted_y_data(Irel(M).data()),Crel_template.unit()};
+// 	return result;
+// }
+// 
+// vector<double> mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::fit_start_parameters(const vector<unsigned int> rank)
+// {
+// 	vector<double> out(rank.size());
+// 	for (int i=0;i<rank.size();i++)
+// 		out[i]=rank[i];
+// 	return out;
+// }
+// 
+// const fit_functions::polynom_t mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f(const vector<unsigned int> rank) const
+// {
+// // 	cout << "RANK" << endl;
+// // 	print(rank);
+// 	const auto Crel_to_Irel = known_Crels_from_sample_matrix_to_Irels_truncated_median();
+// 	const fit_functions::polynom_t polynom_empty(0,{0});
+// 	
+// 	if (!Crel_to_Irel.first.is_set() || !Crel_to_Irel.second.is_set())
+// 	{
+// 		logger::warning(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","known_Crels_from_sample_matrix_to_Irels_truncated_median() is not set","returning false");
+// 		return polynom_empty;
+// 	}
+// 	
+// 	map<double,double> X_to_Y_map;
+// 	tools::vec::combine_vecs_to_map(&Crel_to_Irel.second.data(),&Crel_to_Irel.first.data(), &X_to_Y_map); // Crel(Irel)
+// 	if (X_to_Y_map.size()<1 || X_to_Y_map.size() < rank.size())
+// 	{
+// 		logger::warning(3,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","to less data points: " + tools::to_string(X_to_Y_map.size()),"returning false");
+// 		return polynom_empty;
+// 	}
+// 	const fit_functions::polynom_t polynom_result(rank,fit_start_parameters(rank),X_to_Y_map);
+// 	if (!polynom_result.successfully_fitted())
+// 	{
+// 		//this should essentially never happen; if there is a GSL error, GSL handler will catch the exception
+// 		logger::error("mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","fit returned error","returning false");
+// 		logger::debug(11,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","X_to_Y_map.size()=" + tools::to_string(X_to_Y_map.size()));
+// 		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","X_to_Y_map",tools::to_string(X_to_Y_map));
+// 		logger::debug(12,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","rank",tools::vec::to_string(rank));
+// 		return polynom_empty;
+// 	}
+// 	else
+// 	{
+// 		logger::info(4,"mgroups_::sims_t::calc_t::polynom_fit_Crel_to_Irel_c::polynom_f()","fit successful","zaehler=" + zaehler.to_string()+" nenner=" + nenner.to_string());
+// 	}
+// 	return polynom_result;
+// }
 

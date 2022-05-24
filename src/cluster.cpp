@@ -84,6 +84,16 @@ const bool cluster_t::is_set() const
 	return false;
 }
 
+quantity::intensity_t cluster_t::intensity_background() const
+{
+	unsigned int bins = 10;
+	statistics::histogram_t histogram(intensity.data(),10);
+	cout << endl << "HISTOGRAM: " << endl;
+	print(histogram.linear_bins());
+	print(histogram.log10_bins());
+	return {};
+}
+
 bool cluster_t::operator!=(const cluster_t& obj) const
 {
 	return !operator==(obj);
@@ -276,8 +286,8 @@ cluster_t cluster_t::interpolate(const quantity::quantity_t& new_Q, const quanti
 	if (SF.is_set() && SF.data().size()>1)
 		new_cluster.SF = SF.interp(old_Q,new_Q);
 	
-	if (RSF.is_set() && RSF.data().size()>1)
-		new_cluster.RSF = RSF.interp(old_Q,new_Q);
+// 	if (RSF.is_set() && RSF.data().size()>1)
+// 		new_cluster.RSF = RSF.interp(old_Q,new_Q);
 	
 	return new_cluster;
 }
@@ -296,8 +306,8 @@ cluster_t cluster_t::filter_impulse(int window_size, float factor)
 	//ATTENTION i am not sure if this is right ...
 	if (SF.is_set())
 		c_out.SF = SF.filter_impulse(window_size,factor);
-	if (RSF.is_set())
-		c_out.RSF = RSF.filter_impulse(window_size,factor);
+// 	if (RSF.is_set())
+// 		c_out.RSF = RSF.filter_impulse(window_size,factor);
 	
 	return c_out;
 }
@@ -367,10 +377,11 @@ quantity::intensity_t matrix_clusters_c::intensity_sum() const
 	quantity::intensity_t intensity;
 	for (auto& C : clusters)
 	{
-		if (!intensity.is_set())
-			intensity = C->intensity;
-		else
-			intensity += C->intensity;
+// 		if (!intensity.is_set())
+// 			intensity = C->intensity;
+// 		else
+// 		cout << "matrix_clusters_c::intensity_sum(): " << C->to_string() << endl;
+		intensity += C->intensity;
 	}
 	return intensity;
 }
@@ -451,3 +462,24 @@ cluster_t * matrix_clusters_c::cluster(const isotope_t iso)
 }
 
 
+/**************************************************************/
+/******************  cluster_t::RSF_t  ************************/
+/**************************************************************/
+
+
+cluster_t::RSF_t::RSF_t(const quantity::quantity_t& q, const vector<cluster_t>& reference_clusters_s) : 
+			quantity_t("RSF",q.data(),q.unit(),q.dimension()), reference_clusters_p(RSF_t(reference_clusters_s).reference_clusters_p)
+{
+}
+
+cluster_t::RSF_t::RSF_t(const vector<cluster_t>& reference_clusters_s)
+{
+	reference_clusters_p.reserve(reference_clusters_s.size());
+	for (const auto& C : reference_clusters_s)
+		reference_clusters_p.push_back(cluster_t{C.isotopes});
+}
+
+const vector<cluster_t>& cluster_t::RSF_t::reference_clusters() const
+{
+	return reference_clusters_p;
+}

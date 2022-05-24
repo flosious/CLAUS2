@@ -23,6 +23,17 @@ mgroups_::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurem
 {	
 }
 
+const vector<const measurements_::sims_t*> mgroups_::sims_t::sims_t::measurements_const()
+{
+	const auto Ms = measurements();
+	vector<const measurements_::sims_t*> Ms_const(Ms.size());
+	for (int i=0;i<Ms.size();i++)
+	{
+		Ms_const.at(i)=Ms.at(i);
+	}
+	return Ms_const;
+}
+
 ///will be overwritten by dsims/tofsims
 vector<measurements_::sims_t *> mgroups_::sims_t::measurements()
 {
@@ -74,9 +85,9 @@ void mgroups_::sims_t::check()
 	}
 }
 
-const map<sample_t::matrix_t,quantity::SF_t> mgroups_::sims_t::matrix_to_RSF(const cluster_t& cluster)
+const map<sample_t::matrix_t, cluster_t::RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluster_t& cluster)
 {
-	map<sample_t::matrix_t,quantity::SF_t> mat_to_RSF;
+	map<sample_t::matrix_t,cluster_t::RSF_t> mat_to_RSF;
 	for (auto& M : measurements())
 	{
 		sample_t::matrix_t mat = M->sample->matrix();
@@ -84,7 +95,7 @@ const map<sample_t::matrix_t,quantity::SF_t> mgroups_::sims_t::matrix_to_RSF(con
 		if (!mat.is_set()) continue;
 		cluster_t* C = M->cluster(cluster);
 		if (C==nullptr) continue;
-		quantity::SF_t RSF =  C->RSF;
+		auto RSF =  C->RSF;
 		if (!RSF.is_set()) continue;
 		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()",M->sample->to_string());
 		logger::debug(21,"mgroups_::sims_t::matrix_to_RSF()","matrix:"+mat.to_string(),"\trRSF:"+RSF.to_string());
@@ -94,13 +105,13 @@ const map<sample_t::matrix_t,quantity::SF_t> mgroups_::sims_t::matrix_to_RSF(con
 			RSF =  RSF.median();
 		}
 		if (mat_to_RSF.find(mat)==mat_to_RSF.end())
-			mat_to_RSF.insert(pair<sample_t::matrix_t, quantity::SF_t> (mat,RSF));
+			mat_to_RSF.insert( {mat,RSF});
 		else
 			mat_to_RSF.at(mat) << RSF;
 	}
 	
 	for (auto& m : mat_to_RSF)
-		m.second = quantity::SF_t(m.second.mean());
+		m.second = m.second.mean();
 	return mat_to_RSF;
 }
 
@@ -356,123 +367,139 @@ const map<cluster_t*,quantity::substance_amount_t> mgroups_::sims_t::matrix_clus
 		}
 	}
 	return matrix_C_to_I;
-// 	for (auto& M : measurements())
+}
+
+quantity::table_t mgroups_::sims_t::matrix_concentrations()
+{
+	quantity::table_t table;
+	for (const auto& I : matrix_isotopes())
+		table.add(matrix_concentrations(I));
+	return table;
+}
+
+quantity::table_t mgroups_::sims_t::matrix_concentrations(const isotope_t& isotope)
+{
+	quantity::table_t table;
+	data_collectors_t::sims_t dc(measurements());
+	const auto col = dc.get_column_concentrations_from_sample_matrix(isotope);
+	table.add(col);
+	return table;
+}
+
+
+quantity::table_t mgroups_::sims_t::matrix_concentrations(const element_t& element)
+{
+	quantity::table_t table;
+	data_collectors_t::sims_t dc(measurements());
+	const auto col = dc.get_column_concentrations_from_sample_matrix(element);
+	table.add(col);
+	return table;
+}
+
+quantity::table_t mgroups_::sims_t::intensities(const cluster_t& cluster)
+{
+	quantity::table_t table;
+	data_collectors_t::sims_t collect_data(measurements());
+	const auto col = collect_data.get_column_intensities_from_cluster(cluster);
+	table.add(col);
+	return table;
+}
+
+quantity::table_t mgroups_::sims_t::intensities()
+{
+	quantity::table_t table;
+	for (const auto& C : clusters())
+		table.add(intensities(C));
+	return table;
+}
+
+quantity::table_t mgroups_::sims_t::ref_intensities()
+{
+	quantity::table_t table;
+	for (const auto& C : matrix_clusters())
+		table.add(intensities(C));
+	return table;
+}
+
+quantity::table_t mgroups_::sims_t::concentrations(const cluster_t& cluster)
+{
+	quantity::table_t table;
+	data_collectors_t::sims_t collect_data(measurements());
+	const auto col = collect_data.get_column_concentrations_from_cluster(cluster);
+	table.add(col);
+	return table;
+}
+
+quantity::table_t mgroups_::sims_t::concentrations()
+{
+	quantity::table_t table;
+	for (const auto& C : clusters())
+		table.add(concentrations(C));
+	return table;
+}
+
+quantity::table_t mgroups_::sims_t::RSFs(const cluster_t& cluster)
+{
+	quantity::table_t table;
+	data_collectors_t::sims_t collect_data(measurements());
+	const auto col = collect_data.get_column_RSFs_from_cluster(cluster);
+	table.add(col);
+	return table;
+// 	for (const auto& C : MG.clusters())
 // 	{
-// 		if (!M->sample->matrix().is_set()) continue;
-// 		if (!M->matrix_clusters(matrix_isotopes()).intensity_sum().is_set()) continue;
-// 		for (int i=0;i<M->sample->matrix().isotopes().size();i++)
-// 		{
-// 			isotope_t iso = M->sample->matrix().isotopes().at(i);
-// 			cluster_t* C = M->matrix_clusters(matrix_isotopes()).cluster(iso);
-// 			if (C == nullptr) 
-// 			{
-// 				logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_matrix_iso()","M->matrix_clusters().cluster("+iso.to_string()+")==nullptr","doing nothing");
-// 				continue;
-// 			}
-// 			if (!C->intensity.is_set())
-// 			{
-// 				logger::warning(4,"mgroups_::sims_t::calc_t::matrix_c::matrix_cluster_to_matrix_iso()",C->to_string()+" intensity not set","doing nothing");
-// 				continue;
-// 			}
-// 			matrix_C_to_I.insert(pair<cluster_t*,isotope_t> (C,*M->sample->matrix().isotope(iso)));
-// 		}
+// 		auto col = collect_data.get_column_SFs_from_cluster(C);
+// 		col.name = C.to_string();
+// 		if (col.is_set())
+// 			table.add(col);
 // 	}
-// 	return matrix_C_to_I;
+// 	for (const auto& C : MG.matrix_clusters())
+// 	{
+// 		auto col = collect_data.get_column_intensities_from_cluster(C);
+// 		col.name = C.to_string();
+// 		if (col.is_set())
+// 			table.add(col);
+// 	}
+// 	return table.remove_empty_lines();
 }
 
-
-/*****************************************************/
-/********     sims_t::data_collectors_t     **********/
-/*****************************************************/
-
-mgroups_::sims_t::data_collectors_t::data_collectors_t(mgroups_::sims_t& MG) : MG(MG)
+quantity::table_t mgroups_::sims_t::RSFs()
 {
+	quantity::table_t table;
+	for (const auto& C : clusters())
+		table.add(RSFs(C));
+	return table;
 }
 
-quantity::map_t mgroups_::sims_t::data_collectors_t::SR_scalar_vs_C_from_matrix(const isotope_t& C_iso) const
+quantity::table_t mgroups_::sims_t::SFs(const cluster_t& cluster)
 {
-	quantity::map_t SR_vs_C;
-	if (!C_iso.is_set())
-		return SR_vs_C;
-	const auto ref_isotopes = MG.matrix_isotopes();
-	for (const auto& M : MG.measurements())
-	{
-		if (!M->crater.SR.is_set())
-			continue;
-		if (!M->crater.SR.is_scalar())
-			continue;
-		if (!M->sample->matrix().is_set())
-			continue;
-		if (!M->sample->matrix().concentration(C_iso).is_set())
-			continue;
-		SR_vs_C << quantity::map_t(M->sample->matrix().concentration(C_iso),M->crater.SR);
-	}
-	return SR_vs_C;
+	quantity::table_t table;
+	data_collectors_t::sims_t collect_data(measurements());
+	const auto col = collect_data.get_column_SFs_from_cluster(cluster);
+	table.add(col);
+	return table;
 }
 
-quantity::map_t mgroups_::sims_t::data_collectors_t::SR_scalar_vs_C_from_matrix(const element_t& C_ele) const
+quantity::table_t mgroups_::sims_t::SFs()
 {
-	quantity::map_t SR_vs_C;
-	if (C_ele.isotopes.size()==0)
-		return SR_vs_C;
-	const auto ref_isotopes = MG.matrix_isotopes();
-	for (const auto& M : MG.measurements())
-	{
-		if (!M->crater.SR.is_set())
-			continue;
-		if (!M->crater.SR.is_scalar())
-			continue;
-		if (!M->sample->matrix().is_set())
-			continue;
-		if (!M->sample->matrix().concentration(C_ele).is_set())
-			continue;
-		SR_vs_C << quantity::map_t(M->sample->matrix().concentration(C_ele),M->crater.SR);
-	}
-	return SR_vs_C;
+	quantity::table_t table;
+	for (const auto& C : clusters())
+		table.add(SFs(C));
+	return table;
 }
 
-quantity::map_t mgroups_::sims_t::data_collectors_t::SR_scalar_vs_C_median_from_cluster(const cluster_t& cluster) const
+quantity::table_t mgroups_::sims_t::SRs()
 {
-	quantity::map_t SR_vs_C;
-	if (!cluster.is_set())
-		return SR_vs_C;
-	const auto ref_isotopes = MG.matrix_isotopes();
-	for (const auto& M : MG.measurements())
-	{
-		if (!M->crater.SR.is_set())
-			continue;
-		if (!M->crater.SR.is_scalar())
-			continue;
-		if (M->cluster(cluster)==nullptr)
-			continue;
-		if (!M->cluster(cluster)->concentration.is_set())
-			continue;
-		SR_vs_C << quantity::map_t(M->cluster(cluster)->concentration.median(),M->crater.SR);
-	}
-	return SR_vs_C;
+	quantity::table_t table;
+	data_collectors_t::sims_t collect_data(measurements());
+	table.add(collect_data.get_column_sputter_rates());
+	return table;
 }
 
-quantity::map_t mgroups_::sims_t::data_collectors_t::SR_scalar_vs_C_truncated_mean_from_cluster(const cluster_t& cluster) const
+quantity::table_t mgroups_::sims_t::measurement_names()
 {
-	quantity::map_t SR_vs_C;
-	if (!cluster.is_set())
-		return SR_vs_C;
-	const auto ref_isotopes = MG.matrix_isotopes();
-	for (const auto& M : MG.measurements())
-	{
-		if (!M->crater.SR.is_set())
-			continue;
-		if (!M->crater.SR.is_scalar())
-			continue;
-		if (M->cluster(cluster)==nullptr)
-			continue;
-		const auto conc = M->cluster(cluster)->concentration;
-		if (!conc.is_set())
-			continue;
-		SR_vs_C << quantity::map_t(conc.remove_data_by_index(0,conc.data().size()/2).mean(),M->crater.SR);
-	}
-	return SR_vs_C;
+	quantity::table_t table;
+	data_collectors_t::sims_t collect_data(measurements());
+	const auto col = collect_data.measurement_line_names();
+	table.add(col);
+	return table;
 }
-
-
-

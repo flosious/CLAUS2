@@ -209,7 +209,7 @@ namespace quantity
 		quantity_t abs_sum()  const;
 		///sums up all data in the data.vector
 		quantity_t sum(int start=0, int stop = -1)  const;
-		quantity_t pbp_sum()  const;
+// 		quantity_t pbp_sum()  const;
 		quantity_t quantile(double percentile=0.75)  const;
 		quantity_t median()  const;
 		quantity_t mean()  const;
@@ -241,6 +241,7 @@ namespace quantity
 		quantity_t fit_polynom_by_x_data(const quantity_t& x_data, quantity_t new_x_data, int polynom_grade=17 ) const;
 		///polynomial interpolation from idx_start to idx_stop
 		quantity_t polyfit(unsigned int polynom_grade) const;
+// 		quantity_t polyfit(fit_functions::polynom_t polynom_s) const;
 		///deviation = 1 -> 1st deviation; 0 no deviation == polyfit
 		quantity_t polyfit_derivative(unsigned int polynom_grade, unsigned int derivative=1) const;
 		quantity_t extrapolate(unsigned int polynom_grade, const quantity_t& X) const;
@@ -456,6 +457,7 @@ namespace quantity
 		const map<double,double> data_map() const;
 		string to_string() const;
 		string to_string_detailed() const;
+		string to_string_list() const;
 		///removes outliners until chisqr_relative is below treshold (default 10%)
 		map_t remove_outliners(const fit_functions::polynom_t& polynom_s,float chisqr_relative_treshold=0.1) const;
 		fit_functions::polynom_t polynom(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
@@ -481,6 +483,8 @@ namespace quantity
 		map_t delta_y(const quantity_t& Y_ref) const;
 		///the polynomial fitted map (X(),Y_fitted())
 		map_t polyfit(fit_functions::polynom_t polynom_s) const;
+		map_t polyfit(fit_functions::polynom_t polynom_s,const unsigned int number_of_points) const;
+		map_t polyfit(fit_functions::polynom_t polynom_s, quantity_t new_X) const;
 		///the polynomial fitted map (X(),Y_fitted())
 		map_t polyfit(unsigned int polynom_grade) const;
 		///the polynomial fitted map (X(),Y_fitted())
@@ -501,6 +505,7 @@ namespace quantity
 		/// returns the number of filled data bins
 		int filled_data_bins(int bins_count) const;
 		int size() const;
+		const map_t change_resolution(const quantity_t new_X_resolution) const;
 		/*********OPERATORS*********/
 		///appends obj to the map, if quantitys dimension and units allow it
 		map_t& operator<<(map_t obj);
@@ -523,30 +528,92 @@ namespace quantity
 		class column_t
 		{
 		private:
+			///line_id -> quantity_entry; each entry can be a vector
+			map<long long unsigned int, quantity_t> quantity_entries_p;
 		public:
-			quantity_t quantity;
 			string name;
-			///compares name and quantity
-			bool operator==(const column_t& col);
-			bool operator!=(const column_t& col);
+			string comment;
+			column_t();
+			column_t(long long unsigned int line_id,const quantity_t& q, string name="", string comment="");
+			//quantities, have same unit, dimension and name; just their data might be different
+			const map<long long unsigned int, quantity_t>& quantity_entries() const;
+			///header quantity; all q-entries must have same dimension, unit and name
+			const quantity_t header() const;
+			///at least one quantity entry line is be set
+			bool is_set() const;
+			string to_string() const;
+			///true on success
+			bool add_quantity_entry(long long unsigned int line_id, quantity_t q);
+			///adds new lines/quantities to this column or replaces not_set ones; true on success
+			bool add_entries(const column_t& col);
+			///all line_ids with match with q
+			vector<long long unsigned int> get_line_ids(quantity_t q) const;
+			//true on success; sets all entries to {}, where q is identical
+			bool unset_quantities(const quantity_t& q);
+			//true on success
+			bool unset_quantity_entry(long long unsigned int line_id);
+			//true on success
+			bool erase_quantity_entry(long long unsigned int line_id);
+			//true on success; replace Line_id with q_replacement
+			bool replace_quantity_entry(long long unsigned int line_id, const quantity_t& q_replacement);
+			///compares name and quantity.name + quantity.dimension + quantity.unit
+			bool operator==(const column_t& col) const;
+			///compares name and quantity.name + quantity.dimension + quantity.unit
+			bool operator!=(const column_t& col) const;
+			///quantity is not set, if line_id does not exist
+			quantity_t get_quantity(long long unsigned int line_id) const;
+			///column is transformed into 1 vector quantity; just possible if column entries are scalars
+			quantity_t get_quantity() const;
+			///calculates for each column entry its median
+			column_t median() const;
+			///for each column entry!
+			column_t mean()  const;
+			///for each column entry!
+			column_t geo_mean()  const;
+			///statistically sorted; for each column entry!
+			column_t trimmed_mean(float alpha=0.25)  const;
+			///not sorted; for each column entry!
+			column_t cut_mean(float alpha=0.25)  const;
+			///not sorted; for each column entry!
+			column_t cut_median(float alpha=0.25)  const;
 		}; // table_t::column_t
 	private:
+		///combination of col+name is unique
 		vector<column_t> columns_p;
+		///generates a random line_id, which is not used yet
+		long long unsigned int get_new_random_line_id() const;
+		///generates a sequential line_id, which is not used yet
+		long long unsigned int get_new_sequential_line_id() const;
+		column_t* column(const column_t& col);
 	public:
-		table_t(const quantity_t& q);
-		table_t(const vector<quantity_t>& qs);
-		///true on success
-		bool add_column();
+		/// line_id --> line_name
+		map<long long unsigned int,string> line_names;
+		bool add(const table_t& table);
+		bool add(const vector<column_t>& cols);
+		bool add(const column_t& col);
+		///using get_new_sequential_line_id to generate a line_id
+		bool add(const quantity_t& Q, string col_name);
+		bool add(const quantity_t& Q, string col_name, long long unsigned int line_id);
+		table_t& erase_line(long long unsigned int line_id);
+		table_t& erase_lines(set<long long unsigned int> line_ids);
+		///returns the corssponding column within the table
+		const column_t* get_col(const column_t& col) const;
+		///returns the corssponding column within the table
+		const column_t* get_col(const quantity_t& col_header, string col_name) const;
+		///returns only quantitie, which are set
+		map_t get_map(const column_t& col_X, const column_t& col_Y) const;
+		///returns 0th and 1st column idxs
+		map_t get_map() const;
+		map_t get_map(int X_col_idx, int Y_col_idx) const;
 		const vector<column_t>& columns() const;
-		//empty if table.columns().size()!=2
-		map_t map() const;
-		///X and Y, do not need to be filled, just comparing name and quantity
-		map_t map(const column_t& X, const column_t& Y) const;
-		table_t add_lines(const vector<column_t>& columns_s) const;
-		//numer of lines
-		int size() const;
-		//numer of lines
-		int lines() const;
+		const vector<column_t> line(long long unsigned int line_id) const;
+		const set<long long unsigned int> line_ids() const;
+		string to_string() const;
+		///removes all lines, with at least 1 entry, where quantity is not set
+		table_t& remove_empty_lines();
+		table_t& remove_empty_columns();
+		///at least 1 col in table is_set
+		bool is_set() const;
 	}; //table_t
 }
 

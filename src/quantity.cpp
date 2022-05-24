@@ -233,14 +233,10 @@ quantity::quantity_t quantity::quantity_t::polyfit_derivative(unsigned int polyn
 	return {*this,polynom(polynom_grade).derivative(derivative).y_data(data_X_1D()),ss.str()};
 }
 
-
 quantity::quantity_t quantity::quantity_t::polyfit(unsigned int polynom_grade) const
 {
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_fit";
-// 	operations_history_s.push_back(ss.str());
-// 	data_s = polynom(polynom_grade).y_data(data_X_1D());
-// 	cout << endl << "polynom: " << polynom(polynom_grade).to_string() << endl;
 	return {*this,polynom(polynom_grade).y_data(data_X_1D()),ss.str()};
 }
 
@@ -315,7 +311,7 @@ quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data, u
 		logger::error("quantity::quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
 		return {};
 	}
-	return get_data_by_index(lower_X_index,upper_X_index).integrate_pbp(x_data.get_data_by_index(lower_X_index,upper_X_index)).abs_sum();
+	return get_data_by_index(lower_X_index,upper_X_index).integrate_pbp(x_data.get_data_by_index(lower_X_index,upper_X_index)).back();
 // 	auto int_pbp = integrate_pbp(x_data);
 // 	double sum=int_pbp.data().at(upper_X_index);
 // 	if (lower_X_index>0)
@@ -908,6 +904,8 @@ quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
 const string quantity::quantity_t::to_string() const
 {
 	ostringstream out;
+	if (!is_set())
+		return "not set";
 	if (data().size()>1)
 		out <<  name()  << operations_history_to_string() << " = " <<"<" << data().size() << ">" << " [" << unit().to_string() << "]" << " {" << dimension().to_string() << "}";
 	else if (data().size()==1)
@@ -969,7 +967,7 @@ quantity::quantity_t quantity::quantity_t::change_unit(const unit_t& target_unit
 		return {*this,target_unit};
 	if (unit().base_units_exponents != target_unit.base_units_exponents) 
 	{
-		logger::info(4,"quantity::quantity_t::change_unit","unit.base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
+		logger::error("quantity::quantity_t::change_unit","unit.base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
 		return {};
 	}
 	auto data_c = data();
@@ -1122,15 +1120,15 @@ quantity::quantity_t quantity::quantity_t::absolute() const
 	return {*this,data_c,"absolute"};
 }
 
-quantity::quantity_t quantity::quantity_t::pbp_sum() const
-{
-	if (!is_set()) 
-		return {};
-
-	vector<double> summe(0,data().size());
-	for (int i=1;i<summe.size();i++)
-		summe.at(i) = data_s.at(i);
-}
+// quantity::quantity_t quantity::quantity_t::pbp_sum() const
+// {
+// 	if (!is_set()) 
+// 		return {};
+// 
+// 	vector<double> summe(0,data().size());
+// 	for (int i=1;i<summe.size();i++)
+// 		summe.at(i) = data_s.at(i);
+// }
 
 quantity::quantity_t quantity::quantity_t::sum(int start, int stop) const
 {

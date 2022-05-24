@@ -79,7 +79,8 @@ public:
 		///returns the pointer to the element within this matrix
 		element_t* element(const element_t& ele);
 		vector<element_t> elements;
-		
+		bool is_in(const isotope_t& iso) const;
+		bool is_in(const element_t& ele) const;
 		const bool is_set() const;
 		const string to_string() const;
 		///RELATIVE! in at%

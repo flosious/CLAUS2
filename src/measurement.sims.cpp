@@ -222,7 +222,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 // 		plot.Y3.add_curve(X,crater.sputter_current().change_unit({"nA"}));
 	
 	plot.Y1.range(1,1E6,true);
-	plot.Y3.range(1,100,false);
+	plot.Y3.range(0.01,105,false);
 	
 	matrix_clusters_c MC = matrix_clusters();
 	quantity::intensity_t ref_intensity = MC.intensity_sum();
@@ -272,12 +272,16 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 					plot.Y3.add_curve(X,C.concentration.change_unit(units::derived::atom_percent),C.to_string());
 			}
 			else
+			{
 				plot.Y2.add_curve(X,C.concentration.change_unit(units::derived::atoms_per_ccm),C.to_string());
+// 				cout << endl << C.concentration.change_unit(units::derived::atoms_per_ccm).to_string_detailed() << endl;
+			}
 		}
+		
 // 		else if (C.RSF.is_set() && C.RSF.data.size()>1) // vector
 // 			plot.Y2.add_curve(X,C.RSF,C.to_string());
 	}
-	
+	plot.Y2.range(plot.Y2.range().stop,plot.Y2.range().stop/1E6,true);
 	plot.to_screen(to_string(),sleep_sec);
 }
 
@@ -550,6 +554,39 @@ const cluster_t* measurements_::sims_t::cluster(const cluster_t& cluster_s) cons
 		if (cluster_s==C)
 			return &C;
 	return nullptr;
+}
+
+///returns a copy of the RSF of the specified cluster_s
+cluster_t::RSF_t measurements_::sims_t::RSF(const cluster_t& cluster_s) const
+{
+	auto c = cluster(cluster_s);
+	if (c==nullptr)
+		return {};
+	return c->RSF;
+}
+///returns a copy of the SF of the specified cluster_s
+quantity::SF_t measurements_::sims_t::SF(const cluster_t& cluster_s) const
+{
+	auto c = cluster(cluster_s);
+	if (c==nullptr)
+		return {};
+	return c->SF;
+}
+///returns a copy of the intensity of the specified cluster_s
+quantity::intensity_t measurements_::sims_t::intensity(const cluster_t& cluster_s) const
+{
+	auto c = cluster(cluster_s);
+	if (c==nullptr)
+		return {};
+	return c->intensity;
+}
+///returns a copy of the concentration of the specified cluster_s
+quantity::concentration_t measurements_::sims_t::concentration(const cluster_t& cluster_s) const
+{
+	auto c = cluster(cluster_s);
+	if (c==nullptr)
+		return {};
+	return c->concentration;
 }
 
 measurements_::sims_t measurements_::sims_t::change_resolution(quantity::sputter_depth_t sputter_depth_res)

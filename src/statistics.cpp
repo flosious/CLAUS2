@@ -1870,3 +1870,108 @@ unsigned int statistics::factorial(const unsigned int& fac)
 		result *= i;
 	return result;
 }
+
+vector<double> statistics::absolute(vector<double> data)
+{
+	for (auto& d:data)
+		d = abs(d);
+	return data;
+}
+
+
+/*************************************************************/
+/***   			    statistics::histogram_t 			  ****/
+/*************************************************************/
+
+statistics::histogram_t::histogram_t(const vector<double>& data, unsigned int number_of_bins) : 
+			data(data), number_of_bins(number_of_bins), range(data,number_of_bins)
+{
+}
+
+vector<unsigned int> statistics::histogram_t::linear_bins() const
+{
+	return fill_bins(range.equal_distributed_linear());
+}
+vector<unsigned int> statistics::histogram_t::log10_bins() const
+{
+	return fill_bins(range.equal_distributed_log10());
+}
+
+vector<unsigned int> statistics::histogram_t::fill_bins(const vector<double>& range) const
+{
+	vector<unsigned int> histogram(number_of_bins);
+	gsl_histogram * h = gsl_histogram_alloc (number_of_bins);
+	gsl_histogram_set_ranges(h,&range[0],range.size());
+	for (const auto& d : data)
+		gsl_histogram_increment(h,d);
+	for (int i=0;i<number_of_bins;i++)
+	{
+		histogram[i] = gsl_histogram_get(h,i);
+// 		double b=0;
+// 		double t=0;
+// 		gsl_histogram_get_range(h,i,&b,&t);
+// 		cout << "range[" << i << "]=(" << b << "," << t << ")" << endl;
+	}
+	gsl_histogram_free(h);
+	return histogram;
+}
+
+/*************************************************************/
+/***   			  statistics::histogram_t::range_t	  	  ****/
+/*************************************************************/
+
+// statistics::histogram_t::range_t::range_t(const double& min, const double& max, const unsigned int& number_of_bins) : min(min), max(max), number_of_bins(number_of_bins)
+// {
+// }
+
+statistics::histogram_t::range_t::range_t(const vector<double>& data, const unsigned int& number_of_bins) : data(data), number_of_bins(number_of_bins)
+{
+}
+
+const vector<double> statistics::histogram_t::range_t::equal_distributed_linear() const
+{
+	vector<double> r(number_of_bins+1);
+	auto min = get_min_from_Y(data);
+	auto delta = (get_max_from_Y(data)-min)/number_of_bins;
+	for (int i=0;i<number_of_bins+1;i++)
+	{
+		r[i]=min+delta*i;
+	}
+	return r;
+}
+
+const vector<double> statistics::histogram_t::range_t::equal_distributed_log10() const
+{
+	auto data_abs = absolute(data);
+	vector<double> r(number_of_bins+1);
+	double min=1, max=1;
+	std::sort(data_abs.begin(),data_abs.end());
+	for (auto& d : data_abs)
+	{
+		if (d>0)
+		{
+			min=d;
+			break;
+		}
+	}
+	for (auto i=data_abs.rbegin();i!=data_abs.rend();i++)
+	{
+		if (*i>0)
+		{
+			max=*i;
+			break;
+		}
+	}
+	const auto lmax = log10(max);
+	const auto lmin = log10(min);
+	auto delta = (lmax-lmin)/number_of_bins;
+	for (int i=0;i<number_of_bins+1;i++)
+	{
+		r[i]=min*pow(10,delta*i);
+	}
+	return r;
+}
+
+
+
+

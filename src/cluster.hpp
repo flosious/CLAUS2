@@ -41,6 +41,17 @@ using namespace std;
 
 class cluster_t : public mglDraw
 {
+public:
+	class RSF_t : public quantity::quantity_t
+	{
+	private:
+		vector<cluster_t> reference_clusters_p;
+	public:
+		///when no reference_cluster is set, then the reference_intensity from measurement::sims_t will be used
+		RSF_t(const vector<cluster_t>& reference_clusters_s={});
+		RSF_t(const quantity::quantity_t& q, const vector<cluster_t>& reference_clusters_s={});
+		const vector<cluster_t>& reference_clusters() const;
+	};
 	friend class crater_t;
 private:
 public:
@@ -67,12 +78,16 @@ public:
 	string to_string(const string del=" ") const;
 	const bool is_set() const;
 	
+	quantity::intensity_t intensity_background() const; // from histogram
+	quantity::concentration_t concentration_background() const; // from histogram
+	
 	quantity::concentration_t concentration;
 	quantity::intensity_t intensity;
 	quantity::sputter_time_t sputter_time;
 	quantity::depth_t sputter_depth;
 	quantity::SF_t SF;
-	quantity::SF_t RSF;
+	RSF_t RSF;
+// 	quantity::SF_t RSF;
 	///cahnges resolution of all
 	cluster_t interpolate(const quantity::quantity_t& new_Q, const quantity::quantity_t& old_Q) const;
 	cluster_t filter_impulse(int window_size=0, float factor=5);

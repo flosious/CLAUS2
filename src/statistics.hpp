@@ -36,6 +36,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_statistics.h>
+#include <gsl/gsl_histogram.h>
 
 #include "persistence1d.hpp" // from https://www.csc.kth.se/~weinkauf/notes/persistence1d.html
 
@@ -46,9 +47,36 @@ private:
 	typedef int (* functiontype) (const gsl_movstat_end_t, const gsl_vector*, gsl_vector*, gsl_movstat_workspace* );
 	static vector<double> get_moving_window_function(const vector<double>& Y, int window_size, functiontype function,const gsl_movstat_end_t gsl_movstat_end = GSL_MOVSTAT_END_TRUNCATE);
 public:
+	class histogram_t
+	{
+	private:
+		class range_t
+		{
+		private:
+			const vector<double>& data;
+			unsigned int number_of_bins;
+		public:
+			range_t(const vector<double>& data, const unsigned int& number_of_bins);
+			///breaks the min-max distance into equally linear distributed parts
+			const vector<double> equal_distributed_log10() const;
+			const vector<double> equal_distributed_linear() const;
+		};
+		const vector<double> data;
+		const unsigned int number_of_bins;
+		const range_t range;
+		vector<unsigned int> fill_bins(const vector<double>& range) const;
+	public:
+		///1 dimension
+		histogram_t(const vector<double>& data, unsigned int number_of_bins);
+		///the actual histogram, with equally linear distributed bins
+		vector<unsigned int> linear_bins() const;
+		///the actual histogram, with equally log10 distributed bins
+		vector<unsigned int> log10_bins() const;
+	};
 	static gsl_vector* get_gsl_vec(const vector<double>& Y);
 	static vector<double> get_gsl_vec(gsl_vector* Y);
-
+	///breaks data equally into number_of_bins and returns a vector of the bin position and the number of elements in that bin
+// 	static vector<unsigned int> histogram_t(const vector<double>& data, unsigned int number_of_bins);
 	/*TEST*/
 	static void test();
 	
@@ -178,6 +206,9 @@ public:
 	
 	static unsigned int factorial(const unsigned int& fac);
 	static vector<unsigned int> factorial(const vector<unsigned int>& fac);
+	///returns the absolute of each entry
+	static vector<double> absolute(vector<double> data);
+	
 };
 
 #endif // STATISTICS_HPP

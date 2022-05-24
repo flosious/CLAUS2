@@ -126,6 +126,22 @@ std::string quantity::map_t::to_string_detailed() const
 	return ss.str();
 }
 
+std::string quantity::map_t::to_string_list() const
+{
+	stringstream ss;
+	ss << X().name() << "\t" << Y().name() << endl;
+	ss << X().unit().to_string() << "\t" << Y().unit().to_string() << endl;
+	ss << X().dimension().to_string() << "\t" << Y().dimension().to_string() << endl;
+	if (X().data().size()!=Y().data().size())
+	{
+		ss << "<"<< X().data().size() << ">\t<" << Y().data().size() << ">";
+		return ss.str();
+	}
+	for (int i=0;i<X().data().size();i++)
+		ss << X().data().at(i) << "\t" << Y().data().at(i) << endl;
+	return ss.str();
+}
+
 fit_functions::polynom_t quantity::map_t::polynom(unsigned int polynom_grade) const
 {
 	return fit_functions::polynom_t(polynom_grade,data_map());
@@ -138,12 +154,25 @@ fit_functions::polynom_t quantity::map_t::polynom(const vector<unsigned>& rank, 
 	return poly;
 }
 
+quantity::map_t quantity::map_t::polyfit(fit_functions::polynom_t polynom_s,const unsigned int number_of_points) const
+{
+	return polyfit(polynom_s,X().change_resolution(number_of_points));
+}
+
 quantity::map_t quantity::map_t::polyfit(fit_functions::polynom_t polynom_s) const
 {
 	if (!polynom_s.successfully_fitted())
 		return {};
 	quantity_t fitted_Y(Y(),polynom_s.y_data(X().data()));
 	return {X(),fitted_Y};
+}
+
+quantity::map_t quantity::map_t::polyfit(fit_functions::polynom_t polynom_s, quantity_t new_X) const
+{
+	if (!new_X.is_set())
+		return {};
+	quantity_t new_Y(Y(),polynom_s.y_data(new_X.data()));
+	return {new_X,new_Y};
 }
 
 quantity::quantity_t quantity::map_t::polyfit(const quantity_t& x_vals, fit_functions::polynom_t polynom_s) const
@@ -195,6 +224,23 @@ int quantity::map_t::filled_data_bins(int bins_count) const
 int quantity::map_t::size() const
 {
 	return X().data().size();
+}
+
+const quantity::map_t quantity::map_t::change_resolution(const quantity_t new_X_resolution) const
+{
+	if (!new_X_resolution.is_set())
+	{
+		logger::error("quantity::map_t::change_resolution()","!new_X_resolution.is_set()","returning empty");
+		return {};
+	}
+	if (new_X_resolution.data().front()<=0)
+	{
+		logger::error("quantity::map_t::change_resolution()","new_X_resolution.data().front()<=0","returning empty");
+		return {};
+	}
+	const auto new_X = X().change_resolution(new_X_resolution);
+	const auto new_Y = Y().interp(X(),new_X);
+	return {new_X,new_Y};
 }
 
 vector<int> quantity::map_t::bin_data(const vector<double>& bins) const

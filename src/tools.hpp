@@ -333,6 +333,8 @@ public:
 		static vector<double> multiply(vector<double>& values, double factor);
 		/*=values + summand*/
 		static vector<double> add(vector<double>& values, double summand);
+		static long long unsigned int hexTOint(const string& hex);
+		static double hexTOdouble(const string& hex);
 	};
 
 

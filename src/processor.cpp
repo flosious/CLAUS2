@@ -59,16 +59,36 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		cout << "\t" << d.name.filename_without_crater_depths() << endl;
 	cout << endl;
 	
+// 	map<int,string> test;
+// 	test.insert(pair<int,string>(5,"a"));
+// 	test.insert(pair<int,string>(51,"b"));
+// 	for (auto& T : test)
+// 		cout << T.first << T.second << endl;
+// 	exit(0);
+	
 	
 	for (auto& MG : dsims.mgroups())
 	{
-		if (MG.matrix_isotopes().size()>2)
+		for (auto& M:MG.measurements_p)
+		{
+			for (auto C : M.clusters)
+			{
+				cout << endl << C.to_string()  <<endl;
+				C.intensity_background();
+			}
+			M.plot_now(0);
+		}
+		auto calc = MG.calc();
+		calc.SRs.from_crater_depths().SRs.from_implant_max();
+		
+		
+// 		cout << endl << endl << MG.matrix_isotopes().size() << endl;
+		if (MG.matrix_clusters().size()>1)
 		{
 			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
 			const auto RSFs = mat.RSFs().add_natural_abundances();
 			for (auto& M:MG.measurements_p)
 			{
-// 				cout << "M.clusters.size()=" << M.clusters.size() << endl;
 				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,M);
 				const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
 				///copy the results - this is really ugly
@@ -79,13 +99,12 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 				}
 			}
 		}
-
 		// SR + SD
-		MG.calc().SRs.from_crater_depths().SRs.from_implant_max().SRs.interpolate_from_known_matrix_clusters({1,1}).SDs.from_SR();
+		calc.SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
 		// SF + RSF
-		MG.calc().SFs.from_implant_dose().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().SFs.from_RSF_median_ref().SFs.from_implant_max();
+		calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices().SFs.from_RSF_median_ref().SFs.from_implant_max();
 		// C
-		MG.calc().concentrations.from_SF();
+		calc.concentrations.from_SF();
 		
 		for (auto M : MG.measurements())
 			M->plot_now(0);

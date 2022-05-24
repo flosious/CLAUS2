@@ -36,6 +36,7 @@
 #include "measurement.hpp"
 #include "fit_functions.hpp"
 #include "calc.hpp"
+#include "data_collector.hpp"
 
 using namespace std;
 
@@ -86,43 +87,6 @@ public:
 	{
 	private:
 	protected:
-		///collects data into a quantity::map_t
-		class data_collectors_t
-		{
-		private:
-			///collect data from these measurements
-			mgroups_::sims_t& MG;
-			/// a table of quantities using measurement pointers as reference to sort lines
-// 			class measurements_to_quantities_t
-// 			{
-// 			private:
-// 				///Ms are unique, so it is effectively a set
-// 				///sort data using measurement as reference column to sort lines   	/*************************/
-// 				vector<const measurements_::sims_t*> Ms;							// M1* // Q1 // Q2 // .. //
-// 				///quantity columns													// M2* // Q1 // Q2 // .. //
-// 				vector<quantity::quantity_t> Qs;									// M3* // Q1 // Q2 // .. //
-// 			public:
-// 				//adds a point (1 col with 1 line)
-// 				measurements_to_quantities_t& add_line(const measurements_::sims_t* M, const quantity::quantity_t& Q);
-// 				//adds a map (1 col with multiple line)
-// 				measurements_to_quantities_t& add_lines(const vector<const measurements_::sims_t*> Ms, const quantity::quantity_t& Q);
-// 				//adds a tensor (multiple cols with multiple line)
-// 				measurements_to_quantities_t& add_lines(const vector<const measurements_::sims_t*> Ms, const vector<quantity::quantity_t>& Qs);
-// 				//adds a column
-// 				measurements_to_quantities_t& add_column(const vector<const measurements_::sims_t*> Ms, quantity::quantity_t& Q);
-// 				//adds multiple columns
-// 				measurements_to_quantities_t& add_columns(const vector<const measurements_::sims_t*> Ms, vector<quantity::quantity_t>& Qs);
-// 			};
-		public:
-			data_collectors_t(mgroups_::sims_t& MG);
-			///ignore the first 50% of data
-			quantity::map_t SR_scalar_vs_C_truncated_mean_from_cluster(const cluster_t& cluster) const;
-			quantity::map_t SR_scalar_vs_C_median_from_cluster(const cluster_t& cluster) const;
-			quantity::map_t SR_scalar_vs_C_from_matrix(const isotope_t& C_iso) const;
-			quantity::map_t SR_scalar_vs_C_from_matrix(const element_t& C_ele) const;
-// 			quantity::map_t RSF_scalar_vs_C_from_matrx(const ::calc_t::sims_t::RSF_t& RSF, const isotope_t& C_iso) const;
-// 			quantity::map_t RSF_scalar_vs_C_from_matrx(const ::calc_t::sims_t::RSF_t& RSF, const element_t& C_ele) const;
-		};
 		class calc_t
 		{
 		protected:
@@ -146,26 +110,26 @@ public:
 				const quantity::concentration_t Crel_from_sample(const measurements_::sims_t* M) const;
 			}; // Crel_to_Irel_c
 			///interpolates [E_i]/[E_j] = POLYNOM( (E_i)/(E_j) ) for 2 clusters (zaehler and nenner)
-			class polynom_fit_Crel_to_Irel_c : public Crel_to_Irel_c
-			{
-			private:
-				static vector<double> fit_start_parameters(const vector<unsigned int> rank);
-				///the polynomial fitting routine
-				const fit_functions::polynom_t polynom_f(const vector<unsigned int> rank) const;
-			public:
-				polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
-				const fit_functions::polynom_t polynom;
-				///returns Crel using Crel_template from Irel polynomfit; Crel===[E_i]/[E_j];; Irel===(E_i)/(E_j)
-				quantity::concentration_t Crel(const measurements_::sims_t* M) const;
-				void plot_to_screen(double sleep_sec=0) const;
-			};
+// 			class polynom_fit_Crel_to_Irel_c : public Crel_to_Irel_c
+// 			{
+// 			private:
+// 				static vector<double> fit_start_parameters(const vector<unsigned int> rank);
+// 				///the polynomial fitting routine
+// 				const fit_functions::polynom_t polynom_f(const vector<unsigned int> rank) const;
+// 			public:
+// 				polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
+// 				const fit_functions::polynom_t polynom;
+// 				///returns Crel using Crel_template from Irel polynomfit; Crel===[E_i]/[E_j];; Irel===(E_i)/(E_j)
+// 				quantity::concentration_t Crel(const measurements_::sims_t* M) const;
+// 				void plot_to_screen(double sleep_sec=0) const;
+// 			};
 			///interpolates [E_i]/[E_j] = POLYNOM( (E_i)/(E_j) ) for all given clusters and all combinations
-			const vector<polynom_fit_Crel_to_Irel_c> polynom_fit_Crels_to_Irels(vector<cluster_t> cluster_names, vector<unsigned int> rank, vector<double> fit_start_parameters);
+// 			const vector<polynom_fit_Crel_to_Irel_c> polynom_fit_Crels_to_Irels(vector<cluster_t> cluster_names, vector<unsigned int> rank, vector<double> fit_start_parameters);
 			
 			sims_t& MG;
 		public:
 			///interpolates [E_i]/[E_j] = k * (E_i)/(E_j)  for all given clusters and all combinations
-			const vector<polynom_fit_Crel_to_Irel_c> proportional_fit_Crels_to_Irels(vector<cluster_t> cluster_names);
+// 			const vector<polynom_fit_Crel_to_Irel_c> proportional_fit_Crels_to_Irels(vector<cluster_t> cluster_names);
 			///sputter_rate
 			class SR_c
 			{
@@ -175,7 +139,6 @@ public:
 				const vector<measurements_::sims_t*>& measurements;
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
-				
 				SR_c(calc_t& calc);
 				calc_t& from_crater_depths(bool overwrite = false);
 			 	calc_t& from_implant_max(bool overwrite = false);
@@ -183,7 +146,7 @@ public:
 				///sets SR for known matrices
 				calc_t& copy_to_same_matrices(bool overwrite = false);
 				///uses SR from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24
-				calc_t& interpolate_from_known_matrix_clusters(vector<unsigned int> rank={1,1,1}, bool overwrite = false);
+				calc_t& interpolate_from_known_sample_matrices(vector<unsigned int> rank={1,1}, bool overwrite = false);
 			};
 			///sputter_depth
 			class SD_c
@@ -224,7 +187,7 @@ public:
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
-				const map<cluster_t*,quantity::intensity_t> SFs_to_ref_intensities();
+				const map<cluster_t*,quantity::intensity_t> clusters_to_ref_intensities();
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				RSF_c(calc_t& calc);
@@ -235,8 +198,10 @@ public:
 // 				calc_t& polynom_interpolation_from_matrix(bool overwrite = false, const int max_rank=2);
 				///sets RSF for known matrices
 				calc_t& copy_to_same_matrices(bool overwrite=false);
-				///uses SR from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24
-				calc_t& interpolate_from_known_matrices(vector<unsigned int> rank={1,1,1}, bool overwrite = false);
+				///uses RSF from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24; for 1 specific cluster
+				calc_t& interpolate_from_known_sample_matrices(const cluster_t& cluster, vector<unsigned int> rank={1,1}, bool overwrite = false);
+				///uses RSF from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24; for all clusters
+				calc_t& interpolate_from_known_sample_matrices(vector<unsigned int> rank={1,1}, bool overwrite = false);
 			};
 			class concentration_c
 			{
@@ -297,20 +262,17 @@ public:
 		///sets mat_isos as matrix_isotopes in all samples within all measurements within this group
 		bool set_matrix_isotopes_in_unknown_samples();
 	public:
-		void export_origin_ascii(string path="/tmp/exports/", const string delimiter="\t");
+		sims_t(measurements_::sims_t& measurement);
+		void export_origin_ascii(string path="/home/florian/Sync/exports/", const string delimiter="\t");
 		string to_string_short() const;
 		calc_t calc();
 		///all different matrices from all samples within this group
 		set<sample_t::matrix_t> matrices();
 		///all different clusters from all measurements within this group
 		set<cluster_t> clusters();
-		const map<sample_t::matrix_t,quantity::SF_t> matrix_to_RSF(const cluster_t& cluster);
-		
+		const map<sample_t::matrix_t, cluster_t::RSF_t> matrix_to_RSF(const cluster_t& cluster);
 		const map<sample_t::matrix_t,quantity::SR_t> matrix_to_SRs();
-// 		const map<sample_t::matrix_t,quantity::intensity_t> matrix_to_intensity_sum();
-		///known(set) matrices and their corresponding matrix_clusters; depricated, because there can be multiple corresponding clusters to one matrix isotope
-// 		const vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> sample_mats_to_mat_clusters();
-		sims_t(measurements_::sims_t& measurement);
+		const vector<const measurements_::sims_t*> measurements_const();
 		virtual vector<measurements_::sims_t*> measurements();
 		virtual vector<measurements_::sims_t> measurements_copy();
 		virtual const msettings::sims_t* settings() const;
@@ -322,13 +284,37 @@ public:
 		const vector<cluster_t> matrix_clusters();
 		///all isotopes corresponding to matrix_clusters
 		const vector<isotope_t> isotopes_corresponding_to_matrix_clusters();
-		///matrix_cluster of each measurement pointing to its sample matrix isotope
-// 		const std::map< cluster_t*, isotope_t > matrix_cluster_to_matrix_iso();
 		const std::map< cluster_t*, quantity::substance_amount_t > matrix_cluster_to_matrix_iso_substance_amount();
 		///returs pointer to the matching measurement within this group
 		measurements_::sims_t* measurement(const measurements_::sims_t& M);
 		bool check_cluster_consistency();
 		bool check_matrix_cluster_consistency();
+		///from sample matrix
+		quantity::table_t matrix_concentrations(const isotope_t& isotope);
+		///from sample matrix
+		quantity::table_t matrix_concentrations(const element_t& element);
+		///from all isotopes of sample matrices in all measurements
+		quantity::table_t matrix_concentrations();
+		///of all measurements for the specified cluster
+		quantity::table_t concentrations(const cluster_t& cluster);
+		///of all measurements for the specified cluster
+		quantity::table_t intensities(const cluster_t& cluster);
+		///of all measurements for the specified cluster
+		quantity::table_t SFs(const cluster_t& cluster);
+		///of all measurements for the specified cluster
+		quantity::table_t RSFs(const cluster_t& cluster);
+		///of all clusters and measurements
+		quantity::table_t concentrations();
+		///of all clusters and measurements
+		quantity::table_t intensities();
+		///of all matrix clusters and measurements
+		quantity::table_t ref_intensities();
+		///of all clusters and measurements
+		quantity::table_t SFs();
+		///of all clusters and measurements
+		quantity::table_t RSFs();
+		quantity::table_t SRs();
+		quantity::table_t measurement_names();
 	};
 
 	class dsims_t: public sims_t

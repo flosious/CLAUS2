@@ -19,3 +19,22 @@ vector<double> tools::math::add(vector<double>& values, double summand)
 	}
 	return results;
 }
+
+long long unsigned int tools::math::hexTOint(const std::string& hex)
+{
+	long long unsigned int x;   
+	std::stringstream ss;
+	ss << std::hex << hex;
+	ss >> x;
+	return x;
+}
+
+
+double tools::math::hexTOdouble(const std::string& hex)
+{
+	double x;   
+	std::stringstream ss;
+	ss << std::hex << hex;
+	ss >> x;
+	return x;
+}

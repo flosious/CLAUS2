@@ -87,9 +87,9 @@ private:
 		///all the curves for this axis
 		vector<points_t> curves;
 		vector<points_t> points;
-		vector<fit_functions::polynom_t> polynoms;
+// 		vector<points_t> polynoms;
 		///not working
-// 		bool add_polynom(const quantity::quantity_t& X, const fit_functions::polynom_t& polynom_s);
+		void add_polynom(const quantity::map_t& XY, const fit_functions::polynom_t& polynom_s, const string legend="", const string color=" +", const unsigned int  points=100);
 		void add_points(const quantity::map_t& XY, const string legend="", const string color=" +");
 		///e.g. "Intensity [c/s]"
 		void add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend="", const string color=" +");

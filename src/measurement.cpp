@@ -55,6 +55,14 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, li
 	}
 }
 
+long long unsigned int measurements_::measurement_t::memory_address() const
+{
+	stringstream out;
+	out << this;
+	const auto address = tools::math::hexTOint(out.str());
+	return address;
+}
+
 
 bool measurements_::measurement_t::operator!=(const measurements_::measurement_t& obj) const
 {

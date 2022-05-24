@@ -100,6 +100,7 @@ public:
 	unit_t(const unit_t& unit_, string prefered_unit_string ) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(prefered_unit_string) {};
 	unit_t(base_exponents_t unit_exponents, double multiplier,string prefered_unit_string ="" ) : base_units_exponents(unit_exponents),multiplier(multiplier),prefered_output_string(prefered_unit_string) {};
 	unit_t(string symbols,string prefered_string="");
+// 	unit_t(unit_t unit_, string prefered_string);
 	
 // 	static unit_t string_to_unit(string unit_s);
 // 	constexpr unit_t(unit_t unit, double multiplier);

@@ -310,21 +310,14 @@ void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double s
 {
 	plot_t plot(false,false);
 	stringstream plot_title;
-// 	if (!Crel_to_Irel_data.first.is_set() || Crel_to_Irel_data.second.is_set())
-// 		return;
-// 	quantity::map_t XY(Crel_to_Irel_data.second,Crel_to_Irel_data.first);
+
 	auto Crel_to_Irel_map_withot_infs = Crel_to_Irel_map().remove_inf();
-	
-// 	cout << XYr.to_string_detailed() << endl;
-	
-	plot.Y1.add_points(Crel_to_Irel_map_withot_infs,"data"," ro");
+// 	cout << endl << Crel_to_Irel_map_withot_infs.to_string_list() << endl;
+	plot.Y1.add_points(Crel_to_Irel_map_withot_infs,zaehler().to_string() + " / " + nenner().to_string()," ro");
 	if (polynom().successfully_fitted())
 	{
-// 		cout << "Z: " << zaehler.to_string() << " N:" << nenner.to_string() << endl;
-// 		cout << polynom.to_string() << endl;
-		auto Irel_points = Crel_to_Irel_map_withot_infs.X().change_resolution(100);
-		auto Crel_points = Crel_to_Irel_map_withot_infs.polyfit(Irel_points,polynom());
-		plot.Y1.add_curve(Irel_points,Crel_points,"interpolation");
+// 		plot.Y1.add_curve(Crel_to_Irel_map().polyfit(polynom()), polynom().to_string());
+		plot.Y1.add_polynom(Crel_to_Irel_map(),polynom());
 	}
 	plot_title << "{" << zaehler().to_string() << "} / {" << nenner().to_string() <<  "}";
 	plot.to_screen(plot_title.str(),sleep_sec);
@@ -342,14 +335,6 @@ calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_data_fits_t(const quantit
 {
 }
 
-// const cluster_t& calc_t::sims_t::Crel_to_Irel_data_fits_t::zaehler() const
-// {
-// 	return zaehler_p;
-// }
-// const cluster_t& calc_t::sims_t::Crel_to_Irel_data_fits_t::nenner() const
-// {
-// 	return nenner_p;
-// }
 
 const quantity::map_t& calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_map() const
 {
@@ -358,17 +343,7 @@ const quantity::map_t& calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_ma
 
 const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t calc_t::sims_t::Crel_to_Irel_data_fits_t::polynom(const vector<unsigned int> polynom_rank, const vector<double> polynom_start_parameters) const
 {
-// 	const auto data = tools::vec::combine_vecs_to_map(Crel_to_Irel_data.second.data(), Crel_to_Irel_data.first.data());
-// 	fit_functions::polynom_t poly(polynom_rank,polynom_start_parameters,data);
 	const auto P = Crel_to_Irel_map().remove_inf().remove_nan().polynom(polynom_rank,polynom_start_parameters);
-	
-	if (P.successfully_fitted()) //plot
-	{
-		plot_t plot(false,false);
-		plot.Y1.add_points(Crel_to_Irel_map(),zaehler().to_string() + " / " + nenner().to_string(),"ro");
-		plot.Y2.add_curve(Crel_to_Irel_map().polyfit(P), P.to_string());
-		plot.to_screen(zaehler().to_string() + " / " + nenner().to_string(),0);
-	}
 	Crel_to_Irel_data_polynomial_fit_t crel_irel_polyfit(zaehler(),nenner(),Crel_to_Irel_map(),P);
 	return crel_irel_polyfit;
 }

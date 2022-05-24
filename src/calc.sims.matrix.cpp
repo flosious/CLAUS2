@@ -119,6 +119,7 @@ const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t:
 				logger::info(3,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","RSF not successfully fitted", "Z:" + RSF.zaehler().to_string() + ", N:" + RSF.nenner().to_string());
 				continue;
 			}
+			RSF.plot_to_screen(0);
 			Crels_to_Irels.push_back(RSF);
 		}
 	}

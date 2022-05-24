@@ -271,6 +271,21 @@ void sample_t::matrix_t::substance_amount_to_relative(vector<isotope_t>& isotope
 // 		cout << iso.substance_amount.to_string_detailed() << endl;
 }
 
+bool sample_t::matrix_t::is_in(const isotope_t& iso) const
+{
+	const auto isos = isotopes();
+	if (find(isos.begin(),isos.end(),iso)!=isos.end())
+		return true;
+	return false;
+}
+
+bool sample_t::matrix_t::is_in(const element_t& ele) const
+{
+	if (find(elements.begin(),elements.end(),ele)!=elements.end())
+		return true;
+	return false;
+}
+
 isotope_t* sample_t::matrix_t::isotope(isotope_t iso)
 {
 	for (auto& E : elements)
@@ -319,6 +334,8 @@ const bool sample_t::matrix_t::is_set() const
 
 const quantity::concentration_t sample_t::matrix_t::concentration(element_t ele) const
 {
+	if (!is_in(ele))
+		return quantity::concentration_t({0},units::derived::atom_percent,quantity::dimensions::SI::relative);
 	quantity::substance_amount_t sum;
 	for (const auto& e : elements)
 	{
@@ -334,6 +351,8 @@ const quantity::concentration_t sample_t::matrix_t::concentration(element_t ele)
 
 const quantity::concentration_t sample_t::matrix_t::concentration(isotope_t iso) const
 {
+	if (!is_in(iso))
+		return quantity::concentration_t({0},units::derived::atom_percent,quantity::dimensions::SI::relative);
 	quantity::substance_amount_t sum;
 	for (const auto& i : isotopes())
 	{

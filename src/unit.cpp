@@ -240,6 +240,12 @@ const string unit_t::base_exponents_t::to_string() const
 /*****  unit_t   *******/
 /***********************/
 
+
+// unit_t::unit_t(unit_t unit_, string prefered_string) : unit_t(unit_)
+// {
+// 	prefered_output_string = prefered_string;
+// }
+
 unit_t::unit_t(string symbols, string prefered_string) : prefered_output_string(prefered_string)
 {
 	tools::str::remove_spaces(&symbols);
