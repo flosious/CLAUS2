@@ -154,6 +154,7 @@ namespace quantity
 		quantity_t at(unsigned int start_pos, unsigned int end_pos) const;
 		
 		bool operator>(quantity_t obj) const;
+		bool operator>=(quantity_t obj) const;
 		bool operator<(quantity_t obj) const;
 		bool operator==(quantity_t obj) const;
 		bool operator!=(quantity_t obj) const;
@@ -198,12 +199,23 @@ namespace quantity
 		///removes all data which are lower or greater than the limits
 		quantity_t get_data_within_limits(double lower_limit, double upper_limit)  const;
 		quantity_t get_data_by_index(unsigned int start, unsigned int stop)  const;
+		quantity_t get_data_by_index_rel(float start, float stop)  const;
 		quantity_t remove_data_by_index(unsigned int start, unsigned int stop)  const;
 		quantity_t remove_data_by_index(vector<unsigned int> remove_pos)  const;
 		///deletes last entry
 		quantity_t pop_back()  const;
 		quantity_t remove_data_from_begin(unsigned int stop)  const;
-		quantity_t remove_data_from_begin(quantity_t& remove_stop)  const;
+		quantity_t remove_data_from_begin_rel(float stop_relative)  const;
+// 		quantity_t remove_data_from_begin(quantity_t& remove_stop)  const;
+		///removes data, which is bigger than Q.data[i]
+		quantity_t remove_data_bigger_than(const quantity_t& Q) const;
+		quantity_t remove_data_bigger_than(double Q) const;
+		///removes data, which is identical to Q.data[i]
+		quantity_t remove_data_equal_to(const quantity_t& Q) const;
+		quantity_t remove_data_equal_to(double Q) const;
+		///removes data, which is smaller than Q.data[i]
+		quantity_t remove_data_smaller_than(const quantity_t& Q) const;
+		quantity_t remove_data_smaller_than(double Q) const;
 		quantity_t absolute()  const;
 		quantity_t invert()  const;
 		quantity_t abs_sum()  const;
@@ -214,8 +226,10 @@ namespace quantity
 		quantity_t median()  const;
 		quantity_t mean()  const;
 		quantity_t geo_mean()  const;
-		///statistically sorted
+		///statistically sorted; removes data at beginning and end
 		quantity_t trimmed_mean(float alpha=0.25)  const;
+		///statistically sorted; removes data at beginning and end
+		quantity_t trimmed_median(float alpha=0.25)  const;
 		///not sorted
 		quantity_t cut_mean(float alpha=0.25)  const;
 		///not sorted
@@ -252,6 +266,8 @@ namespace quantity
 		quantity_t remove_nan()  const;
 		///clears all data: data={}
 		quantity_t& clear();
+		///lowest to highest
+		quantity_t& sort();
 		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
 		/// bins is the number of bins, all having same sizes
 		vector<int> bin_data(int bins_count) const;
@@ -615,6 +631,8 @@ namespace quantity
 		///at least 1 col in table is_set
 		bool is_set() const;
 	}; //table_t
+	
+	
 }
 
 #endif // QUANTITY_HPP

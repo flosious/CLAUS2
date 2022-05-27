@@ -86,12 +86,48 @@ const bool cluster_t::is_set() const
 
 quantity::intensity_t cluster_t::intensity_background() const
 {
+	if (!intensity.is_set())
+		return {};
 	unsigned int bins = 10;
-	statistics::histogram_t histogram(intensity.data(),10);
-	cout << endl << "HISTOGRAM: " << endl;
-	print(histogram.linear_bins());
-	print(histogram.log10_bins());
-	return {};
+// 	statistics::histogram_t histogram(intensity.data(),10);
+// 	cout << endl << "HISTOGRAM: " << endl;
+// 	print(histogram.linear_bins());
+// 	print(histogram.log10_bins());
+	
+	auto histograms = histogram_builder_t(intensity);
+	auto histo = histograms.equally_linearly_distanced_bins(bins);
+	auto histo_detail = histo.rebuild(histo.quantity_data_size_to_its_bin().rbegin()->second).equally_log10_distanced_bins(bins);
+// 	cout << "linear: " << endl << histo.to_string() << endl;
+// 	cout << "log10: " << endl << histo_detail.to_string() << endl;
+// 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().median().to_string() << endl;
+// 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().get_data_by_index_rel(0,0.25).median().to_string() << endl;
+// 	for (const auto& m : histograms.equally_linearly_distanced_bins(bins).quantity_data_size_to_its_bin())
+// 		cout << m.first << endl;
+	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).median();
+// 	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).get_data_by_index_rel(0,0.25).median();
+}
+
+quantity::concentration_t cluster_t::concentration_background() const
+{
+	if (!concentration.is_set())
+		return {};
+	unsigned int bins = 10;
+// 	statistics::histogram_t histogram(intensity.data(),10);
+// 	cout << endl << "HISTOGRAM: " << endl;
+// 	print(histogram.linear_bins());
+// 	print(histogram.log10_bins());
+	
+	auto histograms = histogram_builder_t(concentration);
+	auto histo = histograms.equally_linearly_distanced_bins(bins);
+	auto histo_detail = histo.rebuild(histo.quantity_data_size_to_its_bin().rbegin()->second).equally_log10_distanced_bins(bins);
+// 	cout << "linear: " << endl << histo.to_string() << endl;
+// 	cout << "log10: " << endl << histo_detail.to_string() << endl;
+// 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().median().to_string() << endl;
+// 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().get_data_by_index_rel(0,0.25).median().to_string() << endl;
+// 	for (const auto& m : histograms.equally_linearly_distanced_bins(bins).quantity_data_size_to_its_bin())
+// 		cout << m.first << endl;
+// 	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).get_data_by_index_rel(0,0.25).median();
+	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).median();
 }
 
 bool cluster_t::operator!=(const cluster_t& obj) const

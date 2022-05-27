@@ -69,15 +69,15 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	for (auto& MG : dsims.mgroups())
 	{
-		for (auto& M:MG.measurements_p)
-		{
-			for (auto C : M.clusters)
-			{
-				cout << endl << C.to_string()  <<endl;
-				C.intensity_background();
-			}
-			M.plot_now(0);
-		}
+// 		for (auto& M:MG.measurements_p)
+// 		{
+// 			for (auto C : M.clusters)
+// 			{
+// 				cout << endl << C.to_string()  <<endl;
+// 				C.intensity_background();
+// 			}
+// 			M.plot_now(0);
+// 		}
 		auto calc = MG.calc();
 		calc.SRs.from_crater_depths().SRs.from_implant_max();
 		

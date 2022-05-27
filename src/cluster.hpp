@@ -34,6 +34,7 @@
 // #include "crater.hpp"
 #include <mgl2/fltk.h>
 // #include "measurement.hpp"
+#include "histogram.hpp"
 
 using namespace std;
 

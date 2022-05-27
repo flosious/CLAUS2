@@ -228,7 +228,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 	quantity::intensity_t ref_intensity = MC.intensity_sum();
 	if (MC.clusters.size()>1 && ref_intensity.is_set())
 		plot.Y1.add_curve(X,ref_intensity,MC.to_string());
-	
+	quantity::concentration_t concentration_backgrounds;
 	for (auto& C: clusters)
 	{
 		if (C.intensity.is_set())
@@ -274,14 +274,15 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 			else
 			{
 				plot.Y2.add_curve(X,C.concentration.change_unit(units::derived::atoms_per_ccm),C.to_string());
-// 				cout << endl << C.concentration.change_unit(units::derived::atoms_per_ccm).to_string_detailed() << endl;
+				concentration_backgrounds << C.concentration_background().change_unit(units::derived::atoms_per_ccm);
 			}
 		}
-		
-// 		else if (C.RSF.is_set() && C.RSF.data.size()>1) // vector
-// 			plot.Y2.add_curve(X,C.RSF,C.to_string());
 	}
-	plot.Y2.range(plot.Y2.range().stop,plot.Y2.range().stop/1E6,true);
+	
+	if (concentration_backgrounds.is_set())
+		plot.Y2.range(concentration_backgrounds.min().data().front(),plot.Y2.range().stop,true);
+	else
+		plot.Y2.range(plot.Y2.range().stop/1E5,plot.Y2.range().stop,true);
 	plot.to_screen(to_string(),sleep_sec);
 }
 

@@ -114,6 +114,12 @@ quantity::quantity_t& quantity::quantity_t::clear()
 	return* this;
 }
 
+quantity::quantity_t& quantity::quantity_t::sort()
+{
+	std::sort(data_s.begin(),data_s.end());
+	return *this;
+}
+
 const std::map<double,double> quantity::quantity_t::data_XY_1D()
 {
 	std::map<double,double> data_XY; 
@@ -457,18 +463,18 @@ quantity::quantity_t quantity::quantity_t::cut_mean(float alpha) const
 {
 	if (!is_set())
 		return {};
-	int start = alpha * data().size();
-	int stop = (1-alpha) * data().size();
-	return get_data_by_index(start,stop).mean();
+	int stop = alpha * data().size();
+// 	int stop = (1-alpha) * data().size();
+	return get_data_by_index(0,stop).mean();
 }
 
 quantity::quantity_t quantity::quantity_t::cut_median(float alpha) const
 {
 	if (!is_set())
 		return {};
-	int start = alpha * data().size();
-	int stop = (1-alpha) * data().size();
-	return get_data_by_index(start,stop).median();
+	int stop = alpha * data().size();
+// 	int stop = (1-alpha) * data().size();
+	return get_data_by_index(0,stop).median();
 }
 
 quantity::quantity_t quantity::quantity_t::trimmed_mean(float alpha) const
@@ -477,9 +483,22 @@ quantity::quantity_t quantity::quantity_t::trimmed_mean(float alpha) const
 		return {};
 	stringstream n;
 	n << "trimmed" << alpha << "_mean"; 
-// 	data_s = {statistics::get_trimmed_mean_from_Y(data(),alpha)};
-// 	operations_history_s.push_back(n.str());
 	return {*this,statistics::get_trimmed_mean_from_Y(data(),alpha),n.str()};
+}
+
+quantity::quantity_t quantity::quantity_t::trimmed_median(float alpha) const
+{
+	if (!is_set())
+		return {};
+	stringstream n;
+	int start = alpha * data().size();
+	int stop = (1-alpha) * data().size();
+	n << "trimmed" << alpha << "_median"; 
+	if (start == stop)
+		return median();
+	if (start > stop)
+		return get_data_by_index(stop,start).median();
+	return get_data_by_index(start,stop).median();
 }
 
 quantity::quantity_t quantity::quantity_t::mean() const
@@ -687,7 +706,7 @@ quantity::quantity_t quantity::quantity_t::log10() const
 		return {};
 	vector<double> data_log(data().size());
 	for (int i=0;i<data().size();i++)
-		data_log.at(i) = log(data_s.at(i));
+		data_log.at(i) = ::log10(data_s.at(i));
 // 	operations_history_s.push_back("log10");
 // 	data_s = data_log;
 	return {*this,data_log,"log10"};;
@@ -1004,13 +1023,98 @@ quantity::quantity_t quantity::quantity_t::remove_data_from_begin(unsigned int s
 	return remove_data_by_index(0,stop);
 }
 
-quantity::quantity_t quantity::quantity_t::remove_data_from_begin(quantity_t& remove_stop) const
+quantity::quantity_t quantity::quantity_t::remove_data_from_begin_rel(float stop_relative)  const
 {
-// 	if (!remove_stop.is_set())
-// 		return {};
-// 	cout << remove_stop.change_unit(unit).to_string() << endl;
-	return remove_data_from_begin(remove_stop.change_unit(unit()).data().front());
+	return remove_data_by_index(0,stop_relative*data().size());
 }
+
+quantity::quantity_t quantity::quantity_t::remove_data_equal_to(const quantity_t& Q) const
+{
+	set<unsigned int> rem_idx;
+	auto q = Q.change_unit(unit());
+	if (!q.is_set())
+		return {};
+	for (const auto& d : q.data())
+	{
+		for (int i = 0; i < data().size(); i++)
+		{
+			if (d== data().at(i))
+				rem_idx.insert(i);
+		}
+	}
+	return remove_data_by_index({rem_idx.begin(),rem_idx.end()});
+}
+quantity::quantity_t quantity::quantity_t::remove_data_equal_to(double Q) const
+{
+	set<unsigned int> rem_idx;
+		for (int i = 0; i < data().size(); i++)
+		{
+			if (Q== data().at(i))
+				rem_idx.insert(i);
+		}
+	return remove_data_by_index({rem_idx.begin(),rem_idx.end()});
+}
+quantity::quantity_t quantity::quantity_t::remove_data_bigger_than(double Q) const
+{
+	set<unsigned int> rem_idx;
+		for (int i = 0; i < data().size(); i++)
+		{
+			if ( data().at(i) > Q)
+				rem_idx.insert(i);
+		}
+	return remove_data_by_index({rem_idx.begin(),rem_idx.end()});
+}
+quantity::quantity_t quantity::quantity_t::remove_data_smaller_than(double Q) const
+{
+	set<unsigned int> rem_idx;
+		for (int i = 0; i < data().size(); i++)
+		{
+			if (data().at(i) < Q)
+				rem_idx.insert(i);
+		}
+	return remove_data_by_index({rem_idx.begin(),rem_idx.end()});
+}
+
+quantity::quantity_t quantity::quantity_t::remove_data_bigger_than(const quantity_t& Q) const
+{
+	set<unsigned int> rem_idx;
+	auto q = Q.change_unit(unit());
+	if (!q.is_set())
+		return {};
+	for (const auto& d : q.data())
+	{
+		for (int i = 0; i < data().size(); i++)
+		{
+			if (data().at(i) > d)
+				rem_idx.insert(i);
+		}
+	}
+	return remove_data_by_index({rem_idx.begin(),rem_idx.end()});
+}
+quantity::quantity_t quantity::quantity_t::remove_data_smaller_than(const quantity_t& Q) const
+{
+	set<unsigned int> rem_idx;
+	auto q = Q.change_unit(unit());
+	if (!q.is_set())
+		return {};
+	for (const auto& d : q.data())
+	{
+		for (int i = 0; i < data().size(); i++)
+		{
+			if (data().at(i) < d)
+				rem_idx.insert(i);
+		}
+	}
+	return remove_data_by_index({rem_idx.begin(),rem_idx.end()});
+}
+
+// quantity::quantity_t quantity::quantity_t::remove_data_from_begin(quantity_t& remove_stop) const
+// {
+// // 	if (!remove_stop.is_set())
+// // 		return {};
+// // 	cout << remove_stop.change_unit(unit).to_string() << endl;
+// 	return remove_data_from_begin(remove_stop.change_unit(unit()).data().front());
+// }
 
 
 quantity::quantity_t quantity::quantity_t::pop_back() const
@@ -1109,6 +1213,11 @@ quantity::quantity_t quantity::quantity_t::get_data_by_index(unsigned int start,
 	return {*this,new_data,ss.str()};
 }
 
+quantity::quantity_t quantity::quantity_t::get_data_by_index_rel(float start, float stop)  const
+{
+	return get_data_by_index(start*data().size(),stop*data().size());
+}
+
 quantity::quantity_t quantity::quantity_t::absolute() const
 {
 	if (!is_set()) 
@@ -1157,6 +1266,15 @@ bool quantity::quantity_t::operator<(quantity_t obj) const
 	if (*this > obj || *this == obj)
 		return false;
 	return true;
+}
+
+bool quantity::quantity_t::operator>=(quantity_t obj) const
+{
+	if (*this==obj)
+		return true;
+	if (*this>obj)
+		return true;
+	return false;
 }
 
 bool quantity::quantity_t::operator>(quantity_t obj) const
