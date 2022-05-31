@@ -66,18 +66,9 @@ public:
 		sputter_beam_t(quantity::current_t sputter_current_s={}, quantity::sputter_time_t sputter_time={}, quantity::sputter_depth_t sputter_depth_s={});
 		const string to_string(const string del=", ") const;
 	};
-	class calc_t
-	{
-// 		SR_c
-// 		ST_c
-// 		SD_c
-	};
 /***********/	
 	friend class processor;
 private:
-// 	quantity::depth_t sputter_depth_s;
-// 	quantity::sputter_time_t sputter_time;
-// 	quantity::current_t sputter_current_s;
 	quantity::sputter_time_t total_sputter_time_s;
 	///calculates common X points from all clusters and sets sputter_depth_s and/or sputter_time
 	quantity::sputter_depth_t total_sputter_depths;
@@ -88,7 +79,10 @@ private:
 public:
 	const string to_string(const string del=", ") const;
 	crater_t();
-	crater_t(const vector<cluster_t>& clusters, const sputter_beam_t& sputter_beam);
+	crater_t(const quantity::sputter_depth_t& sputter_depth);
+	crater_t(const quantity::sputter_time_t& sputter_time);
+	crater_t(const quantity::sputter_time_t& sputter_time, const quantity::sputter_depth_t& sputter_depth);
+	
 	///returns sputter_depth if set, or sputter_time, or nullptr, if nothing is set
 	const quantity::quantity_t* X() const;
 	sputter_beam_t sputter_beam;

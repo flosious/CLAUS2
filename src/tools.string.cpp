@@ -62,7 +62,7 @@ bool tools::str::is_empty(vector<vector<string>> input) {
 	return true;
 }
 
-string tools::str::get_string_between_string_A_and_next_B(string *mainstring,string A, string B) {
+string tools::str::get_string_between_string_A_and_next_B(const string *mainstring,string A, string B) {
 	int len = mainstring->find(B)-mainstring->find(A)-A.length();
 	if (len>0) { 
 		return mainstring->substr(mainstring->find(A)+A.length(),len);

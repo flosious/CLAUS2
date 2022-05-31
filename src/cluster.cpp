@@ -84,7 +84,7 @@ const bool cluster_t::is_set() const
 	return false;
 }
 
-quantity::intensity_t cluster_t::intensity_background() const
+quantity::intensity_t cluster_t::intensity_background(float treshold) const
 {
 	if (!intensity.is_set())
 		return {};
@@ -107,7 +107,7 @@ quantity::intensity_t cluster_t::intensity_background() const
 // 	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).get_data_by_index_rel(0,0.25).median();
 }
 
-quantity::concentration_t cluster_t::concentration_background() const
+quantity::concentration_t cluster_t::concentration_background(float treshold) const
 {
 	if (!concentration.is_set())
 		return {};
@@ -119,13 +119,20 @@ quantity::concentration_t cluster_t::concentration_background() const
 	
 	auto histograms = histogram_builder_t(concentration);
 	auto histo = histograms.equally_linearly_distanced_bins(bins);
-	auto histo_detail = histo.rebuild(histo.quantity_data_size_to_its_bin().rbegin()->second).equally_log10_distanced_bins(bins);
+// 	auto histo_detail = histo.rebuild(histo.quantity_data_size_to_its_bin().rbegin()->second).equally_log10_distanced_bins(bins);
 // 	cout << "linear: " << endl << histo.to_string() << endl;
 // 	cout << "log10: " << endl << histo_detail.to_string() << endl;
 // 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().median().to_string() << endl;
 // 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().get_data_by_index_rel(0,0.25).median().to_string() << endl;
-// 	for (const auto& m : histograms.equally_linearly_distanced_bins(bins).quantity_data_size_to_its_bin())
-// 		cout << m.first << endl;
+	const auto sum = histo.quantities_in_bins();
+// 	for (const auto& m : histo.quantity_data_size_to_its_bin())
+// 		cout << m.first << "\t[" << m.second.start().data().front() << "," << m.second.stop().data().front() << ")\trel:" << (double)m.first/sum*100 << endl ;
+	double relative_size = (double)histo.quantity_data_size_to_its_bin().rbegin()->first/sum;
+	if (relative_size < treshold)
+	{
+		logger::info(3,"cluster_t::concentration_background()","number of points for background detection not sufficient: relative_size=" + std::to_string(relative_size));
+		return {};
+	}
 // 	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).get_data_by_index_rel(0,0.25).median();
 	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).median();
 }

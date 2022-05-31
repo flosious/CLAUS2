@@ -78,9 +78,10 @@ public:
 	string name() const;
 	string to_string(const string del=" ") const;
 	const bool is_set() const;
-	
-	quantity::intensity_t intensity_background() const; // from histogram
-	quantity::concentration_t concentration_background() const; // from histogram
+	///lower treshold means less sensitive to background detection
+	quantity::intensity_t intensity_background(float treshold=0.75) const; // from histogram
+	///lower treshold means less sensitive to background detection
+	quantity::concentration_t concentration_background(float treshold=0.75) const; // from histogram
 	
 	quantity::concentration_t concentration;
 	quantity::intensity_t intensity;

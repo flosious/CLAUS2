@@ -129,6 +129,14 @@ histogram_t::histogram_t(const vector<bin_t>& bins) :bins_p(bins)
 {
 }
 
+unsigned int histogram_t::quantities_in_bins() const
+{
+	unsigned int c = 0;
+	for (const auto& bin : bins())
+		c += bin.quantities_in_bin().data().size();
+	return c;
+}
+
 histogram_t& histogram_t::add(const quantity::quantity_t& q)
 {
 	if (bins().size()==0)

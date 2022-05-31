@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2021 Florian Bärwolf
+	Copyright (C) 2021, 2022 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -23,26 +23,6 @@
 
 
 
-/***************************************/
-/*****  files_::dsims_t::contents_t::Ipr_t       ****/
-/***************************************/
-
-// const quantity::depth_t files_::dsims_t::contents_t::Ipr_t::sputter_depth() const
-// {
-// 	return sputter_depth_p;
-// }
-// 
-// const quantity::sputter_time_t files_::dsims_t::contents_t::Ipr_t::sputter_time const
-// {
-// 	return sputter_time_p;
-// }
-// 
-// const quantity::current_t files_::dsims_t::contents_t::Ipr_t::sputter_current() const
-// {
-// 	return sputter_current_p;
-// }
-
-
 
 /***************************************/
 /*****  files_::dsims_t::contents_t  ****/
@@ -54,37 +34,7 @@ files_::dsims_t::contents_t::contents_t(string& filename_with_path) : files_::si
 
 void files_::dsims_t::contents_t::to_screen(string prefix)
 {
-// 	cout << prefix << "name:" << endl;
-// 	cout << prefix << "\t"<<"filename_with_path:\t" << name.filename_with_path << endl;
-// 	cout << prefix << "\t"<<"filename:\t" << name.filename() << endl;
-// 	cout << prefix << "\t"<<"filename_type_ending:\t" << name.filename_type_ending() << endl;
-// 	cout << prefix << "\t"<<"filename_without_crater_depths:\t" << name.filename_without_crater_depths() << endl;
-// 	cout << prefix << "\t"<<"simple_name:\t" << name.simple_name() << endl;
-// 	cout << prefix << "\t"<<"directory:\t" << name.directory() << endl;
-// 	
-// 	cout << prefix << "\tdelimiter:\t'" << name.delimiter <<"'" << endl;
-// // 	if (name.identifiers.size()==1) cout << prefix << "\tidentifiers:\t" << *name.identifiers.begin() << endl;
-// // 	else cout << prefix << "\tidentifiers:\t<" << name.identifiers.size() << ">" << endl;
-// 	
-// 	cout << prefix << "\t" <<"olcdb:\t" << name.olcdb() << endl;
-// 	cout << prefix << "\t" <<"lot:\t" << name.lot() << endl;
-// 	cout << prefix << "\t" << "lot_split:\t" << name.lot_split() << endl;
-// 	cout << prefix << "\t"<<"wafer:\t" << name.wafer() << endl;
-// 	cout << prefix << "\t" << "chip x;y:\t" << name.chip_x() << ";" << name.chip_y() << endl;
-// 	cout << prefix << "\t" << "monitor:\t" << name.monitor() << endl;
-// 	cout << prefix << "\t"<<"group:\t" << name.group() << endl;
-// 	cout << prefix << "\t"<<"repetition:\t" << name.repetition() << endl;
-// 	
-// 	if (name.not_parseable_filename_parts().size()==1) cout << prefix << "\t"<<"not_parseable_filename_parts:\t" << *name.not_parseable_filename_parts().begin() << endl;
-// 	else cout << prefix << "\t"<<"not_parseable_filename_parts:\t<" << name.not_parseable_filename_parts().size() << ">" << endl;
-// 	
-// 	cout << prefix << "\t"<<"sputter_element:\t" << name.sputter_element().to_string() << endl;
-// 	cout << prefix << "\t"<<"sputter_energy:\t" << name.sputter_energy().to_string() << endl;
-// 	cout << prefix << "\t"<<"secondary_polarity:\t" << name.secondary_polarity() << endl;
-// 	
-// 	cout << prefix << "\t"<<"total_sputter_depths:\t" << name.total_sputter_depths().to_string() << endl;
-	
-	
+
 	cout << prefix << "contents:" << endl;
 	cout << prefix << "\tdelimiter:\t'" << delimiter <<"'" << endl;
 	if (identifiers.size()==1) cout << prefix << "\tidentifiers:\t" << *identifiers.begin() << endl;
@@ -198,17 +148,6 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 		logger::debug(12,"files_::dsims_t::contents_t::columns()","units().size()=",tools::to_string(units().size()));
 		logger::debug(12,"files_::dsims_t::contents_t::columns()","data_cols_lines.size()=",tools::to_string(data_cols_lines.size()));
 	}
-// 	cout << "START"<<endl;
-// 	print(cluster_names());
-// 	print(dimensions());
-// 	print(units());
-// 	for (auto& col : cols)
-// 	{
-// 		cout << "col.cluster_name=" << col.cluster_name << endl;
-// 		cout << "col.dimension=" << col.dimension << endl;
-// 		cout << "col.unit=" << col.unit << endl;
-// 	}
-// 	cout << "STOP"<<endl;
 	return columns_s;
 }
 
@@ -416,26 +355,6 @@ bool files_::dsims_t::contents_t::ipr_shift_correction()
 	mat->insert(mat->end(),Ipr_mat.begin(),Ipr_mat.end());
     return true;
 }
-
-// const quantity::quantity_t files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername(const string col_dimension, const string ignore_clustername)
-// {
-// 	string unit="";
-// 	vector<vector<double>> data_vecs;
-// 	for (auto& col:columns())
-// 	{
-// 		if (col.dimension!=col_dimension) continue;
-// 		if (col.cluster_name==ignore_clustername) continue;
-// 		data_vecs.push_back(col.data);
-// 		unit = col.unit;
-// 	}
-// 	if (unit=="") 
-// 	{
-// 		logger::error("files_::dsims_t::contents_t::get_quantity_from_dimension_and_clustername()","unit=''",to_string(),"returning {}");
-// 		return {};
-// 	}
-// 	statistics::common_vector({});
-// 	return quantity::quantity_t{statistics::common_vector(data_vecs),unit};
-// }
 
 const map<string,string>& files_::dsims_t::contents_t::infos_and_settings()
 {

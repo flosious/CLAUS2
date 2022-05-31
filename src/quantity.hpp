@@ -438,7 +438,7 @@ namespace quantity
 	class electrical_charge_t : public quantity_t
 	{
 	public:
-		electrical_charge_t(vector<double> data_s={},unit_t unit_s={units::derived::coulomb,-1}, dimension_t dim_s=dimensions::SI::electic_current*dimensions::SI::time);
+		electrical_charge_t(vector<double> data_s={},unit_t unit_s={units::derived::coulomb}, dimension_t dim_s=dimensions::SI::electic_current*dimensions::SI::time);
 		electrical_charge_t(const quantity_t& quantity_s);
 	};
 

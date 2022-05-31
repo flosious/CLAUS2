@@ -29,6 +29,7 @@ files_::file_t::name_t::name_t(string& filename_with_path_s,
 											OR_identifiers_s(OR_identifiers_s),
 											AND_identifiers_s(AND_identifiers_s)
 {	
+	parse_filename_parts();
 }
 
 const vector<string> files_::file_t::name_t::methods = {"dsims","tofsims","xps"};

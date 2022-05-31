@@ -46,18 +46,30 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	list<sample_t> samples_list;
 	profiler_t profiler(filenames,samples_list,sql_wrapper);
 	camera_t camera(filenames,sql_wrapper);
+	tofsims_t tofsims(filenames,samples_list,profiler,camera,sql_wrapper);
 	dsims_t dsims(filenames,samples_list,profiler,camera,sql_wrapper);
+	
 	
 	
 // 	cout << "filenames.size()=" << filenames.size() << endl;
 // 	cout << "dsims.files().size()=" << dsims.files().size() << endl;
 // 	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
 // 	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
+	cout << "tofsims files:" << endl;
+	for (auto& d : tofsims.files())
+		cout << "\t" << d.name.filename_without_crater_depths() << endl;
 	
+	cout << endl;
 	cout << "dsims files:" << endl;
 	for (auto& d : dsims.files())
 		cout << "\t" << d.name.filename_without_crater_depths() << endl;
 	cout << endl;
+	
+	cout << "measurements: " << endl;
+	for (auto& M : tofsims.measurements())
+	{
+		cout << M.to_string() << endl;
+	}
 	
 // 	map<int,string> test;
 // 	test.insert(pair<int,string>(5,"a"));
@@ -87,15 +99,15 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		{
 			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
 			const auto RSFs = mat.RSFs().add_natural_abundances();
-			for (auto& M:MG.measurements_p)
+			for (auto& M:MG.measurements())
 			{
-				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,M);
+				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
 				const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
 				///copy the results - this is really ugly
 				for (auto C : M_with_Cs.clusters)
 				{
 					if (!C.concentration.is_set()) continue;
-					*M.cluster(C) = C;
+					*M->cluster(C) = C;
 				}
 			}
 		}
@@ -116,6 +128,74 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Program runtime\t" << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+}
+
+
+/*****************************/
+/**  processor::tofsims_t  ***/
+/*****************************/
+
+processor::tofsims_t::tofsims_t(vector<string>& filenames, 
+							list<sample_t>& samples_list, 
+							processor::profiler_t& profiler, 
+							processor::camera_t& cam,
+							database_t& sql_wrapper	) : filenames(filenames),samples_list(samples_list),profiler(profiler),camera(cam), sql_wrapper(sql_wrapper)
+{
+}
+
+vector<files_::tofsims_t> & processor::tofsims_t::files()
+{
+	if (files_p.size()>0)
+		return files_p;
+	
+	for (int f=0;f<filenames.size();f++)
+	{
+		files_::tofsims_t::name_t dFN(filenames.at(f));
+		if (dFN.is_correct_type())
+		{
+			files_::tofsims_t::contents_t F(filenames.at(f));
+			if (F.is_correct_type())
+			{
+				files_::tofsims_t D{dFN,F};
+				files_p.push_back(D);
+				filenames.erase(filenames.begin()+f); // dont allow doubles
+				f--;
+			}
+		}
+	}
+	sort(files_p.begin(),files_p.end());
+	return files_p;
+}
+vector<measurements_::tofsims_t>& processor::tofsims_t::measurements()
+{
+	if (measurements_p.size()>0)
+		return measurements_p;
+	if (files().size()==0) // populate files_p
+		return measurements_p;
+	
+	for (vector<files_::tofsims_t>::iterator DF=files_p.begin();DF!=files_p.end();DF++)
+	{
+		measurements_p.push_back({*DF,samples_list,sql_wrapper,&camera.files(),&profiler.files()});
+	}
+	
+	if (measurements_p.size()<2)
+		return measurements_p;
+	
+	/*clear duplicates*/
+	sort(measurements_p.begin(),measurements_p.end());
+	for (vector<measurements_::tofsims_t>::iterator DM=measurements_p.begin();DM!=measurements_p.end();DM++)
+	{
+		for (vector<measurements_::tofsims_t>::iterator DM2=DM+1;DM2!=measurements_p.end();DM2++)
+		{
+			if (DM->add(*DM2))
+			{
+				measurements_p.erase(DM2);
+				DM2--;
+			}
+		}
+	}
+	
+	return measurements_p;
 }
 
 /*****************************/

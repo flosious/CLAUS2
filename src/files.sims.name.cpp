@@ -64,16 +64,6 @@ const string files_::sims_t::name_t::filename_without_crater_depths()
 	if (filename_without_crater_depths_s=="") 
 		total_sputter_depths();
 	return filename_without_crater_depths_s;
-// 	string filename_wo_crater_depths  = tools::file::extract_filename(filename_with_path);
-// 	stringstream remove;
-// 	for (double total_sputter_depth:total_sputter_depths().data)
-// 	{
-// 		remove.str("");
-// 		remove << total_sputter_depth << total_sputter_depths().unit().to_string();
-// 		tools::str::remove_substring_from_mainstring(&filename_wo_crater_depths ,remove.str() + delimiter);
-// 		tools::str::remove_substring_from_mainstring(&filename_wo_crater_depths ,delimiter+ remove.str());
-// 	}
-// 	return filename_wo_crater_depths;
 }
 
 bool files_::sims_t::name_t::parse_sputter_energy_element_polarity()

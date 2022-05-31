@@ -54,6 +54,7 @@ private:
 	vector<bin_t> bins_p;
 public:
 	histogram_t(const vector<bin_t>& bins);
+	unsigned int quantities_in_bins() const;
 // 	histogram_t(const quantity::quantity_t& Qs);
 	///tries to add a new quantity to the correct bin;
 	histogram_t& add(const quantity::quantity_t& q);

@@ -96,6 +96,24 @@ private:
 		vector<measurements_::dsims_t>& measurements();
 		vector<mgroups_::dsims_t>& mgroups();
 	};
+	
+	class tofsims_t
+	{
+	private:
+		vector<string>& filenames;
+		vector<files_::tofsims_t> files_p;
+		vector<measurements_::tofsims_t> measurements_p;
+		vector<mgroups_::tofsims_t> mgroups_p;
+		list<sample_t>& samples_list;
+		profiler_t& profiler;
+		camera_t& camera;
+		database_t& sql_wrapper;
+	public:
+		tofsims_t(vector<string>& filenames, list<sample_t>& samples_list, profiler_t& profiler, camera_t& cam, database_t& sql_wrapper);
+		vector<files_::tofsims_t>& files();
+		vector<measurements_::tofsims_t>& measurements();
+		vector<mgroups_::tofsims_t>& mgroups();
+	};
 		
 private:
 	vector<string> filenames;

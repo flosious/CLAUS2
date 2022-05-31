@@ -76,7 +76,23 @@ const string msettings::dsims_t::to_string(const string del) const
 
 bool msettings::dsims_t::operator==(const msettings::dsims_t& obj) const
 {
-	if (sims_t::operator!=(obj)) return false;
+	if (sims_t::operator!=(obj))
+		return false;
+	if (egate != obj.egate) 
+		return false;
+	if (mass_resolution != obj.mass_resolution) 
+		return false;
+	if (field_aperture != obj.field_aperture) 
+		return false;
+	if (contrast_aperture != obj.contrast_aperture) 
+		return false;
+	if (entrance_slit != obj.entrance_slit) 
+		return false;
+	if (exit_slit != obj.exit_slit) 
+		return false;
+	if (energy_window != obj.energy_window) 
+		return false;
+	
 	return true;
 }
 

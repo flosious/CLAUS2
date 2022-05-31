@@ -183,8 +183,12 @@ string measurements_::sims_t::to_string(const string del)
 	logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
 	stringstream ss;
 	ss << measurement_t::to_string() << del;
-	if (crater.total_sputter_depths.is_set() || crater.linescans.size()>0)
+// 	if (crater.total_sputter_depths.is_set() || crater.linescans.size()>0)
 	ss << "crater: ";
+	if (crater.sputter_depth.is_set())
+		ss << crater.sputter_depth.to_string() << del;
+	if (crater.sputter_time.is_set())
+		ss << crater.sputter_time.to_string() << del;
 	if (crater.total_sputter_depths.is_set())
 		ss << crater.total_sputter_depths.to_string() << del;
 	if (crater.linescans.size()>0)
@@ -282,7 +286,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 	if (concentration_backgrounds.is_set())
 		plot.Y2.range(concentration_backgrounds.min().data().front(),plot.Y2.range().stop,true);
 	else
-		plot.Y2.range(plot.Y2.range().stop/1E5,plot.Y2.range().stop,true);
+		plot.Y2.range(plot.Y2.range().start,plot.Y2.range().stop,true);
 	plot.to_screen(to_string(),sleep_sec);
 }
 

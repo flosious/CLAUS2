@@ -139,6 +139,18 @@ crater_t::crater_t()
 {
 }
 
+crater_t::crater_t(const quantity::sputter_depth_t& sputter_depth) : sputter_depth(sputter_depth)
+{
+}
+crater_t::crater_t(const quantity::sputter_time_t& sputter_time) : sputter_time(sputter_time)
+{
+}
+
+crater_t::crater_t(const quantity::sputter_time_t& sputter_time, const quantity::sputter_depth_t& sputter_depth) : 
+	sputter_time(sputter_time), sputter_depth(sputter_depth)
+{
+}
+
  const string crater_t::to_string(const string del) const
  {
 	 return "not set at the mom";

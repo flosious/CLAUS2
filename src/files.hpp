@@ -141,7 +141,7 @@ public:
 		protected:
 			name_t(string& filename_with_path_s,const string delimiter_s,const set<string> OR_identifiers_s,const set<string> AND_identifiers_s);
 		public:
-			const vector<string>& not_parseable_filename_parts();
+			const vector<string>& not_parseable_filename_parts() override;
 			const string simple_name();
 			string to_string();
 			const quantity::energy_t sputter_energy();
@@ -213,16 +213,7 @@ public:
 			const vector<column_t> columns();
 			const vector<string>& cluster_names();
 		public:
-// 			class Ipr_t
-// 			{
-// 			public:
-// 				quantity::current_t sputter_current;
-// 				quantity::sputter_time_t sputter_time;
-// 				quantity::depth_t sputter_depth;
-// 				Ipr_t(quantity::current_t sputter_current_s={}, quantity::sputter_time_t sputter_time={}, quantity::depth_t sputter_depth_s={});
-// 				const string to_string(const string del=", ") const;
-// 			};
-			vector<cluster_t> clusters();
+			vector<cluster_t> clusters() override;
 			const tm start_date_time();
 			const tm creation_date_time();
 			///primary current (sputter_current vs time/depth)
@@ -262,25 +253,30 @@ public:
 		class name_t : public sims_t::name_t
 		{
 		private:
-			bool parse_analysis_energy_element(string filename_part);
-			string analysis_element_p;
+			bool parse_analysis_energy_element();
+			ion_t analysis_ion_p;
+			quantity::energy_t analysis_energy_p;
 		public:
 			name_t(string& filename_with_path_s);
-			const element_t analysis_element();
-			const quantity::energy_t analysis_energy();
+			const ion_t& analysis_ion() const;
+			const quantity::energy_t& analysis_energy() const;
 		};
 		class contents_t : public sims_t::contents_t
 		{
+		private:
+			vector<column_t> cols_p;
 		protected:
-			bool parse_analysis_energy_element(string filename_part);
-			string analysis_element_p;
+			vector<isotope_t> parse_isotopes(string isotopes) const;
+			const vector<column_t> columns();
 		public:
-			const element_t analysis_element();
-			const quantity::energy_t analysis_energy();
+			quantity::sputter_time_t sputter_time();
+			quantity::sputter_depth_t sputter_depth();
+			vector<cluster_t> clusters() override;
 			contents_t(string& filename_with_path);
 		};
 		tofsims_t(string& filename);
 		tofsims_t(files_::tofsims_t::name_t& name_s, files_::tofsims_t::contents_t& contents_s);
+		bool operator<(tofsims_t& obj);
 		name_t name;
 		contents_t contents;
 	};

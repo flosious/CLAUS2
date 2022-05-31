@@ -319,14 +319,14 @@ public:
 
 	class dsims_t: public sims_t
 	{
-		friend class processor;
+// 		friend class processor;
 	private:
 		vector<measurements_::dsims_t> measurements_p;
 		const msettings::dsims_t settings_p;
 	public:
-		const msettings::sims_t* settings() const override;
 		dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
 		dsims_t(measurements_::dsims_t& dsims_measurements);
+		const msettings::sims_t* settings() const override;
 		vector<measurements_::sims_t*> measurements() override;
 		vector<measurements_::sims_t> measurements_copy() override;
 		string to_string(const string del=", ");
@@ -334,21 +334,24 @@ public:
 		/*normalize to primary current*/
 		dsims_t normalize_to_Iprimary();
 		
-		
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
 	};
 	
-// 	class tofsims_t: public sims_t
-// 	{
-// 	private:
-// 		
-// 	public:
-// 		string to_string();
-// 		set<measurements::tofsims_t*> measurements;
-// 		void insert_measurement(measurements::tofsims_t* M_p);
-// 		tofsims_t(measurements::tofsims_t* measurement);
-// 	};
+	class tofsims_t: public sims_t
+	{
+	private:
+		vector<measurements_::tofsims_t> measurements_p;
+// 		const msettings::tofsims_t settings_p;
+	public:
+		tofsims_t(vector<measurements_::tofsims_t>& dsims_measurements);
+		tofsims_t(measurements_::tofsims_t& dsims_measurements);
+		vector<measurements_::sims_t*> measurements() override;
+		vector<measurements_::sims_t> measurements_copy() override;
+		string to_string(const string del=", ");
+		bool operator==(const tofsims_t& obj) const;
+		bool operator!=(const tofsims_t& obj) const;
+	};
 	
 };
 

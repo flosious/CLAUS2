@@ -36,7 +36,9 @@ ion_t::ion_t(element_t element_s,  quantity::electrical_charge_t electric_charge
 
 bool ion_t::operator==(const ion_t& obj) const
 {
-	if (electric_charge!=obj.electric_charge) return false;
+	if (electric_charge!=obj.electric_charge) 
+		return false;
+	
 	bool same_elements=false;
 	for (auto ele:elements)
 	{
@@ -49,7 +51,8 @@ bool ion_t::operator==(const ion_t& obj) const
 				break;
 			}
 		}
-		if (!same_elements) return false;
+		if (!same_elements) 
+			return false;
 	}
 	return true;
 }

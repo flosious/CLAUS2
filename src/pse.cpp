@@ -142,7 +142,7 @@ const pse_t::pse_isotope_t* pse_t::pse_element_t::isotope_with_highest_abundance
 // 	int max_entry = 0;
 // 	double max_abundance = isotopes.at(max_entry).abundance;
 	
-	for (int i=1;i<isotopes.size();i++)
+	for (int i=0;i<isotopes.size();i++)
 	{
 		if (iso_w_max_abundance == nullptr || isotopes.at(i).abundance > iso_w_max_abundance->abundance)
 		{

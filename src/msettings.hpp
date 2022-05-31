@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2021 Florian Bärwolf
+	Copyright (C) 2021, 2022 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -75,13 +75,18 @@ public:
 		bool operator!=(const dsims_t& obj) const;
 	};
 
-// 	class tofsims_t : public sims_t
-// 	{
-// 	public:
+	class tofsims_t : public sims_t
+	{
+	public:
 // 		tofsims_t();
-// 	// 	const beam_settings_t analysis_beam();
-// 		tofsims_t(set<files_::tofsims_t*> files_p);
-// 		string to_string();
-// 	};
+		tofsims_t(files_::tofsims_t::name_t& filename, files_::tofsims_t::contents_t& filecontents);
+		tofsims_t(files_::tofsims_t& file);
+		
+		ion_t analysis_ion;
+		quantity::energy_t analysis_energy;
+		
+		bool operator==(const tofsims_t& obj) const;
+		bool operator!=(const tofsims_t& obj) const;
+	};
 };
 #endif // MEASUREMENT_SETTINGS_T_HPP

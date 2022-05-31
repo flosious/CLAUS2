@@ -136,7 +136,7 @@ public:
 		static bool is_empty(string input);
 		static bool is_empty(vector<string> input);
 		static bool is_empty(vector<vector<string>> input);
-        static string get_string_between_string_A_and_next_B(string *mainstring,string A, string B);
+        static string get_string_between_string_A_and_next_B(const string *mainstring,string A, string B);
         static int is_number(std::string str);
         static double str_to_double(string mainstring);
         static int str_to_int(string mainstring);

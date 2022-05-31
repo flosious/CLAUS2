@@ -104,6 +104,7 @@ public:
 	
 	class sims_t : public measurement_t
 	{
+		
 		friend class processor;
 	protected:
 		///some general data filters
@@ -304,11 +305,9 @@ public:
 // 		unsigned int equilibrium_start_index_s=0;
 		cluster_t matrix_cluster_s;
 	public: 
-		/*
-		 * matrix cluster should contain only unique isotope for its cluster;
-		 * that means e.g. SiGe matrix there can never be a SiGe cluster, just Si clusters and Ge clusters seperate
-		 * SiGeB cluster or SiB cluster will be treatet as NON-matrix clusters, that means (implanted) isotopical cluster
-		 */
+		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
+			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
+		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
 		
 		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
@@ -316,9 +315,7 @@ public:
 		bool are_intensities_of_clusters_set(const cluster_t& cluster_s) const;
 		
 		calc_t calc(bool overwrite=false);
-		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
-			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
-		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
+		
 		string to_string(const string del = ", ");
 		const string to_string_short(const string del = ", ") const;
 		///returns the measurement without surface artefacts
@@ -328,6 +325,11 @@ public:
 		set<cluster_t*> clusters_corresponding_to_isotope(const isotope_t& isotope);
 		isotope_t isotope_corresponding_to_cluster(const cluster_t& cluster);
 		///get or set matrix_isotopes
+		/*
+		 * matrix cluster should contain only unique isotope for its cluster;
+		 * that means e.g. SiGe matrix there can never be a SiGe cluster, just Si clusters and Ge clusters seperate
+		 * SiGeB cluster or SiB cluster will be treatet as NON-matrix clusters, that means (implanted) isotopical cluster
+		 */
 		matrix_clusters_c matrix_clusters(const vector<isotope_t> matrix_isotopes={});
 		
 		//creates instantly a plot
@@ -383,14 +385,16 @@ public:
 
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
-
 	}; // dsims_t
 	
 	class tofsims_t : public sims_t
 	{
 	public:
-// 		const msettings::tofsims_t settings;
-// 		tofsims_t(vector<files_::tofsims_t>& dsims_files, list<sample_t>& samples_list,vector<files_::jpg_t>* jpg_files=nullptr);
+		msettings::tofsims_t settings;
+		tofsims_t(files_::tofsims_t& tofsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profiler_t>* profiler_files=nullptr);
+
+		bool operator==(const tofsims_t& obj) const;
+		bool operator!=(const tofsims_t& obj) const;
 	}; // tofsims_t
 }; // measurements_
 
