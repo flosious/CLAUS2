@@ -280,6 +280,7 @@ public:
 		quantity::SF_t RSF(cluster_t cluster, sample_t::matrix_t matrix);
 		///all isotopes contained in all matrices in all samples
 		const vector<isotope_t> matrix_isotopes();
+		void set_reference_isotopes_in_measurements();
 		///all clusters contained in all matrices in all measurements
 		const vector<cluster_t> matrix_clusters();
 		///all isotopes corresponding to matrix_clusters
@@ -342,10 +343,11 @@ public:
 	{
 	private:
 		vector<measurements_::tofsims_t> measurements_p;
-// 		const msettings::tofsims_t settings_p;
+		const msettings::tofsims_t settings_p;
 	public:
-		tofsims_t(vector<measurements_::tofsims_t>& dsims_measurements);
-		tofsims_t(measurements_::tofsims_t& dsims_measurements);
+		tofsims_t(vector<measurements_::tofsims_t>& tofsims_measurements);
+		tofsims_t(measurements_::tofsims_t& tofsims_measurements);
+		const msettings::sims_t* settings() const override;
 		vector<measurements_::sims_t*> measurements() override;
 		vector<measurements_::sims_t> measurements_copy() override;
 		string to_string(const string del=", ");

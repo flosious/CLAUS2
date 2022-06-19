@@ -217,9 +217,21 @@ const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 	return isos_vec;
 }
 
+
+void mgroups_::sims_t::set_reference_isotopes_in_measurements()
+{
+	const auto matrix_isos = matrix_isotopes();
+	for (auto& M : measurements())
+	{
+		M->reference_isotopes = matrix_isos;
+		logger::info(3,"mgroups_::sims_t::set_reference_isotopes_in_measurements()",M->to_string_short() + " was set");
+	}
+}
+
 const vector<isotope_t> mgroups_::sims_t::isotopes_corresponding_to_matrix_clusters()
 {
 	const auto matrix_isos = matrix_isotopes();
+	
 	set<isotope_t> isos;
 	for (auto& MC : matrix_clusters())
 		isos.insert(MC.corresponding_isotope(matrix_isos));
@@ -331,7 +343,7 @@ bool mgroups_::sims_t::check_matrix_cluster_consistency()
 		auto M = Ms.at(i);
 		for (auto& Cref : ref_clusters)
 		{
-			if (tools::find_in_V(Cref,M->matrix_clusters(matrix_isotopes()).cluster_names())==nullptr)
+			if (tools::find_in_V(Cref,M->matrix_clusters().cluster_names())==nullptr)
 			{
 				logger::error("mgroups_::sims_t::check_matrix_cluster_consistency()","missing matrix_cluster " + Cref.to_string() +" in measurement " + M->to_string());
 				return false;

@@ -72,7 +72,7 @@ const set<cluster_t> calc_t::sims_t::matrix_t::matrix_clusters_from_matrix_isoto
 			continue;
 		if (std::find(matrix_isotopes().begin(),matrix_isotopes().end(),C.isotopes.front())==matrix_isotopes().end())
 			continue;
-		matrix_clusters.insert(C);
+		matrix_clusters.insert(C.isotopes);
 	}
 
 	return matrix_clusters;
@@ -119,7 +119,7 @@ const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t:
 				logger::info(3,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","RSF not successfully fitted", "Z:" + RSF.zaehler().to_string() + ", N:" + RSF.nenner().to_string());
 				continue;
 			}
-			RSF.plot_to_screen(0);
+// 			RSF.plot_to_screen(0);
 			Crels_to_Irels.push_back(RSF);
 		}
 	}
@@ -705,6 +705,18 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs_a
 	return RSFs_t(matrix_clusters(),new_Crel_to_Irels_lin_fits,RSFs_manually_set());
 }
 
+calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs_below_gof_treshold(float gof_treshold) const
+{
+	vector<Crel_to_Irel_data_polynomial_fit_t> new_Crel_to_Irels_lin_fits;
+	new_Crel_to_Irels_lin_fits.reserve(Crel_to_Irel_lin_fits().size());
+	for (const auto& Crel_to_Irel : Crel_to_Irel_lin_fits())
+	{
+		if (Crel_to_Irel.polynom().gof()>=gof_treshold)
+			new_Crel_to_Irels_lin_fits.push_back(Crel_to_Irel);
+	}
+	return RSFs_t(matrix_clusters(),new_Crel_to_Irels_lin_fits,RSFs_manually_set());
+}
+
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replace_RSF(const RSF_t& RSF) const
 {
 	vector<RSF_t> new_RSFs = RSFs_manually_set();
@@ -824,6 +836,32 @@ const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::
 // 		all_possible_RFS.erase(RSF(Crel_to_Irel));
 	
 	return all_possible_RFS;
+}
+
+void calc_t::sims_t::matrix_t::RSFs_t::plot_now(double sleep_sec) const
+{
+	plot_t plot;
+	cout << endl << "Crel_to_Irel_lin_fits:" << Crel_to_Irel_lin_fits().size() << endl;
+	for (auto& RSF_fits : Crel_to_Irel_lin_fits())
+	{
+// 		RSF_fits.plot_to_screen(0);
+// 		continue;
+		plot_t::window_t w;
+		stringstream plot_title;
+		
+		w.Y1.log10_scale=false;
+		auto Crel_to_Irel_map_withot_infs = RSF_fits.Crel_to_Irel_map().remove_inf();
+		
+		w.Y1.add_points(Crel_to_Irel_map_withot_infs,RSF_fits.zaehler().to_string() + " / " + RSF_fits.nenner().to_string()," ro");
+		plot_title << "{" << RSF_fits.zaehler().to_string() << "} / {" << RSF_fits.nenner().to_string() <<  "}";
+		w.title = plot_title.str();
+		if (!RSF_fits.polynom().successfully_fitted())
+			logger::warning(3,"calc_t::sims_t::matrix_t::RSFs_t::plot_now()",RSF_fits.to_string(),"continue");
+		else
+			w.Y1.add_polynom(Crel_to_Irel_map_withot_infs,RSF_fits.polynom(),RSF_fits.polynom().to_string());
+		plot.windows.push_back(w);
+	}
+	plot.to_screen("",0);
 }
 
 /* this is a rather complicated method

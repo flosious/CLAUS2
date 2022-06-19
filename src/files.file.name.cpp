@@ -32,25 +32,32 @@ files_::file_t::name_t::name_t(string& filename_with_path_s,
 	parse_filename_parts();
 }
 
-const vector<string> files_::file_t::name_t::methods = {"dsims","tofsims","xps"};
+// const vector<string> files_::file_t::name_t::methods = {"dsims","tofsims","xps"};
 
-const string files_::file_t::name_t::method() const
-{
-	for (auto& m : methods)
-	{
-		if (filename().find(m)!=string::npos)
-			return m;
-	}
-	return "";
-}
+// const string files_::file_t::name_t::method() const
+// {
+// 	for (auto& m : methods)
+// 	{
+// 		if (filename().find(m)!=string::npos)
+// 			return m;
+// 	}
+// 	return "";
+// }
 
 const string files_::file_t::name_t::simple_name()
 {
 	string simple_name_p;
-	if ((lot()=="") && not_parseable_filename_parts().size()>0) simple_name_p=tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
-	else if ((wafer()<0)) simple_name_p=lot() +lot_split() + tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
-	else simple_name_p="";
-	if (simple_name_p=="" && lot()=="")
+// 	if ((lot()=="") && not_parseable_filename_parts().size()>0) 
+// 		simple_name_p=tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
+// 	else if ((wafer()<0)) 
+// 		simple_name_p=lot() +lot_split() + tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
+// 	else 
+// 		simple_name_p="";
+	
+	if ((lot()=="" || wafer() <0 ) && not_parseable_filename_parts().size()>0)
+		simple_name_p = not_parseable_filename_parts().at(0);
+	
+	if (simple_name_p=="")
 		logger::warning(1,"files_::file_t::name_t::simple_name()","simple_name_p=='' && lot()==''",filename_with_path,"using " + simple_name_p);
 	return simple_name_p;
 }
@@ -63,6 +70,7 @@ const bool files_::file_t::name_t::is_correct_type()
 	{
 		if ((filename()+"."+filename_type_ending()).find(fti)==string::npos)
 		{
+			logger::debug(33,"files_::file_t::name_t::is_correct_type()","wrong AND file type: " + filename_with_path );
 			return false;
 		}
 	}
@@ -72,11 +80,15 @@ const bool files_::file_t::name_t::is_correct_type()
 	
 	for (auto& fti : OR_identifiers_s)
 	{
-		if ((filename()+"."+filename_type_ending()).find(fti)!=string::npos)
+		
+		string T = filename()+"."+filename_type_ending();
+// 		cout << endl << T << " FTI " << fti << endl;
+		if (T.find(fti)!=string::npos)
 		{
 			return true;
 		}
 	}
+	logger::debug(33,"files_::file_t::name_t::is_correct_type()","wrong OR file type: " +  filename_with_path );
 	return false;
 }
 
@@ -108,6 +120,9 @@ string files_::file_t::name_t::lot()
 	parse_filename_parts();
 // 	if (lot_p=="")
 // 		logger::warning("files_::file_t::lot() unkown", filename_with_path);
+	if (lot_p=="" && not_parseable_filename_parts().size()>0)
+		lot_p =  not_parseable_filename_parts().at(0);
+	
 	return lot_p;
 }
 string files_::file_t::name_t::lot_split()
@@ -166,10 +181,9 @@ void files_::file_t::name_t::to_screen(string prefix)
 	cout<< prefix << "filename_with_path=\t"<< filename_with_path<<endl;
 	cout<< prefix << "filename_type_ending=\t"<< filename_type_ending()<<endl;
 	cout << prefix<< "directory=\t"<< directory()<<endl;
-	
-	cout<< prefix << "wafer=\t"<< wafer()<<endl;
 	cout << prefix<< "lot=\t"<< lot()<<endl;
 	cout << prefix<< "lot_split=\t"<< lot_split()<<endl;
+	cout<< prefix << "wafer=\t"<< wafer()<<endl;
 	cout<< prefix << "chip_x=\t"<< chip_x()<<endl;
 	cout << prefix<< "chip_y=\t"<< chip_y()<<endl;
 	cout << prefix<< "monitor=\t"<< monitor()<<endl;
@@ -221,7 +235,8 @@ void files_::file_t::name_t::parse_filename_parts()
 		// no parser worked
 		not_parseable_filename_parts_p.push_back(filename_part);
 	}
-	if (lot_p=="" || olcdb_p==-1 || wafer_p==-1 || group_p=="") parse_all_parts_at_once();
+	if (lot_p=="" || olcdb_p==-1 || wafer_p==-1 || group_p=="") 
+		parse_all_parts_at_once();
 	parsed_filename_parts = true;
 // 	if (lot=="" && not_parseable_filename_parts.size()>0) lot=not_parseable_filename_parts[0];
 }
@@ -270,7 +285,7 @@ bool files_::file_t::name_t::parse_olcdb(string filename_part)
 bool files_::file_t::name_t::parse_lot(string filename_part)
 {
 	smatch match;
-	regex reg ("^([A-Z]{1,4}[0-9]{1,5})([#[0-9A-Za-z]*?]*?)$"); 
+	regex reg ("^([A-Z]{1,4}[0-9]{1,5}){4,}([#[0-9A-Za-z]*?]*?)$"); 
 	if (regex_search(filename_part,match,reg)) 
 	{
 		lot_p = match[1];
@@ -407,18 +422,46 @@ bool files_::file_t::name_t::operator!=(files_::file_t::name_t& obj)
 	return !operator==(obj);
 }
 
-// bool files_::file_t::name_t::operator<(files_::file_t::name_t& obj)
-// {
-// 	if (olcdb() < obj.olcdb()) return true;
-// 	if (olcdb() > obj.olcdb()) return false;
-// 	return false;
-// }
-// 
+/************************************************/
+/******   		crater_in_name_t   		   ******/
+/************************************************/
 
 
+files_::file_t::crater_in_name_t::crater_in_name_t(string& filename_with_path_s,const string delimiter_s,const set<string> OR_identifiers_s,const set<string> AND_identifiers_s) :
+	files_::file_t::name_t(filename_with_path_s,delimiter_s,OR_identifiers_s,AND_identifiers_s)
+{
+}
 
+const quantity::total_sputter_depth_t& files_::file_t::crater_in_name_t::total_sputter_depths()
+{
+	if (total_sputter_depths_p.data().size()==0)
+	{
+		filename_without_crater_depths_s = filename();
+		for (vector<string>::iterator FNp=not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
+		{
+			smatch match;
+			regex reg ("^([0-9]{2,})(nm|A)$"); 
+			if (regex_search(*FNp,match,reg)) 
+			{
+				string value = match[1];
+				string unit = match[2];
+				total_sputter_depths_p << quantity::total_sputter_depth_t({tools::str::str_to_double(value)},unit);
+				not_parseable_filename_parts_p.erase(FNp);
+				FNp--;
+				tools::str::remove_substring_from_mainstring(&filename_without_crater_depths_s,delimiter+value+unit);
+				tools::str::remove_substring_from_mainstring(&filename_without_crater_depths_s,value+unit+delimiter);
+			}
+		}
+	}
+	return total_sputter_depths_p;
+}
 
-
+const string& files_::file_t::crater_in_name_t::filename_without_crater_depths()
+{
+	if (filename_without_crater_depths_s=="" && total_sputter_depths_p.data().size()==0)
+		total_sputter_depths();
+	return filename_without_crater_depths_s;
+}
 
 
 

@@ -19,7 +19,8 @@
 
 #include "files.hpp"
 
-files_::file_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : filename_with_path(filename_with_path), delimiter(delimiter),identifiers(identifiers)
+files_::file_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : 
+	filename_with_path(filename_with_path), delimiter(delimiter),identifiers(identifiers)
 {
 }
 
@@ -157,7 +158,6 @@ vector<vector<vector<string> > >& files_::file_t::contents_t::raw_header_tensor(
 }
 vector<vector<vector<string> > >& files_::file_t::contents_t::raw_data_tensor()
 {
-
 	if (raw_data_tensor_p.size()>0) return raw_data_tensor_p;
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{

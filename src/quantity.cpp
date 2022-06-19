@@ -246,13 +246,14 @@ quantity::quantity_t quantity::quantity_t::polyfit(unsigned int polynom_grade) c
 	return {*this,polynom(polynom_grade).y_data(data_X_1D()),ss.str()};
 }
 
-quantity::quantity_t quantity::quantity_t::round_() const
+quantity::quantity_t quantity::quantity_t::round_(const unsigned int decimals) const
 {
 	if (!is_set()) 
 		return {};
 	auto data_c = data_s;
+	const double multiplier = pow(10,decimals);
 	for (auto& d : data_c)
-        d = round(d);
+        d = round(d*multiplier)/multiplier;
 // 	operations_history_s.push_back("round");
 	return {*this,data_c,"round"};
 }

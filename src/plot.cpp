@@ -33,6 +33,24 @@ plot_t::plot_t(bool Y1_log10, bool Y2_log10, bool Y3_log10)
 
 int plot_t::Draw(mglGraph* gr)
 {
+	if (windows.size()!=0)
+	{
+		int x_n = ceil((double)sqrt(windows.size()));
+		int y_n = ceil((double)windows.size() / x_n );
+// 		cout << endl << "windows.size: " << windows.size() << endl;
+// 		cout << "x_n: " << x_n << endl;
+// 		cout << "y_n: " << y_n << endl;
+		// create sub-plots
+		for (int i=0; i < windows.size(); i++)
+		{
+			gr->SubPlot(x_n,y_n,i);
+			windows.at(i).draw(gr);
+		}
+// 		gr->Legend(0.5,1.04,"A-","value 0.004");
+// 		gr->Legend();
+		return 0;
+	}
+	/*this is the old version*/
 	tools::str::filter_t filter;
 	logger::debug(15,"plot_t::Draw()","entering");
 	/*x axis*/
@@ -56,20 +74,14 @@ int plot_t::Draw(mglGraph* gr)
 		logger::error("plot_t::Draw()","no X axis","","returning 0");
 		return 0;
 	}
-// 	cout << "Xs.size():" << Xs.size() << endl;
-// 	for (auto& X : Xs)
-// 		cout << X->to_string() << endl;
+
 	axis_t::range_t X_range(Xs);
 	
 	gr->SetFontSize(3);
-// 	X_range.log10();
 	gr->SetRange('x',X_range.start,X_range.stop);
-// 	gr->SetOrigin(0,-0.98);
 	gr->SetOrigin(0,-1);
 	gr->Axis("x");
-// 	mglData x(X->data.size());
-// 	x.Set(X->data);
-	
+
 	stringstream x_l;
 	if (Xs.front()->is_relative())
 		x_l << "rel. ";
@@ -101,13 +113,9 @@ int plot_t::Draw(mglGraph* gr)
 		if (Y2.check()) Y3.draw(gr, X_range.stop*1.15);
 		else Y3.draw(gr, X_range.stop);
 	}
-	
-	
-	
-// 	gr->Grid();
-// 	gr->Box();
-// 	gr->Legend(0.49999,1.05,"^-");
+
 	gr->Legend(0.5,1.04,"A-","value 0.04");
+// 	gr->Legend();
 	logger::debug(15,"plot_t::Draw()","exiting");
 	return 0;
 }
@@ -181,7 +189,7 @@ void plot_t::axis_t::add_curve(const quantity::map_t& XY, const std::string lege
 void plot_t::axis_t::add_polynom(const quantity::map_t& XY, const fit_functions::polynom_t& polynom_s, const string legend, const string color, const unsigned int  points)
 {
 	const quantity::quantity_t new_X=XY.X().change_resolution(points) ;
-	add_curve(XY.polyfit(polynom_s,new_X),legend);
+	add_points(XY.polyfit(polynom_s,new_X),legend, color);
 }
 
 void plot_t::axis_t::add_points(const quantity::map_t& XY, const std::string legend, const std::string color)
@@ -289,6 +297,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	else gr->Axis("y",color.c_str());
 	
 	stringstream y_l;
+	y_l.str("");;
 	string y_name="", y_unit="", y_rel="";
 	if (curves.size()>0)
 	{
@@ -305,7 +314,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 			y_rel = "rel. ";
 	}
 	y_l << y_rel << y_name << " [" << y_unit << "]";
-	
+// 	gr->Legend();
 	gr->Label('y',("#"+color+"{"+ filter.escape_special_characters(y_l.str())+"}").c_str(),0);
 	
 	for (auto& c: points)
@@ -313,19 +322,20 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		mglData x(c.XY.X().data());
 		mglData y(c.XY.Y().data());
 		gr->Plot(x,y,c.color.c_str(),filter.escape_special_characters("legend '"+ c.legende +"'").c_str()); 
+// 		cout << endl << filter.escape_special_characters("legend '"+ c.legende +"'").c_str() << endl;
+// 		gr->Plot(x,y,c.color.c_str()); 
 	}
-	int legends_above_curves = 1;
+	int legends_above_curves = 0;
 	for (auto& c: curves)
 	{
 		if (!c.XY.is_set())
 			continue;
 		mglData x(c.XY.X().data());
 		mglData y(c.XY.Y().data());
-		
-// 		gr->Plot(x,y,color.c_str(),.c_str());
 		gr->Plot(x,y,color.c_str(),("legend '"+ filter.escape_special_characters(c.legende) +"'").c_str());
-		if (c.legende.length()>5)
-			continue;
+// 		gr->Plot(x,y,color.c_str());
+// 		if (c.legende.length()>5)
+// 			continue;
 		if (c.XY.Y().data().size()<11) 
 			continue;
 		int y_offset=0;
@@ -333,7 +343,10 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 			y_offset = 1;
 		gr->SetFontSize(2);
 		/// write legend above the curve
-		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1)*0.9/legends_above_curves,c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),filter.escape_special_characters(c.legende).c_str(),"m");
+// 		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1)*0.9/legends_above_curves,c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),filter.escape_special_characters(c.legende).c_str(),"m");
+		int x_idx = c.XY.X().data().size()/ (curves.size()+2 )*(legends_above_curves+1);
+		
+		gr->Puts(mglPoint(c.XY.X().at(x_idx).data().front(),c.XY.Y().data().at(x_idx)+y_offset),filter.escape_special_characters(c.legende).c_str(),"m");
 		legends_above_curves++;
 // 		gr->Puts(mglPoint(c.XY.X().data().at(c.XY.Y().data().size()*0.1),c.XY.Y().data().at(c.XY.Y().data().size()*0.05)+y_offset),filter.escape_special_characters(c.legende).c_str(),"m");
 		gr->SetFontSize(3); // default
@@ -503,23 +516,83 @@ plot_t::axis_t::points_t::points_t(const quantity::map_t& XY, const std::string 
 }
 
 
-// double plot_t::axis_t::points_t::x_stop()
-// {
-// 	return statistics::get_max_from_Y(X->data);
-// }
-// double plot_t::axis_t::points_t::x_start()
-// {
-// 	return statistics::get_min_from_Y(X->data);
-// }
-// double plot_t::axis_t::points_t::y_start()
-// {
-// 	return statistics::get_min_from_Y(Y->data);
-// }
-// double plot_t::axis_t::points_t::y_stop()
-// {
-// 	return statistics::get_max_from_Y(Y->data);
-// }
-// 
+/****************************************/
+/********  plot_t::window_t  ************/
+/****************************************/
 
+
+void plot_t::window_t::draw(mglGraph* gr)
+{
+	/*this is the old version*/
+	tools::str::filter_t filter;
+	logger::debug(15,"plot_t::Draw()","entering");
+	/*x axis*/
+	vector<const quantity::quantity_t*> Xs;
+	for (auto& c:Y1.curves)
+		Xs.push_back(&c.XY.X());
+	for (auto& c:Y2.curves)
+		Xs.push_back(&c.XY.X());
+	for (auto& c:Y3.curves)
+		Xs.push_back(&c.XY.X());
+	
+	for (auto& c:Y1.points)
+		Xs.push_back(&c.XY.X());
+	for (auto& c:Y2.points)
+		Xs.push_back(&c.XY.X());
+	for (auto& c:Y3.points)
+		Xs.push_back(&c.XY.X());
+	
+	if (Xs.size()==0)
+	{
+		logger::error("plot_t::Draw()","no X axis","","returning 0");
+		return ;
+	}
+	
+// 	gr->Title(title.c_str());
+	axis_t::range_t X_range(Xs);
+	
+	gr->SetFontSize(3);
+	gr->SetRange('x',X_range.start,X_range.stop);
+	gr->SetOrigin(0,-1);
+	gr->Axis("x");
+
+	stringstream x_l;
+	x_l.str("");
+	if (Xs.front()->is_relative())
+		x_l << "rel. ";
+	x_l << Xs.front()->name() << " [" << Xs.front()->unit().to_string() << "]";
+	//will escape special characters
+	gr->Label('x',filter.escape_special_characters(x_l.str()).c_str(),0);
+	/********/
+	gr->ClearLegend();
+	if (Y1.check())
+		Y1.draw(gr,X_range.start);
+	if (Y2.check())
+	{
+		if (Y1.check())
+		{
+			gr->SetRange('x',X_range.start,X_range.stop);
+			gr->SetOrigin(X_range.stop,Y1.range().stop);
+			gr->Axis("x");
+		}
+		Y2.draw(gr, X_range.stop);
+	}
+	if (Y3.check())
+	{
+		if (Y1.check() && !Y2.check())
+		{
+			gr->SetRange('x',X_range.start,X_range.stop);
+			gr->SetOrigin(X_range.stop,Y1.range().stop);
+			gr->Axis("x");
+		}
+		if (Y2.check()) Y3.draw(gr, X_range.stop*1.15);
+		else Y3.draw(gr, X_range.stop);
+	}
+
+	gr->Legend(0.5,1.25,"-","value 0.04");
+// 	gr->Box();
+// 	gr->Legend(2);
+	logger::debug(15,"plot_t::Draw()","exiting");
+}
 
 

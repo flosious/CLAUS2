@@ -53,7 +53,7 @@ class processor
 private:
 	sqlite3* sql = nullptr;
 	database_t sql_wrapper;
-	/*SAMPLES*/
+	
 	class camera_t
 	{
 	private:
@@ -65,18 +65,18 @@ private:
 		vector<files_::jpg_t>& files();
 	};
 	
-	class profiler_t
+	class dektak6m_t
 	{
 	private:
 		vector<string>& filenames;
-		vector<files_::profiler_t> files_p;
-		vector<measurements_::profiler_t> measurements_p;
+		vector<files_::profilers_t::dektak6m_t> files_p;
+		vector<measurements_::profilers_t::dektak6m_t> measurements_p;
 		list<sample_t>& samples_list;
 		database_t& sql_wrapper;
 	public:
-		profiler_t(vector<string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper);
-		vector<files_::profiler_t>& files();
-		vector<measurements_::profiler_t>& measurements();
+		dektak6m_t(vector<string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper);
+		vector<files_::profilers_t::dektak6m_t>& files();
+		vector<measurements_::profilers_t::dektak6m_t>& measurements();
 	};
 	
 	class dsims_t
@@ -87,11 +87,10 @@ private:
 		vector<measurements_::dsims_t> measurements_p;
 		vector<mgroups_::dsims_t> mgroups_p;
 		list<sample_t>& samples_list;
-		profiler_t& profiler;
-		camera_t& camera;
 		database_t& sql_wrapper;
 	public:
-		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, profiler_t& profiler, camera_t& cam, database_t& sql_wrapper);
+// 		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, vector<measurements_::profilers_t>& profiler_measurements, camera_t& cam, database_t& sql_wrapper);
+		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, database_t& sql_wrapper);
 		vector<files_::dsims_t>& files();
 		vector<measurements_::dsims_t>& measurements();
 		vector<mgroups_::dsims_t>& mgroups();
@@ -105,16 +104,14 @@ private:
 		vector<measurements_::tofsims_t> measurements_p;
 		vector<mgroups_::tofsims_t> mgroups_p;
 		list<sample_t>& samples_list;
-		profiler_t& profiler;
-		camera_t& camera;
 		database_t& sql_wrapper;
 	public:
-		tofsims_t(vector<string>& filenames, list<sample_t>& samples_list, profiler_t& profiler, camera_t& cam, database_t& sql_wrapper);
+// 		tofsims_t(vector<string>& filenames, list<sample_t>& samples_list, vector<measurements_::profilers_t>& profiler_measurements, camera_t& cam, database_t& sql_wrapper);
+		tofsims_t(vector<string>& filenames, list<sample_t>& samples_list, database_t& sql_wrapper);
 		vector<files_::tofsims_t>& files();
 		vector<measurements_::tofsims_t>& measurements();
 		vector<mgroups_::tofsims_t>& mgroups();
 	};
-		
 private:
 	vector<string> filenames;
 public:

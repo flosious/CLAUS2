@@ -34,18 +34,18 @@ const map<double, double> fit_functions::data_1D_to_2D(vector<double> data_1D)
  * asym2sig_t*
  *************/
 
-double fit_functions::asym2sig_t::gof()
+double fit_functions::asym2sig_t::gof() const
 {
 	return gof_p;
 }
 
 
-double fit_functions::asym2sig_t::chisq()
+double fit_functions::asym2sig_t::chisq() const
 {
 	return chisq_p;
 }
 
-double fit_functions::asym2sig_t::chisq0()
+double fit_functions::asym2sig_t::chisq0() const
 {
 	return chisq0_p;
 }
@@ -228,12 +228,12 @@ vector<double> fit_functions::asym2sig_t::fitted_y_data(vector<double> x)
 	return y_data;
 }
 
-bool fit_functions::asym2sig_t::fitted()
+bool fit_functions::asym2sig_t::fitted() const
 {
 	return fitted_p;
 }
 
-string fit_functions::asym2sig_t::to_string(string prefix)
+string fit_functions::asym2sig_t::to_string(string prefix) const
 {
 	if (!fitted()) return "";
 	stringstream ss;
@@ -246,6 +246,12 @@ string fit_functions::asym2sig_t::to_string(string prefix)
 /************
  **POLYNOM***
  ************/
+
+fit_functions::polynom_t::polynom_t(const vector<double>& fit_parameters) : fit_parameters_p(fit_parameters)
+{
+	successfully_fitted_p= true;
+	rank_p.resize(fit_parameters.size(),0);
+}
 
 fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, 
 									const vector<double>& fit_parameters, 
@@ -270,6 +276,11 @@ fit_functions::polynom_t::polynom_t(int degree, const map<double, double>& data_
 fit_functions::polynom_t::polynom_t(int degree, const vector<double>& data) : 
 									polynom_t(degree+1, fit_functions::data_1D_to_2D(data))
 {
+}
+
+double fit_functions::polynom_t::gof() const
+{
+	return gof_p;
 }
 
 int fit_functions::polynom_t::degree() const
@@ -307,7 +318,8 @@ const fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int
 
 vector<double> fit_functions::polynom_t::y_data(const vector<double>& x_data) const
 {
-	if (!successfully_fitted()) return {};
+// 	if (!successfully_fitted()) 
+// 		return {};
 	vector<double> Y(x_data.size());
 	for (int i=0;i<x_data.size();i++)
 	{
@@ -330,7 +342,9 @@ std::string fit_functions::polynom_t::to_string(std::string prefix) const
 	stringstream out;
 	if (!successfully_fitted())
 		return "unsecesfull fit";
-	out << "chisq: " << chisq();
+	out << "gof: " << gof();
+// 	out << " chisq_relative: " << chisq_relative();
+// 	out << " chisq: " << chisq();
 	out << " params: ";
 	for (auto p : fit_parameters())
 	{
@@ -425,13 +439,18 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
     gsl_vector_free (c);
     gsl_matrix_free (cov);
 	
-	chisq_relative_p =-1;
 	vector<double> YY = y_data(Xdata);
+	gof_p = statistics::round(pow(statistics::get_correlation_Y1_Y2(Ydata,YY),50),1);
+	
+	chisq_relative_p = 0;
+	
+// 	cout << endl << "chisq_relative_p: " << chisq_relative_p << endl;
 	for (int i=0;i<YY.size();i++)
 	{
 		chisq_relative_p +=  (abs(YY.at(i)-Ydata.at(i)))/Ydata.at(i);
 	}
-	chisq_relative_p = chisq_relative_p / (Xdata.size());
+	
+// 	chisq_relative_p = chisq_relative_p / (Xdata.size());
 	
 	return true;
 }

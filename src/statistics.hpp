@@ -208,7 +208,8 @@ public:
 	static vector<unsigned int> factorial(const vector<unsigned int>& fac);
 	///returns the absolute of each entry
 	static vector<double> absolute(vector<double> data);
-	
+	static vector<double> round(vector<double> data_s ,unsigned int decimals);
+	static double round(double data_s ,unsigned int decimals);
 };
 
 #endif // STATISTICS_HPP

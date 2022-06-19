@@ -27,7 +27,12 @@
 files_::sims_t::name_t::name_t(string& filename_with_path_s, 
 						  const string delimiter_s, 
 						  const std::set< string > OR_identifiers_s, 
-						  const std::set< string > AND_identifiers_s) : files_::file_t::name_t(filename_with_path_s,delimiter_s,OR_identifiers_s,AND_identifiers_s)
+						  const std::set< string > AND_identifiers_s) :
+						  
+							files_::file_t::crater_in_name_t(filename_with_path_s,
+													delimiter_s,
+													OR_identifiers_s,
+													AND_identifiers_s)
 {
 }
 

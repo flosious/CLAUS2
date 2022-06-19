@@ -427,7 +427,8 @@ bool sample_t::matrix_t::operator<(const matrix_t& obj) const
 const string sample_t::matrix_t::to_string() const
 {
 	stringstream out;
-	if (!is_set()) return "";
+	if (!is_set()) 
+		return "matrix not set";
 	for (int i=0;i<isotopes().size();i++)
 	{
 		out << isotopes().at(i).nucleons << isotopes().at(i).symbol;

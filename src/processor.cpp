@@ -44,57 +44,111 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	/*****************************/
 	
 	list<sample_t> samples_list;
-	profiler_t profiler(filenames,samples_list,sql_wrapper);
+	dektak6m_t dektak6m(filenames,samples_list,sql_wrapper);
 	camera_t camera(filenames,sql_wrapper);
-	tofsims_t tofsims(filenames,samples_list,profiler,camera,sql_wrapper);
-	dsims_t dsims(filenames,samples_list,profiler,camera,sql_wrapper);
+	tofsims_t tofsims(filenames,samples_list,sql_wrapper);
+	dsims_t dsims(filenames,samples_list,sql_wrapper);
 	
-	
-	
-// 	cout << "filenames.size()=" << filenames.size() << endl;
-// 	cout << "dsims.files().size()=" << dsims.files().size() << endl;
-// 	cout << "dsims.measurements().size()=" << dsims.measurements().size() << endl;
-// 	cout << "dsims.mgroups().size()=" << dsims.mgroups().size() << endl;
 	cout << "tofsims files:" << endl;
 	for (auto& d : tofsims.files())
-		cout << "\t" << d.name.filename_without_crater_depths() << endl;
-	
+	{
+		cout << "\t" << d.name.filename_with_path << endl;
+	}
 	cout << endl;
+	
 	cout << "dsims files:" << endl;
 	for (auto& d : dsims.files())
-		cout << "\t" << d.name.filename_without_crater_depths() << endl;
+	{
+		cout << "\t" << d.name.filename_with_path << endl;
+	}
 	cout << endl;
 	
-	cout << "measurements: " << endl;
-	for (auto& M : tofsims.measurements())
+	
+	cout << "dektak6m files:" << endl;
+	for (auto& d : dektak6m.files())
 	{
-		cout << M.to_string() << endl;
+		cout << "\t" << d.name.filename_with_path << endl;
+// 		cout << d.contents.linescan().xy.to_string_detailed() << endl;
+// 		d.contents.linescan().plot_now(0);
+	}
+	cout << endl;
+
+	cout << "not recognized: " << endl;
+	for (auto& f : filenames)
+		cout << "\t" << f << endl;
+	cout << endl;
+	
+// 	cout << "dektak6m measurements:" << endl;
+// 	for (auto& d : dektak6m.measurements())
+// 	{
+// 		cout << "\t" << d.to_string() << endl;
+// 	}
+// 	cout << endl;
+	
+	
+	/*copy linescans to sims measurements*/
+// 	for (auto iter=dektak6m.measurements().begin();iter!=dektak6m.measurements().end();iter++)
+	for (measurements_::profilers_t::dektak6m_t&  pm : dektak6m.measurements())
+	{
+		for (measurements_::dsims_t& dm : dsims.measurements())
+		{
+			if (pm == dm)
+			{
+				dm.crater.linescans.push_back(pm.linescan());
+			}
+		}
+		for (auto& tm : tofsims.measurements())
+		{
+			if (pm == tm)
+			{
+				tm.crater.linescans.push_back(pm.linescan());
+			}
+		}
 	}
 	
-// 	map<int,string> test;
-// 	test.insert(pair<int,string>(5,"a"));
-// 	test.insert(pair<int,string>(51,"b"));
-// 	for (auto& T : test)
-// 		cout << T.first << T.second << endl;
-// 	exit(0);
-	
-	
-	for (auto& MG : dsims.mgroups())
+	/*tof sims*/
+	for (auto& MG : tofsims.mgroups())
 	{
-// 		for (auto& M:MG.measurements_p)
-// 		{
-// 			for (auto C : M.clusters)
-// 			{
-// 				cout << endl << C.to_string()  <<endl;
-// 				C.intensity_background();
-// 			}
-// 			M.plot_now(0);
-// 		}
+		MG.set_reference_isotopes_in_measurements();
 		auto calc = MG.calc();
 		calc.SRs.from_crater_depths().SRs.from_implant_max();
+		if (MG.matrix_clusters().size()>1)
+		{
+			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+
+			const auto RSFs = mat.RSFs().add_natural_abundances()/*.remove_RSFs_below_gof_treshold(0.5)*/;
+			RSFs.RSF_with_worst_fit();
+			for (auto& M:MG.measurements())
+			{
+				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
+				const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
+				///copy the results - this is really ugly
+				for (auto C : M_with_Cs.clusters)
+				{
+					if (!C.concentration.is_set()) continue;
+					*M->cluster(C) = C;
+				}
+			}
+		}
+		// SR + SD
+		calc.SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
+		// SF + RSF
+		calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices().SFs.from_RSF_median_ref().SFs.from_implant_max();
+		// C
+		calc.concentrations.from_SF();
 		
-		
-// 		cout << endl << endl << MG.matrix_isotopes().size() << endl;
+		for (auto M : MG.measurements())
+		{
+			M->plot_now(0);
+		}
+		MG.export_origin_ascii();
+	}
+	
+	/*d sims*/
+	for (auto& MG : dsims.mgroups())
+	{
+		auto calc = MG.calc();
+		calc.SRs.from_crater_depths().SRs.from_implant_max();
 		if (MG.matrix_clusters().size()>1)
 		{
 			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
@@ -119,7 +173,9 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		calc.concentrations.from_SF();
 		
 		for (auto M : MG.measurements())
+		{
 			M->plot_now(0);
+		}
 		MG.export_origin_ascii();
 	}
 	
@@ -137,9 +193,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 
 processor::tofsims_t::tofsims_t(vector<string>& filenames, 
 							list<sample_t>& samples_list, 
-							processor::profiler_t& profiler, 
-							processor::camera_t& cam,
-							database_t& sql_wrapper	) : filenames(filenames),samples_list(samples_list),profiler(profiler),camera(cam), sql_wrapper(sql_wrapper)
+							database_t& sql_wrapper	) : filenames(filenames),samples_list(samples_list), sql_wrapper(sql_wrapper)
 {
 }
 
@@ -150,17 +204,13 @@ vector<files_::tofsims_t> & processor::tofsims_t::files()
 	
 	for (int f=0;f<filenames.size();f++)
 	{
-		files_::tofsims_t::name_t dFN(filenames.at(f));
-		if (dFN.is_correct_type())
+		files_::tofsims_t F(filenames.at(f));
+		if (F.name.is_correct_type() && F.contents.is_correct_type())
 		{
-			files_::tofsims_t::contents_t F(filenames.at(f));
-			if (F.is_correct_type())
-			{
-				files_::tofsims_t D{dFN,F};
-				files_p.push_back(D);
-				filenames.erase(filenames.begin()+f); // dont allow doubles
-				f--;
-			}
+			logger::debug(3,"processor::tofsims_t::files()",filenames.at(f) + "\t->\t" + "tofsims_t");
+			files_p.push_back(F);
+			filenames.erase(filenames.begin()+f); // dont allow doubles
+			f--;
 		}
 	}
 	sort(files_p.begin(),files_p.end());
@@ -175,7 +225,7 @@ vector<measurements_::tofsims_t>& processor::tofsims_t::measurements()
 	
 	for (vector<files_::tofsims_t>::iterator DF=files_p.begin();DF!=files_p.end();DF++)
 	{
-		measurements_p.push_back({*DF,samples_list,sql_wrapper,&camera.files(),&profiler.files()});
+		measurements_p.push_back({*DF,samples_list,sql_wrapper});
 	}
 	
 	if (measurements_p.size()<2)
@@ -198,15 +248,28 @@ vector<measurements_::tofsims_t>& processor::tofsims_t::measurements()
 	return measurements_p;
 }
 
+vector<mgroups_::tofsims_t>& processor::tofsims_t::mgroups()
+{
+	if (mgroups_p.size()>0)
+		return mgroups_p;
+	
+	int old_size = 0;
+	measurements();
+	//populate groups with measurements, until measurement_p is empty
+	while (old_size!=measurements_p.size() && measurements_p.size() > 0)
+	{
+		mgroups_p.push_back(mgroups_::tofsims_t(measurements_p));
+	}
+	return mgroups_p;
+}
+
 /*****************************/
 /***  processor::dsims_t  ****/
 /*****************************/
 
 processor::dsims_t::dsims_t(vector<string>& filenames, 
 							list<sample_t>& samples_list, 
-							processor::profiler_t& profiler, 
-							processor::camera_t& cam,
-							database_t& sql_wrapper	) : filenames(filenames),samples_list(samples_list),profiler(profiler),camera(cam), sql_wrapper(sql_wrapper)
+							database_t& sql_wrapper	) : filenames(filenames),samples_list(samples_list), sql_wrapper(sql_wrapper)
 {
 }
 
@@ -217,17 +280,13 @@ vector<files_::dsims_t> & processor::dsims_t::files()
 	
 	for (int f=0;f<filenames.size();f++)
 	{
-		files_::dsims_t::name_t dFN(filenames.at(f));
-		if (dFN.is_correct_type())
+		files_::dsims_t dsims_file(filenames.at(f));
+		if (dsims_file.name.is_correct_type() && dsims_file.contents.is_correct_type())
 		{
-			files_::dsims_t::contents_t F(filenames.at(f));
-			if (F.is_correct_type())
-			{
-				files_::dsims_t D{dFN,F};
-				files_p.push_back(D);
-				filenames.erase(filenames.begin()+f); // dont allow doubles
-				f--;
-			}
+			logger::debug(3,"processor::dsims_t::files()",filenames.at(f) + "\t->\t" + "dsims_t");
+			files_p.push_back(dsims_file);
+			filenames.erase(filenames.begin()+f); // dont allow doubles
+			f--;
 		}
 	}
 	sort(files_p.begin(),files_p.end());
@@ -243,7 +302,7 @@ vector<measurements_::dsims_t>& processor::dsims_t::measurements()
 	
 	for (vector<files_::dsims_t>::iterator DF=files_p.begin();DF!=files_p.end();DF++)
 	{
-		measurements_p.push_back({*DF,samples_list,sql_wrapper,&camera.files(),&profiler.files()});
+		measurements_p.push_back(measurements_::dsims_t{*DF,samples_list,sql_wrapper});
 	}
 	
 	if (measurements_p.size()<2)
@@ -257,6 +316,7 @@ vector<measurements_::dsims_t>& processor::dsims_t::measurements()
 		{
 			if (DM->add(*DM2))
 			{
+				logger::warning(3,"processor::dsims_t::measurements()","cleared duplicate of: " + DM->to_string());
 				measurements_p.erase(DM2);
 				DM2--;
 			}
@@ -291,80 +351,60 @@ processor::camera_t::camera_t(vector<string>& filenames, database_t& sql_wrapper
 {
 }
 
-
 vector<files_::jpg_t>& processor::camera_t::files()
 {
 	if (files_p.size()>0)
 		return files_p;
 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
 	{
-		files_::jpg_t::name_t djFN(*f);
-		if (djFN.is_correct_type())
+		files_::jpg_t jpg_file(*f);
+		if (jpg_file.name.is_correct_type())
 		{
-			files_p.push_back(djFN);
+			logger::debug(3,"processor::jpg_t::files()",*f + "\t->\t" + "jpg_t");
+			files_p.push_back(jpg_file);
 			filenames.erase(f);
 			f--;
 		}
 	}
-	/*check for distinguishability*/
-	set<string> different_methods;
-	for (auto& PF : files_p)
-	{
-		different_methods.insert(PF.name.method());
-	}
-	different_methods.erase("");
-	if (different_methods.size()>1)
-		logger::error("can not distinguish dsims / tofsims jpg files","expect wrong results");
 	return files_p;
 }
 
 /**********************************/
-/***   processor::profiler_t   ****/
+/***   processor::dektak6m_t   ****/
 /**********************************/
 
-processor::profiler_t::profiler_t(vector<string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper) : filenames(filenames), samples_list(samples_list), sql_wrapper(sql_wrapper)
+processor::dektak6m_t::dektak6m_t(vector<string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper) : 
+	filenames(filenames), samples_list(samples_list), sql_wrapper(sql_wrapper)
 {
 }
 
-vector<files_::profiler_t>& processor::profiler_t::files()
+vector<files_::profilers_t::dektak6m_t>& processor::dektak6m_t::files()
 {
 	if (files_p.size()>0)
 		return files_p;
 	for (vector<string>::iterator f=filenames.begin();f!=filenames.end();++f)
 	{
 		/*dsims_profiler_t*/
-		files_::profiler_t::name_t dpFN(*f);
-		if (dpFN.is_correct_type())
+		files_::profilers_t::dektak6m_t  dektak6m_file(*f);
+		if (dektak6m_file.name.is_correct_type() && dektak6m_file.contents.is_correct_type())
 		{
-			files_::profiler_t::contents_t F(*f);
-			if (F.is_correct_type())
-			{
-				files_p.push_back({dpFN,F});
-				filenames.erase(f);
-				f--;
-			}
+			logger::debug(3,"processor::dektak6m_t::files()",*f + "\t->\t" + "dektak6m_t");
+			files_p.push_back(dektak6m_file);
+			filenames.erase(f);
+			f--;
 		}
 	}
-	/*check for distinguishability*/
-	set<string> different_methods;
-	for (auto& PF : files_p)
-	{
-		different_methods.insert(PF.name.method());
-	}
-	different_methods.erase("");
-	if (different_methods.size()>1)
-		logger::error("can not distinguish dsims / tofsims profiler files","expect wrong results");
 	return files_p;
 }
 
-vector<measurements_::profiler_t> & processor::profiler_t::measurements()
+vector<measurements_::profilers_t::dektak6m_t>& processor::dektak6m_t::measurements()
 {
 	if (measurements_p.size()>0)
 		return measurements_p;
 	if (files().size()==0) 
 		return measurements_p;
 	
-	for (vector<files_::profiler_t>::iterator PM=files_p.begin();PM!=files_p.end();PM++)
+	for (vector<files_::profilers_t::dektak6m_t>::iterator PM=files_p.begin();PM!=files_p.end();PM++)
 	{
 		measurements_p.push_back({*PM,samples_list,sql_wrapper});
 		files_p.erase(PM);

@@ -88,23 +88,34 @@ public:
 		bool operator>(const measurement_t& obj) const;
 	}; // measurement_t
 	
-	class profiler_t : public measurement_t
+	class profilers_t
 	{
-		
-	private:
-		string primary_method_p="";
 	public:
-		const string& primary_method();
-		quantity::depth_t total_sputter_depths;
-		crater_t::linescan_t linescan;
-		profiler_t(files_::profiler_t& file, list<sample_t>& samples_list, database_t& sql_wrapper);
-		//creates instantly a plot
-		void plot_now(double sleep_sec=1);
-	}; //profiler_t
+		class profiler_t : public measurement_t
+		{
+		protected:
+			profiler_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, const crater_t::linescan_t& linescan_s, list<sample_t>& samples_list, string method,database_t& sql_wrapper);
+			crater_t::linescan_t linescan_p;
+		public:
+			crater_t::linescan_t& linescan();
+			//creates instantly a plot
+			void plot_now(double sleep_sec=1);
+		}; //profiler_t
+	public:
+		class dektak6m_t : public profiler_t
+		{
+		public:
+			dektak6m_t(files_::profilers_t::dektak6m_t& file, list<sample_t>& samples_list, database_t& sql_wrapper);
+		};
+		class P17_t : public profiler_t
+		{
+		public:
+			P17_t(files_::profilers_t::dektak6m_t& file, list<sample_t>& samples_list, database_t& sql_wrapper);
+		};
+	}; // profilers_t
 	
 	class sims_t : public measurement_t
 	{
-		
 		friend class processor;
 	protected:
 		///some general data filters
@@ -298,16 +309,17 @@ public:
 			calc_t(sims_t& measurement,bool overwrite=false);
 		};
 	private:
-		
 		///adds more cluster to this measurement
 		void add_clusters(vector<cluster_t>& clusters_s);
 		///saved variable for faster recalculation of sputter_equlibrium
 // 		unsigned int equilibrium_start_index_s=0;
 		cluster_t matrix_cluster_s;
 	public: 
-		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
-			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
-		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
+// 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
+// 			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
+// 		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
+		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+// 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper, vector<const profilers_t::profiler_t*> profiler_measurements);
 		
 		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
@@ -324,13 +336,14 @@ public:
 		///e.g. isotope(31P) --> cluster(74Ge 31P) & cluster(31P) & ...
 		set<cluster_t*> clusters_corresponding_to_isotope(const isotope_t& isotope);
 		isotope_t isotope_corresponding_to_cluster(const cluster_t& cluster);
-		///get or set matrix_isotopes
+		///isotopes in matrix and references, e.g. in cluster 70Ge 11B, 70Ge is a ref isotope, but not included in sample matrix ; might be overwritten by mgroup
+		vector<isotope_t> reference_isotopes;
 		/*
 		 * matrix cluster should contain only unique isotope for its cluster;
 		 * that means e.g. SiGe matrix there can never be a SiGe cluster, just Si clusters and Ge clusters seperate
 		 * SiGeB cluster or SiB cluster will be treatet as NON-matrix clusters, that means (implanted) isotopical cluster
 		 */
-		matrix_clusters_c matrix_clusters(const vector<isotope_t> matrix_isotopes={});
+		matrix_clusters_c matrix_clusters();
 		
 		//creates instantly a plot
 		void plot_now(double sleep_sec=1);
@@ -348,7 +361,7 @@ public:
 		///returns pointer to the matching cluster within this measurement
 		cluster_t* cluster(const cluster_t& cluster_s);
 		///returns pointer to the matching cluster with the corresponding_isotope within this measurement
-		cluster_t* cluster(const isotope_t& iso, const vector<isotope_t>& reference_isos);
+		cluster_t* cluster(const isotope_t& iso);
 		const cluster_t* cluster(const cluster_t& cluster_s) const;
 		///returns a copy of the RSF of the specified cluster
 		cluster_t::RSF_t RSF(const cluster_t& cluster_s) const;
@@ -381,8 +394,8 @@ public:
 // 		vector<cluster_t> clusters;
 	public:
 		msettings::dsims_t settings;
-		dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profiler_t>* profiler_files=nullptr);
-
+// 		dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profiler_t>* profiler_files=nullptr);
+		dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
 	}; // dsims_t
@@ -391,7 +404,8 @@ public:
 	{
 	public:
 		msettings::tofsims_t settings;
-		tofsims_t(files_::tofsims_t& tofsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profiler_t>* profiler_files=nullptr);
+// 		tofsims_t(files_::tofsims_t& tofsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profilers_t::profiler_t>* profiler_files=nullptr);
+		tofsims_t(files_::tofsims_t& tofsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 
 		bool operator==(const tofsims_t& obj) const;
 		bool operator!=(const tofsims_t& obj) const;

@@ -1878,6 +1878,19 @@ vector<double> statistics::absolute(vector<double> data)
 	return data;
 }
 
+vector<double> statistics::round(vector<double> data_s ,unsigned int decimals)
+{
+	const double multiplier = pow(10,decimals);
+	for (auto& d : data_s)
+        d = ::round(d*multiplier)/multiplier;
+	return data_s;
+}
+double statistics::round(double data_s ,unsigned int decimals)
+{
+	const double multiplier = pow(10,decimals);
+	return ::round(data_s*multiplier)/multiplier;
+}
+
 
 /*************************************************************/
 /***   			    statistics::histogram_t 			  ****/

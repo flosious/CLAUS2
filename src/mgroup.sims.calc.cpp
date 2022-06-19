@@ -188,7 +188,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
 	{
 		if (!overwrite && M->crater.SR.is_set())
 			continue;
-		cluster_t* relevant_C = M->matrix_clusters(MG.matrix_isotopes()).cluster(relevant_isotope);
+		cluster_t* relevant_C = M->matrix_clusters().cluster(relevant_isotope);
 		if (relevant_C==nullptr)
 			continue;
 		if (!relevant_C->concentration.is_set())
@@ -247,7 +247,7 @@ const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs
 	map<cluster_t*,quantity::intensity_t> rsf_to_ref_intensity;
 	for (auto& M : measurements)
 	{
-		auto matrix_clusters = M->matrix_clusters(MG.matrix_isotopes());
+		auto matrix_clusters = M->matrix_clusters();
 		if (!matrix_clusters.intensity_sum().is_set())
 		{
 			logger::error("mgroups_::sims_t::calc_t::RSF_c::RSFs_to_ref_intensities()","!M->reference_intensity().is_set()","continue");
@@ -307,7 +307,7 @@ const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::RSF_c::clu
 	map<cluster_t*,quantity::intensity_t> clusters_to_ref_intensity;
 	for (auto& M : measurements)
 	{
-		auto matrix_clusters = M->matrix_clusters(MG.matrix_isotopes());
+		auto matrix_clusters = M->matrix_clusters();
 		if (!matrix_clusters.intensity_sum().is_set())
 		{
 			logger::error("mgroups_::sims_t::calc_t::RSF_c::clusters_to_ref_intensities()","!M->reference_intensity().is_set(), " + M->to_string_short(),"continue");
@@ -437,7 +437,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 			continue;
 		if (!overwrite && c_in_m->RSF.is_set())
 			continue;
-		cluster_t* relevant_C = M->matrix_clusters(MG.matrix_isotopes()).cluster(relevant_isotope);
+		cluster_t* relevant_C = M->matrix_clusters().cluster(relevant_isotope);
 		if (relevant_C==nullptr)
 			continue;
 		if (!relevant_C->concentration.is_set())

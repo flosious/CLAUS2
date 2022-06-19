@@ -69,7 +69,7 @@ public:
 // 			cluster_t* zaehler_p;
 // 			cluster_t* nenner_p;
 		public:
-			cluster_relations_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner);
+			cluster_relations_t(const measurements_::sims_t& measurement, const cluster_t& zaehler_s, const cluster_t& nenner_s);
 // 			cluster_relations_t(cluster_t& zaehler, const cluster_t& nenner);
 			const measurements_::sims_t& measurement;
 			///ATTENTION can be nullptr
@@ -308,6 +308,8 @@ public:
 				set<RSF_t> RSFs_with_worst_fit(int n=1) const;
 				///removes particulary Crel_to_Irel_lin_fits with relative_chisqr > 0.1
 				RSFs_t remove_RSFs_above_relative_chisqr_treshold(float relativ_chisq=0.1) const;
+				///just returns the polynom fits with gof() >= gof_treshold
+				RSFs_t remove_RSFs_below_gof_treshold(float gof_treshold=0.5) const;
 				///removes the manual setted and fitted RSFs
 				RSFs_t remove_RSFs(const set<RSF_t>& rsfs_s) const;
 				RSFs_t remove_RSFs_with_worst_fit(int n=1) const;
@@ -328,6 +330,7 @@ public:
 				RSFs_t symmetrical_RSFs() const;
 				///sets abundance_relations of all RSFs -> cluster_relations_copies_t
 				RSFs_t add_natural_abundances() const;
+				void plot_now(double sleep_sec=1) const;
 			}; // RSFs_t
 		public:
 			///calculation of matrix concentrations

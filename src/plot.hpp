@@ -89,7 +89,7 @@ private:
 		vector<points_t> points;
 // 		vector<points_t> polynoms;
 		///not working
-		void add_polynom(const quantity::map_t& XY, const fit_functions::polynom_t& polynom_s, const string legend="", const string color=" +", const unsigned int  points=100);
+		void add_polynom(const quantity::map_t& XY, const fit_functions::polynom_t& polynom_s, const string legend="", const string color="", const unsigned int  points=100);
 		void add_points(const quantity::map_t& XY, const string legend="", const string color=" +");
 		///e.g. "Intensity [c/s]"
 		void add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend="", const string color=" +");
@@ -112,11 +112,20 @@ private:
 		void add_line(double x_start, double y_star, double x_stop, double y_stop, string color="", string text="");
 		void add_arrow(double x_start, double y_star, double x_stop, double y_stop, string color="rA", string text="");
 	}; // axis_t
-	
 	int Draw(mglGraph * gr) override;
 public:
+	class window_t
+	{
+	private:
+	public:
+		string title="";
+		axis_t Y1;
+		axis_t Y2;
+		axis_t Y3;
+		void draw(mglGraph * gr);
+	}; //window_t
 	plot_t(bool Y1_log10=true, bool Y2_log10=true, bool Y3_log10=false);
-	
+	vector<window_t> windows;
 	axis_t Y1;
 	axis_t Y2;
 	axis_t Y3;

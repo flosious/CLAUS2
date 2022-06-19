@@ -17,7 +17,7 @@
 */
 
 #include "crater.hpp"
-
+#include "plot.hpp"
 
 /************/
 /*LINESCAN_T*/
@@ -30,12 +30,12 @@ crater_t::linescan_t::linescan_t(quantity::quantity_t xy, quantity::quantity_t z
 {
 }
 
-fit_functions::asym2sig_t crater_t::linescan_t::fit_params()
+const fit_functions::asym2sig_t& crater_t::linescan_t::fit_params() const
 {
 	return asym2sig;
 }
 
-bool crater_t::linescan_t::is_set()
+bool crater_t::linescan_t::is_set() const
 {
 	if (!xy.is_set() || !z.is_set()) return false;
 	return true;
@@ -105,10 +105,41 @@ string crater_t::linescan_t::to_string(string prefix)
 	stringstream ss;
 	ss << prefix;
 	ss << std::scientific << depth().to_string() <<"; " << fit_params().to_string();
+	ss << "gof: " <<fit_params().gof();
+		
 	return ss.str();
 }
 
-
+void crater_t::linescan_t::plot_now(double sleep_sec)
+{
+	plot_t plot(false,false);
+	if (!is_set())
+		return;
+	plot.Y1.add_points(xy,z,"raw","k");
+	fit(); // perform the fit (will save data in assoziated fit_functions::asym2sig)
+	if (fitted)
+	{
+// 		plot.Y1.add_points(xy,fit(),"fit","r");
+		fit_functions::polynom_t slopiness({fit_params().y0,fit_params().m});
+// 		plot.Y1.add_polynom({xy,z},slopiness,"","b");
+// 		auto y_start = slopiness.y_data({fit_params().xc}).front();
+// 		auto y_stop = y_start - depth().data().front();
+// 		plot.Y1.add_arrow(fit_params().xc,y_start,fit_params().xc,y_stop,"Ab",depth().round_(1).to_string());
+		
+		//plot a planar profile
+		auto asym2sig_planar = fit_params();
+		asym2sig_planar.y0 =0;
+		asym2sig_planar.m = 0;
+		quantity::quantity_t z_slope(z,slopiness.y_data(xy.data()));
+		plot.Y2.add_points(xy,z-z_slope,"raw planarized","b");;
+		plot.Y2.add_arrow(fit_params().xc,0,fit_params().xc,-depth().data().front(),"Ab",depth().round_(1).to_string());
+// 		double range_start = plot.Y2.range().start;
+// 		double range_stop = plot.Y1.range().stop;
+// 		plot.Y1.range(range_start,range_stop,false);
+// 		plot.Y2.range(range_start,range_stop,false);
+	}
+	plot.to_screen(to_string(),sleep_sec);
+}
 
 
 
@@ -189,12 +220,16 @@ quantity::sputter_depth_t crater_t::total_sputter_depth()
 	{
 		for (auto& LS : linescans)
 		{
+			if (!LS.fit_params().fitted()) 
+				LS.fit();
 			if (LS.fit_params().gof()>0.5)
 				TSD << LS.depth();
 		}
 	}
 	if (TSD.is_set())
-		return TSD.median();
+	{
+		return TSD.mean();
+	}
 	return {};
 }
 

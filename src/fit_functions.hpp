@@ -67,12 +67,12 @@ public:
 		vector<double> fitted_y_data(vector<double> x);
 		/// calculation of fit parameters
 		bool fit(map<double, double> data_XY, double y0_s=NAN, double xc_s=NAN, double m_s=NAN, double A_s=NAN, double w1_s=NAN, double w2_s=NAN, double w3_s=NAN);
-		bool fitted();
+		bool fitted() const;
 		void print_parameters();
-		double chisq();
-		double chisq0();
-		double gof();
-		string to_string(string prefix="");
+		double chisq() const;
+		double chisq0() const;
+		double gof() const;
+		string to_string(string prefix="") const;
 	};
 	/*
 	 * Y = SUM_i ( c_j * x_j * rank_j )
@@ -87,6 +87,7 @@ public:
 		///perform the actual fit
 		bool fit(map<double,double> data_XY);
 		vector<unsigned int> rank_p;
+		double gof_p;
 // 		const vector<double> x_data_p;
 	public:
 		///degree means rank; 2D data
@@ -97,6 +98,8 @@ public:
 		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, const map<double,double>& data_XY);
 		///fitting 1D data
 		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, const vector<double>& data);
+		///no fit is done; use "fit_parameters" directly 
+		polynom_t(const vector<double>& fit_parameters);
 		///rank of polynom: 0 means discard, and non-0 means use
 		const vector<unsigned int>& rank() const;
 		const double chisq() const;
@@ -108,6 +111,7 @@ public:
 		const polynom_t derivative(unsigned int derive=1) const;
 		string to_string(string prefix="") const;
 		bool successfully_fitted() const;
+		double gof() const;
 		///returns the fitted Y_data using X_data and the successfully interpolated fit_parameters;
 		///returns empty if interpolation was not successfully
 		vector<double> y_data(const vector<double>& x_data) const;

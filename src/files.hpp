@@ -39,7 +39,6 @@ public:
 		class name_t
 		{
 		private:
-			static const vector<string> methods;
 			string group_p="";
 			string lot_p="";
 			string lot_split_p="";
@@ -66,7 +65,6 @@ public:
 			vector<string> not_parseable_filename_parts_p;
 			name_t(string& filename_with_path_s, const string delimiter_s,const set<string> OR_identifiers_s,const set<string> AND_identifiers_s);
 		public:
-			const string method() const;
 			string to_string(const string del = ",");
 			string delimiter;
 			set<string> OR_identifiers_s;
@@ -92,6 +90,17 @@ public:
 			bool operator==(name_t& obj);
 			bool operator!=(name_t& obj);
 			bool operator<(name_t& obj);
+		};
+		///extends name_t for crater detection
+		class crater_in_name_t : public name_t
+		{
+		protected:
+			string filename_without_crater_depths_s="";
+			quantity::total_sputter_depth_t total_sputter_depths_p;
+		public:
+			crater_in_name_t(string& filename_with_path_s,const string delimiter_s,const set<string> OR_identifiers_s,const set<string> AND_identifiers_s);
+			const quantity::total_sputter_depth_t& total_sputter_depths();
+			const string& filename_without_crater_depths();
 		};
 		
 		class contents_t
@@ -125,11 +134,12 @@ public:
 			const string creation_date_time() const;
 		};
 	};
+public:
 	
 	class sims_t
 	{
 	public:
-		class name_t : public file_t::name_t
+		class name_t : public file_t::crater_in_name_t
 		{
 		private:
 			string filename_without_crater_depths_s="";
@@ -142,7 +152,7 @@ public:
 			name_t(string& filename_with_path_s,const string delimiter_s,const set<string> OR_identifiers_s,const set<string> AND_identifiers_s);
 		public:
 			const vector<string>& not_parseable_filename_parts() override;
-			const string simple_name();
+			const string simple_name() override;
 			string to_string();
 			const quantity::energy_t sputter_energy();
 			element_t sputter_element();
@@ -173,7 +183,7 @@ public:
 			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
 			vector<column_t> columns_s;
 		};
-	};
+	}; // sims_t
 	
 	class dsims_t
 	{
@@ -245,7 +255,7 @@ public:
 		bool operator<(dsims_t& obj);
 		name_t name;
 		contents_t contents;
-	};
+	}; //dsims_t
 	
 	class tofsims_t
 	{
@@ -279,42 +289,59 @@ public:
 		bool operator<(tofsims_t& obj);
 		name_t name;
 		contents_t contents;
-	};
+	}; // tofsims_t
 	
-	class profiler_t
+	///contains all profiler files
+	class profilers_t
 	{
-	public:	
-		class name_t : public sims_t::name_t
+	protected:
+		///a general class
+		class profiler_t
 		{
 		public:
-			///string primary_method will be set as a required identifier
-			name_t(string& filename_with_path_s);
+			class contents_t : public file_t::contents_t
+			{
+			public:
+				contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
+				///should be overwritten
+				virtual crater_t::linescan_t linescan();
+			};
 		};
-		class contents_t : public sims_t::contents_t
+	public:
+		class dektak6m_t 
 		{
 		public:
-			crater_t::linescan_t linescan();
-			contents_t(string& filename_with_path);
-		};
-		profiler_t(string& filename);
-		profiler_t(files_::profiler_t::name_t& name_s, files_::profiler_t::contents_t& contents_s);
-		bool operator<(profiler_t& obj);
-		name_t name;
-		contents_t contents;
-	};
+			class contents_t : public profiler_t::contents_t
+			{
+			public:
+				contents_t(string& filename_with_path);
+				crater_t::linescan_t linescan() override;
+			};
+			dektak6m_t(string& filename);
+			file_t::crater_in_name_t name;
+			contents_t contents;
+		}; // dektak6m_t
+		class P17_t : profiler_t
+		{
+		public:
+			class contents_t : public profiler_t::contents_t
+			{
+			public:
+				contents_t(string& filename_with_path);
+				crater_t::linescan_t linescan() override;
+			};
+			P17_t(string& filename);
+			tofsims_t::name_t name;
+			contents_t contents;
+		}; //P17_t
+	}; //profiler_t
 	
 	class jpg_t
 	{
 	public:
-		class name_t : public sims_t::name_t
-		{
-		public:
-			name_t(string& filename_with_path_s);
-		};
 		jpg_t(string& filename);
-		jpg_t(name_t& filename);
 		bool operator<(jpg_t& obj);
-		name_t name;
+		file_t::crater_in_name_t name;
 	};
 };
 

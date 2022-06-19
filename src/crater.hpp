@@ -37,13 +37,12 @@ public:
 	class linescan_t
 	{
 	private:
-		vector <double> fit_parameters;
 		fit_functions::asym2sig_t asym2sig;
 		bool fitted=false;
 	public:
 		linescan_t();
 		linescan_t(quantity::quantity_t xy,quantity::quantity_t z);
-		fit_functions::asym2sig_t fit_params();
+		const fit_functions::asym2sig_t& fit_params() const;
 		/// the depth or height (z)
 		quantity::quantity_t z;
 		/// the surface (xy)
@@ -55,7 +54,8 @@ public:
 		/// origin -> peak-functions -> Asym2Sig
 		quantity::quantity_t fit();
 		string to_string(string prefix="");
-		bool is_set();
+		bool is_set() const;
+		void plot_now(double sleep_sec);
 	};
 	class sputter_beam_t
 	{

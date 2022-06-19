@@ -150,8 +150,8 @@ bool cluster_t::operator==(const cluster_t& obj) const
 		auto found = find(obj.isotopes.begin(),obj.isotopes.end(),iso);
 		if (found ==obj.isotopes.end())
 			return false;
-		if (found->substance_amount != iso.substance_amount)
-			return false;
+// 		if (found->substance_amount != iso.substance_amount)
+// 			return false;
 	}
 	return true;
 }
@@ -266,7 +266,7 @@ isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_is
 	{
 		if (find(reference_isotopes.begin(),reference_isotopes.end(),i)==reference_isotopes.end())
 		{
-			logger::debug(11,"cluster_t::corresponding_isotope()","not found cluster isotope in reference_isotopes", i.to_string());
+			logger::debug(14,"cluster_t::corresponding_isotope()","not found cluster isotope in reference_isotopes", i.to_string(),"this is a good message");
 			isos.insert(i);
 		}
 	}

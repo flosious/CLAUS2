@@ -37,7 +37,6 @@ bool files_::tofsims_t::name_t::parse_analysis_energy_element()
 // 	cout << to_string() << endl;
 	for (vector<string>::iterator FNp = not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
 	{
-		cout << "FNp: " <<  *FNp << endl;
 		reg = ("^([0-9]{1,5})(V|eV|kV|keV)(Mn|Mn\\+|Bi|Bi\\+|Bi\\+\\+)$"); 
 		if (regex_search(*FNp,match,reg)) 
 		{	

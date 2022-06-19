@@ -19,22 +19,22 @@
 
 #include "mgroup.hpp"
 
-mgroups_::tofsims_t::tofsims_t(measurements_::tofsims_t& dsims_measurements) : 
-				sims_t(dsims_measurements)/*, settings_p(dsims_measurements.settings)*/
+mgroups_::tofsims_t::tofsims_t(measurements_::tofsims_t& tofsims_measurements) : 
+				sims_t(tofsims_measurements), settings_p(tofsims_measurements.settings)
 {
-	measurements_p.push_back(dsims_measurements);
+	measurements_p.push_back(tofsims_measurements);
 }
 
-mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t >& dsims_measurements) : 
-									tofsims_t(dsims_measurements.back())
+mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t >& tofsims_measurements) : 
+									tofsims_t(tofsims_measurements.back())
 {
-	dsims_measurements.pop_back();
-	for (auto DM=dsims_measurements.begin();DM!=dsims_measurements.end();DM++)
+	tofsims_measurements.pop_back();
+	for (auto DM=tofsims_measurements.begin();DM!=tofsims_measurements.end();DM++)
 	{
 		tofsims_t MG(*DM);
 		if (*this != MG) continue;
 		measurements_p.push_back(*DM);
-		dsims_measurements.erase(DM);
+		tofsims_measurements.erase(DM);
 		DM--;
 	}
 }
@@ -88,7 +88,7 @@ vector<measurements_::sims_t> mgroups_::tofsims_t::measurements_copy()
 
 
 
-// const msettings::sims_t* mgroups_::tofsims_t::settings() const
-// {
-// 	return &settings_p;
-// }
+const msettings::sims_t* mgroups_::tofsims_t::settings() const
+{
+	return &settings_p;
+}

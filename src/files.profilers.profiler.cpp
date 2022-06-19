@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 Florian Bärwolf
+	Copyright (C) 2021 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -18,15 +18,13 @@
 
 #include "files.hpp"
 
-
-files_::jpg_t::jpg_t(string& filename) : name(filename,"_",{".jpg",".jpeg"},{})
+files_::profilers_t::profiler_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : 
+	files_::file_t::contents_t(filename_with_path, delimiter, identifiers)
 {
 }
 
-bool files_::jpg_t::operator <(jpg_t& obj)
+crater_t::linescan_t files_::profilers_t::profiler_t::contents_t::linescan()
 {
-	if (name.filename() < obj.name.filename()) return true;
-	if (name.filename() > obj.name.filename()) return false;
-	
-	return false;
+	logger::error("files_::profilers_t::profiler_t::contents_t::linescan()","virtual function called, this should never happen, tell florian");
+	return {};
 }

@@ -192,7 +192,7 @@ bool sample_t::db_t::load_from_table()
 		if (iso.symbol=="") continue;
 		if (implants_s.find(iso)!=implants_s.end())
 		{
-			logger::error("sample_t::db_t::load_from_table()","more then 1 identical isotope implanted in sample: check database",sample.to_name() +"  " +iso.to_string(),"skipping");
+			logger::warning(3,"sample_t::db_t::load_from_table()","more then 1 identical isotope implanted in sample: check database",sample.to_name() +"  " +iso.to_string(),"skipping");
 			continue;
 		}
 		quantity::dose_t D;
@@ -331,7 +331,8 @@ void sample_t::load_from_database()
 	db_t db(*this,*sql_wrapper);
 	if (!matrix_p.is_set())
 		matrix_p = db.matrix();
-	
+	if (!matrix_p.is_set())
+		return;
 	if (implants.size()==0)
 		implants = db.implants();
 }
@@ -437,8 +438,8 @@ string sample_t::to_string(const string del)
 		ss << ", monitor: " << monitor;
 	if (matrix().is_set())
 		ss << ", matrix: " << matrix().to_string();
-	if (simple_name!="")
-		return simple_name;
+// 	if (simple_name!="")
+// 		return simple_name;
 // 		ss << "simple_name: " << simple_name << ",";
 	return ss.str();
 }
@@ -454,8 +455,8 @@ string sample_t::to_name(const string del) const
 		ss << ", chip: " << chip.to_string();
 	if (monitor!="")
 		ss << ", monitor: " << monitor;
-	if (simple_name!="")
-		return simple_name;
+// 	if (simple_name!="")
+// 		return simple_name;
 // 		ss << "simple_name: " << simple_name << ",";
 	return ss.str();
 }

@@ -18,17 +18,10 @@
 
 #include "measurement.hpp"
 
-
-measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, 
-								list<sample_t>& samples_list,
-								database_t& sql_wrapper,
-								vector<files_::jpg_t>* jpg_files,
-								vector<files_::profiler_t>* profiler_files
-   							) : 
-				sims_t(dsims_file.name,dsims_file.contents,samples_list,"dsims",sql_wrapper,jpg_files,profiler_files), 
+measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
+		sims_t(dsims_file.name,dsims_file.contents,samples_list,"dsims",sql_wrapper,total_sputter_dephs), 
 				settings(dsims_file.name,dsims_file.contents)
-// 				clusters(dsims_file.contents.clusters)
-{	
+{
 	crater.sputter_beam = dsims_file.contents.Ipr();
 	
 	if (dsims_file.contents.total_sputtering_time().is_set())

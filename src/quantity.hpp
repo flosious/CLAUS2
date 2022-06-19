@@ -249,7 +249,7 @@ namespace quantity
 		quantity_t integrate(const quantity_t& x_data,const quantity_t& x_data_start) const;
 		/// point by point integration
 		quantity_t integrate_pbp(const quantity_t& x_data) const;
-		quantity_t round_() const;
+		quantity_t round_(const unsigned int decimals=0) const;
 		quantity_t diff() const;
 		quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
 		quantity_t fit_polynom_by_x_data(const quantity_t& x_data, quantity_t new_x_data, int polynom_grade=17 ) const;

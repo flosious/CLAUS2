@@ -43,12 +43,16 @@ const cluster_t& calc_t::sims_t::cluster_relations_copies_t::nenner() const
 /*******************************************************/
 
 calc_t::sims_t::cluster_relations_t::cluster_relations_t(const measurements_::sims_t& measurement, 
-														 const cluster_t& zaehler, 
-														 const cluster_t& nenner) : 
+														 const cluster_t& zaehler_s, 
+														 const cluster_t& nenner_s) : 
 														 measurement(measurement), 
-														 zaehler(measurement.cluster(zaehler)), 
-														 nenner(measurement.cluster(nenner))
+														 zaehler(measurement.cluster(zaehler_s)), 
+														 nenner(measurement.cluster(nenner_s))
 {
+	if (zaehler==nullptr)
+		logger::fatal("calc_t::sims_t::cluster_relations_t::cluster_relations_t()","zaehler==nullptr", zaehler_s.to_string());
+	if (nenner == nullptr)
+		logger::fatal("calc_t::sims_t::cluster_relations_t::cluster_relations_t()","nenner==nullptr", nenner_s.to_string());
 }
 
 bool calc_t::sims_t::cluster_relations_t::clusters_exist() const
@@ -95,6 +99,8 @@ const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_eleme
 		return Crel_isotopical;
 	if (!measurement.sample->matrix().is_set())
 		return {};
+	if (zaehler==nullptr || nenner == nullptr)
+		return {};
 	//ATTENTION zaehler could be nullptr
 	if (measurement.sample->matrix().isotope(zaehler->isotopes.front())==nullptr)
 		return {};
@@ -113,6 +119,8 @@ const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_eleme
 const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_isotopes() const
 {
 	logger::debug(21,"calc_t::sims_t::Crel_t::from_sample_matrix_isotopes()","entering");
+	if (zaehler == nullptr || nenner==nullptr)
+		return {};
 	auto amount_zaehler = substance_amount(*zaehler);
 	auto amount_nenner = substance_amount(*nenner);
 	
@@ -316,8 +324,8 @@ void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double s
 	plot.Y1.add_points(Crel_to_Irel_map_withot_infs,zaehler().to_string() + " / " + nenner().to_string()," ro");
 	if (polynom().successfully_fitted())
 	{
-// 		plot.Y1.add_curve(Crel_to_Irel_map().polyfit(polynom()), polynom().to_string());
-		plot.Y1.add_polynom(Crel_to_Irel_map(),polynom());
+// 		plot.Y1.add_polynom(Crel_to_Irel_map(),polynom(),polynom().to_string()); 
+		plot.Y1.add_polynom(Crel_to_Irel_map_withot_infs,polynom(),polynom().to_string()); 
 	}
 	plot_title << "{" << zaehler().to_string() << "} / {" << nenner().to_string() <<  "}";
 	plot.to_screen(plot_title.str(),sleep_sec);
