@@ -467,6 +467,7 @@ namespace quantity
 		const map_t remove_by_X(quantity_t X_s) const;
 		///delete last element
 		const map_t pop_back() const;
+		const map_t back() const;
 		bool is_set() const;
 		//scalar vs scalar
 		bool is_single_point() const;
@@ -475,7 +476,8 @@ namespace quantity
 		string to_string_detailed() const;
 		string to_string_list() const;
 		///removes outliners until chisqr_relative is below treshold (default 10%)
-		map_t remove_outliners(const fit_functions::polynom_t& polynom_s,float chisqr_relative_treshold=0.1) const;
+		map_t remove_outliners(fit_functions::polynom_t polynom_s,float gof_treshold=0.1) const;
+		map_t remove_worst_outliner(const fit_functions::polynom_t& polynom_s) const;
 		fit_functions::polynom_t polynom(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
 		fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
 		map_t swap_X_Y() const;

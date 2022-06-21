@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2020 Florian Bärwolf
+	Copyright (C) 2020-2022 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -28,9 +28,9 @@
 // #include "export.hpp"
 // #include "pse.hpp"
 // #include "measurement_tools_t.hpp"
-#include "processor.hpp"
+// #include "processor.hpp"
 // #include "database_t.hpp"
-#include "sample.hpp"
+// #include "sample.hpp"
 
 using namespace std;
 
@@ -97,7 +97,8 @@ public:
     /*directories*/
     
     ///directory name of exports; output to measurement directory, when empty
-    string export_location="";
+    string dsims_export_location="";
+	string tofsims_export_location="";
 
     ///constructor
     config_t();

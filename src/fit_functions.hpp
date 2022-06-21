@@ -106,7 +106,7 @@ public:
 		///
 		double chisq_relative() const;
 		const vector<double>& fit_parameters() const;
-		///the maximum rank
+		///the minimum / necessary rank
 		int degree() const;
 		const polynom_t derivative(unsigned int derive=1) const;
 		string to_string(string prefix="") const;
@@ -123,16 +123,21 @@ public:
 	{
 	private:
 		double chisq_p=-1;
-		bool fitted_p=false;
+		bool successfully_fitted_p=false;
 		double cov_p;
+		double chisq_relative_p=-1;
 		double slope_p;
-	public:
-		const double cov() const;
-		const double slope() const;
-		double chisq() const;
+		double gof_p;
 		bool fit(map<double,double> data_XY);
-		bool fitted() const;
-		vector<double> Y(vector<double> x={});
+	public:
+		linear_t(const double slope,const map<double,double>& data_XY);
+		double chisq_relative() const;
+		const double cov() const;
+		double slope() const;
+		double chisq() const;
+		bool successfully_fitted() const;
+		double gof() const;
+		vector<double> y_data(vector<double> x_data);
 	};
 };
 

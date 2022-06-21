@@ -1532,7 +1532,7 @@ vector<int> quantity::quantity_t::bin_data(const int bins_count) const
 	double bins_size = (MAX-MIN)/bins_count;
 	for (int i=0;i<bins_count;i++)
 	{
-		bins.at(i*bins_size+MIN);
+		bins.at(i)=(i*bins_size+MIN);
 	}
 	return bin_data(bins);
 }

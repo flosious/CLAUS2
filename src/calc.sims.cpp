@@ -218,7 +218,7 @@ calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel_to_Irel_data_fit_ro
 																							   const cluster_t& nenner, 
 																							   const quantity::map_t& Crel_to_Irel_map) :
 // 																							   zaehler_p(zaehler.isotopes), nenner_p(nenner.isotopes),
-																							   Crel_to_Irel_map_p(Crel_to_Irel_map), cluster_relations_copies_t(zaehler,nenner)
+																							   Crel_to_Irel_map(Crel_to_Irel_map), cluster_relations_copies_t(zaehler,nenner)
 {
 }
 
@@ -234,10 +234,10 @@ calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::~Crel_to_Irel_data_fit_r
 // {
 // 	return nenner_p;
 // }
-const quantity::map_t& calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel_to_Irel_map() const
-{
-	return Crel_to_Irel_map_p;
-}
+// const quantity::map_t& calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel_to_Irel_map const
+// {
+// 	return Crel_to_Irel_map_p;
+// }
 
 bool calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::operator<(const Crel_to_Irel_data_fit_routine_template& obj) const
 {
@@ -269,7 +269,7 @@ void calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::plot_to_screen(doub
 string calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::to_string() const
 {
 	stringstream ss;
-	ss << "Z:" << zaehler().to_string() << "; N:" << nenner().to_string() << "; Crel_to_Irel_data.size()=" << Crel_to_Irel_map().X().data().size();
+	ss << "Z:" << zaehler().to_string() << "; N:" << nenner().to_string() << "; Crel_to_Irel_data.size()=" << Crel_to_Irel_map.X().data().size();
 	return ss.str();
 }
 
@@ -298,7 +298,7 @@ const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_polynomial_fit
 	if (!polynom().successfully_fitted())
 		return {};
 // 	cout << "Crel_to_Irel_map.polyfit=" << Crel_to_Irel_map.polyfit(Irel,polynom).to_string_detailed() << endl;
-	return Crel_to_Irel_map().polyfit(Irel,polynom());
+	return Crel_to_Irel_map.polyfit(Irel,polynom());
 // 	return polynom.y_data(Irel.data());
 }
 
@@ -319,12 +319,12 @@ void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double s
 	plot_t plot(false,false);
 	stringstream plot_title;
 
-	auto Crel_to_Irel_map_withot_infs = Crel_to_Irel_map().remove_inf();
+	auto Crel_to_Irel_map_withot_infs = Crel_to_Irel_map.remove_inf();
 // 	cout << endl << Crel_to_Irel_map_withot_infs.to_string_list() << endl;
 	plot.Y1.add_points(Crel_to_Irel_map_withot_infs,zaehler().to_string() + " / " + nenner().to_string()," ro");
 	if (polynom().successfully_fitted())
 	{
-// 		plot.Y1.add_polynom(Crel_to_Irel_map(),polynom(),polynom().to_string()); 
+// 		plot.Y1.add_polynom(Crel_to_Irel_map,polynom(),polynom().to_string()); 
 		plot.Y1.add_polynom(Crel_to_Irel_map_withot_infs,polynom(),polynom().to_string()); 
 	}
 	plot_title << "{" << zaehler().to_string() << "} / {" << nenner().to_string() <<  "}";
@@ -337,22 +337,22 @@ void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double s
 /*******************************************************/
 
 calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_data_fits_t(const quantity::map_t& Crel_to_Irel_map, const cluster_t& zaehler, const cluster_t& nenner) :
-													Crel_to_Irel_map_p(Crel_to_Irel_map), 
+													Crel_to_Irel_map(Crel_to_Irel_map), 
 													cluster_relations_copies_t(zaehler,nenner)
 // 													zaehler_p(zaehler.isotopes),nenner_p(nenner.isotopes)
 {
 }
 
 
-const quantity::map_t& calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_map() const
-{
-	return Crel_to_Irel_map_p;
-}
+// const quantity::map_t& calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_map const
+// {
+// 	return Crel_to_Irel_map_p;
+// }
 
 const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t calc_t::sims_t::Crel_to_Irel_data_fits_t::polynom(const vector<unsigned int> polynom_rank, const vector<double> polynom_start_parameters) const
 {
-	const auto P = Crel_to_Irel_map().remove_inf().remove_nan().polynom(polynom_rank,polynom_start_parameters);
-	Crel_to_Irel_data_polynomial_fit_t crel_irel_polyfit(zaehler(),nenner(),Crel_to_Irel_map(),P);
+	const auto P = Crel_to_Irel_map.remove_inf().remove_nan().polynom(polynom_rank,polynom_start_parameters);
+	Crel_to_Irel_data_polynomial_fit_t crel_irel_polyfit(zaehler(),nenner(),Crel_to_Irel_map,P);
 	return crel_irel_polyfit;
 }
 

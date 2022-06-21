@@ -31,6 +31,9 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 
 	/*******/
 	
+	/*config*/
+	config.load();
+	
 	filenames=args_p;
 	
 	/*connect to sqlite3 database*/
@@ -116,8 +119,8 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		{
 			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
 
-			const auto RSFs = mat.RSFs().add_natural_abundances()/*.remove_RSFs_below_gof_treshold(0.5)*/;
-			RSFs.RSF_with_worst_fit();
+			auto RSFs = mat.RSFs().add_natural_abundances().remove_RSFs_below_gof_treshold(0.2).symmetrical_RSFs();
+			RSFs.plot_now(0);
 			for (auto& M:MG.measurements())
 			{
 				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
@@ -137,22 +140,25 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		// C
 		calc.concentrations.from_SF();
 		
+		/*exporting*/
 		for (auto M : MG.measurements())
 		{
 			M->plot_now(0);
 		}
-		MG.export_origin_ascii();
+		MG.export_origin_ascii(config.tofsims_export_location);
 	}
 	
 	/*d sims*/
 	for (auto& MG : dsims.mgroups())
 	{
+		MG.set_reference_isotopes_in_measurements();
 		auto calc = MG.calc();
 		calc.SRs.from_crater_depths().SRs.from_implant_max();
 		if (MG.matrix_clusters().size()>1)
 		{
 			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
 			const auto RSFs = mat.RSFs().add_natural_abundances();
+			RSFs.remove_RSFs_below_gof_treshold(0.2).plot_now(0);
 			for (auto& M:MG.measurements())
 			{
 				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
@@ -176,7 +182,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		{
 			M->plot_now(0);
 		}
-		MG.export_origin_ascii();
+		MG.export_origin_ascii(config.dsims_export_location);
 	}
 	
 	if (!logger::instant_print_messages)
@@ -196,6 +202,8 @@ processor::tofsims_t::tofsims_t(vector<string>& filenames,
 							database_t& sql_wrapper	) : filenames(filenames),samples_list(samples_list), sql_wrapper(sql_wrapper)
 {
 }
+
+string processor::tofsims_t::export_path="";
 
 vector<files_::tofsims_t> & processor::tofsims_t::files()
 {
@@ -272,6 +280,8 @@ processor::dsims_t::dsims_t(vector<string>& filenames,
 							database_t& sql_wrapper	) : filenames(filenames),samples_list(samples_list), sql_wrapper(sql_wrapper)
 {
 }
+
+string processor::dsims_t::export_path="";
 
 vector<files_::dsims_t> & processor::dsims_t::files()
 {

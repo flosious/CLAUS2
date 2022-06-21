@@ -86,7 +86,7 @@ private:
 	///just allow the processor to open and close
 	
 public:
-	const string file_location = "build/database.sqlite3";
+	const string file_location = "database.sqlite3";
 	database_t(sqlite3* sql_handle);
 	database_t(sqlite3* sql_handle, string filename);
 	~database_t();

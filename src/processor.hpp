@@ -41,6 +41,7 @@
 #include "plot.hpp"
 #include "database_t.hpp"
 #include "calc.hpp"
+#include "config.hpp"
 
 // #include "plc++demos.h"
 
@@ -53,7 +54,8 @@ class processor
 private:
 	sqlite3* sql = nullptr;
 	database_t sql_wrapper;
-	
+	config_t config;
+public:
 	class camera_t
 	{
 	private:
@@ -89,6 +91,7 @@ private:
 		list<sample_t>& samples_list;
 		database_t& sql_wrapper;
 	public:
+		static string export_path;
 // 		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, vector<measurements_::profilers_t>& profiler_measurements, camera_t& cam, database_t& sql_wrapper);
 		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, database_t& sql_wrapper);
 		vector<files_::dsims_t>& files();
@@ -106,6 +109,7 @@ private:
 		list<sample_t>& samples_list;
 		database_t& sql_wrapper;
 	public:
+		static string export_path;
 // 		tofsims_t(vector<string>& filenames, list<sample_t>& samples_list, vector<measurements_::profilers_t>& profiler_measurements, camera_t& cam, database_t& sql_wrapper);
 		tofsims_t(vector<string>& filenames, list<sample_t>& samples_list, database_t& sql_wrapper);
 		vector<files_::tofsims_t>& files();

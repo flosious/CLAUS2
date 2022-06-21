@@ -67,6 +67,11 @@ const quantity::map_t quantity::map_t::pop_back() const
 	return map_t(X().pop_back(),Y().pop_back());
 }
 
+const quantity::map_t quantity::map_t::back() const
+{
+	return map_t(X().back(),Y().back());
+}
+
 const quantity::map_t quantity::map_t::remove_by_X(quantity::quantity_t X_s) const
 {
 	X_s = X_s.change_unit(X().unit());
@@ -115,14 +120,14 @@ bool quantity::map_t::is_single_point() const
 std::string quantity::map_t::to_string() const
 {
 	stringstream ss;
-	ss << "X: " << X().to_string() << "; Y: " << Y().to_string() << endl;
+	ss << "X: " << X().to_string() << "; Y: " << Y().to_string();
 	return ss.str();
 }
 
 std::string quantity::map_t::to_string_detailed() const
 {
 	stringstream ss;
-	ss << "X: " << X().to_string_detailed() << "; Y: " << Y().to_string_detailed() << endl;
+	ss << "X: " << X().to_string_detailed() << "; Y: " << Y().to_string_detailed() ;
 	return ss.str();
 }
 
@@ -199,7 +204,10 @@ quantity::quantity_t quantity::map_t::distance() const
 		distances.at(i)=sqrt(pow(X().data().at(i),2)+pow(Y().data().at(i),2));
 	quantity_t XY_radius("distance",distances,units::SI::one);
 	if (X().unit() == Y().change_unit(X().unit()).unit())
-		return quantity_t(X(),distances);
+	{
+		const auto out = quantity_t(X(),distances);
+		return out;
+	}
 	return XY_radius;
 }
 
@@ -251,15 +259,26 @@ vector<int> quantity::map_t::bin_data(const vector<double>& bins) const
 	return distance().bin_data(bins);
 }
 
-quantity::map_t quantity::map_t::remove_outliners(const fit_functions::polynom_t& polynom_s,float chisqr_relative_treshold) const
+quantity::map_t quantity::map_t::remove_outliners( fit_functions::polynom_t polynom_s,float gof_treshold) const
 {
-// 	map_t result_map(X(),Y());
 	map_t result_map = *this;
-	while (result_map.polynom(polynom_s.rank(),polynom_s.fit_parameters()).chisq_relative() > chisqr_relative_treshold && polynom_s.rank().size()>=result_map.filled_data_bins(polynom_s.rank().size()))
+	while (polynom_s.gof() < gof_treshold && polynom_s.rank().size()>=result_map.filled_data_bins(polynom_s.rank().size()))
 	{
-		result_map = result_map.delta_y(polynom_s).sort_Y_from_low_to_high().pop_back();
+// 		result_map = result_map.delta_y(polynom_s).sort_Y_from_low_to_high().pop_back();
+		auto X = result_map.delta_y(polynom_s).sort_Y_from_low_to_high().back().X();
+// 		cout << endl << X.to_string() << endl;
+		result_map = result_map.remove_by_X(X);
+		polynom_s = result_map.polynom(polynom_s.rank(),polynom_s.fit_parameters());
+		logger::info(3,"quantity::map_t::remove_outliners()","removing from map: " + X.to_string());
+		logger::info(3,"quantity::map_t::remove_outliners()","new polynom: " + polynom_s.to_string());
 	}
 	return result_map;
+}
+
+quantity::map_t quantity::map_t::remove_worst_outliner(const fit_functions::polynom_t& polynom_s) const
+{
+	auto X = delta_y(polynom_s).sort_Y_from_low_to_high().back().X();
+	return remove_by_X(X);
 }
 
 quantity::map_t quantity::map_t::swap_X_Y() const

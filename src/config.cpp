@@ -25,13 +25,18 @@ int config_t::load_file(string filename_with_path)
 {
     vector<string> config_lines = tools::file::load_file_to_vector_string(filename_with_path);
     if (config_lines.size()==0) return 0;
-    if (parse(config_lines)>0) return 1;
+    if (parse(config_lines)>0) 
+	{
+		logger::info(3,"config_t::load_file()",filename_with_path + " successfully loaded");
+		return 1;
+	}
     return 0;
 }
-int config_t::load() {
-    files.insert(default_file);
-    return load(files);
+int config_t::load() 
+{
+    return load_file(default_file);
 }
+
 int config_t::load(string filename_with_path) {
     if (filename_with_path.length()==0) files.insert(default_file);
     files.insert(filename_with_path);
@@ -56,10 +61,11 @@ int config_t::parse(vector<string> config_lines) {
     for (int i=0; i<config_lines.size();i++) {
         vector<string> string_parts = tools::str::get_strings_between_delimiter(config_lines[i],"=");
         if (string_parts.size()<2) continue; // no "=" in line, skip
-        tools::str::remove_spaces_from_string_start(&string_parts[0]);
-        tools::str::remove_spaces_from_string_end(&string_parts[0]);
-        tools::str::remove_spaces_from_string_start(&string_parts[1]);
-        tools::str::remove_spaces_from_string_end(&string_parts[1]);
+        tools::str::remove_spaces(&string_parts);
+//         tools::str::remove_spaces_from_string_start(&string_parts[0]);
+//         tools::str::remove_spaces_from_string_end(&string_parts[0]);
+//         tools::str::remove_spaces_from_string_start(&string_parts[1]);
+//         tools::str::remove_spaces_from_string_end(&string_parts[1]);
         tools::str::replace_chars(&string_parts,"\"","");
         string key = string_parts[0];
         string value = string_parts[1];
@@ -101,14 +107,15 @@ int config_t::parse(vector<string> config_lines) {
 // 		else if (key=="export_calculation_history" || key=="export_calc_history") { if (value.find("0")!=string::npos) 		export2_t::export_calc_history=false;}
 // 		else if (key=="export_calculation_results" || key=="export_calc_results") { if (value.find("0")!=string::npos) 		export2_t::export_calc_results=false;}
 //         else if (key=="calc_location") 																export2_t::calc_location = value;
-//         else if (key=="export_location" || key=="export_directory") 								export2_t::directory_config=value;
+        else if (key=="dsims_export_location" || key=="dsims_export_directory") 								dsims_export_location=value;
+		else if (key=="tofsims_export_location" || key=="tofsims_export_directory") 							tofsims_export_location=value;
 // 		else if (key=="export_filename")															export2_t::filename_config=value;
 // 		else if (key=="smoothing_moving_window_mean_size") 											export2_t::smoothing_moving_window_mean_size = tools::str::str_to_int(value);
 // 		else if (key=="depth_resolution") 															export2_t::depth_resolution=tools::str::str_to_double(value);
 //         else if (key=="replace" || key=="replacements") 											export2_t::replacements [ string_parts[1] ] = string_parts[2];
 // 		else if (key=="data_column_delimiter") 														export2_t::data_column_delimiter=value;
 		
-		else if (key=="sample_definition") 															save_sample_definition(value);
+// 		else if (key=="sample_definition") 															save_sample_definition(value);
 // 		else if (key=="measurement_group_definition") 												save_measurement_group_definition(value);
 // 		else if (key=="measurement_definition") 													save_measurement_definition(value);
 // 		else if (key=="export_columns" || key=="export_column_names")								save_export_column_names(value);
@@ -116,7 +123,8 @@ int config_t::parse(vector<string> config_lines) {
 //         else if (key=="use_impulse_filter_on_data") { if (value.find("0")!=string::npos) 			parser_methods::use_impulse_filter_on_data=false;}
         else 
 		{
-			cout << "config_t::\tCould not parse: " << config_lines[i] << endl;
+// 			cout << "config_t::\tCould not parse: " << config_lines[i] << endl;
+			logger::error("config_t::parse","could not parse",config_lines[i], key);
 			parsed_lines--;
 		}
 // 		cout << "KEY=" << key << "\tvalue=" << value << endl;
@@ -164,54 +172,54 @@ void config_t::save_test(string value)
 // }
 
 /// sample_definition = lot + wafer + monitor + chip + simple_name
-void config_t::save_sample_definition(string value)
-{
-	tools::str::remove_spaces(&value);
-	vector<string> definitions = tools::str::get_strings_between_delimiter(value,"+");
-	tools::str::remove_spaces(&definitions);
-	sample_t::use_lot=false;
-	sample_t::use_wafer=false;
-	sample_t::use_lot_split = false;
-	sample_t::use_monitor = false;
-	sample_t::use_chip = false;
-	sample_t::use_simple_name = false;
-	
-	stringstream new_definition;
-	for (auto& definition:definitions)
-	{
-		if (definition=="lot") 
-		{
-			sample_t::use_lot=true;
-		}
-		else if (definition=="lot_split") 
-		{
-			sample_t::use_lot_split=true;
-		}
-		else if (definition=="wafer" || definition=="wafer_number")
-		{
-			sample_t::use_wafer=true;
-		}
-		else if (definition=="monitor") 
-		{
-			sample_t::use_monitor=true;
-		}
-		else if (definition=="chip") 
-		{
-			sample_t::use_chip=true;
-		}
-		else if (definition=="simple_name" || definition=="name")
-		{
-			sample_t::use_simple_name=true;
-		}
-		else 
-		{
-			logger::error("config_t::save_sample_definition()", "unknown input value", definition,"continue");
-			continue;
-		}
-		new_definition << definition << " ";
-	}
-	logger::info(2,"config_t::save_sample_definition()",new_definition.str());
-}
+// void config_t::save_sample_definition(string value)
+// {
+// 	tools::str::remove_spaces(&value);
+// 	vector<string> definitions = tools::str::get_strings_between_delimiter(value,"+");
+// 	tools::str::remove_spaces(&definitions);
+// 	sample_t::use_lot=false;
+// 	sample_t::use_wafer=false;
+// 	sample_t::use_lot_split = false;
+// 	sample_t::use_monitor = false;
+// 	sample_t::use_chip = false;
+// 	sample_t::use_simple_name = false;
+// 	
+// 	stringstream new_definition;
+// 	for (auto& definition:definitions)
+// 	{
+// 		if (definition=="lot") 
+// 		{
+// 			sample_t::use_lot=true;
+// 		}
+// 		else if (definition=="lot_split") 
+// 		{
+// 			sample_t::use_lot_split=true;
+// 		}
+// 		else if (definition=="wafer" || definition=="wafer_number")
+// 		{
+// 			sample_t::use_wafer=true;
+// 		}
+// 		else if (definition=="monitor") 
+// 		{
+// 			sample_t::use_monitor=true;
+// 		}
+// 		else if (definition=="chip") 
+// 		{
+// 			sample_t::use_chip=true;
+// 		}
+// 		else if (definition=="simple_name" || definition=="name")
+// 		{
+// 			sample_t::use_simple_name=true;
+// 		}
+// 		else 
+// 		{
+// 			logger::error("config_t::save_sample_definition()", "unknown input value", definition,"continue");
+// 			continue;
+// 		}
+// 		new_definition << definition << " ";
+// 	}
+// 	logger::info(2,"config_t::save_sample_definition()",new_definition.str());
+// }
 
 
 // void config_t::save_measurement_definition(string value)

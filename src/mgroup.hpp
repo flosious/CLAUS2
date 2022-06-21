@@ -263,7 +263,7 @@ public:
 		bool set_matrix_isotopes_in_unknown_samples();
 	public:
 		sims_t(measurements_::sims_t& measurement);
-		void export_origin_ascii(string path="/home/florian/Sync/exports/", const string delimiter="\t");
+		void export_origin_ascii(string path="", const string delimiter="\t");
 		string to_string_short() const;
 		calc_t calc();
 		///all different matrices from all samples within this group

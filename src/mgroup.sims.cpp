@@ -302,7 +302,9 @@ string mgroups_::sims_t::to_string_short() const
 void mgroups_::sims_t::export_origin_ascii(string path, const string delimiter)
 {
 	for (auto& M : measurements())
+	{
 		M->export_origin_ascii(path+to_string_short(),delimiter);
+	}
 }
 
 bool mgroups_::sims_t::check_cluster_consistency()

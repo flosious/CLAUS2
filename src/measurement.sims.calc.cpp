@@ -590,7 +590,7 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_dose()
 	}
 	if (cluster.intensity.data().back() / maximum_intensity().data().front() > 0.1)
 	{
-		logger::error("measurements_::sims_t::calc_t::implant_c::SF_from_dose()","intensity background higher than 10\% of maximum","recommanding: sputter deeper, substract background, use implant maximum","returning empty");
+		logger::error("measurements_::sims_t::calc_t::implant_c::SF_from_dose()","intensity background higher than 10\% of maximum","recommending: sputter deeper, substract background, use implant maximum","returning empty");
 		return {};
 	}
 	auto min_pos = minimum_index_position(cluster.intensity);

@@ -36,7 +36,7 @@ class pse_t
 // 	friend class config_t;
 private:
 	const string source_url="https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl";
-	const string filename="build/pse.csv";
+	const string filename="pse.csv";
 	const string delimiter = ",";
 	
 	class pse_isotope_t

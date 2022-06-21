@@ -123,18 +123,19 @@ public:
 // 			cluster_t zaehler_p;
 			///just the isotopes are saved without data
 // 			cluster_t nenner_p;
-			quantity::map_t Crel_to_Irel_map_p;
+			
 		public:
 // 			Crel_to_Irel_data_fit_routine_template(const cluster_t& zaehler, const cluster_t& nenner, const pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data);
 			Crel_to_Irel_data_fit_routine_template(const cluster_t& zaehler, const cluster_t& nenner, const quantity::map_t& Crel_to_Irel_map);
 			virtual ~Crel_to_Irel_data_fit_routine_template();
+			quantity::map_t Crel_to_Irel_map;
 			string to_string() const;
 			///just the isotopes are saved without data
 // 			const cluster_t& zaehler() const;
 			///just the isotopes are saved without data
 // 			const cluster_t& nenner() const;
 // 			const pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
-			const quantity::map_t& Crel_to_Irel_map() const;
+// 			const quantity::map_t& Crel_to_Irel_map() const;
 			virtual const quantity::concentration_t Crel(const quantity::intensity_t Irel) const;
 			virtual const quantity::concentration_t Crel(const measurements_::sims_t& measurement) const;
 			virtual void plot_to_screen(double sleep_sec=1) const;
@@ -163,10 +164,11 @@ public:
 // 			cluster_t zaehler_p;
 			///just the isotopes are saved without data
 // 			cluster_t nenner_p;
-			quantity::map_t Crel_to_Irel_map_p;
+			
 		public:
 			Crel_to_Irel_data_fits_t(const quantity::map_t& Crel_to_Irel_map,const cluster_t& zaehler, const cluster_t& nenner);
-			const quantity::map_t& Crel_to_Irel_map() const;
+			quantity::map_t Crel_to_Irel_map;
+// 			const quantity::map_t& Crel_to_Irel_map() const;
 			///just the isotopes are saved without data
 // 			const cluster_t& zaehler() const;
 			///just the isotopes are saved without data
@@ -259,8 +261,8 @@ public:
 				RSF_t(const cluster_t zaehler,const cluster_t nenner, const quantity_t& quantity_s , const quantity::abundance_t& abundance_ratio={});
 				bool operator==(const RSF_t& obj) const;
 				bool operator!=(const RSF_t& obj) const;
-				bool operator<(const RSF_t& obj) const;
-				bool operator>(const RSF_t& obj) const;
+// 				bool operator<(const RSF_t& obj) const;
+// 				bool operator>(const RSF_t& obj) const;
 			}; // RSF_t
 			
 		private:
@@ -303,7 +305,7 @@ public:
 				///asumes sum of all elements / isotopes is 100at%; then tries to calculate a virtual cluster with an substance_amount of (100at% - known elements/isotopes)
 				RSF_t RSF_from_virtual_cluster(const cluster_t& zaehler, const cluster_t& nenner) const;
 				///returns empty if worst fit can not be found, that means all fits are perfect or none are there
-				RSF_t RSF_with_worst_fit() const;
+				const Crel_to_Irel_data_polynomial_fit_t& RSF_with_worst_gof() const;
 				///returns the n worst fits
 				set<RSF_t> RSFs_with_worst_fit(int n=1) const;
 				///removes particulary Crel_to_Irel_lin_fits with relative_chisqr > 0.1
@@ -313,6 +315,8 @@ public:
 				///removes the manual setted and fitted RSFs
 				RSFs_t remove_RSFs(const set<RSF_t>& rsfs_s) const;
 				RSFs_t remove_RSFs_with_worst_fit(int n=1) const;
+				///TODO:removes all data belonging to a certain measurement
+				RSFs_t remove_measurement(const measurements_::sims_t& measurement) const;
 				///uses add_missing_RSFs_from_inverse() and then add_missing_RSFs_from_virtual_cluster()
 				RSFs_t add_missing_RSFs() const; ///TODO ELMENTAL + ISOTOPICAL
 				RSFs_t add_missing_RSFs_from_inverse() const;  ///TODO ELMENTAL + ISOTOPICAL ist hier glaube ich nicht notwendig
@@ -323,9 +327,9 @@ public:
 				///adds or replaces multiple RSFs in the RSFs table
 				RSFs_t add_or_replace_RSFs(const vector<RSF_t>& RSFs_s) const;
 				///improves RSFs fits by increasing linearity of Crel_to_Irel_poly_fits, by removing outliners outside of a relative_chisqr;
-				RSFs_t improve_fit_by_removing_outliners(float relative_chisqr=0.05) const;
+				RSFs_t improve_fits_by_removing_outliners(float gof_reshold=0.1) const;
 				///improves RSFs fits by increasing linearity of Crel_to_Irel_poly_fits, by removing outliners outside of a relative_chisqr;
-				RSFs_t improve_fit_by_removing_biggest_Irels(float relative_chisqr=0.05) const;
+				RSFs_t improve_fits_by_removing_biggest_Irels(float relative_chisqr=0.05) const;
 				///makes RSF(zaehler,nenner) == RSF(nenner,zaehler) by using their mean
 				RSFs_t symmetrical_RSFs() const;
 				///sets abundance_relations of all RSFs -> cluster_relations_copies_t

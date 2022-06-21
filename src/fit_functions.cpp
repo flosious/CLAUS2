@@ -285,8 +285,14 @@ double fit_functions::polynom_t::gof() const
 
 int fit_functions::polynom_t::degree() const
 {
-	return rank_p.size()-1;
+// 	int c=0;
+// 	for (auto r : rank_p)
+// 		if (r!=0)
+// 			c++;
+	return rank().size();
 }
+
+
 
 const vector<unsigned int>& fit_functions::polynom_t::rank() const
 {
@@ -343,8 +349,8 @@ std::string fit_functions::polynom_t::to_string(std::string prefix) const
 	if (!successfully_fitted())
 		return "unsecesfull fit";
 	out << "gof: " << gof();
-// 	out << " chisq_relative: " << chisq_relative();
-// 	out << " chisq: " << chisq();
+	out << " chisq_relative: " << chisq_relative();
+	out << " chisq: " << chisq();
 	out << " params: ";
 	for (auto p : fit_parameters())
 	{
@@ -380,10 +386,22 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 		return false;
 	if (data_XY.size()==0)
 		return false;
-	if (rank().size()>data_XY.size()) 
+	
+	/*catch a linear function*/
+	if (rank().size()==2 && rank().at(0)==0 && data_XY.size()>0) // linear m*x
+	{
+		linear_t L(fit_parameters().at(1), data_XY);
+		fit_parameters_p = {0,L.slope()};
+		successfully_fitted_p = L.successfully_fitted();
+		chisq_p = L.chisq();
+		gof_p = L.gof();
+		return L.successfully_fitted();
+	}
+	
+	if (rank().size()>data_XY.size())
+	{
 		return false;
-	
-	
+	}
 	
 	int i, n;
 	gsl_matrix *X, *cov;
@@ -440,7 +458,7 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
     gsl_matrix_free (cov);
 	
 	vector<double> YY = y_data(Xdata);
-	gof_p = statistics::round(pow(statistics::get_correlation_Y1_Y2(Ydata,YY),50),1);
+	gof_p = statistics::round(pow(statistics::get_correlation_Y1_Y2(Ydata,YY),10),1);
 	
 	chisq_relative_p = 0;
 	
@@ -460,12 +478,27 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 /****  linear_t  ******/
 /**********************/
 
+fit_functions::linear_t::linear_t(const double slope,const map<double,double>& data_XY) : slope_p(slope)
+{	
+	successfully_fitted_p = fit(data_XY);
+}
+
+double fit_functions::linear_t::gof() const
+{
+	return gof_p;
+}
+
+double fit_functions::linear_t::chisq_relative() const
+{
+	return chisq_relative_p;
+}
+
 const double fit_functions::linear_t::cov() const
 {
 	return cov_p;
 }
 
-const double fit_functions::linear_t::slope() const
+double fit_functions::linear_t::slope() const
 {
 	return slope_p;
 }
@@ -475,18 +508,17 @@ double fit_functions::linear_t::chisq() const
 	return chisq_p;
 }
 
-bool fit_functions::linear_t::fitted() const
+bool fit_functions::linear_t::successfully_fitted() const
 {
-	return fitted_p;
+	return successfully_fitted_p;
 }
 
-vector<double> fit_functions::linear_t::Y(vector<double> x)
+vector<double> fit_functions::linear_t::y_data(vector<double> x_data)
 {
-	if (!fitted_p) return {};
-	vector<double> Y(x.size());
-	for (int i=0;i<x.size();i++)
+	vector<double> Y(x_data.size());
+	for (int i=0;i<x_data.size();i++)
 	{
-		Y[i] = x[i] * slope();
+		Y[i] = x_data[i] * slope();
 	}
 	return Y;
 }
@@ -495,6 +527,9 @@ bool fit_functions::linear_t::fit(map<double, double> data_XY)
 {
 // 	double cov01, cov11;
 	size_t n = data_XY.size();
+	if (n==0) 
+		return false;
+
 	double x[n], y[n];
 	int i=0;
 	for (auto& xy : data_XY)
@@ -504,7 +539,19 @@ bool fit_functions::linear_t::fit(map<double, double> data_XY)
 		i++;
 	}
 	gsl_fit_mul(x,1,y,1,n,&slope_p,&cov_p,&chisq_p);
-	fitted_p = true;
+	successfully_fitted_p = true;
+	
+	vector<double> Ydata;
+	vector<double> Xdata;
+	tools::vec::split_map_to_vecs(data_XY,&Xdata,&Ydata);
+	vector<double> YY = y_data(Xdata);
+	gof_p = statistics::round(pow(statistics::get_correlation_Y1_Y2(Ydata,YY),10),1);
+	chisq_relative_p = 0;
+	
+	for (int i=0;i<YY.size();i++)
+	{
+		chisq_relative_p +=  (abs(YY.at(i)-Ydata.at(i)))/Ydata.at(i);
+	}
 	return true;
 }
 

@@ -104,7 +104,7 @@ const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t:
 
 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted() const
 {
-	logger::debug(13,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","entering");
+	logger::debug(13,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","entering");
 	vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
 	for (const auto& Z : matrix_clusters().clusters())
 	{
@@ -116,14 +116,14 @@ const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t:
 			auto const RSF = Crel_to_Irel_data_collector.isotopical_Crel().Irel_from_median().polynom({0,1},{0,1});
 			if (!RSF.polynom().successfully_fitted())
 			{
-				logger::info(3,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","RSF not successfully fitted", "Z:" + RSF.zaehler().to_string() + ", N:" + RSF.nenner().to_string());
+				logger::info(3,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","RSF not successfully fitted", "Z:" + RSF.zaehler().to_string() + ", N:" + RSF.nenner().to_string());
 				continue;
 			}
 // 			RSF.plot_to_screen(0);
 			Crels_to_Irels.push_back(RSF);
 		}
 	}
-	logger::debug(13,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","leaving");
+	logger::debug(13,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","leaving");
 	return Crels_to_Irels;
 }
 
@@ -278,23 +278,27 @@ bool calc_t::sims_t::matrix_t::RSF_t::operator!=(const calc_t::sims_t::matrix_t:
 	return !operator==(obj);
 }
 
-bool calc_t::sims_t::matrix_t::RSF_t::operator<(const calc_t::sims_t::matrix_t::RSF_t& obj) const
-{
-	if (zaehler()==nenner())
-		return false;
-	if (zaehler().to_string() > nenner().to_string())
-		return false;
-	return true;
-}
-
-bool calc_t::sims_t::matrix_t::RSF_t::operator>(const calc_t::sims_t::matrix_t::RSF_t& obj) const
-{
-	if (*this == obj)
-		return false;
-	if (*this < obj)
-		return false;
-	return true;
-}
+// bool calc_t::sims_t::matrix_t::RSF_t::operator<(const calc_t::sims_t::matrix_t::RSF_t& obj) const
+// {
+// 	if (zaehler()!=obj.zaehler())
+// 		return true;
+// 	if (nenner()!=obj.nenner())
+// 		return true;
+// // 	if (zaehler().to_string() < obj.zaehler().to_string())
+// // 		return true;
+// // 	if (nenner().to_string() > obj.nenner().to_string())
+// // 		return false;
+// 	return false;
+// }
+// 
+// bool calc_t::sims_t::matrix_t::RSF_t::operator>(const calc_t::sims_t::matrix_t::RSF_t& obj) const
+// {
+// 	if (*this == obj)
+// 		return false;
+// 	if (*this < obj)
+// 		return false;
+// 	return true;
+// }
 
 /****************************************/
 /*********     clusters_t    ************/
@@ -434,6 +438,19 @@ calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters,
 										 const vector<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
 										 matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs)
 {
+	logger::debug(11,"calc_t::sims_t::matrix_t::RSFs_t::RSFs_t","entering");
+// 	cout << "RSFs" << endl;
+// 	for (auto& rsf : RSFs)
+// 		cout << rsf.to_string() << endl;
+// 	cout << "STOP" << endl;
+// 	cout << "RSFs_manually_set_p" << endl;
+// 	for (auto& rsf : RSFs_manually_set_p)
+// 		cout << rsf.to_string() << endl;
+// 	cout << "STOP" << endl;
+// 	cout << "RSFs_manually_set()" << endl;
+// 	for (auto& rsf : RSFs_manually_set())
+// 		cout << rsf.to_string() << endl;
+// 	cout << "STOP" << endl;
 }
 
 calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters, 
@@ -441,6 +458,7 @@ calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters,
 										 const set<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
 										 matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs.begin(),RSFs.end())
 {
+	
 }
 /*getter functions for logical consts*/
 const calc_t::sims_t::matrix_t::clusters_t& calc_t::sims_t::matrix_t::RSFs_t::matrix_clusters() const
@@ -540,14 +558,14 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_Crel_t
 	return {matrix_clusters(),residual_fits,RSFs_manually_set()};
 }
 
-calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fit_by_removing_biggest_Irels(float relative_chisqr) const
+calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_biggest_Irels(float relative_chisqr) const
 {
 	//Irel is X coordinate
 	vector<Crel_to_Irel_data_polynomial_fit_t> new_fits;
 	new_fits.reserve(Crel_to_Irel_lin_fits().size());
 	for (auto& F : Crel_to_Irel_lin_fits())
 	{
-		auto new_map = F.Crel_to_Irel_map().sort_X_from_low_to_high();
+		auto new_map = F.Crel_to_Irel_map.sort_X_from_low_to_high();
 		auto new_polynom = F.polynom();
 		while (new_map.size()>=new_polynom.rank().size() && new_polynom.chisq_relative()>relative_chisqr)
 		{
@@ -560,15 +578,28 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fit_b
 }
 
 
-calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fit_by_removing_outliners(float relative_chisqr) const
+calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners(float gof_reshold) const
 {
 	vector<Crel_to_Irel_data_polynomial_fit_t> new_fits;
 	new_fits.reserve(Crel_to_Irel_lin_fits().size());
 	for (auto& F : Crel_to_Irel_lin_fits())
 	{
-		const auto new_map = F.Crel_to_Irel_map().remove_outliners(F.polynom());
-		const fit_functions::polynom_t new_polynom = new_map.polynom(F.polynom().rank(),F.polynom().fit_parameters());
-		new_fits.push_back(Crel_to_Irel_data_polynomial_fit_t(F.zaehler(),F.nenner(),new_map,new_polynom));
+		if (F.polynom().gof()>gof_reshold)
+		{
+			new_fits.push_back(F);
+		}
+		else	
+		{
+			logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","trying to improve: "+ F.to_string());
+			const auto new_map = F.Crel_to_Irel_map.remove_outliners(F.polynom(),gof_reshold);
+			logger::info(4,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","new_map: "+ new_map.to_string());
+			const fit_functions::polynom_t new_polynom = new_map.polynom(F.polynom().rank(),F.polynom().fit_parameters());
+			logger::info(4,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","new_polynom: "+ new_polynom.to_string());
+			new_fits.push_back(Crel_to_Irel_data_polynomial_fit_t(F.zaehler(),F.nenner(),new_map,new_polynom));
+// 			cout  << "F.Crel_to_Irel_map().Y()=" << F.Crel_to_Irel_map().Y().to_string_detailed() << endl;
+// 			cout << "new_map.Y()=" << new_map.Y().to_string_detailed() << endl;
+// 			exit(1);
+		}
 	}
 	return RSFs_t(matrix_clusters(),new_fits,RSFs_manually_set());
 }
@@ -613,7 +644,7 @@ calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSFs_t::RSF(const clus
 		RSF_t rsf(zaehler,nenner,Crel_to_Irel.polynom().fit_parameters().at(1),Crel_to_Irel.abundance_ratio);
 		return rsf;
 	}
-	return {zaehler,nenner};
+	return RSF_t(zaehler,nenner);
 }
 
 calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSFs_t::RSF_from_inverse(const cluster_t& zaehler, const cluster_t& nenner) const
@@ -621,20 +652,25 @@ calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSFs_t::RSF_from_inver
 	return RSF_t(zaehler,nenner,{RSF(nenner,zaehler).invert()});
 }
 
-calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSFs_t::RSF_with_worst_fit() const
+const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t& calc_t::sims_t::matrix_t::RSFs_t::RSF_with_worst_gof() const
 {
 	cluster_t Z,N;
-	double chisqr_max=0;
-	for (auto& fits : Crel_to_Irel_lin_fits())
+	double gof_min=0;
+	/*this will be catastrophical if Crel_to_Irel_lin_fits_p is empty*/
+	if (Crel_to_Irel_lin_fits_p.size()==0)
+		logger::fatal("calc_t::sims_t::matrix_t::RSFs_t::RSF_with_worst_gof()","Crel_to_Irel_lin_fits_p is empty, can NOT return nullptr as ref");
+	const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t * result=nullptr;
+	for (auto& fits : Crel_to_Irel_lin_fits_p)
 	{
-		if (fits.polynom().chisq_relative() > chisqr_max)
+		if (result == nullptr || fits.polynom().gof() < gof_min)
 		{
 			Z = fits.zaehler();
 			N = fits.nenner();
-			chisqr_max = fits.polynom().chisq_relative();
+			gof_min = fits.polynom().gof();
+			result = &fits;
 		}
 	}
-	return RSF(Z,N);
+	return *result;
 }
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs(const set<RSF_t>& rsfs_s) const
@@ -744,25 +780,30 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replac
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs() const
 {
-	set<RSF_t> new_RSFs;
-	for (auto rsf : RSFs_manually_set())
+	vector<RSF_t> new_RSFs;
+	new_RSFs.reserve(all_possible_RSFs().size()); // reserve theorethical maximum
+	for (auto rsf : all_available_RSFs())
 	{
-		if (new_RSFs.find(rsf)!= new_RSFs.end())
+		if (find(new_RSFs.begin(),new_RSFs.end(),rsf) != new_RSFs.end()) // rsf already in new_RSFs? -> continue
 			continue;
 		if (!rsf.is_set())
 			continue;
-		if (!RSF(rsf.nenner(),rsf.zaehler()).is_set())
+		if (rsf.is_nan())
 			continue;
-		if (RSF(rsf.nenner(),rsf.zaehler()).is_nan())
+		if (rsf.is_inf())
 			continue;
-		if (RSF(rsf.nenner(),rsf.zaehler()).is_inf())
-			continue;
-		// wenn sich die Einheiten / dimensionen der RSFs unterscheiden, dann wird die linke seite genommen
-		rsf << RSF(rsf.nenner(),rsf.zaehler()); 
-		new_RSFs.insert(RSF_t(rsf.zaehler(), rsf.nenner(), rsf.mean()));
-		new_RSFs.insert(RSF_t(rsf.nenner(), rsf.zaehler(), rsf.mean()));
+		
+		rsf << RSF(rsf.nenner(),rsf.zaehler()).invert(); 
+		new_RSFs.push_back(RSF_t(rsf.zaehler(), rsf.nenner(), rsf.mean()));
+		logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs()",new_RSFs.back().to_string());
+		new_RSFs.push_back(RSF_t(rsf.nenner(), rsf.zaehler(), rsf.mean().invert()));
+		logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs()",new_RSFs.back().to_string());
 	}
-	return {matrix_clusters(),Crel_to_Irel_lin_fits(),new_RSFs};
+// 	cout << endl << "new_RSFs: " << endl;
+// 	for (auto& rsf : new_RSFs)
+// 		cout << rsf.to_string() << endl;
+// 	cout << "ENDE" << endl;
+	return RSFs_t(matrix_clusters(),Crel_to_Irel_lin_fits(),new_RSFs);
 }
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances() const
@@ -805,22 +846,26 @@ const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::
 	auto manual_RSFs = RSFs_manually_set();
 	set<calc_t::sims_t::matrix_t::RSF_t> all_RSFs; 
 	
-	if (fitted_RSFs.size()>0)
-		all_RSFs.insert(fitted_RSFs.begin(),fitted_RSFs.end());
 	if (manual_RSFs.size()>0)
 		all_RSFs.insert(manual_RSFs.begin(),manual_RSFs.end());
+	if (fitted_RSFs.size()>0)
+		all_RSFs.insert(fitted_RSFs.begin(),fitted_RSFs.end());
+	
 	return {all_RSFs.begin(),all_RSFs.end()};
 } 
 const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_possible_RSFs() const
 {
-	set<RSF_t> all_possible_RFS;
+	vector<RSF_t> all_possible_RFS;
+	int N = matrix_clusters().clusters().size();
+	all_possible_RFS.reserve(N*N-N);
 	for (auto& Z : matrix_clusters().clusters())
 	{
 		for (auto& N : matrix_clusters().clusters())
 		{
 			if (Z==N)
 				continue;
-			all_possible_RFS.insert({Z,N,{}});
+			all_possible_RFS.push_back({Z,N,{}});
+// 			all_possible_RFS.push_back({N,Z,{}});
 		}
 	}
 	return {all_possible_RFS.begin(),all_possible_RFS.end()};
@@ -841,7 +886,7 @@ const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::
 void calc_t::sims_t::matrix_t::RSFs_t::plot_now(double sleep_sec) const
 {
 	plot_t plot;
-	cout << endl << "Crel_to_Irel_lin_fits:" << Crel_to_Irel_lin_fits().size() << endl;
+// 	cout << endl << "Crel_to_Irel_lin_fits:" << Crel_to_Irel_lin_fits().size() << endl;
 	for (auto& RSF_fits : Crel_to_Irel_lin_fits())
 	{
 // 		RSF_fits.plot_to_screen(0);
@@ -850,7 +895,7 @@ void calc_t::sims_t::matrix_t::RSFs_t::plot_now(double sleep_sec) const
 		stringstream plot_title;
 		
 		w.Y1.log10_scale=false;
-		auto Crel_to_Irel_map_withot_infs = RSF_fits.Crel_to_Irel_map().remove_inf();
+		auto Crel_to_Irel_map_withot_infs = RSF_fits.Crel_to_Irel_map.remove_inf();
 		
 		w.Y1.add_points(Crel_to_Irel_map_withot_infs,RSF_fits.zaehler().to_string() + " / " + RSF_fits.nenner().to_string()," ro");
 		plot_title << "{" << RSF_fits.zaehler().to_string() << "} / {" << RSF_fits.nenner().to_string() <<  "}";
