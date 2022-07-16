@@ -25,7 +25,7 @@ plot_t::plot_t(bool Y1_log10, bool Y2_log10, bool Y3_log10)
 	Y1.log10_scale= Y1_log10;
 	Y2.log10_scale= Y2_log10;
 	Y3.log10_scale= Y3_log10;
-	Y1.color = "k";
+	Y1.color = "G";
 	Y2.color = "B";
 	Y3.color = "R";
 }
@@ -405,6 +405,11 @@ void plot_t::axis_t::range(double start_s, double stop_s, bool log10_scale_s)
 	log10_scale = log10_scale_s;
 }
 
+void plot_t::axis_t::add_curve(const quantity::quantity_t& Y, const string legend)
+{
+	quantity::quantity_t X("idx", Y.data_X_1D(),units::SI::one);
+	add_curve(X,Y,legend);
+}
 
 /***********************************************/
 /*******    plot_t::axis_t::range_t    *********/
@@ -464,9 +469,7 @@ plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys)
 			logger::error("plot_t::axis_range_t::axis_range_t()","Y has elements with different quantity units",yr.to_string(),mins_maxs.to_string());
 		mins_maxs << yr.max();
 		mins_maxs << yr.min();
-// 		cout << yr.max().to_string_detailed() << endl;
-// 		cout << yr.min().to_string_detailed() << endl;
-// 		cout << mins_maxs.to_string_detailed() << endl;
+		
 	}
 	auto start = mins_maxs.min().data().at(0);
 	auto stop = mins_maxs.max().data().at(0);

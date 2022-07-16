@@ -18,7 +18,8 @@
 
 #include "measurement.hpp"
 
-measurements_::sims_t::calc_t::calc_t(sims_t& measurement, bool overwrite) : M(measurement), SR(*this), SD(*this), SF(*this),RSF(*this),concentration(*this), overwrite(overwrite)
+measurements_::sims_t::calc_t::calc_t(sims_t& measurement, bool overwrite) : 
+	M(measurement), SR(*this), SD(*this), SF(*this),RSF(*this),concentration(*this), overwrite(overwrite),matrix(*this)
 {
 }
 
@@ -52,7 +53,8 @@ measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SD_c::from_SR(bool
 				M.crater.sputter_depth = M.crater.SR * M.crater.sputter_time;
 			else
 				M.crater.sputter_depth = M.crater.SR.integrate_pbp(M.crater.sputter_time);
-			logger::debug(5,"measurements_::sims_t::calc_t::SD_c::from_SR()","M.crater.SR.is_set() && M.crater.sputter_time.is_set(), " + M.to_string_short());
+			logger::debug(5,"measurements_::sims_t::calc_t::SD_c::from_SR()",M.crater.sputter_depth.to_string(),M.crater.sputter_time.to_string());
+// 			cout << endl << M.crater.sputter_depth.to_string_detailed() << endl;
 		}
 	}
 	return calc;
@@ -118,6 +120,7 @@ measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SR_c::from_implant
 	for (auto& C:M.clusters)
 	{
 		M.crater.SR  << from_implant_max(C);
+// 		cout << endl << M.crater.SR.to_string() << endl;
 	}
 	M.crater.SR = quantity::SR_t(M.crater.SR.mean());
 	return calc;
@@ -128,13 +131,13 @@ quantity::SR_t measurements_::sims_t::calc_t::SR_c::from_implant_max(cluster_t& 
 	if (!C.intensity.is_set() && !C.concentration.is_set())	return {};
 	if (!M.crater.sputter_time.is_set()) return {};
 	if (!C.intensity.is_set()) return {};
-	isotope_t I_iso = C.corresponding_isotope(M.reference_isotopes);
-	auto I = M.sample->implant(I_iso);
-	if (!I.depth_at_concentration_maxium.is_set())
-	{
-		logger::info(5,"measurements_::sims_t::calc_t::SR_c::from_implant_max("+C.to_string()+")","depth_at_concentration_maxium not set in DB",M.to_string_short());
-		return {};
-	}
+// 	isotope_t I_iso = C.corresponding_isotope(M.reference_isotopes);
+// 	auto I = M.sample->implant(I_iso);
+// 	if (!I.depth_at_concentration_maxium.is_set())
+// 	{
+// 		logger::info(5,"measurements_::sims_t::calc_t::SR_c::from_implant_max("+C.to_string()+")","depth_at_concentration_maxium not set in DB",M.to_string_short());
+// 		return {};
+// 	}
 	quantity::SR_t SR = calc.implant(C).SR();
 	if (SR.is_set())
 		logger::debug(11,"measurements_::sims_t::calc_t::SR_c::from_implant_max()","calc.implant(C).SR()=",SR.to_string(),M.to_string_short());
@@ -241,8 +244,13 @@ cluster_t::RSF_t measurements_::sims_t::calc_t::RSF_c::from_SF_mean_ref(const cl
 /**      implant_c      **/
 /*************************/
 
-measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor) : M(measurement), cluster(cluster), X_resolution_factor(X_resolution_factor)
+measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor) :
+	M(measurement), cluster(cluster), X_resolution_factor(X_resolution_factor)
 {
+	// it is not relevant yet, whether the sample has implanted parameters: 
+	// maybe the user needs the implant values for other reasons or the implant parameters were not introduced in the DB yet
+	
+	// OLD
 	fit_maximum_intensity_val_and_pos();
 	logger::debug(11,"measurements_::sims_t::calc_t::implant_c::implant_c()","new implant object created",cluster.to_string(),M.to_string_short());
 }
@@ -271,20 +279,13 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(qu
 	if (!Y.is_set() || Y.data().size()<5)
 		return 0;
 	vector<int> maxIdx, minIdx;
-	Y = Y.filter_gaussian(10,1).moving_window_median(5);
-// 	Y = Y.filter_gaussian(10,1).log10() +0.001;
-// 	double deviation = 2*abs(Y.data().at(12)-Y.data().at(11));
+	int window_size= 0.01 * Y.data().size(); // 1%
+	Y = Y.filter_gaussian(window_size,1).moving_window_median(window_size);
 	double deviation = 0.01*statistics::get_mad_from_Y(Y.data());
-// 	Y = Y.moving_window_mean(10);
-	fit_functions::polynom_t poly(8,Y.data());
-// 	poly.fit(Y.data());
-	double chi_rel = poly.chisq() / Y.data().size();
-// 	cout << "chi_rel=" << chi_rel << endl;
-// 	deviation = 4.5E-8 * pow(chi_rel,5);
-// 	deviation = 215 * log10(chi_rel);
-	deviation = 200 * log10(chi_rel);
-// 	deviation = 250;
-// 	cout << "deviation=" << deviation << endl;
+// 	fit_functions::polynom_t poly(8,Y.data());
+// 	double chi_rel = poly.chisq() / Y.data().size();
+// 	double deviation = 20 * log10(chi_rel);
+// 	deviation = 200 * log10(chi_rel);
 
 	if (!statistics::get_extrema_indices(maxIdx,minIdx,Y.data(),deviation))
 	{
@@ -300,7 +301,8 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(qu
 	int max_pos = -1;
 	for (int i=maxIdx.size()-1;i>=0;i--)
 	{
-		if (min_pos < maxIdx.at(i)) continue;
+		if (min_pos < maxIdx.at(i)) 
+			continue;
 		for (int j=minIdx.size()-1;j>=0;j--)
 		{
 			if (minIdx.at(j)<maxIdx.at(i))
@@ -318,21 +320,9 @@ unsigned int measurements_::sims_t::calc_t::implant_c::minimum_index_position(qu
 		return 0;
 	
 	min_pos = area_to_min_pos.rbegin()->second; // max area
-
+	logger::info(3,"measurements_::sims_t::calc_t::implant_c::minimum_index_position()","min_pos: " + ::to_string(min_pos));
 	return min_pos;
 }
-
-// quantity::quantity_t measurements_::sims_t::calc_t::implant_c::sputter_depth_from_minimum()
-// {
-// 	if (!M.crater.sputter_depth.is_set())
-// 		return {};
-// }
-// 
-// quantity::quantity_t measurements_::sims_t::calc_t::implant_c::sputter_time_from_minimum()
-// {
-// 	if (!M.crater.sputter_time.is_set())
-// 		return {};
-// }
 
 quantity::depth_t measurements_::sims_t::calc_t::implant_c::minimum_sputter_depth_position() const
 {
@@ -389,14 +379,18 @@ const quantity::map_t& measurements_::sims_t::calc_t::implant_c::fitted_curve() 
 	return fitted_curve_p;
 }
 
+double measurements_::sims_t::calc_t::implant_c::X_resolution_factor_() const
+{
+	return X_resolution_factor;
+}
 
+///TODO HERE
 void measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot)
 {
 	// current X resoluttion
 	quantity::sputter_time_t res_old = M.crater.sputter_time.diff().mean().absolute();
 	quantity::sputter_time_t res_new = res_old*X_resolution_factor;
 	quantity::intensity_t Y;
-	unsigned int start_idx;
 	crater_t crater;
 	if (res_new.is_set())
 	{
@@ -412,19 +406,33 @@ void measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos
 	}
 	
 	
-	start_idx = minimum_index_position(Y);
+// 	unsigned int start_idx = minimum_index_position(Y);
+	unsigned int minimum_idx = minimum_index_position(Y);
 
-	int max_idx = statistics::get_max_index_from_Y(Y.remove_data_from_begin(start_idx).polyfit(17).data()) + start_idx;
+	int max_idx = statistics::get_max_index_from_Y(Y.remove_data_from_begin(minimum_idx).polyfit(17).data()) + minimum_idx;
 // 	cout << endl << "max_idx: " << max_idx << endl;
-	int delta = (max_idx - start_idx)*8/10;
+	int delta = (max_idx - minimum_idx)*8/10;
 	int stop_idx = max_idx + delta;
-	start_idx = max_idx - delta;
+	unsigned int start_idx = max_idx - delta;
+// 	auto reduced_q = Y.get_data_by_index(start_idx,stop_idx);
 	auto reduced_q = Y.get_data_by_index(start_idx,stop_idx);
+	auto reduced_q_x = crater.sputter_time.get_data_by_index(start_idx,stop_idx);
 	auto intensity_poly6 = reduced_q.polyfit(6);
 	maximum_pos_index_s = statistics::get_max_index_from_Y(intensity_poly6.data()) + start_idx;
-	
-	if (maximum_pos_index_s > intensity_poly6.data().size()-2) // maximum at the end of profile -> no clear maximum
+	stringstream ss;
+	ss << "; Y.data().size()=" << Y.data().size();
+	ss << "; minimum_idx=" << minimum_idx;
+	ss << "; crater.sputter_time.at(minimum_idx)=" << crater.sputter_time.at(minimum_idx).to_string();
+	ss << "; start_idx=" << start_idx;
+	ss << "; stop_idx=" << stop_idx;
+	ss << "; delta=" << delta;
+	ss << "; reduced_q.data().size()=" << reduced_q.data().size();
+	ss << "; reduced_q_x.front()=" << reduced_q_x.front().to_string();
+	ss << "; maximum_pos_index_s=" << maximum_pos_index_s;
+	ss << "; intensity_poly6.data().size()=" << intensity_poly6.data().size();
+	if (maximum_pos_index_s-start_idx > intensity_poly6.data().size()-2) // maximum at the end of profile -> no clear maximum
 	{
+		logger::error("measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()","maximum at the end of profile? " + ss.str());
 		sputter_time_at_maximum_s = {};
 		maximum_intensity_s = {};
 	}
@@ -433,14 +441,16 @@ void measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos
 		sputter_time_at_maximum_s = intensity_poly6.x_at_max(crater.sputter_time.get_data_by_index(start_idx,stop_idx));
 		maximum_intensity_s = intensity_poly6.max();
 	}
+	
+	logger::info(3,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()",ss.str());
 // 	cout << endl << "start_idx: " << start_idx << endl;
 // 	cout << "stop_idx: " << stop_idx << endl;
 	
 	logger::debug(11,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()",cluster.to_string(),Y.to_string(), M.to_string_short()+ " minimum_index_position()=" + tools::to_string(start_idx)+ "\tmax_idx=" + tools::to_string(max_idx) + "\tstop_idx=" + tools::to_string(stop_idx));
-	logger::debug(7,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()",M.to_string_short()+" maximum_pos_index_s="+tools::to_string(maximum_pos_index_s),"max: " + sputter_time_at_maximum_s.to_string() +" " + maximum_intensity_s.to_string());
+	logger::debug(7,"measurements_::sims_t::calc_t::implant_c::fit_maximum_intensity_val_and_pos()",M.to_string_short()+" maximum_pos_index_s="+tools::to_string(maximum_pos_index_s),"sputter_time_at_maximum: " + sputter_time_at_maximum_s.to_string() +" ;maximum_intensity: " + maximum_intensity_s.to_string());
 	
 	fitted_curve_p = quantity::map_t(crater.sputter_time.get_data_by_index(start_idx,stop_idx),intensity_poly6);
-	
+// 	seconds_for_fit_plot=0;
 	if (seconds_for_fit_plot>=0)
 	{
 		plot_t plot(true,true); //log, lin
@@ -604,7 +614,6 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_dose()
 
 
 
-
 /*************************/
 /**      matrix_c       **/
 /*************************/
@@ -613,11 +622,54 @@ measurements_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc) : calc(calc), M(
 {
 }
 
-measurements_::sims_t::calc_t & measurements_::sims_t::calc_t::matrix_c::mean_const_from_db(bool overwrite)
+measurements_::sims_t::calc_t & measurements_::sims_t::calc_t::matrix_c::median_const_from_db(bool overwrite)
 {
-	if (!M.sample->matrix().is_set()) return calc;
-	if (!M.matrix_clusters().intensity_sum().is_set()) return calc;
-		
+	const auto& sample_mat = M.sample->matrix();
+	auto M_copy = M; // work with a copy and overwrite at the end
+	const auto& mat_clusters = M_copy.matrix_clusters();
+	
+	if (!sample_mat.is_set()) 
+		return calc;
+	if (!mat_clusters.intensity_sum().is_set()) 
+		return calc;
+	
+	for (auto& C : mat_clusters.clusters)
+	{
+		const auto& corresponding_iso = C->corresponding_isotope(M.reference_isotopes);
+		if (!corresponding_iso.is_set())
+			continue;
+		const auto& iso_in_matrix = sample_mat.isotope(corresponding_iso);
+		if (iso_in_matrix==nullptr)
+		{
+			logger::info(5,"measurements_::sims_t::calc_t::matrix_c::mean_const_from_db","corresponding isotope from cluster " + C->to_string()+ " not found in " + sample_mat.to_string() );
+			continue;
+		}
+		if (!iso_in_matrix->substance_amount.is_set())
+		{
+			logger::error("measurements_::sims_t::calc_t::matrix_c::mean_const_from_db","isotope in sample matrix has unknown substance amount");
+			return calc;
+		}
+		if (!C->concentration.is_set() || overwrite)
+			C->concentration = (quantity::concentration_t( (C->intensity / C->intensity.median() ) * iso_in_matrix->substance_amount)).change_unit("at%");
+	}
+	M = M_copy; // if everything was successfull, then overwrite original
 	return calc;
 }
 
+measurements_::sims_t::calc_t & measurements_::sims_t::calc_t::matrix_c::median_const_from_reference_isotopes(bool overwrite)
+{
+// 	auto M_copy = M; // work with a copy and overwrite at the end
+// 	auto mat_clusters = M.matrix_clusters();
+	
+	for (auto& ref_iso : M.reference_isotopes)
+	{
+		if (!ref_iso.is_set() || !ref_iso.substance_amount.is_set())
+			continue;
+		auto C = M.cluster(ref_iso);
+		if (C==nullptr || !C->intensity.is_set())
+			continue;
+		if (!C->concentration.is_set() || overwrite)
+			C->concentration = (quantity::concentration_t( (C->intensity / C->intensity.median() ) * ref_iso.substance_amount)).change_unit("at%");
+	}
+	return calc;
+}

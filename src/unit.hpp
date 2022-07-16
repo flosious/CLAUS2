@@ -191,6 +191,8 @@ namespace units
 		const unit_t min 			= {SI::second,60};
 // 		const unit_t atoms_per_ccm 	= {{-3,0,0,0,1,0,0},1E-6,"at/ccm"};
 		const unit_t atoms_per_ccm 	= {atoms/((SI::meter*prefixes::centi)^3),"at/ccm"};
+		const unit_t atoms_per_scm 	= {atoms/((SI::meter*prefixes::centi)^2),"at/scm"};
+		const unit_t Ang 			= {SI::meter,1E-10,"Ang"};
 	}
 }
 

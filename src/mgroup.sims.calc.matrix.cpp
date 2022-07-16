@@ -42,6 +42,14 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::median_const_from_
 	return calc;
 }
 
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::median_const_from_reference_isotopes(bool overwrite)
+{
+	MG.set_reference_isotopes_in_measurements();
+	for (auto& M : MG.measurements())
+		M->calc().matrix.median_const_from_reference_isotopes(overwrite);
+	return calc;
+}
+
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::const_from_db(quantity::quantity_t (*operation) (quantity::quantity_t), bool overwrite)
 {
 	for (auto& mat_C_to_I : MG.matrix_cluster_to_matrix_iso_substance_amount())
@@ -106,34 +114,9 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::interpolate(const 
 		logger::error("mgroups_::sims_t::calc_t::matrix_c::interpolate()","not all intensities are set","returning");
 		return calc;
 	}
-// 	vector<double> fit_start_parameters(polynom_rank.size(),0);
-// 	polynom_fits_Crels_to_Irels_c polyfit(polynom_rank,fit_start_parameters,calc);
-// 	const auto matrix_isotopes = MG.matrix_isotopes();
-// 	for (auto& M : measurements)
-// 	{
-// 		if (overwrite) //use results no matter what
-// 			polyfit.concentration(*M);
-// 		else
-// 		{
-// 			auto M_copy = *M;
-// 			if (!polyfit.concentration(M_copy))
-// 			{
-// 				logger::warning(3,"mgroups_::sims_t::calc_t::matrix_c::interpolate()","polyfit.concentration not set",M->to_string_short(),"continue");
-// 				continue;
-// 			}
-// 			for (auto& MC : M->matrix_clusters(matrix_isotopes).clusters)
-// 			{
-// 				if (!MC->concentration.is_set())
-// 					MC->concentration = M_copy.cluster(*MC)->concentration;
-// 			}
-// 		}
-// 	}
-	
-	//show me 
-// 	polyfit.plot_to_screen(0);
-	
 	return calc;
 }
+
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::linear_interpolated_elemental_concentration(bool overwrite)
 {
 	if (!MG.check_matrix_cluster_consistency())
@@ -147,42 +130,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::linear_interpolate
 		return calc;
 	}
 	
-// 	polynom_fits_Crels_to_Irels_c polyfit({0,1},{0,1},calc);
-// 	const auto matrix_isotopes = MG.matrix_isotopes();
-// 	for (auto& M : measurements)
-// 	{
-// 		if (overwrite) //use results no matter what
-// 			polyfit.concentration(*M);
-// 		else 
-// 		{
-// 			auto M_copy = *M;
-// 			if (!polyfit.concentration(M_copy)) // overwrite only successfull calculations
-// 			{
-// 				logger::warning(3,"mgroups_::sims_t::calc_t::matrix_c::linear_interpolated_elemental_concentration()","polyfit.concentration not set",M->to_string_short(),"continue");
-// 				continue;
-// 			}
-// 			for (auto& MC : M->matrix_clusters(matrix_isotopes).clusters) 
-// 			{
-// 				if (!MC->concentration.is_set())
-// 					MC->concentration = M_copy.cluster(*MC)->concentration;
-// 			}
-// 		}
-// 	}
 	
 	return calc;
 }
-
-
-
-
-
-
-/****************************************************/
-/**********  		 RSF_c	      *******************/
-/****************************************************/
-
-// mgroups_::sims_t::calc_t::matrix_c::RSF_c::RSF_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc) : zaehler(zaehler), nenner(nenner), calc(calc)
-// {
-// }
-
 

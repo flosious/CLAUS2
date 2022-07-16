@@ -76,8 +76,10 @@ public:
 		const vector<isotope_t> isotopes() const;
 		///points to the corresponding isotope of this iso
 		isotope_t* isotope(isotope_t iso);
+		const isotope_t* isotope(isotope_t iso) const;
 		///returns the pointer to the element within this matrix
 		element_t* element(const element_t& ele);
+		const element_t* element(const element_t& ele ) const;
 		vector<element_t> elements;
 		bool is_in(const isotope_t& iso) const;
 		bool is_in(const element_t& ele) const;
@@ -103,8 +105,7 @@ private:
 	
 	const database_t* sql_wrapper=nullptr;
 	///all samples from all loaded files
-// 	static vector<sample_t> samples_list_p;
-	
+public:
 	class implant_s
 	{
 	private:
@@ -115,6 +116,7 @@ private:
 		quantity::depth_t depth_at_concentration_maxium;
 		implant_s(quantity::dose_t dose={}, quantity::concentration_t concentration_maximum={}, quantity::depth_t depth_at_concentration_maxium={});
 	};
+private:
 	map<isotope_t,implant_s> implants;
 	///populates implants and matrix_p
 	void load_from_database();
@@ -162,7 +164,9 @@ public:
 // 	set<measurements::profiler_t*> profiler;
 	
 	implant_s implant(const isotope_t& isotope);
-	
+	///checks if there is at least 1 isotope implanted
+	bool is_implanted();
+	bool is_implanted(const isotope_t& isotope);
 	sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f, database_t& sql_wrapper);
 	sample_t(files_::file_t::name_t& fn,database_t& sql_wrapper);
 // 	sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix);

@@ -921,6 +921,20 @@ quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
 	return {*this,new_data,"resolutiion"};;
 }
 
+const string quantity::quantity_t::to_string_short() const
+{
+	ostringstream out;
+	if (!is_set())
+		return "not set";
+	if (data().size()>1)
+		out <<"<" << data().size() << ">" << " [" << unit().to_string() << "]";
+	else if (data().size()==1)
+		out <<  data_s.front() << " [" << unit().to_string() << "]" << " {";
+	else
+		out <<  "<0>" << "[]";
+	return out.str();
+}
+
 const string quantity::quantity_t::to_string() const
 {
 	ostringstream out;

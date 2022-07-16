@@ -244,18 +244,58 @@ public:
 			private:
 				sims_t& M;
 				calc_t& calc;
-// 				const std::map< cluster_t*, isotope_t* > matrix_cluster_to_iso();
-// 				calc_t& const_from_db(quantity::quantity_t (*operation) (quantity::quantity_t), bool overwrite=false);
 			public:
 				///calculation of matrix concentrations
 				matrix_c(calc_t& calc);
-// 				calc_t& pbp_const_from_db();
 				calc_t& mean_const_from_db(bool overwrite = false);
 				calc_t& median_const_from_db(bool overwrite = false);
+				calc_t& median_const_from_reference_isotopes(bool overwrite = false);
 				calc_t& trimmed_mean_const_from_db(bool overwrite = false, float trimm_factor=0.25);
 			};
 			class implant_c
 			{
+			public:
+				class quantity_c
+				{
+				private:
+					quantity::quantity_t Y;
+					int minimum_index_position_p = -1;
+					int maximum_index_position_p = -1;
+				public:
+					quantity_c(const quantity::quantity_t& Y);
+					unsigned int minimum_index_position();
+					quantity::quantity_t minimum_position();
+					unsigned int maximum_index_position();
+					quantity::quantity_t maximum_position();
+					/// mean of 20 last data points
+					quantity::quantity_t background(int last_points=20) const;
+				};
+				class map_c
+				{
+				private:
+					quantity::map_t XY_map_p;
+					int minimum_index_position_p = -1;
+					int maximum_index_position_p = -1;
+				public:
+					map_c();
+					map_c(const quantity::map_t& XY_map);
+					map_c(const quantity::map_t& XY_map, unsigned int minimum_index_position_p, unsigned int maximum_index_position_p);
+					//unmodified map (raw data)
+					const quantity::map_t& XY_map() const; 
+					//used as implant profile
+					quantity::map_t XY_map_without_surface(); 
+					quantity::quantity_t background_value(int last_points=20) const;
+					quantity::quantity_t minimum_pos();
+					quantity::quantity_t minimum_value();
+					quantity::quantity_t maxmimum_pos();
+					quantity::quantity_t maximum_value();
+					///excluding surface
+					quantity::quantity_t area();
+					unsigned int minimum_index_position();
+					unsigned int maximum_index_position();
+					///plot 
+					void to_screen(float seconds=0) const;
+				};
 			private:
 				///the measurement
 				sims_t& M;
@@ -268,8 +308,15 @@ public:
 				///populates maximum_intensity_s + sputter_time_at_maximum_s ;seconds_for_fit_plot < 0 no plot;
 				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=-1);
 				quantity::map_t fitted_curve_p;
+				///saved calculation data
+				map_c C_vs_SD_p;
+				map_c C_vs_ST_p;
+				map_c I_vs_SD_p;
+				map_c I_vs_ST_p;
 			public:
-				implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor=0.1);
+				implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor=1);
+				///checks if the cluster is actually showing an implant profile
+// 				bool has_implant_profile() const;
 				static unsigned int minimum_index_position(quantity::quantity_t Y);
 				static unsigned int minimum_index_position(vector<double> data);
 				unsigned int minimum_index_position();
@@ -293,17 +340,22 @@ public:
 				quantity::SF_t RSF();
 				quantity::concentration_t concentration();
 				const quantity::map_t& fitted_curve() const;
-			};
+				double X_resolution_factor_() const;
+				const map_c& C_vs_SD();
+				const map_c& C_vs_ST();
+				const map_c& I_vs_SD();
+				const map_c& I_vs_ST();
+			}; //implant_c
 		private:
 			map<cluster_t* const, implant_c> implants_s;
 		public:
 			implant_c& implant(cluster_t& cluster, double X_resolution_factor=0.1);
 			///calculates SR and SF in one step from implant
-// 			calc_t& SR_SF_from_implant(); not necessary, implant calculations are saved in implants_s map
 			SR_c SR;
 			SD_c SD;
 			SF_c SF;
 			RSF_c RSF;
+			matrix_c matrix;
 			concentration_c concentration;
 
 			calc_t(sims_t& measurement,bool overwrite=false);
@@ -311,16 +363,10 @@ public:
 	private:
 		///adds more cluster to this measurement
 		void add_clusters(vector<cluster_t>& clusters_s);
-		///saved variable for faster recalculation of sputter_equlibrium
-// 		unsigned int equilibrium_start_index_s=0;
 		cluster_t matrix_cluster_s;
 	public: 
-// 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper,
-// 			   vector<files_::jpg_t>* jpg_files=nullptr,vector<files_::profiler_t>* profiler_files=nullptr);
-// 		sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method, database_t& sql_wrapper);	
 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
-// 		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper, vector<const profilers_t::profiler_t*> profiler_measurements);
-		
+
 		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
 		bool are_intensities_of_clusters_set(const vector<cluster_t>& clusters_s) const;
@@ -371,7 +417,10 @@ public:
 		quantity::intensity_t intensity(const cluster_t& cluster_s) const;
 		///returns a copy of the concentration of the specified cluster
 		quantity::concentration_t concentration(const cluster_t& cluster_s) const;
-		
+		quantity::map_t concentration_vs_sputter_depth(const cluster_t& cluster) const;
+		quantity::map_t concentration_vs_sputter_time(const cluster_t& cluster) const;
+		quantity::map_t intensity_vs_sputter_depth(const cluster_t& cluster) const;
+		quantity::map_t intensity_vs_sputter_time(const cluster_t& cluster) const;
 	}; // sims_t
 	
 	class dsims_t : public sims_t
@@ -386,7 +435,6 @@ public:
 			///make this measurement M a reference
 			static bool insert_into_table();
 		public:
-// 			database(dsims_t& M, database_t& sql_wrapper);
 			static bool create_table();
 			static dsims_t reference_measurement();
 			static vector<dsims_t> reference_measurements();
@@ -394,7 +442,6 @@ public:
 // 		vector<cluster_t> clusters;
 	public:
 		msettings::dsims_t settings;
-// 		dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profiler_t>* profiler_files=nullptr);
 		dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
@@ -404,7 +451,6 @@ public:
 	{
 	public:
 		msettings::tofsims_t settings;
-// 		tofsims_t(files_::tofsims_t& tofsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<files_::jpg_t>* jpg_files=nullptr, vector<files_::profilers_t::profiler_t>* profiler_files=nullptr);
 		tofsims_t(files_::tofsims_t& tofsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 
 		bool operator==(const tofsims_t& obj) const;

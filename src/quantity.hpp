@@ -41,8 +41,7 @@ namespace quantity
 	class quantity_t
 	{
 	private:
-		///{1,2,3,4,5,...data.size()}
-		const vector<double> data_X_1D() const;
+		
 		const std::map<double,double> data_XY_1D();
 		fit_functions::polynom_t polynom(unsigned int polynom_grade) const; 
 		static int get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec);
@@ -91,6 +90,8 @@ namespace quantity
 		dimension_t dimension_s;
 		unit_t unit_s;
 	public:
+		///{1,2,3,4,5,...data.size()}
+		const vector<double> data_X_1D() const;
 		bool is_relative() const;
 		///the actual data
 		const vector<double>& data() const;
@@ -142,6 +143,7 @@ namespace quantity
 		quantity_t change_resolution(unsigned int new_data_size) const;
 // 		const unit_t& unit() const;
 // 		const unit_t unit_copy() const;
+		const string to_string_short() const;
 		const string to_string() const;
 		const string to_string_detailed() const;
 		
@@ -244,7 +246,7 @@ namespace quantity
 		quantity_t min()  const;
 		quantity_t x_at_min(quantity_t& X)  const;
 		quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index, unsigned int upper_X_index)  const;
-		quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index)  const;
+		quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index=0)  const;
 		quantity_t integrate(const quantity_t& x_data,const quantity_t& x_data_start,const quantity_t& x_data_stop) const;
 		quantity_t integrate(const quantity_t& x_data,const quantity_t& x_data_start) const;
 		/// point by point integration
@@ -481,12 +483,14 @@ namespace quantity
 		fit_functions::polynom_t polynom(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
 		fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
 		map_t swap_X_Y() const;
+		map_t at(unsigned int idx_pos) const;
 		///max of Y
 		map_t max() const;
 		///min of Y
 		map_t min() const;
 		///absolute of Y
 		map_t absolute() const;
+		quantity_t integral() const;
 		map_t sort_X_from_low_to_high() const;
 		map_t sort_Y_from_low_to_high() const;
 		map_t sort_X_from_high_to_low() const;
@@ -523,6 +527,7 @@ namespace quantity
 		/// returns the number of filled data bins
 		int filled_data_bins(int bins_count) const;
 		int size() const;
+		map_t get_data_by_index(unsigned int start, unsigned int stop) const;
 		const map_t change_resolution(const quantity_t new_X_resolution) const;
 		/*********OPERATORS*********/
 		///appends obj to the map, if quantitys dimension and units allow it

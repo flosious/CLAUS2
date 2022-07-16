@@ -185,6 +185,8 @@ measurements_::sims_t* mgroups_::sims_t::measurement ( const measurements_::sims
 
 const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 {
+// 	if (matrix_isotopes_p.size()>0)
+// 		return matrix_isotopes_p;
 	set<isotope_t> isos;
 // 	cout << "F1" << endl;
 	for (auto& M : measurements())
@@ -203,7 +205,7 @@ const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 	// keep abundance and/or substance_amount if there is only 1 known matrix from all reference samples within this group
 	if (matrices().size()==1) 
 	{
-		logger::info(3,"mgroups_::sims_t::matrix_isotopes()","all references have same matrix, applying to whole group",matrices().begin()->to_string());
+		logger::info(3,"mgroups_::sims_t::matrix_isotopes()","found just 1 matrix, using its substance_amount for all matrix isotopes in this group",matrices().begin()->to_string());
 		return isos_vec;
 	}
 // 	cout << "F3" << endl;
@@ -213,6 +215,11 @@ const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 		I.substance_amount.clear();
 		I.abundance.clear();
 	}
+	
+	for (auto& mi : isos_vec)
+		logger::info(3,"mgroups_::sims_t::matrix_isotopes()",mi.to_string());
+	if (isos.size()==0)
+		logger::warning(1,"no matrix isotopes","");
 	
 	return isos_vec;
 }
@@ -353,6 +360,12 @@ bool mgroups_::sims_t::check_matrix_cluster_consistency()
 		}
 	}
 	return true;
+}
+
+void mgroups_::sims_t::set_natural_abundances_in_matrix_clusters()
+{
+	for (auto& M : measurements())
+		M->matrix_clusters().set_natural_abundances();
 }
 
 const map<cluster_t*,quantity::substance_amount_t> mgroups_::sims_t::matrix_cluster_to_matrix_iso_substance_amount()

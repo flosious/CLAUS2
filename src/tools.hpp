@@ -31,13 +31,15 @@
 // #include <curl/curl.h> // libcurl4-gnutls-dev
 // #include <gsl/gsl_sys.h>
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
-#define path_del "\\"
-#define line_del "\n"
-#elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
-#define path_del "/"
-#define line_del "\n"
-#endif
+#include "definitions.hpp"
+
+// #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
+// #define path_del "\\"
+// #define line_del "\n"
+// #elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
+// #define path_del "/"
+// #define line_del "\n"
+// #endif
 
 #ifdef __unix__ 
 #include <unistd.h>
@@ -53,11 +55,11 @@
     #include <conio.h>   //for getch(), needed in wait_for_key()
     #include <windows.h> //for Sleep()
     //  static void sleep(int i) { Sleep(i*1000); }
-    #define PATH_DELIMITER string("\\")
-    #define LINE_DELIMITER string("\n")
+//     #define PATH_DELIMITER string("\\")
+//     #define LINE_DELIMITER string("\n")
 #elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
-    #define PATH_DELIMITER string("/")
-    #define LINE_DELIMITER string("\n")
+//     #define PATH_DELIMITER string("/")
+//     #define LINE_DELIMITER string("\n")
 #endif
 
 using namespace std;

@@ -269,7 +269,7 @@ void calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::plot_to_screen(doub
 string calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::to_string() const
 {
 	stringstream ss;
-	ss << "Z:" << zaehler().to_string() << "; N:" << nenner().to_string() << "; Crel_to_Irel_data.size()=" << Crel_to_Irel_map.X().data().size();
+	ss << "Z:" << zaehler().to_string() << "; N:" << nenner().to_string() << "; Crel_to_Irel_data.size()=" << Crel_to_Irel_map.X().data().size() << "; abundance_ratio: " << abundance_ratio.to_string() ;
 	return ss.str();
 }
 

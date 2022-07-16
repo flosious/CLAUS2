@@ -118,10 +118,10 @@ string files_::file_t::name_t::group()
 string files_::file_t::name_t::lot()
 {
 	parse_filename_parts();
-// 	if (lot_p=="")
-// 		logger::warning("files_::file_t::lot() unkown", filename_with_path);
-	if (lot_p=="" && not_parseable_filename_parts().size()>0)
-		lot_p =  not_parseable_filename_parts().at(0);
+	if (lot_p=="")
+		logger::warning(1,"files_::file_t::lot() unkown", filename_with_path);
+// 	if (lot_p=="" && not_parseable_filename_parts().size()>0)
+// 		lot_p =  not_parseable_filename_parts().at(0);
 	
 	return lot_p;
 }
@@ -219,14 +219,21 @@ void files_::file_t::name_t::parse_filename_parts()
 {
 	if (parsed_filename_parts) return;
 	vector<string> filename_parts = tools::str::get_strings_between_delimiter(filename(),delimiter);
+	
 	for (auto filename_part:filename_parts)
 	{
 
 		// parse everything just once (except crater depths)
 		// THE ORDER IS VERY IMPORTANT
 		if (olcdb_p==-1) if(parse_olcdb(filename_part)) continue;
-		if (wafer_p==-1) if(parse_wafer(filename_part)) continue;
 		if (lot_p=="") if(parse_lot(filename_part)) continue;
+		if (lot_p=="") 
+		{
+			lot_p = filename_part;
+			logger::debug(5,"files_::file_t::name_t::parse_filename_parts","filename_part:lot_p as simple name : " + lot_p);
+			continue;
+		}
+		if (wafer_p==-1) if(parse_wafer(filename_part)) continue;
 		if (chip_x_p==-1)	if(parse_chip(filename_part)) continue;
 		if (monitor_p=="") if(parse_monitor(filename_part)) continue;
 		if (group_p=="") if(parse_group(filename_part)) continue;
@@ -234,9 +241,11 @@ void files_::file_t::name_t::parse_filename_parts()
 // 		if (parse_crater_depth(filename_part)) continue;
 		// no parser worked
 		not_parseable_filename_parts_p.push_back(filename_part);
+		logger::debug(5,"files_::file_t::name_t::parse_filename_parts","filename_part : not_parseable : " + filename_part);
+			
 	}
-	if (lot_p=="" || olcdb_p==-1 || wafer_p==-1 || group_p=="") 
-		parse_all_parts_at_once();
+// 	if (lot_p=="" || olcdb_p==-1 || wafer_p==-1 || group_p=="") 
+// 		parse_all_parts_at_once();
 	parsed_filename_parts = true;
 // 	if (lot=="" && not_parseable_filename_parts.size()>0) lot=not_parseable_filename_parts[0];
 }
@@ -250,6 +259,7 @@ bool files_::file_t::name_t::parse_monitor(string filename_part)
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) || regex_search(filename_part,match,reg3)) 
 	{
 		monitor_p = match[1];
+		logger::debug(7,"files_::file_t::name_t::parse_monitor",monitor_p);
 		return true;
 	}
 	return false;
@@ -265,6 +275,7 @@ bool files_::file_t::name_t::parse_chip(string filename_part)
 	{
 		chip_x_p = tools::str::str_to_int(match[1]);
 		chip_y_p = tools::str::str_to_int(match[2]);
+		logger::debug(7,"files_::file_t::name_t::parse_chip",::to_string( chip_x_p) + " " + ::to_string( chip_y_p));
 		return true;
 	}
 	return false;
@@ -277,6 +288,7 @@ bool files_::file_t::name_t::parse_olcdb(string filename_part)
 	if (regex_search(filename_part,match,reg)) 
 	{
 		olcdb_p = tools::str::str_to_int(filename_part);
+		logger::debug(7,"files_::file_t::name_t::parse_olcdb",::to_string(olcdb_p));
 		return true;
 	}
 	return false;
@@ -285,11 +297,12 @@ bool files_::file_t::name_t::parse_olcdb(string filename_part)
 bool files_::file_t::name_t::parse_lot(string filename_part)
 {
 	smatch match;
-	regex reg ("^([A-Z]{1,4}[0-9]{1,5}){4,}([#[0-9A-Za-z]*?]*?)$"); 
+	regex reg ("^([a-zA-Z]{1,4}[0-9]{1,4})([#[0-9A-Za-z]*?]*?)$"); 
 	if (regex_search(filename_part,match,reg)) 
 	{
 		lot_p = match[1];
 		lot_split_p = match[2];
+		logger::debug(7,"files_::file_t::name_t::parse_lot",lot_p + " " + lot_split_p);
 		return true;
 	}
 	return false;
@@ -302,6 +315,7 @@ bool files_::file_t::name_t::parse_wafer(string filename_part)
 	if (regex_search(filename_part,match,reg)) 
 	{
 		wafer_p = tools::str::str_to_int(match[1]);
+		logger::debug(7,"files_::file_t::name_t::parse_wafer",::to_string(wafer_p));
 		return true;
 	}
 	return false;
@@ -317,6 +331,7 @@ bool files_::file_t::name_t::parse_group(string filename_part)
 // 		cout << "filename_part=" << filename_part << endl;
 		group_p = match[1];
 		repetition_p = match[2];
+		logger::debug(7,"files_::file_t::name_t::parse_group",group_p + " " + repetition_p);
 // 		cout << "match[1]=" << match[1] << endl;
 // 		cout << "match[2]=" << match[2] << endl;
 // 		cout << "group_p=" << group_p << endl;
@@ -334,6 +349,7 @@ bool files_::file_t::name_t::parse_repetitor(string filename_part)
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
 	{
 		repetition_p = match[1];
+		logger::debug(7,"files_::file_t::name_t::parse_repetitor",repetition_p);
 		return true;
 	}
 	return false;
@@ -392,7 +408,11 @@ string files_::file_t::name_t::to_string(const string del)
 	ss<< "group= "<< group()<<del;
 	ss<< "repetition= "<< repetition()<<del;
 	
-	ss<< "not_parseable_filename_parts: <" << not_parseable_filename_parts().size()  << ">" ;
+// 	ss<< "not_parseable_filename_parts: <" << not_parseable_filename_parts().size()  << ">" ;
+	ss << "not_parseable_filename_parts=";
+	for (auto& f : not_parseable_filename_parts())
+		ss  << f << ",";
+	ss << del;
 	return ss.str();
 }
 
@@ -445,7 +465,10 @@ const quantity::total_sputter_depth_t& files_::file_t::crater_in_name_t::total_s
 			{
 				string value = match[1];
 				string unit = match[2];
-				total_sputter_depths_p << quantity::total_sputter_depth_t({tools::str::str_to_double(value)},unit);
+				double depth = {tools::str::str_to_double(value)};
+				if (unit=="A")
+					depth = depth/10;
+				total_sputter_depths_p << quantity::total_sputter_depth_t({depth},units::SI::meter*units::prefixes::nano);
 				not_parseable_filename_parts_p.erase(FNp);
 				FNp--;
 				tools::str::remove_substring_from_mainstring(&filename_without_crater_depths_s,delimiter+value+unit);

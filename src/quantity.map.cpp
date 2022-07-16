@@ -234,6 +234,11 @@ int quantity::map_t::size() const
 	return X().data().size();
 }
 
+quantity::map_t quantity::map_t::get_data_by_index(unsigned int start, unsigned int stop) const
+{
+	return {X().get_data_by_index(start,stop),Y().get_data_by_index(start,stop)};
+}
+
 const quantity::map_t quantity::map_t::change_resolution(const quantity_t new_X_resolution) const
 {
 	if (!new_X_resolution.is_set())
@@ -286,6 +291,11 @@ quantity::map_t quantity::map_t::swap_X_Y() const
 	return {Y(),X()};
 }
 
+quantity::map_t quantity::map_t::at(unsigned int idx_pos) const
+{
+	return {X().at(idx_pos),Y().at(idx_pos)};
+}
+
 quantity::map_t quantity::map_t::max() const
 {
 	if (!Y().is_set())
@@ -305,6 +315,11 @@ quantity::map_t quantity::map_t::min() const
 quantity::map_t quantity::map_t::absolute() const
 {
 	return {X(),Y().absolute()};
+}
+
+quantity::quantity_t quantity::map_t::integral() const
+{
+	return Y().integrate(X());
 }
 
 quantity::map_t quantity::map_t::sort_X_from_low_to_high() const

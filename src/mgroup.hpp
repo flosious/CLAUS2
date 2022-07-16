@@ -159,7 +159,7 @@ public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				bool overwrite = false;
 				SD_c(calc_t& calc);
-				calc_t& from_SR();
+				calc_t& from_SR(bool overwrite=false);
 			};
 			///sensitivity_factor
 			class SF_c
@@ -235,6 +235,8 @@ public:
 				calc_t& pbp_const_from_db(bool overwrite = false);
 				calc_t& mean_const_from_db(bool overwrite = false);
 				calc_t& median_const_from_db(bool overwrite = false);
+				///reference_isotopes will set mgroups_::sims_t::set_reference_isotopes_in_measurements()
+				calc_t& median_const_from_reference_isotopes(bool overwrite = false);
 				calc_t& trimmed_mean_const_from_db(bool overwrite = false);
 				calc_t& const_from_db(quantity::quantity_t (*operation) (quantity::quantity_t), bool overwrite=false);
 			}; // matrix_c 
@@ -261,6 +263,7 @@ public:
 		void check();
 		///sets mat_isos as matrix_isotopes in all samples within all measurements within this group
 		bool set_matrix_isotopes_in_unknown_samples();
+		vector<isotope_t> matrix_isotopes_p;
 	public:
 		sims_t(measurements_::sims_t& measurement);
 		void export_origin_ascii(string path="", const string delimiter="\t");
@@ -290,6 +293,7 @@ public:
 		measurements_::sims_t* measurement(const measurements_::sims_t& M);
 		bool check_cluster_consistency();
 		bool check_matrix_cluster_consistency();
+		void set_natural_abundances_in_matrix_clusters();
 		///from sample matrix
 		quantity::table_t matrix_concentrations(const isotope_t& isotope);
 		///from sample matrix

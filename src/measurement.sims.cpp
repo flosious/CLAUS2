@@ -42,19 +42,9 @@ measurements_::sims_t measurements_::sims_t::filter_t::impulses()
 /****** measurements_::sims_t ******/
 /***********************************/
 
-// measurements_::sims_t::matrix_clusters_c measurements_::sims_t::matrix_clusters()
-// {
-// 	return matrix_clusters_c(clusters,sample->matrix().isotopes);
-// }
-
 matrix_clusters_c measurements_::sims_t::matrix_clusters()
 {
-	///if no isotopes are known, look in database
-// 	if (matrix_isotopes.size()==0)
-// 		matrix_isotopes = sample->matrix().isotopes();
-// 	if (matrix_isotopes.size()==0)
-// 		return matrix_clusters_c(clusters,sample->matrix().isotopes());
-// 	else
+
 	return matrix_clusters_c(clusters,reference_isotopes);
 }
 
@@ -115,67 +105,6 @@ measurements_::sims_t::calc_t measurements_::sims_t::calc(bool overwrite)
 	return calc_t{(*this),overwrite};
 }
 
-// measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, 
-// 							  files_::sims_t::contents_t& filecontents, 
-// 							  list<sample_t>& samples_list, 
-// 							  string method,
-// 							  database_t& sql_wrapper,
-// 							  vector<files_::jpg_t>* jpg_files,
-// 							  vector<files_::profiler_t>* profiler_files) : 
-// 									measurement_t(filename,filecontents,samples_list,method,sql_wrapper), clusters(filecontents.clusters())
-// {	
-// 	crater.total_sputter_depths = filename.total_sputter_depths();
-// 	
-// 	bool found_any=false;
-// 	/*JPEG files*/
-// 	if (jpg_files!=nullptr)
-// 	{
-// 		sort(jpg_files->begin(),jpg_files->end());
-// 		found_any=false;
-// 		for (int i=jpg_files->size()-1;i>=0;i--)
-// 		{
-// 			if ((jpg_files->at(i).name.method()==method || jpg_files->at(i).name.method()=="") && 
-// 					filename != jpg_files->at(i).name)
-// 			{
-// 				if (!found_any) continue;
-// 				else break;
-// 			}
-// 			found_any = true;
-// 			/*save essentials*/
-// 			crater.total_sputter_depths << jpg_files->at(i).name.total_sputter_depths();
-// 			/*delete*/
-// 			jpg_files->erase(jpg_files->begin()+i);
-// 		}
-// 	}
-// 	
-// 	/*PROFILER files*/
-// 	if (profiler_files!=nullptr)
-// 	{
-// 		sort(profiler_files->begin(),profiler_files->end());
-// 		found_any=false;
-// 		for (int i=profiler_files->size()-1;i>=0;i--)
-// 		{
-// 			if ((profiler_files->at(i).name.method()==method || profiler_files->at(i).name.method()=="") && 
-// 					filename != profiler_files->at(i).name)
-// 			{
-// 				if (!found_any) continue;
-// 				else break;
-// 			}
-// 			found_any = true;
-// 			/*save essentials*/
-// 			crater.total_sputter_depths << profiler_files->at(i).name.total_sputter_depths();
-// 			crater.linescans.push_back(profiler_files->at(i).contents.linescan());
-// 			/*delete*/
-// 			profiler_files->erase(profiler_files->begin()+i);
-// 		}
-// 	}
-// }
-
-// measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, list<sample_t>& samples_list, string method,database_t& sql_wrapper) : measurement_t(filename,samples_list,method,sql_wrapper)
-// {
-// 	crater.total_sputter_depths << filename.total_sputter_depths();
-// }
-
 measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
 	measurement_t(filename,samples_list,method,sql_wrapper), clusters(filecontents.clusters()), reference_isotopes(sample->matrix().isotopes())
 {
@@ -184,19 +113,6 @@ measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::
 		if (tsd!=nullptr)
 			crater.total_sputter_depths << *tsd;
 }
-
-// measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper, vector<const profilers_t::profiler_t*> profiler_measurements) :
-// 	sims_t(filename,filecontents,samples_list,method,sql_wrapper)
-// {
-// 	for (const auto& pm : profiler_measurements)
-// 	{
-// 		if (pm == nullptr)
-// 			continue;
-// 		if (*this != *pm)
-// 			continue;
-// 		crater.total_sputter_depths << pm->total_sputter_depth();
-// 	}
-// }
 
 string measurements_::sims_t::to_string(const string del)
 {
@@ -233,6 +149,12 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 	if (crater.sputter_depth.is_set())
 	{
 		X = crater.sputter_depth.change_unit("nm");
+		if (!X.is_set())
+		{
+			logger::error("measurements_::sims_t::plot_now","can not change unit to nm", X.to_string());
+			X = crater.sputter_depth;
+		}
+		
 	}
 	else if (crater.sputter_time.is_set())
 		X = crater.sputter_time.change_unit("min");
@@ -246,7 +168,10 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 // 		plot.Y3.add_curve(X,crater.sputter_current().change_unit({"nA"}));
 	
 	plot.Y1.range(1,1E6,true);
-	plot.Y3.range(0.01,105,false);
+	if (plot.Y3.range().stop<101)
+		plot.Y3.range(0.01,105,false);
+	else
+		plot.Y3.range(0.01,plot.Y3.range().stop,false);
 	
 	matrix_clusters_c MC = matrix_clusters();
 	quantity::intensity_t ref_intensity = MC.intensity_sum();
@@ -255,17 +180,18 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 	quantity::concentration_t concentration_backgrounds;
 	for (auto& C: clusters)
 	{
+		auto calc_ = calc();
 		if (C.intensity.is_set())
 		{
 			plot.Y1.add_curve(X,C.intensity,C.to_string()); 
 			if (sample->implant(C.corresponding_isotope(reference_isotopes)).dose.is_set())
 			{
 				// unit is not same as unit(x)
-				const auto implant_ = calc().implant(C);
+				const auto implant_ = calc_.implant(C);
 				quantity::quantity_t min = implant_.minimum_starting_position().change_unit(X.unit());
 				if (min.is_set())
 				{
-					plot.Y1.add_arrow(min.data().at(0),0.1,min.data().at(0),1E6,"bA",C.to_string() );
+					plot.Y1.add_arrow(min.data().at(0),0.1,min.data().at(0),1E6,"bA",C.to_string() ); // arrow at minimum position
 					if (X.dimension()==quantity::dimensions::SI::time)
 					{
 						plot.Y1.add_curve(implant_.fitted_curve().X().change_unit(X.unit()),implant_.fitted_curve().Y(),C.to_string()+"_fitted");
@@ -273,7 +199,7 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 					else
 					{
 						const quantity::sputter_depth_t SD((implant_.fitted_curve().X()*implant_.SR()).change_unit(X.unit()));
-						plot.Y1.add_curve(SD,implant_.fitted_curve().Y(),C.to_string()+"_fitted");
+						plot.Y1.add_curve(SD,implant_.fitted_curve().Y(),C.to_string()+"_fitted_from_DB");
 					}
 				}
 			}
@@ -299,14 +225,27 @@ void measurements_::sims_t::plot_now(double sleep_sec)
 			{
 				plot.Y2.add_curve(X,C.concentration.change_unit(units::derived::atoms_per_ccm),C.to_string());
 				concentration_backgrounds << C.concentration_background().change_unit(units::derived::atoms_per_ccm);
+				if (sample->implant(C.corresponding_isotope(reference_isotopes)).dose.is_set())
+				{
+					const auto implant_ = calc_.implant(C);
+					auto max_pos = X.at(implant_.maximum_pos_index()*implant_.X_resolution_factor_());
+					plot.Y2.add_arrow(max_pos.data().at(0),plot.Y2.range().start,max_pos.data().at(0),plot.Y2.range().stop,"bA",C.to_string() +" from DB: " + C.concentration.at(implant_.maximum_pos_index()*implant_.X_resolution_factor_()).to_string_short()  + "\\@" + max_pos.to_string_short()  ); // arrow at minimum position
+					
+					/**/
+// 					C.concentration.polyfit()
+// 					plot.Y2.add_arrow();
+				}
+				
 			}
 		}
 	}
-	
+	double start_y2, stop_y2;
 	if (concentration_backgrounds.is_set())
-		plot.Y2.range(concentration_backgrounds.min().data().front(),plot.Y2.range().stop,true);
+		start_y2 = concentration_backgrounds.min().data().front();
 	else
-		plot.Y2.range(plot.Y2.range().start,plot.Y2.range().stop,true);
+		start_y2 = plot.Y2.range().start;
+	stop_y2 = plot.Y2.range().stop;
+	plot.Y2.range(start_y2,stop_y2,true); 
 	plot.to_screen(to_string(),sleep_sec);
 }
 
@@ -323,19 +262,24 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 	/*time-intensity-profile*/
 	stringstream comment,longname;
 	comment << "crater ";
-	longname << "sputter_depth";
 	if (sample->simple_name!="")
 		comment << sample->simple_name;
 	else
 		comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
 	if (crater.sputter_depth.is_set())
+	{
+		longname << "sputter_depth";
 		cols.push_back({crater.sputter_depth.data(),longname.str(),crater.sputter_depth.unit().to_string(),comment.str()});
+	}
+	else if (crater.sputter_time.is_set())
+	{
+		longname << "sputter_time";
+		cols.push_back({crater.sputter_time.data(),longname.str(),crater.sputter_time.unit().to_string(),comment.str()});
+	}
 	for (auto& C : clusters)
 	{
 		comment.str("");
 		longname.str("");
-// 		comment << "^" << C.to_string(" ^") << " ";
-// 		longname << "^" << C.to_string(" ^") << " ";
 		comment << "^" << C.to_string(" ^");
 		longname << "^" << C.to_string(" ^") ;
 		
@@ -355,9 +299,13 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 		}
 		
 		if (sample->simple_name!="")
-			comment << sample->simple_name;
+			comment << " " << sample->simple_name;
 		else
-			comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
+			comment <<" " << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
+		if (sample->chip.is_set())
+			comment << "_" << sample->chip.to_string();
+		if (sample->monitor!="")
+			comment << "_m" << sample->monitor;
 		if (C_out.is_set()) 
 		{
 			if (C_out.dimension() == quantity::dimensions::SI::relative)
@@ -375,22 +323,28 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 		comment << sample->simple_name;
 	else
 		comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
+	if (sample->chip.is_set())
+			comment << "_" << sample->chip.to_string();
+	if (sample->monitor!="")
+		comment << "_m" << sample->monitor;
 	if (crater.sputter_time.is_set())
 	{
-		
 		cols.push_back({crater.sputter_time.data(),longname.str(),crater.sputter_time.unit().to_string(),comment.str()});
 	}
 	for (auto& C : clusters)
 	{
 		ostringstream comment,longname;
-		comment << "^" << C.to_string(" ^") << " ";
-		longname << "^" << C.to_string(" ^") << " ";
+		comment << "^" << C.to_string(" ^") ;
+		longname << "^" << C.to_string(" ^") ;
 		
 		if (sample->simple_name!="")
-			comment << sample->simple_name;
+			comment << " " << sample->simple_name;
 		else
-			comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
-
+			comment << " " << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
+		if (sample->chip.is_set())
+			comment << "_" << sample->chip.to_string();
+		if (sample->monitor!="")
+			comment << "_m" << sample->monitor;
 		if (C.intensity.is_set()) 
 			cols.push_back({C.intensity.data(),longname.str() + " intensity",C.intensity.unit().to_string(),comment.str()});
 	}
@@ -402,6 +356,10 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 			comment << sample->simple_name;
 		else
 			comment << sample->lot << sample->lot_split << "_w" << sample->wafer_string();
+		if (sample->chip.is_set())
+			comment << "_" << sample->chip.to_string();
+		if (sample->monitor!="")
+			comment << "m_" << sample->monitor;
 		cols.push_back({crater.sputter_current().data(),"crater "+ crater.sputter_current().name(),crater.sputter_current().unit().to_string(),comment.str()});
 	}
 	
@@ -431,63 +389,16 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 	if (repetition!="")
 		filename << "_r" << repetition;
 	filename << ".txt";
-	
+// 	cout  << endl << "sample->wafer: " << sample->wafer << endl;
+// 	cout  << endl << "sample->wafer_string(): " << sample->wafer_string() << endl;
 	tools::file::write_to_file(path+filename.str(),&out,false);
 }
 
-// cluster_t& measurements_::sims_t::matrix_cluster()
-// {
-// 	if (matrix_cluster_s.is_set())
-// 		return matrix_cluster_s;
-// 	if (reference_clusters().size()==0)
-// 	{
-// 		logger::error("measurements_::sims_t::matrix_cluster()","reference_clusters().size()==0",to_string(),"skipping");
-// 		return matrix_cluster_s;
-// 	}
-// 	quantity::intensity_t intensity;
-// 	quantity::concentration_t concentration;
-// 	set<isotope_t> isos;
-// 	for (auto& C : reference_clusters())
-// 	{
-// 		isos.insert(C->isotopes.begin(),C->isotopes.end());
-// 		if (!intensity.is_set())
-// 			intensity = C->intensity;
-// 		else
-// 			intensity += C->intensity;
-// 		if (!concentration.is_set())
-// 			concentration = C->concentration;
-// 		else
-// 			concentration += C->concentration;
-// 	}
-// // 	matrix_cluster_s = cluster_t(isos,(*reference_clusters().begin())->sputter_time,intensity,(*reference_clusters().begin())->sputter_depth,concentration);
-// 	matrix_cluster_s = cluster_t(isos,{},intensity,{},concentration);
-// 	return matrix_cluster_s;
-// }
-
 isotope_t measurements_::sims_t::isotope_corresponding_to_cluster(const cluster_t& cluster)
 {
-// 	set<isotope_t> isos;
-// 	for (auto& i:cluster.isotopes)
-// 	{
-// 		if (find(reference_isotopes().begin(),reference_isotopes().end(),i)==reference_isotopes().end())
-// 			isos.insert(i);
-// 	}
-// 	if (isos.size()>1)
-// 	{
-// 		logger::error("measurements_::sims_t::isotope_corresponding_to_cluster()","detected more than 1 possible isotope in cluster; unknown matrix isotopes? check database",cluster.to_string(),"returning empty");
-// 		return {};
-// 	}
-// 	return *isos.begin();
 	return cluster.corresponding_isotope(reference_isotopes);
 }
 
-// const vector<isotope_t> measurements_::sims_t::reference_isotopes() const
-// {
-// 	set<isotope_t> isos;
-// 	for (auto c : reference_clusters())
-// 		isos.insert(c->isotopes.begin(),c->isotopes.end());
-// 	return {isos.begin(),isos.end()};
-// }
 
 set<cluster_t *> measurements_::sims_t::clusters_corresponding_to_isotope(const isotope_t& isotope)
 {
@@ -503,46 +414,6 @@ set<cluster_t *> measurements_::sims_t::clusters_corresponding_to_isotope(const 
 		logger::error("measurements_::sims_t::clusters_corresponding_to_isotope()","can not fond corresponding cluster","","return empty");
 	return Cs;
 }
-
-
-// const set<const cluster_t*> measurements_::sims_t::matrix_clusters() const
-// {
-// 	return reference_clusters();
-// }
-
-/*"30Si" can be a reference cluster for elemental Si or isotopical purified Si*/
-/*"30Si 28Si" can be a reference cluster for elemental Si or isotopical purified Si*/
-/*"74Ge 28Si" can be a reference cluster for elemental Si+Ge or isotopical purified Si+Ge*/
-/// reference_cluster: does NOT contain isotopes, which are NOT found in matrix->isotopes
-// const set<const cluster_t*> measurements_::sims_t::reference_clusters() const
-// {
-// 	set<const cluster_t*> ref_clusters;
-// // 	if (reference_cluster!=nullptr)
-// // 		ref_clusters.insert(reference_cluster);
-// 	if (!sample->matrix().is_set())
-// 		return ref_clusters;
-// 	
-// // 	set<string> element_symbols_in_matrix;
-// // 	for (auto& I : sample->matrix().isotopes)
-// // 		element_symbols_in_matrix.insert(I.symbol);
-// 	
-// 	bool insert=false;
-// 	for (auto& C : clusters)
-// 	{
-// 		insert = true;
-// 		for (auto& I : C.isotopes)
-// 		{
-// 			if (find(sample->matrix().isotopes.begin(),sample->matrix().isotopes.end(),I)==sample->matrix().isotopes.end())
-// 			{
-// 				insert=false;
-// 				break;
-// 			}
-// 		}
-// 		if (insert) ref_clusters.insert(&C);
-// 	}
-// 	
-// 	return ref_clusters;
-// }
 
 bool measurements_::sims_t::add(measurements_::sims_t& adder)
 {
@@ -612,6 +483,23 @@ quantity::concentration_t measurements_::sims_t::concentration(const cluster_t& 
 	if (c==nullptr)
 		return {};
 	return c->concentration;
+}
+
+quantity::map_t measurements_::sims_t::concentration_vs_sputter_depth(const cluster_t& cluster) const
+{
+	return {concentration(cluster),crater.sputter_depth};
+}
+quantity::map_t measurements_::sims_t::concentration_vs_sputter_time(const cluster_t& cluster) const
+{
+	return {concentration(cluster),crater.sputter_time};
+}
+quantity::map_t measurements_::sims_t::intensity_vs_sputter_depth(const cluster_t& cluster) const
+{
+	return {intensity(cluster),crater.sputter_depth};
+}
+quantity::map_t measurements_::sims_t::intensity_vs_sputter_time(const cluster_t& cluster) const
+{
+	return {intensity(cluster),crater.sputter_time};
 }
 
 measurements_::sims_t measurements_::sims_t::change_resolution(quantity::sputter_depth_t sputter_depth_res)

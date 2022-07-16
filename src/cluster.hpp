@@ -102,6 +102,16 @@ public:
 	bool operator!=(const cluster_t& obj) const;
 };
 
+// class implanted_cluster_t : cluster_t
+// {
+// public:
+// 	quantity::intensity_t minimum_intensity;
+// 	quantity::concentration_t minimum_concentration;
+// 	quantity::intensity_t maximum_intensity;
+// 	quantity::concentration_t maximum_concentration;
+// 	quantity::sputter_time_t ST_at_max;
+// 	quantity::sputter_depth_t SD_at_max;
+// };
 
 class matrix_clusters_c
 {
@@ -118,6 +128,7 @@ public:
 	///E.g. for 28Si 30Si 70Ge  matrix_clusters Irels={(28Si)/(30Si),(30Si)/(28Si),(28Si)/(70Ge),(70Ge)/(28Si),(30Si)/(70Ge),(70Ge)/(30Si)}
 	///and their corresponding Crels
 // 	vector<Crel_to_Irel_t> Crels_to_Irels();
+	void set_natural_abundances();
 	cluster_t* cluster(const isotope_t iso);
 	vector<cluster_t*> clusters;
 	const vector<cluster_t*> clusters_from_ele(element_t ele) const;

@@ -298,7 +298,29 @@ isotope_t* sample_t::matrix_t::isotope(isotope_t iso)
 	return nullptr;
 }
 
+const isotope_t* sample_t::matrix_t::isotope(isotope_t iso) const
+{
+	for (auto& E : elements)
+	{
+		if (E.symbol != iso.symbol) continue;
+		for (auto& I : E.isotopes)
+			if (I == iso)
+				return &I;
+	}
+	return nullptr;
+}
+
 element_t* sample_t::matrix_t::element(const element_t& ele)
+{
+	for (auto& E : elements)
+	{
+		if (E == ele)
+			return &E;
+	}
+	return nullptr;
+}
+
+const element_t* sample_t::matrix_t::element(const element_t& ele) const
 {
 	for (auto& E : elements)
 	{

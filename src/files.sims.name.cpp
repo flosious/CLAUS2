@@ -36,40 +36,40 @@ files_::sims_t::name_t::name_t(string& filename_with_path_s,
 {
 }
 
-quantity::depth_t files_::sims_t::name_t::total_sputter_depths()
-{
-	filename_without_crater_depths_s = filename();
-	if (total_sputter_depths_p.size()==0)
-	{
-// 		for (auto& filename_part : not_parseable_filename_parts())
-		for (vector<string>::iterator FNp=not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
-		{
-			smatch match;
-			regex reg ("^([0-9]{2,})(nm|A)$"); 
-			if (regex_search(*FNp,match,reg)) 
-			{
-				string value = match[1];
-				string unit = match[2];
-				total_sputter_depths_p.push_back({{tools::str::str_to_double(value)},unit});
-				not_parseable_filename_parts_p.erase(FNp);
-				FNp--;
-				tools::str::remove_substring_from_mainstring(&filename_without_crater_depths_s,"_"+value+unit);
-				tools::str::remove_substring_from_mainstring(&filename_without_crater_depths_s,value+unit+"_");
-			}
-		}
-	}
-	quantity::depth_t tspd;
-	for (quantity::depth_t& t : total_sputter_depths_p)
-		tspd << t;
-	return tspd;
-}
-
-const string files_::sims_t::name_t::filename_without_crater_depths()
-{
-	if (filename_without_crater_depths_s=="") 
-		total_sputter_depths();
-	return filename_without_crater_depths_s;
-}
+// quantity::total_sputter_depth_t files_::sims_t::name_t::total_sputter_depths()
+// {
+// 	filename_without_crater_depths_s = filename();
+// 	if (total_sputter_depths_p.size()==0)
+// 	{
+// // 		for (auto& filename_part : not_parseable_filename_parts())
+// 		for (vector<string>::iterator FNp=not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
+// 		{
+// 			smatch match;
+// 			regex reg ("^([0-9]{2,})(nm|A)$"); 
+// 			if (regex_search(*FNp,match,reg)) 
+// 			{
+// 				string value = match[1];
+// 				string unit = match[2];
+// 				total_sputter_depths_p.push_back({{tools::str::str_to_double(value)},unit});
+// 				not_parseable_filename_parts_p.erase(FNp);
+// 				FNp--;
+// 				tools::str::remove_substring_from_mainstring(&filename_without_crater_depths_s,"_"+value+unit);
+// 				tools::str::remove_substring_from_mainstring(&filename_without_crater_depths_s,value+unit+"_");
+// 			}
+// 		}
+// 	}
+// 	quantity::total_sputter_depth_t tspd;
+// 	for (quantity::total_sputter_depth_t& t : total_sputter_depths_p)
+// 		tspd << t;
+// 	return tspd;
+// }
+// 
+// const string files_::sims_t::name_t::filename_without_crater_depths()
+// {
+// 	if (filename_without_crater_depths_s=="") 
+// 		total_sputter_depths();
+// 	return filename_without_crater_depths_s;
+// }
 
 bool files_::sims_t::name_t::parse_sputter_energy_element_polarity()
 {
@@ -140,7 +140,8 @@ const string files_::sims_t::name_t::simple_name()
 	if ((lot()=="") && not_parseable_filename_parts().size()>0) 
 		simple_name_p=tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
 	else if ((wafer()<0)) 
-		simple_name_p=lot() +lot_split() + tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
+// 		simple_name_p=lot() +lot_split() + tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
+		simple_name_p=lot();
 	else 
 		simple_name_p="";
 	return simple_name_p;
@@ -164,11 +165,23 @@ bool files_::sims_t::name_t::operator!=(name_t& obj)
 string files_::sims_t::name_t::to_string()
 {
 	stringstream out;
-	out << file_t::name_t::to_string();
-	if (sputter_energy().is_set())
-		out << "_" << sputter_energy().data().at(0) << sputter_energy().unit().to_string();
-	if (sputter_element().is_set())
-		out << sputter_element().to_string() << secondary_polarity();
+	
+	out << file_t::name_t::to_string(";");
+	out << total_sputter_depths().to_string() <<";";
+// 	out << "group=" << group() << "; ";
+// 	out << "lot=" << lot() << "; ";
+// 	out << "lot_split=" << lot_split() << "; ";
+// 	out << "monitor=" << monitor() << "; ";
+// 	out << "repetition=" << repetition() << "; ";
+// 	out << "not_parseable_filename_parts=";
+// 	for (auto& f : not_parseable_filename_parts())
+// 		out << f << ",";
+	
+// 	out << file_t::name_t::to_string();
+// 	if (sputter_energy().is_set())
+// 		out << "_" << sputter_energy().data().at(0) << sputter_energy().unit().to_string();
+// 	if (sputter_element().is_set())
+// 		out << sputter_element().to_string() << secondary_polarity();
 	return out.str();
 }
 

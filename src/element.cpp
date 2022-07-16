@@ -183,7 +183,8 @@ const string element_t::to_string() const
 {
 	stringstream out;
 	const int size = isotopes.size();
-	out << substance_amount.to_string() << "\t";
+	if (substance_amount.is_set())
+		out << substance_amount.to_string() << "\t";
 	if (size==0) return "";
 	for (int i=0;i<size;i++)
 	{

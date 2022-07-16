@@ -57,6 +57,7 @@ const map<std::string, unit_t> unit_t::symbol_to_unit
 	{"at",{units::derived::atoms}},
 	{"at%",{units::derived::atom_percent}},
 	{"nm/s",{units::SI::meter/units::SI::second*units::prefixes::nano}},
+	{"Ang",{units::derived::Ang}},
 	{"nm/min",{units::SI::meter/units::derived::min*units::prefixes::nano}},
 	{"at/scm",{units::derived::atoms / (units::SI::meter.pow(2)*units::prefixes::centi.pow(2))}},
 	{"at/ccm",units::derived::atoms_per_ccm},

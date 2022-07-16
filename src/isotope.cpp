@@ -140,5 +140,16 @@ const bool isotope_t::operator<(const isotope_t& obj) const
 	return false;
 }
 
-
+void isotope_t::set_natural_abundance_from_PSE()
+{
+	if (!is_set())
+		return;
+	auto iso_in_PSE = PSE.isotope(symbol,nucleons);
+	if (iso_in_PSE==nullptr)
+	{
+		logger::error("isotope_t::set_natural_abundance_from_PSE","could not find isotope in PSE: " + to_string());
+		return;
+	}
+	abundance = quantity::abundance_t({iso_in_PSE->abundance});
+}
 

@@ -504,6 +504,16 @@ cluster_t * matrix_clusters_c::cluster(const isotope_t iso)
 	return nullptr;
 }
 
+void matrix_clusters_c::set_natural_abundances()
+{
+	for (auto& C : clusters)
+	{
+		for (auto& I : C->isotopes)
+		{
+			I.set_natural_abundance_from_PSE();
+		}
+	}
+}
 
 /**************************************************************/
 /******************  cluster_t::RSF_t  ************************/

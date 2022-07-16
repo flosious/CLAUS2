@@ -19,7 +19,7 @@
 
 #include "mgroup.hpp"
 
-bool mgroups_::mgroup_t::use_olcdb=true;
+bool mgroups_::mgroup_t::use_olcdb=false;
 bool mgroups_::mgroup_t::use_group=true;
 bool mgroups_::mgroup_t::use_settings=true;
 

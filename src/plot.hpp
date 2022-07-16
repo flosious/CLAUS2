@@ -97,6 +97,8 @@ private:
 		bool check();
 		///adds a new curve to this axis
 		void add_curve(const quantity::map_t& XY, const string legend="");
+		///Y without X, using index position as X
+		void add_curve(const quantity::quantity_t& Y, const string legend="");
 		void add_curve(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend="");
 		void add_curve(const vector<double>& X, const vector<double>& Y, const string legend="");
 		///draws the axis to graph object

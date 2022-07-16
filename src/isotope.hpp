@@ -48,6 +48,7 @@ public:
 	///isotopical signature; isotopenverhältnis; Häufigkeit eines Isotopes eines Elements
 	quantity::abundance_t abundance;
 	quantity::substance_amount_t substance_amount;
+	void set_natural_abundance_from_PSE();
 	int nucleons;
 	string symbol;
 	const string to_string(const string del=" ") const;

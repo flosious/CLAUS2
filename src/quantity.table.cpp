@@ -273,10 +273,17 @@ const set<long long unsigned int> quantity::table_t::line_ids() const
 
 long long unsigned int quantity::table_t::get_new_random_line_id() const
 {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
+	long long unsigned int R = rand();
+	while (line_ids().find(R)!=line_ids().end())
+		R = rand();
+	return R;
+#else
 	long long unsigned int R = random();
 	while (line_ids().find(R)!=line_ids().end())
 		R = random();
 	return R;
+#endif
 }
 
 long long unsigned int quantity::table_t::get_new_sequential_line_id() const

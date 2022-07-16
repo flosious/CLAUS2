@@ -177,10 +177,13 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
 	
 	//plot
 	if (!P.successfully_fitted())
+	{
+		logger::warning(2,"mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrices","polynom not succesfully fitted: " + SR_vs_C.to_string());
 		return calc;
+	}
 	plot_t plot(false,false);
 	plot.Y1.add_points(SR_vs_C,"SR vs " + relevant_isotope.to_string()," Ro");
-	plot.Y1.add_curve(SR_vs_C.polyfit(P),P.to_string());
+	plot.Y1.add_polynom(SR_vs_C,P,P.to_string());
 	plot.to_screen("SR_vs_C",0);
 	
 	//copy to other measurements
@@ -208,16 +211,17 @@ mgroups_::sims_t::calc_t::SD_c::SD_c(calc_t& calc) : MG(calc.MG), calc(calc), me
 {
 }
 
-mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SD_c::from_SR()
+mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SD_c::from_SR(bool overwrite)
 {
 	for (auto& M : measurements)
 	{
-		if (!overwrite && M->crater.sputter_depth.is_set()) continue;
+		if (!overwrite && M->crater.sputter_depth.is_set()) 
+			continue;
 // 		if (save_calc_esults)
 // 			MG.saved_calc_results.at(M).SD.from_SR();
 // 		else
-			M->calc().SD.from_SR();
-// 		M->calc().SD.from_SR();
+
+		M->calc().SD.from_SR(overwrite);
 	}
 	return calc;
 }
@@ -241,6 +245,18 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_median_ref(bo
 	}
 	return calc;
 }
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_pbp_ref(bool overwrite)
+{
+	for (auto& rsf_to_ref : RSFs_to_ref_intensities())
+	{
+		if (overwrite || !rsf_to_ref.first->SF.is_set())
+		{
+			rsf_to_ref.first->SF = quantity::SF_t (rsf_to_ref.first->RSF / rsf_to_ref.second); 
+		}
+	}
+	return calc;
+}
+
 
 const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs_to_ref_intensities()
 {
@@ -269,7 +285,8 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_dose(boo
 		for (auto& C : M->clusters)
 		{
 			//skip cluster belonging to matrix
-			if (M->matrix_clusters().is_cluster_in_matrix(C)) continue;
+			if (M->matrix_clusters().is_cluster_in_matrix(C)) 
+				continue;
 			if (overwrite || !C.SF.is_set())
 			{
 				C.SF = M->calc().SF.from_db_dose(C).change_unit(units::derived::atoms_per_ccm/(units::derived::counts/units::SI::second));
@@ -286,7 +303,8 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_max(bool
 		for (auto& C : M->clusters)
 		{
 			//skip cluster belonging to matrix
-			if (M->matrix_clusters().is_cluster_in_matrix(C)) continue;
+			if (M->matrix_clusters().is_cluster_in_matrix(C)) 
+				continue;
 			if (overwrite || !C.SF.is_set()) 
 				C.SF = M->calc().SF.from_db_max(C);
 		}
@@ -368,7 +386,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_pbp_ref(bool 
 mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::copy_to_same_matrices(bool overwrite)
 {
 	const auto cs = MG.clusters();
-	
+	 
 	for (auto& C : cs)
 	{
 		//for the specific cluster C
@@ -409,7 +427,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 {
 	if (MG.matrix_clusters().size()!=2)
 	{
-		logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
+		logger::error("mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
 		return calc;
 	}
 	const isotope_t relevant_isotope = MG.matrix_isotopes().front();

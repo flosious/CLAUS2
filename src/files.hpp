@@ -143,7 +143,7 @@ public:
 		{
 		private:
 			string filename_without_crater_depths_s="";
-			vector<quantity::depth_t> total_sputter_depths_p;
+			vector<quantity::total_sputter_depth_t> total_sputter_depths_p;
 			bool parse_sputter_energy_element_polarity();
 			string secondary_polarity_p="";
 			quantity::energy_t sputter_energy_p;
@@ -158,8 +158,8 @@ public:
 			element_t sputter_element();
 			const string secondary_polarity();
 			///parses crater depths and populates filename_wo_crater
-			quantity::depth_t total_sputter_depths();
-			const string filename_without_crater_depths();
+// 			quantity::total_sputter_depth_t total_sputter_depths();
+// 			const string filename_without_crater_depths();
 			bool operator==(name_t& obj);
 			bool operator!=(name_t& obj);
 		};

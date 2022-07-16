@@ -263,6 +263,7 @@ public:
 				bool operator!=(const RSF_t& obj) const;
 // 				bool operator<(const RSF_t& obj) const;
 // 				bool operator>(const RSF_t& obj) const;
+				RSF_t invert() const;
 			}; // RSF_t
 			
 		private:

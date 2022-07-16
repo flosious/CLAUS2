@@ -109,16 +109,36 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		}
 	}
 	
+	for (auto&  cf : camera.files())
+	{
+		measurements_::measurement_t cm(cf.name,samples_list,"camera",sql_wrapper);
+		for (measurements_::dsims_t& dm : dsims.measurements())
+		{
+			if (cm == dm)
+			{
+				dm.crater.total_sputter_depths << cf.name.total_sputter_depths();
+			}
+		}
+		for (auto& tm : tofsims.measurements())
+		{
+			if (cm == tm)
+			{
+				tm.crater.total_sputter_depths << cf.name.total_sputter_depths();
+			}
+		}
+	}
+	
 	/*tof sims*/
 	for (auto& MG : tofsims.mgroups())
 	{
 		MG.set_reference_isotopes_in_measurements();
+		MG.set_natural_abundances_in_matrix_clusters();
 		auto calc = MG.calc();
+		calc.matrices.median_const_from_reference_isotopes();
 		calc.SRs.from_crater_depths().SRs.from_implant_max();
 		if (MG.matrix_clusters().size()>1)
 		{
 			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
-
 			auto RSFs = mat.RSFs().add_natural_abundances().remove_RSFs_below_gof_treshold(0.2).symmetrical_RSFs();
 			RSFs.plot_now(0);
 			for (auto& M:MG.measurements())
@@ -128,23 +148,24 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 				///copy the results - this is really ugly
 				for (auto C : M_with_Cs.clusters)
 				{
-					if (!C.concentration.is_set()) continue;
+					if (!C.concentration.is_set()) 
+						continue;
 					*M->cluster(C) = C;
 				}
 			}
 		}
 		// SR + SD
-		calc.SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
+		calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
 		// SF + RSF
-		calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices().SFs.from_RSF_median_ref().SFs.from_implant_max();
+		calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+		calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
 		// C
 		calc.concentrations.from_SF();
-		
-		/*exporting*/
 		for (auto M : MG.measurements())
 		{
 			M->plot_now(0);
 		}
+		/*exporting*/
 		MG.export_origin_ascii(config.tofsims_export_location);
 	}
 	
@@ -152,13 +173,15 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 	for (auto& MG : dsims.mgroups())
 	{
 		MG.set_reference_isotopes_in_measurements();
+		MG.set_natural_abundances_in_matrix_clusters();
 		auto calc = MG.calc();
+		calc.matrices.median_const_from_reference_isotopes();
 		calc.SRs.from_crater_depths().SRs.from_implant_max();
 		if (MG.matrix_clusters().size()>1)
 		{
 			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
-			const auto RSFs = mat.RSFs().add_natural_abundances();
-			RSFs.remove_RSFs_below_gof_treshold(0.2).plot_now(0);
+			auto RSFs = mat.RSFs().add_natural_abundances().remove_RSFs_below_gof_treshold(0.2).symmetrical_RSFs();
+			RSFs.plot_now(0);
 			for (auto& M:MG.measurements())
 			{
 				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
@@ -166,24 +189,32 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 				///copy the results - this is really ugly
 				for (auto C : M_with_Cs.clusters)
 				{
-					if (!C.concentration.is_set()) continue;
+					if (!C.concentration.is_set()) 
+						continue;
 					*M->cluster(C) = C;
 				}
 			}
 		}
-		// SR + SD
-		calc.SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
+		// SR
+		calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1});
+		// SD
+		calc.SDs.from_SR();
 		// SF + RSF
-		calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices().SFs.from_RSF_median_ref().SFs.from_implant_max();
+		calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+		calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
 		// C
 		calc.concentrations.from_SF();
-		
 		for (auto M : MG.measurements())
 		{
 			M->plot_now(0);
 		}
+		/*exporting*/
 		MG.export_origin_ascii(config.dsims_export_location);
 	}
+	
+	cout << "samples: " << samples_list.size() << endl;
+	for (auto& S : samples_list)
+		cout << S.to_string() << endl;
 	
 	if (!logger::instant_print_messages)
 		logger::to_screen();
