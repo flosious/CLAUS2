@@ -230,7 +230,7 @@ void files_::file_t::name_t::parse_filename_parts()
 		if (lot_p=="") 
 		{
 			lot_p = filename_part;
-			logger::debug(5,"files_::file_t::name_t::parse_filename_parts","filename_part:lot_p as simple name : " + lot_p);
+			logger::debug(15,"files_::file_t::name_t::parse_filename_parts","filename_part:lot_p as simple name : " + lot_p);
 			continue;
 		}
 		if (wafer_p==-1) if(parse_wafer(filename_part)) continue;
@@ -241,7 +241,7 @@ void files_::file_t::name_t::parse_filename_parts()
 // 		if (parse_crater_depth(filename_part)) continue;
 		// no parser worked
 		not_parseable_filename_parts_p.push_back(filename_part);
-		logger::debug(5,"files_::file_t::name_t::parse_filename_parts","filename_part : not_parseable : " + filename_part);
+		logger::debug(15,"files_::file_t::name_t::parse_filename_parts","filename_part : not_parseable : " + filename_part);
 			
 	}
 // 	if (lot_p=="" || olcdb_p==-1 || wafer_p==-1 || group_p=="") 
@@ -259,7 +259,7 @@ bool files_::file_t::name_t::parse_monitor(string filename_part)
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) || regex_search(filename_part,match,reg3)) 
 	{
 		monitor_p = match[1];
-		logger::debug(7,"files_::file_t::name_t::parse_monitor",monitor_p);
+		logger::debug(17,"files_::file_t::name_t::parse_monitor",monitor_p);
 		return true;
 	}
 	return false;
@@ -288,7 +288,7 @@ bool files_::file_t::name_t::parse_olcdb(string filename_part)
 	if (regex_search(filename_part,match,reg)) 
 	{
 		olcdb_p = tools::str::str_to_int(filename_part);
-		logger::debug(7,"files_::file_t::name_t::parse_olcdb",::to_string(olcdb_p));
+		logger::debug(17,"files_::file_t::name_t::parse_olcdb",::to_string(olcdb_p));
 		return true;
 	}
 	return false;
@@ -302,7 +302,7 @@ bool files_::file_t::name_t::parse_lot(string filename_part)
 	{
 		lot_p = match[1];
 		lot_split_p = match[2];
-		logger::debug(7,"files_::file_t::name_t::parse_lot",lot_p + " " + lot_split_p);
+		logger::debug(17,"files_::file_t::name_t::parse_lot",lot_p + " " + lot_split_p);
 		return true;
 	}
 	return false;
@@ -315,7 +315,7 @@ bool files_::file_t::name_t::parse_wafer(string filename_part)
 	if (regex_search(filename_part,match,reg)) 
 	{
 		wafer_p = tools::str::str_to_int(match[1]);
-		logger::debug(7,"files_::file_t::name_t::parse_wafer",::to_string(wafer_p));
+		logger::debug(17,"files_::file_t::name_t::parse_wafer",::to_string(wafer_p));
 		return true;
 	}
 	return false;
@@ -331,7 +331,7 @@ bool files_::file_t::name_t::parse_group(string filename_part)
 // 		cout << "filename_part=" << filename_part << endl;
 		group_p = match[1];
 		repetition_p = match[2];
-		logger::debug(7,"files_::file_t::name_t::parse_group",group_p + " " + repetition_p);
+		logger::debug(17,"files_::file_t::name_t::parse_group",group_p + " " + repetition_p);
 // 		cout << "match[1]=" << match[1] << endl;
 // 		cout << "match[2]=" << match[2] << endl;
 // 		cout << "group_p=" << group_p << endl;
@@ -349,7 +349,7 @@ bool files_::file_t::name_t::parse_repetitor(string filename_part)
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
 	{
 		repetition_p = match[1];
-		logger::debug(7,"files_::file_t::name_t::parse_repetitor",repetition_p);
+		logger::debug(17,"files_::file_t::name_t::parse_repetitor",repetition_p);
 		return true;
 	}
 	return false;

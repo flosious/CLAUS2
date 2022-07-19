@@ -53,6 +53,21 @@ public:
 		RSF_t(const quantity::quantity_t& q, const vector<cluster_t>& reference_clusters_s={});
 		const vector<cluster_t>& reference_clusters() const;
 	};
+	class implant_parameters_t
+	{
+	public:
+		quantity::intensity_t max_intensity;
+		quantity::concentration_t max_concentration;
+		quantity::intensity_t min_intensity;
+		quantity::concentration_t min_concentration;
+		quantity::sputter_depth_t sputter_depth_at_min;
+		quantity::sputter_depth_t sputter_depth_at_max;
+		quantity::sputter_time_t sputter_time_at_min;
+		quantity::sputter_time_t sputter_time_at_max;
+		quantity::concentration_t background_concentration;
+		quantity::intensity_t background_intensity;
+		quantity::dose_t dose;
+	};
 	friend class crater_t;
 private:
 public:
@@ -71,6 +86,8 @@ public:
 	cluster_t();
 	cluster_t(const vector<isotope_t>& isotopes_s);
 	cluster_t(const isotope_t isotope_s);
+	///calculated parameters
+	implant_parameters_t implant_parameters;
 	///e.g. 11B for cluster {28Si 11B}
 	isotope_t corresponding_isotope(const vector<isotope_t> reference_isotopes) const;
 	quantity::quantity_t mass();
@@ -100,6 +117,11 @@ public:
 	bool operator==(const cluster_t& obj) const;
 	bool operator<(const cluster_t& obj) const;
 	bool operator!=(const cluster_t& obj) const;
+	
+// 	quantity::map_t concentration_vs_sputter_depth() const;
+// 	quantity::map_t intensity_vs_sputter_depth() const;
+// 	quantity::map_t concentration_vs_sputter_time() const;
+// 	quantity::map_t intensity_vs_sputter_time() const;
 };
 
 // class implanted_cluster_t : cluster_t

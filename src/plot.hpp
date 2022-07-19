@@ -40,7 +40,8 @@ private:
 		class range_t
 		{
 		private:
-			
+			double backgound_minimum_c(const vector<const quantity::quantity_t*> Ys) const;
+			double backgound_minimum_p;
 		public:
 			///asuming y axis starts at low values and grows to bigger (e.g. from 1 to 1000)
 			range_t(const quantity::quantity_t* Ys);
@@ -48,6 +49,7 @@ private:
 			range_t(double start, double stop);
 			///changes start and stop to log10 values
 			range_t log10() const;
+			double background_minimum() const;
 			double start=-1;
 			double stop=1;
 			string to_string() const;

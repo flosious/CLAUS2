@@ -441,7 +441,7 @@ plot_t::axis_t::range_t plot_t::axis_t::range_t::log10() const
 	return range_t(log_start,log_stop);
 }
 
-plot_t::axis_t::range_t::range_t(double start, double stop) : start(start), stop(stop)
+plot_t::axis_t::range_t::range_t(double start, double stop) : start(start), stop(stop), backgound_minimum_p(-1)
 {
 }
 
@@ -452,7 +452,7 @@ plot_t::axis_t::range_t::range_t(const quantity::quantity_t* Ys)
 	*this = range_t(X);
 }
 
-plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys)
+plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys) : backgound_minimum_p(backgound_minimum_c(Ys))
 {
 	logger::debug(15,"plot_t::axis_t::range_t::range_t()","entering");
 
@@ -505,8 +505,23 @@ plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys)
 	logger::debug(15,"plot_t::axis_t::range_t::range_t()","exiting");
 }
 
+double plot_t::axis_t::range_t::range_t::backgound_minimum_c(const vector<const quantity::quantity_t*> Ys) const
+{
+	quantity::quantity_t QB;
+	for (auto& Q : Ys)
+	{
+		if (Q->data().size()>100)
+			QB << Q->get_data_by_index(Q->data().size()-21,Q->data().size()-1).mean();
+	}
+	if (QB.is_set())
+		return QB.min().data().front();
+	return -1;
+}
 
-
+double plot_t::axis_t::range_t::range_t::background_minimum() const
+{
+	return backgound_minimum_p;
+}
 /***********************************************/
 /*******    plot_t::axis_t::points_t    ********/
 /***********************************************/

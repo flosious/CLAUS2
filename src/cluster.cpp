@@ -356,6 +356,23 @@ cluster_t cluster_t::filter_impulse(int window_size, float factor)
 }
 
 
+// quantity::map_t cluster_t::concentration_vs_sputter_depth() const
+// {
+// 	return {concentration(),crater.sputter_depth};
+// }
+// quantity::map_t cluster_t::concentration_vs_sputter_time() const
+// {
+// 	return {concentration(cluster),crater.sputter_time};
+// }
+// quantity::map_t cluster_t::intensity_vs_sputter_depth() const
+// {
+// 	return {intensity(cluster),crater.sputter_depth};
+// }
+// quantity::map_t cluster_t::intensity_vs_sputter_time() const
+// {
+// 	return {intensity(cluster),crater.sputter_time};
+// }
+
 /********************************************/
 /* matrix_clusters_c */
 /********************************************/

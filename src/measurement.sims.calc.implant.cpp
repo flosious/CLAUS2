@@ -184,22 +184,23 @@ quantity::quantity_t measurements_::sims_t::calc_t::implant_c::map_c::background
 
 quantity::quantity_t measurements_::sims_t::calc_t::implant_c::map_c::minimum_pos()
 {
-	return XY_map_p.X().at(minimum_index_position_p);
+	auto q_min = XY_map_p.X().at(minimum_index_position());
+	return q_min;
 }
 
 quantity::quantity_t measurements_::sims_t::calc_t::implant_c::map_c::minimum_value()
 {
-	return XY_map_p.Y().at(minimum_index_position_p);
+	return XY_map_p.Y().at(minimum_index_position());
 }
 
 quantity::quantity_t measurements_::sims_t::calc_t::implant_c::map_c::maxmimum_pos()
 {
-	return XY_map_p.X().at(maximum_index_position_p);
+	return XY_map_p.X().at(maximum_index_position());
 }
 
 quantity::quantity_t measurements_::sims_t::calc_t::implant_c::map_c::maximum_value()
 {
-	return XY_map_p.Y().at(maximum_index_position_p);
+	return XY_map_p.Y().at(maximum_index_position());
 }
 
 quantity::quantity_t measurements_::sims_t::calc_t::implant_c::map_c::area()
@@ -231,44 +232,180 @@ unsigned int measurements_::sims_t::calc_t::implant_c::map_c::maximum_index_posi
 /*******            measurements_::sims_t::calc_t::implant_c               *********/
 /***********************************************************************************/
 
+measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& M, cluster_t& cluster, double X_resolution_factor) :
+	implant_parameters(M.sample->implant(cluster.corresponding_isotope(M.reference_isotopes))), M(M), cluster(cluster), X_resolution_factor(X_resolution_factor)
+{
+// 	auto mapper = M.concentration_vs_sputter_depth(cluster);
+// 	if (mapper.is_set())
+// 		C_vs_SD_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+// 	
+// 	mapper = M.concentration_vs_sputter_time(cluster);
+// 	if (mapper.is_set())
+// 		C_vs_ST_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+// 	
+// 	mapper = M.intensity_vs_sputter_depth(cluster);
+// 	if (mapper.is_set())
+// 		I_vs_SD_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+// 	
+// 	mapper = M.intensity_vs_sputter_time(cluster);
+// 	if (mapper.is_set())
+// 		I_vs_ST_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+	
+	
+	logger::debug(11,"measurements_::sims_t::calc_t::implant_c::implant_c()","new implant object created",cluster.to_string(),M.to_string_short());
+}
 
+quantity::concentration_t measurements_::sims_t::calc_t::implant_c::background_concentration()
+{
+	quantity::quantity_t Q_out;
+	if (C_vs_SD().XY_map().is_set())
+		Q_out = C_vs_SD().background_value();
+	else if (C_vs_ST().background_value().is_set())
+		Q_out = C_vs_ST().background_value();
+	
+	if (!cluster.implant_parameters.background_concentration.is_set() && Q_out.is_set())
+		cluster.implant_parameters.background_concentration = Q_out;
+	return Q_out;
+}
 
+quantity::intensity_t measurements_::sims_t::calc_t::implant_c::background_intensity()
+{	
+	quantity::quantity_t Q_out;
+	if (I_vs_SD().XY_map().is_set())
+		Q_out = I_vs_SD().background_value();
+	else if (I_vs_ST().XY_map().is_set())
+		Q_out = I_vs_ST().background_value();
+	
+	if (!cluster.implant_parameters.background_intensity.is_set() && Q_out.is_set())
+		cluster.implant_parameters.background_intensity = Q_out;
+	return Q_out;
+}
 
+quantity::dose_t measurements_::sims_t::calc_t::implant_c::dose()
+{
+	quantity::quantity_t Q_out;
+	if (C_vs_SD().XY_map().is_set())
+		Q_out = C_vs_SD().area().change_unit(units::derived::atoms_per_scm);
+	
+	if (Q_out.is_set() && !cluster.implant_parameters.dose.is_set())
+		cluster.implant_parameters.dose = Q_out;
+	if (C_vs_SD().minimum_pos().is_set() && !cluster.implant_parameters.sputter_depth_at_min.is_set())
+		cluster.implant_parameters.sputter_depth_at_min = C_vs_SD().minimum_pos();
+	if (C_vs_SD().minimum_value().is_set() && !cluster.implant_parameters.min_concentration.is_set())
+		cluster.implant_parameters.min_concentration = C_vs_SD().minimum_value();
+	
+	return Q_out;
+}
+quantity::SR_t measurements_::sims_t::calc_t::implant_c::SR_from_max()
+{
+	quantity::quantity_t ST_at_max;
+	if (!implant_parameters.depth_at_concentration_maxium.is_set())
+		return {};
+	if (I_vs_ST().XY_map().is_set())
+		ST_at_max =  I_vs_ST().maxmimum_pos();
+	else if (C_vs_ST().XY_map().is_set())
+		ST_at_max =  C_vs_ST().maxmimum_pos();
+	
+	if (ST_at_max.is_set() && !cluster.implant_parameters.sputter_time_at_max.is_set())
+			cluster.implant_parameters.sputter_time_at_max = ST_at_max;
+	
+	
+	return implant_parameters.depth_at_concentration_maxium / ST_at_max;
+}
+quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF()
+{
+	if (SF_from_dose().is_set())
+		return SF_from_dose();
+	return SF_from_max();
+}
+quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_dose()
+{
+	if (!implant_parameters.dose.is_set())
+		return {};
+	
+	if (I_vs_SD().minimum_pos().is_set() && !cluster.implant_parameters.sputter_depth_at_min.is_set())
+		cluster.implant_parameters.sputter_depth_at_min = I_vs_SD().minimum_pos();
+	if (I_vs_SD().minimum_value().is_set() && !cluster.implant_parameters.min_intensity.is_set())
+		cluster.implant_parameters.min_intensity = I_vs_SD().minimum_value();
+	
+// 	cout << endl << "cluster.implant_parameters.sputter_depth_at_min: " << cluster.implant_parameters.sputter_depth_at_min.to_string() << endl;
+// 	cout << endl << "cluster.implant_parameters.min_intensity: " << cluster.implant_parameters.min_intensity.to_string() << endl;
+	
+	quantity::SF_t SF_p = ( implant_parameters.dose / I_vs_SD().area() ).change_unit(units::derived::atoms_per_ccm/units::derived::counts*units::SI::second);
+	logger::info(3,"measurements_::sims_t::calc_t::implant_c::SF_from_dose()",M.to_string_short() + " " + cluster.to_string() + " " + SF_p.to_string());
+	
+	return SF_p;
+}
 
+quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_max()
+{
+	if (!implant_parameters.concentration_maximum.is_set())
+		return {};
+	quantity::intensity_t I_max = I_vs_ST().maximum_value();
+	if (!I_max.is_set())
+		I_max = I_vs_SD().maximum_value();
+	
+	if (I_max.is_set() && !cluster.implant_parameters.min_intensity.is_set())
+		cluster.implant_parameters.max_intensity = I_max;
+	
+	quantity::SF_t SF_p = ( implant_parameters.concentration_maximum / I_max ). change_unit(units::derived::atoms_per_ccm/units::derived::counts*units::SI::second);
+	logger::info(3,"measurements_::sims_t::calc_t::implant_c::SF_from_max()",M.to_string_short() + " " + cluster.to_string() + " " + SF_p.to_string());
+		
+	return SF_p;
+}
 
-const measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::implant_c::C_vs_SD()
+measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::implant_c::C_vs_SD()
 {
 	if (!C_vs_SD_p.XY_map().is_set())
 	{
-		const auto mapper = M.concentration_vs_sputter_depth(cluster);
-		C_vs_SD_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+		auto mapper = M.concentration_vs_sputter_depth(cluster);
+		if (mapper.is_set())
+			C_vs_SD_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
 	}
 	return C_vs_SD_p;
 }
-const measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::implant_c::C_vs_ST()
+measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::implant_c::C_vs_ST()
 {
 	if (!C_vs_ST_p.XY_map().is_set())
 	{
-		const auto mapper = M.concentration_vs_sputter_time(cluster);
-		C_vs_ST_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+		auto mapper = M.concentration_vs_sputter_time(cluster);
+		if (mapper.is_set())
+			C_vs_ST_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
 	}
 	return C_vs_ST_p;
 }
-const measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::implant_c::I_vs_SD()
+measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::implant_c::I_vs_SD()
 {
 	if (!I_vs_SD_p.XY_map().is_set())
 	{
-		const auto mapper = M.intensity_vs_sputter_depth(cluster);
-		I_vs_SD_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+		auto mapper = M.intensity_vs_sputter_depth(cluster);
+// 		cout << endl << "mapper: " << mapper.to_string() << endl;
+// 		cout << "mapper.res: " << mapper.X().resolution().to_string() << endl;
+// 		cout <<"X_resolution_factor: " << X_resolution_factor << endl;
+// 		cout << "mapper.X().resolution()/X_resolution_factor: " << (mapper.X().resolution()/X_resolution_factor).to_string() << endl;
+		if (mapper.is_set())
+			I_vs_SD_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+// 		cout << "I_vs_SD_p: " << I_vs_SD_p.XY_map().to_string() << endl;
+// 		cout << "I_vs_SD_p.res: " << I_vs_SD_p.XY_map().X().resolution().to_string() << endl;
 	}
+	
 	return I_vs_SD_p;
 }
-const measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::implant_c::I_vs_ST()
+measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::implant_c::I_vs_ST()
 {
 	if (!I_vs_ST_p.XY_map().is_set())
 	{
-		const auto mapper = M.intensity_vs_sputter_time(cluster);
-		I_vs_ST_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
+		auto mapper = M.intensity_vs_sputter_time(cluster);
+		if (mapper.is_set())
+			I_vs_ST_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
 	}
 	return I_vs_ST_p;
+}
+
+void measurements_::sims_t::calc_t::implant_c::set_parameters_in_cluster()
+{
+	if (C_vs_SD_p.XY_map().is_set())
+	{
+		
+	}
 }

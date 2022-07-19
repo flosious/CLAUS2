@@ -284,6 +284,7 @@ public:
 					const quantity::map_t& XY_map() const; 
 					//used as implant profile
 					quantity::map_t XY_map_without_surface(); 
+					
 					quantity::quantity_t background_value(int last_points=20) const;
 					quantity::quantity_t minimum_pos();
 					quantity::quantity_t minimum_value();
@@ -297,59 +298,44 @@ public:
 					void to_screen(float seconds=0) const;
 				};
 			private:
-				///the measurement
 				sims_t& M;
 				cluster_t& cluster;
-				///a factor to change sputter_time resolution when determining maximum position
 				double X_resolution_factor;
-				int maximum_pos_index_s = -1;
-				quantity::sputter_time_t sputter_time_at_maximum_s;
-				quantity::intensity_t maximum_intensity_s;
-				///populates maximum_intensity_s + sputter_time_at_maximum_s ;seconds_for_fit_plot < 0 no plot;
-				void fit_maximum_intensity_val_and_pos(double seconds_for_fit_plot=-1);
-				quantity::map_t fitted_curve_p;
 				///saved calculation data
 				map_c C_vs_SD_p;
 				map_c C_vs_ST_p;
 				map_c I_vs_SD_p;
 				map_c I_vs_ST_p;
+				sample_t::implant_s implant_parameters;
 			public:
-				implant_c(sims_t& measurement, cluster_t& cluster, double X_resolution_factor=1);
-				///checks if the cluster is actually showing an implant profile
-// 				bool has_implant_profile() const;
-				static unsigned int minimum_index_position(quantity::quantity_t Y);
-				static unsigned int minimum_index_position(vector<double> data);
-				unsigned int minimum_index_position();
-				int maximum_pos_index() const;
+				implant_c(sims_t& M, cluster_t& cluster, double X_resolution_factor);
+				
+				///background should be calculated somewhere else; maybe in measurement itself
+				quantity::concentration_t background_concentration();
+				///background should be calculated somewhere else; maybe in measurement itself
 				quantity::intensity_t background_intensity();
-				///quantity::sputter_time_t of maximum of intensity of implant
-				const quantity::sputter_time_t& sputter_time_at_maximum() const;
-				///maximum of intensity of implant
-				const quantity::intensity_t& maximum_intensity() const;
-				quantity::quantity_t minimum_starting_position() const;
-				quantity::sputter_time_t minimum_sputter_time_position() const;
-				quantity::depth_t minimum_sputter_depth_position() const;
-				quantity::sputter_time_t sputter_time_from_minimum();
-				quantity::depth_t sputter_depth_from_minimum();
 				///calc dose from concentration and sputter_depth; returns {} if C or SD not set
-				quantity::dose_t dose() const;
-				quantity::SR_t SR() const;
+				quantity::dose_t dose();
+				///calc SR from sputter_time and sputter_depth at maximum from DB
+				quantity::SR_t SR_from_max();
+				///uses SF_from_dose if possible, otherwise SF_from_max
 				quantity::SF_t SF();
+				///calc SF from intensity area and dose from DB
 				quantity::SF_t SF_from_dose();
+				///calc SF from intensity at maximum and concentration at maximum from DB
 				quantity::SF_t SF_from_max();
-				quantity::SF_t RSF();
-				quantity::concentration_t concentration();
-				const quantity::map_t& fitted_curve() const;
-				double X_resolution_factor_() const;
-				const map_c& C_vs_SD();
-				const map_c& C_vs_ST();
-				const map_c& I_vs_SD();
-				const map_c& I_vs_ST();
+
+				map_c& C_vs_SD();
+				map_c& C_vs_ST();
+				map_c& I_vs_SD();
+				map_c& I_vs_ST();
+				///ATTENTION NOT WORKING YET will override any values already set in clusters implant_parameters
+				void set_parameters_in_cluster();
 			}; //implant_c
 		private:
 			map<cluster_t* const, implant_c> implants_s;
 		public:
-			implant_c& implant(cluster_t& cluster, double X_resolution_factor=0.1);
+			implant_c& implant(cluster_t& cluster, double X_resolution_factor=10);
 			///calculates SR and SF in one step from implant
 			SR_c SR;
 			SD_c SD;
@@ -357,7 +343,7 @@ public:
 			RSF_c RSF;
 			matrix_c matrix;
 			concentration_c concentration;
-
+// 			quantity::quantit background_concentration();
 			calc_t(sims_t& measurement,bool overwrite=false);
 		};
 	private:
