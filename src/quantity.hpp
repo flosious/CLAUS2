@@ -240,10 +240,14 @@ namespace quantity
 		quantity_t sd()  const;
 		quantity_t mad()  const;
 		quantity_t max()  const;
+		///returns -1, if not set
+		int max_idx()  const;
+		quantity_t min()  const;
+		int min_idx()  const;
 		quantity_t front()  const;
 		quantity_t back()  const;
 		quantity_t x_at_max(const quantity_t& X)  const;
-		quantity_t min()  const;
+		
 		quantity_t x_at_min(quantity_t& X)  const;
 		quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index, unsigned int upper_X_index)  const;
 		quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index=0)  const;

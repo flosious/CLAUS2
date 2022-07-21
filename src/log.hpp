@@ -26,6 +26,7 @@
 #include <sstream>
 #include <iostream>
 #include "definitions.hpp"
+#include "tools.hpp"
 
 using namespace std;
 
@@ -92,6 +93,8 @@ public:
 	static void debug(unsigned int verbosity, string class_func_name, string variable_condition, string variable_contents="", string solution="");
 	static void debug(unsigned int verbosity, string class_func_name, string variable_condition, bool variable_contents);
 	static void to_screen();
+	static string to_string(const string line_delimiter);
+	static void to_file(string path_with_filename);
 };
 
 #endif // LOG_T_HPP

@@ -115,9 +115,10 @@ public:
 		quantity::concentration_t concentration_maximum;
 		quantity::depth_t depth_at_concentration_maxium;
 		implant_s(quantity::dose_t dose={}, quantity::concentration_t concentration_maximum={}, quantity::depth_t depth_at_concentration_maxium={});
+		string to_string() const;
 	};
 private:
-	map<isotope_t,implant_s> implants;
+	map<isotope_t,implant_s> implants_p;
 	///populates implants and matrix_p
 	void load_from_database();
 protected:
@@ -164,6 +165,7 @@ public:
 // 	set<measurements::profiler_t*> profiler;
 	
 	implant_s implant(const isotope_t& isotope);
+	const map<isotope_t,implant_s>& implants() const;
 	///checks if there is at least 1 isotope implanted
 	bool is_implanted();
 	bool is_implanted(const isotope_t& isotope);

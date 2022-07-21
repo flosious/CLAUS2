@@ -341,7 +341,7 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 		return;
 	}
 // 	cout << measurements_::sims_t::to_string() << endl;
-	logger::debug(6,"measurements_::sims_t::export_origin_ascii","path",path,"starting export");
+	logger::debug(6,"measurements_::sims_t::export_origin_ascii","path",path,"starting export: " + to_string_short());
 	vector<origin_t::column_t> cols;
 	/*time-intensity-profile*/
 	stringstream comment,longname;

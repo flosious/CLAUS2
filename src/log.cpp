@@ -66,6 +66,20 @@ void logger::to_screen()
 		cout << M.to_string() << endl;
 }
 
+string logger::to_string(const string line_delimiter)
+{
+	stringstream out;
+	for (auto& M : messages)
+		out << M.to_string() << line_delimiter;
+	return out.str();
+}
+
+void logger::to_file(string path_with_filename)
+{
+	string contents = to_string("\n");
+	tools::file::write_to_file_and_create_folders(path_with_filename,&contents,false);
+}
+
 void logger::fatal(string class_func_name, string variable_condition, string variable_contents, string solution)
 {
 	messages.push_back({"FATAL",class_func_name,variable_condition,variable_contents,solution});

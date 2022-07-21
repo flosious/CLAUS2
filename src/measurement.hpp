@@ -261,8 +261,11 @@ public:
 					quantity::quantity_t Y;
 					int minimum_index_position_p = -1;
 					int maximum_index_position_p = -1;
+					///not the final minimum position, but a coarse one
+					unsigned int minimum_index_position_coarse();
 				public:
 					quantity_c(const quantity::quantity_t& Y);
+					//TODO fit this position with a polynom
 					unsigned int minimum_index_position();
 					quantity::quantity_t minimum_position();
 					unsigned int maximum_index_position();
@@ -284,18 +287,23 @@ public:
 					const quantity::map_t& XY_map() const; 
 					//used as implant profile
 					quantity::map_t XY_map_without_surface(); 
-					
 					quantity::quantity_t background_value(int last_points=20) const;
 					quantity::quantity_t minimum_pos();
 					quantity::quantity_t minimum_value();
-					quantity::quantity_t maxmimum_pos();
+					quantity::quantity_t maximum_pos();
 					quantity::quantity_t maximum_value();
-					///excluding surface
+					///without surface, but with background and implant
 					quantity::quantity_t area();
+					///without surface and background
+					quantity::quantity_t implanted_area();
+					///just the background, without surfac
+					quantity::quantity_t background_area();
 					unsigned int minimum_index_position();
 					unsigned int maximum_index_position();
 					///plot 
 					void to_screen(float seconds=0) const;
+					///checks if there is sufficient implanted area: implanted_area() >= background_area() * rel_treshold ;; implanted_area() >= abs_treshold
+					bool is_implanted(double abs_treshold = 10,  double rel_treshold=5);
 				};
 			private:
 				sims_t& M;
@@ -324,13 +332,14 @@ public:
 				quantity::SF_t SF_from_dose();
 				///calc SF from intensity at maximum and concentration at maximum from DB
 				quantity::SF_t SF_from_max();
-
+				
 				map_c& C_vs_SD();
 				map_c& C_vs_ST();
 				map_c& I_vs_SD();
 				map_c& I_vs_ST();
 				///ATTENTION NOT WORKING YET will override any values already set in clusters implant_parameters
 				void set_parameters_in_cluster();
+				bool is_implanted();
 			}; //implant_c
 		private:
 			map<cluster_t* const, implant_c> implants_s;

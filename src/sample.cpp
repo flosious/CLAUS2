@@ -9,7 +9,12 @@ sample_t::implant_s::implant_s(quantity::dose_t dose, quantity::concentration_t 
 {
 }
 
-
+string sample_t::implant_s::to_string() const
+{
+	stringstream out;
+	out << "dose: " << dose.to_string() << "; concentration_maximum: " << concentration_maximum.to_string() << "; depth at concentration_maximum: " << depth_at_concentration_maxium.to_string();
+	return out.str();
+}
 
 /******************************/
 /***     sample_t::db_t     ***/
@@ -317,14 +322,18 @@ bool sample_t::use_simple_name=true;
 
 sample_t::implant_s sample_t::implant(const isotope_t& isotope)
 {
-	if (implants.size()==0)
+	if (implants_p.size()==0)
 		load_from_database();
 
-	if (implants.find(isotope)!=implants.end())
-		return implants.at(isotope);
+	if (implants_p.find(isotope)!=implants_p.end())
+		return implants_p.at(isotope);
 	return {};
 }
 
+const map<isotope_t,sample_t::implant_s>& sample_t::implants() const
+{
+	return implants_p;
+}
 
 void sample_t::load_from_database()
 {
@@ -333,8 +342,8 @@ void sample_t::load_from_database()
 		matrix_p = db.matrix();
 	if (!matrix_p.is_set())
 		return;
-	if (implants.size()==0)
-		implants = db.implants();
+	if (implants_p.size()==0)
+		implants_p = db.implants();
 }
 
 sample_t::sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f,database_t& sql_wrapper) : 

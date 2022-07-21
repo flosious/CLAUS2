@@ -238,23 +238,41 @@ bool tools::file::write_mat_to_file(string filename_with_path,vector<vector<stri
 	return true;
 }
 
-bool tools::file::write_to_file(string filename_with_path,string *contents, bool append) {
-// 	cout << filename_with_path << endl;
+bool tools::file::write_to_file(string filename_with_path, const string *contents, bool append) 
+{
   #ifdef __unix__
 #else
 	tools::str::replace_umlaute_to_windows_compatible(&filename_with_path);
 #endif
-// 	cout << filename_with_path << endl;
 	ofstream myfile;
 	if (append) myfile.open (filename_with_path.c_str(), ios::app);
 	else myfile.open (filename_with_path.c_str());
-	if (!myfile.is_open()) return false;
-//     if (!append) myfile << "";
+	if (!myfile.is_open()) 
+		return false;
 	myfile << *contents;
 	myfile.close();
 	return true;
 }
 
+bool tools::file::write_to_file_and_create_folders(string filename_with_path, const string *contents, bool append) 
+{
+	auto parts = tools::str::get_strings_between_delimiter(filename_with_path,PATH_DELIMITER);
+	string filename = parts.back();
+	stringstream path;
+	for (int i=0;i<parts.size()-1;i++)
+		path << parts[i] << PATH_DELIMITER;
+	string path_s = path.str();
+// 	cout << endl << path_s << " " << filename << endl;
+	return write_to_file_and_create_folders(filename,path_s,contents,append);
+}
+
+
+bool tools::file::write_to_file_and_create_folders(string filename, string path, const string *contents, bool append)
+{
+	path = tools::file::check_directory_string(path);
+	tools::file::mkpath(path,0750);
+	return tools::file::write_to_file(path+filename,contents,append);
+}
 
 string tools::file::check_directory_string(string add_directory, string root_dir) {
     /*if empty, then return the working dir*/

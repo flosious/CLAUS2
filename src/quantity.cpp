@@ -726,18 +726,29 @@ quantity::quantity_t quantity::quantity_t::max() const
 {
 	if (!is_set())
 		return {};
-// 	operations_history_s.push_back("max");
-// 	data_s = {statistics::get_max_from_Y(data())};
-	return {*this,statistics::get_max_from_Y(data()),"max"};;
+	return at(max_idx());
+// 	return {*this,statistics::get_max_from_Y(data()),"max"};;
+}
+
+int quantity::quantity_t::max_idx() const
+{
+	if (!is_set())
+		return -1;
+	return statistics::get_max_index_from_Y(data());
 }
 
 quantity::quantity_t quantity::quantity_t::min() const
 {
 	if (!is_set())
 		return {};
-// 	operations_history_s.push_back("min");
-// 	data_s = {statistics::get_min_from_Y(data())};
-	return {*this,statistics::get_min_from_Y(data()),"min"};;
+	return at(min_idx());
+// 	return {*this,statistics::get_min_from_Y(data()),"min"};;
+}
+int quantity::quantity_t::min_idx() const
+{
+	if (!is_set())
+		return -1;
+	return statistics::get_min_index_from_Y(data());
 }
 
 bool quantity::quantity_t::is_nan() const
@@ -929,7 +940,7 @@ const string quantity::quantity_t::to_string_short() const
 	if (data().size()>1)
 		out <<"<" << data().size() << ">" << " [" << unit().to_string() << "]";
 	else if (data().size()==1)
-		out <<  data_s.front() << " [" << unit().to_string() << "]" << " {";
+		out <<  data_s.front() << " [" << unit().to_string() << "]";
 	else
 		out <<  "<0>" << "[]";
 	return out.str();
@@ -1378,15 +1389,17 @@ quantity::quantity_t quantity::quantity_t::operator+(quantity_t quantity) const
 {
 	if (!is_set())
 		return quantity;
-	if (name()!=quantity.name()) 
-		return {}; // only allow addition within the same Größenart
-		
+// 	if (name()!=quantity.name()) // only allow addition within the same Größenart
+// 		return {}; 
+	if (dimension() != quantity.dimension()) 
+		return {};
+	
+	
 	quantity = quantity.change_unit(unit());
 	
 	if (!is_set() || !quantity.is_set()) 
 		return {};
-	if (dimension() != quantity.dimension()) 
-		return {};
+	
 // 	if (unit() != quantity.unit()) 
 // 		return *this;
 	

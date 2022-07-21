@@ -81,14 +81,26 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		cout << "\t" << f << endl;
 	cout << endl;
 	
-// 	cout << "dektak6m measurements:" << endl;
-// 	for (auto& d : dektak6m.measurements())
-// 	{
-// 		cout << "\t" << d.to_string() << endl;
-// 	}
-// 	cout << endl;
-	
-	
+	cout << "dektak6m measurements:" << endl;
+	for (auto& d : dektak6m.measurements())
+		cout << "\t" << d.to_string() << endl;
+	cout << endl;
+	cout << "tofsims measurements:" << endl;
+	for (auto& d : tofsims.measurements())
+		cout << "\t" << d.to_string() << endl;
+	cout << endl;
+	cout << "dsims measurements:" << endl;
+	for (auto& d : dsims.measurements())
+		cout << "\t" << d.to_string() << endl;
+	cout << endl;
+	cout << "samples: " << samples_list.size() << endl;
+	for (auto& S : samples_list)
+	{
+		cout <<  "\t"  << S.to_string() << "; implants: " << endl;
+		for (auto& imp : S.implants())
+			cout << "\t\t" << imp.first.to_string() << ": " << imp.second.to_string() << endl;
+	}
+	cout << endl;
 	/*copy linescans to sims measurements*/
 // 	for (auto iter=dektak6m.measurements().begin();iter!=dektak6m.measurements().end();iter++)
 	for (measurements_::profilers_t::dektak6m_t&  pm : dektak6m.measurements())
@@ -212,9 +224,7 @@ processor::processor(vector<string> args_p) : sql_wrapper(sql)
 		MG.export_origin_ascii(config.dsims_export_location);
 	}
 	
-	cout << "samples: " << samples_list.size() << endl;
-	for (auto& S : samples_list)
-		cout << S.to_string() << endl;
+	logger::to_file("log.txt");
 	
 	if (!logger::instant_print_messages)
 		logger::to_screen();

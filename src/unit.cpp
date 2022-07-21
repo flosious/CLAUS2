@@ -397,7 +397,7 @@ const string unit_t::to_string() const
 		out << prefix.first << " ";
 		out << base_units_exponents.to_string();
 // 		logger::debug(21,"unit_t::to_string()","prefix+derived",prefix.first + it->first);
-		logger::warning(3,"unit_t::to_string()","unknown SI derivate unit:",out.str());
+		logger::debug(17,"unit_t::to_string()","unknown SI derivate unit:",out.str());
 		return out.str();
 	}
 	
@@ -412,7 +412,7 @@ const string unit_t::to_string() const
 		
 // 	logger::debug(5,"unit_t::to_string()","not found","");
 
-	logger::warning(3,"unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));
+	logger::debug(17,"unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));
 	stringstream out;
 	out  << tools::to_string(multiplier) << " * "<< base_units_exponents.to_string();
 	return out.str();

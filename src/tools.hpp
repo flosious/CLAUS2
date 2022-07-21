@@ -191,7 +191,10 @@ public:
         static string load_file_to_string(string filename_with_path);
         static bool write_mat_to_file(string filename_with_path,vector<vector<double>> *matrix, bool append, string column_delimiter, string line_delimiter=LINE_DELIMITER);
         static bool write_mat_to_file(string filename_with_path,vector<vector<string>> *matrix, bool append, string column_delimiter, string line_delimiter=LINE_DELIMITER);
-        static bool write_to_file(string filename_with_path,string *contents, bool append=true);
+        static bool write_to_file(string filename_with_path,const string *contents, bool append=true);
+		///automatically creates folders along the path if they not already exist
+		static bool write_to_file_and_create_folders(string filename_with_path,const string *contents, bool append=true);
+		static bool write_to_file_and_create_folders(string filename, string path,const string *contents, bool append=true);
 		static string extract_filetype_ending(string filename,string filetye_delimiter=".");
         static string extract_directory_from_filename(string filename);
         static string extract_filename(string filename,string filetye_delimiter=".");
