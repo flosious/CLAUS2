@@ -31,12 +31,13 @@ quantity::quantity_t::quantity_t(const quantity_t& quant,const unit_t& unit, str
 
 // quantity::quantity_t::quantity_t(const quantity_t& Q) : name_s()
 
-quantity::quantity_t::quantity_t() : name_s(""), data_s({}),dimension_s(dimensions::SI::relative)
+quantity::quantity_t::quantity_t() : name_s(""), data_s({}),dimension_s(dimensions::SI::relative), logger(global_logger,__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const string& name,const vector<double>& data,const unit_t& unit) : 
-									name_s(name), data_s(data), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit))
+                                    name_s(name), data_s(data), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)),
+                                    logger(global_logger,__FILE__,"quantity::quantity_t")
 {
 }
 
@@ -56,17 +57,20 @@ quantity::quantity_t::quantity_t(const quantity::quantity_t& quant, const unit_t
 }
 
 quantity::quantity_t::quantity_t(const string& name,const unit_t& unit, string add_to_history) :
-	name_s(name), data_s({}), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)), operations_history_s({add_to_history})
+    name_s(name), data_s({}), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)), operations_history_s({add_to_history}),
+    logger(global_logger,__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const string& name,const vector<double>& data,const unit_t& unit, const dimension_t& dimension, const vector<string>& operations_history,string add_to_history) : 
-	name_s(name), data_s(data), unit_s(unit), dimension_s(dimension), operations_history_s(tools::vec::add(operations_history,add_to_history))
+    name_s(name), data_s(data), unit_s(unit), dimension_s(dimension), operations_history_s(tools::vec::add(operations_history,add_to_history)),
+    logger(global_logger,__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const string& name,const vector<double>& data,const unit_t& unit, const dimension_t& dimension) : 
-	name_s(name), data_s(data), unit_s(unit), dimension_s(dimension)
+    name_s(name), data_s(data), unit_s(unit), dimension_s(dimension),
+    logger(global_logger,__FILE__,"quantity::quantity_t")
 {
 }
 
@@ -169,17 +173,17 @@ quantity::quantity_t quantity::quantity_t::interp(const quantity_t& old_X, const
 		return {};
 	if (!old_X.is_set() || !new_X.is_set() || !is_set()) 
 	{
-		logger::error("quantity::quantity_t::interp","!old_X.is_set() || !new_X.is_set() || !is_set()","","returning empty");
+        //logger::error("quantity::quantity_t::interp","!old_X.is_set() || !new_X.is_set() || !is_set()","","returning empty");
 		return {};
 	}
 	if (old_X.data().size()!=data().size())
 	{
-		logger::error("quantity::quantity_t::interp","old_X.data.size()!=data.size()","current_X=" +to_string() +" old_X="+old_X.to_string(),"returning empty");
+        //logger::error("quantity::quantity_t::interp","old_X.data.size()!=data.size()","current_X=" +to_string() +" old_X="+old_X.to_string(),"returning empty");
 		return {};
 	}
 	if (old_X.dimension() != new_X.dimension())
 	{
-		logger::error("quantity::quantity_t::interp","old_X.dimension() != new_X.dimension()","","returning empty");
+        //logger::error("quantity::quantity_t::interp","old_X.dimension() != new_X.dimension()","","returning empty");
 		return {};
 	}
 	auto old_X_same_units = old_X.change_unit(new_X.unit());
@@ -189,12 +193,12 @@ quantity::quantity_t quantity::quantity_t::interp(const quantity_t& old_X, const
 	
 	if (XY_data.begin()->first > new_X.data().front() )
 	{
-		logger::error("quantity::quantity_t::interp","old_X start="+ tools::to_string(XY_data.begin()->first) +" new_X start=" + tools::to_string(new_X.data().front()),"extrapolation not supported","returning empty");
+        //logger::error("quantity::quantity_t::interp","old_X start="+ tools::to_string(XY_data.begin()->first) +" new_X start=" + tools::to_string(new_X.data().front()),"extrapolation not supported","returning empty");
 		return {};
 	}
 	if (XY_data.rbegin()->first < new_X.data().back() )
 	{
-		logger::error("quantity::quantity_t::interp","old_X stop=" + tools::to_string(XY_data.rbegin()->first) + " new_X stop="+tools::to_string(new_X.data().back()),"extrapolation not supported","returning empty");
+        //logger::error("quantity::quantity_t::interp","old_X stop=" + tools::to_string(XY_data.rbegin()->first) + " new_X stop="+tools::to_string(new_X.data().back()),"extrapolation not supported","returning empty");
 		return {};
 	}
 // 	data_s = statistics::interpolate_data_XY(XY_data,new_X.data());
@@ -315,7 +319,7 @@ quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data, u
 		      upper_X_index = x_data.data().size() -1 ;
 	if (x_data.data().size() != data().size())
 	{
-		logger::error("quantity::quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
+        //logger::error("quantity::quantity_t::integrate()","x_data.data.size() != data.size()","return empty");
 		return {};
 	}
 	return get_data_by_index(lower_X_index,upper_X_index).integrate_pbp(x_data.get_data_by_index(lower_X_index,upper_X_index)).back();
@@ -341,13 +345,13 @@ quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data,co
 	unsigned int upper_X_idx=x_data.data().size();
 	if (!x_data_start.is_scalar() || !x_data_stop.is_scalar())
 	{
-		logger::error("quantity::quantity_t::integrate","start/stop quantities no scalars","returning empty");
+        //logger::error("quantity::quantity_t::integrate","start/stop quantities no scalars","returning empty");
 		return {};
 	}
 	
 	if (x_data.dimension() != x_data_start.dimension() || x_data.dimension() != x_data_stop.dimension())
 	{
-		logger::error("quantity::quantity_t::integrate()","x_data.dimension() != x_data_start.dimension() || x_data.dimension() != x_data_stop.dimension()","returning empty");
+        //logger::error("quantity::quantity_t::integrate()","x_data.dimension() != x_data_start.dimension() || x_data.dimension() != x_data_stop.dimension()","returning empty");
 		return {};
 	}
 	
@@ -357,14 +361,14 @@ quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data,co
 	lower_X_idx = get_value_index_position_in_strictly_monotonic_increasing_vector(x_data_start_same_unit.data().front(),x_data.data());
 	if (lower_X_idx<0)
 	{
-		logger::error("quantity::quantity_t::integrate","lower_X_idx<0","returning empty");
+        //logger::error("quantity::quantity_t::integrate","lower_X_idx<0","returning empty");
 		return {};
 	}
 	
 	upper_X_idx = get_value_index_position_in_strictly_monotonic_increasing_vector(x_data_stop_same_unit.data().front(),x_data.data());
 	if (upper_X_idx<0)
 	{
-		logger::error("quantity::quantity_t::integrate","upper_X_idx<0","returning empty");
+        //logger::error("quantity::quantity_t::integrate","upper_X_idx<0","returning empty");
 		return {};
 	}
 	
@@ -889,20 +893,22 @@ quantity::quantity_t quantity::quantity_t::change_resolution(quantity_t new_res)
 // 		return {};
 // 	}
 	if (new_res.data().size()!=1)
-		logger::debug(13,"quantity::quantity_t::change_resolution()","new_res.data.size()!=1",tools::to_string(new_res.data().size()));
+    {
+        //logger::debug(13,"quantity::quantity_t::change_resolution()","new_res.data.size()!=1",tools::to_string(new_res.data().size()));
+    }
 
 	if (!new_res.is_set())
 	{
-		logger::debug(13,"quantity::quantity_t::change_resolution()","!new_res.is_set()","","returning empty");
+        //logger::debug(13,"quantity::quantity_t::change_resolution()","!new_res.is_set()","","returning empty");
 		return {};
 	}
 	change_unit(new_res.unit());
 	if (!is_set())
 	{
-		logger::debug(13,"quantity::quantity_t::resolution()","!old_Q.is_set()","","returning empty");
+        //logger::debug(13,"quantity::quantity_t::resolution()","!old_Q.is_set()","","returning empty");
 		return {};
 	}
-	logger::debug(13,"quantity::quantity_t::resolution()","new_res",new_res.to_string());
+    //logger::debug(13,"quantity::quantity_t::resolution()","new_res",new_res.to_string());
 // 	return resolution(new_res.data.front());
 	return resolution(new_res.data_s.front());
 }
@@ -1012,7 +1018,7 @@ quantity::quantity_t quantity::quantity_t::change_unit(const unit_t& target_unit
 		return {*this,target_unit};
 	if (unit().base_units_exponents != target_unit.base_units_exponents) 
 	{
-		logger::error("quantity::quantity_t::change_unit","unit.base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
+        //logger::error("quantity::quantity_t::change_unit","unit.base_units_exponents != target_unit.base_units_exponents",target_unit.to_string(),"returning this");
 		return {};
 	}
 	auto data_c = data();
@@ -1020,7 +1026,7 @@ quantity::quantity_t quantity::quantity_t::change_unit(const unit_t& target_unit
 // 	*this = *this*factor;
 	for (auto& d : data_c)
 		d *= factor ;
-	logger::debug(14,"quantity::quantity_t::change_unit","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
+    //logger::debug(14,"quantity::quantity_t::change_unit","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
 	stringstream ss;
 	ss << "change_unit(" << target_unit.to_string() << ")";
 	return {name(),data_c,target_unit,dimension(),operations_history(),ss.str()};
@@ -1157,7 +1163,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_by_index(vector<unsigned 
 		return {};
 // 	data_s = tools::vec::erase(data_s,remove_pos);
 // 	operations_history_s.push_back("remove_data_by_index");
-	return {*this,tools::vec::erase(data_s,remove_pos),"remove_data_by_index"};
+    return {*this,tools::vec::erase_copy(data_s,remove_pos),"remove_data_by_index"};
 // 	vector<double> new_data(data().size()-remove_pos.size()); 
 // 	int new_data_counter=0;
 // 	sort (remove_pos.begin(),remove_pos.end());
@@ -1181,7 +1187,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_by_index(unsigned int sta
 		return {};
 	if (start>=data().size())
 	{
-		logger::error("quantity::quantity_t::remove_data_by_index()","start>=data.size()","","return empty");
+        //logger::error("quantity::quantity_t::remove_data_by_index()","start>=data.size()","","return empty");
 		return {};
 	}
 	if (stop>data().size())
@@ -1223,7 +1229,7 @@ quantity::quantity_t quantity::quantity_t::get_data_by_index(unsigned int start,
 		return {};
 	if (start>data_s.size())
 	{
-		logger::error("quantity::quantity_t::get_data_by_index()","start>=data.size()","","returning");
+        //logger::error("quantity::quantity_t::get_data_by_index()","start>=data.size()","","returning");
 		return {};
 	}
 	if (stop>data_s.size())
@@ -1345,7 +1351,7 @@ bool quantity::quantity_t::operator==(double number) const
 		return false;
 	if (!unit().base_units_exponents.is_relative())
 	{
-		logger::error("quantity::quantity_t::operator==","dimension is relative, but unit is not","tell florian");
+        //logger::error("quantity::quantity_t::operator==","dimension is relative, but unit is not","tell florian");
 		return false;
 	}
 	if (abs_sum().data().front()!=number)

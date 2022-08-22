@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2021 Florian Bärwolf
+    Copyright (C) 2021-2022 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -26,8 +26,6 @@
 #include <vector>
 #include <set>
 
-#include <mgl2/mgl.h>
-#include <mgl2/fltk.h>
 // #include <omp.h>
 #include "tools.hpp"
 // #include "sample.hpp"
@@ -38,90 +36,154 @@
 // #include <unordered_set>
 #include "quantity.hpp"
 #include "files.hpp"
-#include "plot.hpp"
+//#include "plot.hpp"
 #include "database_t.hpp"
 #include "calc.hpp"
 #include "config.hpp"
-
+#include "filenames_collector_t.hpp"
+#include "log.hpp"
 // #include "plc++demos.h"
-
-
-using namespace std;
 
 
 class processor 
 {
+
 private:
-	sqlite3* sql = nullptr;
-	database_t sql_wrapper;
-	config_t config;
+
+    class filter
+    {
+    public:
+        template<class T>
+        class files_t
+        {
+        protected:
+            std::vector<T*> files_p;
+        public:
+            files_t(const std::vector<T>& files);
+            files_t(const std::vector<T*>& files);
+            std::vector<T*> files() const;
+            files_t by_olcdb(int olcdb);
+            files_t by_lot(std::string_view lot);
+            files_t by_wafer(int wafer);
+            files_t by_sample(const sample_t& sample);
+            files_t by_sample_matrix(const sample_t::matrix_t& matrix);
+        };
+    };
+
+    class camera_t
+    {
+
+    };
+	
+    class dektak6m_t
+    {
+
+    };
+	
+    class dsims_t
+    {
+    private:
+        class_logger_t logger;
+        ///all available filenames
+        std::vector<string>* filenames_list = nullptr;
+        ///all samples measured by any method
+        std::vector<sample_t>* samples_list = nullptr;
+        database_t* database = nullptr;
+        config_t* config = nullptr;
+    public:
+        filter::files_t<files_::dsims_t> filter_files(const std::vector<files_::dsims_t*>& files_s);
+        filter::files_t<files_::dsims_t> filter_files();
+        std::vector<files_::dsims_t> files;
+        std::vector<measurements_::dsims_t> measurements;
+        std::vector<mgroups_::dsims_t> mgroups;
+
+        dsims_t(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
+        void add_all_files_to_measurements();
+        void add_to_measurement(files_::dsims_t& F);
+    };
 public:
-	class camera_t
-	{
-	private:
-		vector<string>& filenames;
-		vector<files_::jpg_t> files_p;
-		database_t& sql_wrapper;
-	public:
-		camera_t(vector<string>& filenames,database_t& sql_wrapper );
-		vector<files_::jpg_t>& files();
-	};
-	
-	class dektak6m_t
-	{
-	private:
-		vector<string>& filenames;
-		vector<files_::profilers_t::dektak6m_t> files_p;
-		vector<measurements_::profilers_t::dektak6m_t> measurements_p;
-		list<sample_t>& samples_list;
-		database_t& sql_wrapper;
-	public:
-		dektak6m_t(vector<string>& filenames, list<sample_t>& samples_list,database_t& sql_wrapper);
-		vector<files_::profilers_t::dektak6m_t>& files();
-		vector<measurements_::profilers_t::dektak6m_t>& measurements();
-	};
-	
-	class dsims_t
-	{
-	private:
-		vector<string>& filenames;
-		vector<files_::dsims_t> files_p;
-		vector<measurements_::dsims_t> measurements_p;
-		vector<mgroups_::dsims_t> mgroups_p;
-		list<sample_t>& samples_list;
-		database_t& sql_wrapper;
-	public:
-		static string export_path;
-// 		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, vector<measurements_::profilers_t>& profiler_measurements, camera_t& cam, database_t& sql_wrapper);
-		dsims_t(vector<string>& filenames, list<sample_t>& samples_list, database_t& sql_wrapper);
-		vector<files_::dsims_t>& files();
-		vector<measurements_::dsims_t>& measurements();
-		vector<mgroups_::dsims_t>& mgroups();
-	};
-	
-	class tofsims_t
-	{
-	private:
-		vector<string>& filenames;
-		vector<files_::tofsims_t> files_p;
-		vector<measurements_::tofsims_t> measurements_p;
-		vector<mgroups_::tofsims_t> mgroups_p;
-		list<sample_t>& samples_list;
-		database_t& sql_wrapper;
-	public:
-		static string export_path;
-// 		tofsims_t(vector<string>& filenames, list<sample_t>& samples_list, vector<measurements_::profilers_t>& profiler_measurements, camera_t& cam, database_t& sql_wrapper);
-		tofsims_t(vector<string>& filenames, list<sample_t>& samples_list, database_t& sql_wrapper);
-		vector<files_::tofsims_t>& files();
-		vector<measurements_::tofsims_t>& measurements();
-		vector<mgroups_::tofsims_t>& mgroups();
-	};
+    class tofsims_t
+    {
+    private:
+        class_logger_t logger;
+        std::vector<mgroups_::tofsims_t> mgroups_p;
+        ///all available filenames
+        std::vector<string>* filenames_list = nullptr;
+        ///all samples measured by any method
+        std::vector<sample_t>* samples_list = nullptr;
+        database_t* database = nullptr;
+        config_t* config = nullptr;
+        ///ungrouped measurements
+        std::vector<measurements_::tofsims_t> measurements_p;
+        ///filename+path --> files_::tofsims_t
+        std::vector<files_::tofsims_t> files_p;
+    public:
+        tofsims_t(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
+        std::vector<files_::tofsims_t>& files();
+        ///ungrouped measurements
+        std::vector<measurements_::tofsims_t>& measurements();
+        std::vector<mgroups_::tofsims_t>& mgroups();
+        ///just samples measured by tofsims
+        std::vector<sample_t> samples() const;
+        ///add the new group MG to the std::vector mgroups_p
+        void add( mgroups_::tofsims_t& MG);
+        ///add the new measurement M to the std::vector meaasurements_p
+        void add(measurements_::tofsims_t& M);
+        ///adds multiple measurements Ms to the std::vector measurements_p (more efficient)
+        void add(std::vector<measurements_::tofsims_t>& Ms);
+        ///add the new file F to the std::vector files_p
+        void add( files_::tofsims_t& F);
+        ///adds multiple files Fs to the std::vector filesp (more efficient)
+        void add(std::vector<files_::tofsims_t>& Fs);
+        ///removes the file F from the std::vector files_p
+        void remove(files_::tofsims_t& F);
+        ///removes the measurement M from the std::vector meaasurements_p
+        void remove(measurements_::tofsims_t& M);
+        ///will move the Ms to a new group or adds to the existing one
+        void group(std::vector<measurements_::tofsims_t>& Ms);
+        ///will create a measurement from the File F and save it in the std::vector measurements_p
+        void add_all_files_to_measurements();
+        void add_to_measurement(files_::tofsims_t& F);
+        ///will move all measurements to the already existing mgroup MG
+        void move_to_existing_group(std::vector<measurements_::tofsims_t>& Ms, mgroups_::tofsims_t& MG);
+        ///will move all Ms within MG to the meausrements_p std::vector and erase MG from mgroups_p std::vector
+        void ungroup(mgroups_::tofsims_t& MG);
+        ///will remove M within MG from the group MG to the std::vector measurements_p
+        void remove_from_group(measurements_::tofsims_t& M, mgroups_::tofsims_t& MG);
+        ///will remove MG and its containing Ms
+        void remove(mgroups_::tofsims_t& MG);
+    };
+    class aishu_t
+    {
+    private:
+    public:
+        std::vector<files_::aishu_t> files;
+    };
+
 private:
-	vector<string> filenames;
+    sqlite3* sql = nullptr;
+    std::vector<sample_t> samples_list_p;
+    class_logger_t logger;
+    config_t config_p;
 public:
-	processor(vector<string> args_p);
+    processor(std::vector<string> args_p);
+    ~processor();
+    database_t database;
+    const config_t& config() const;
+    ///all samples measured by any method
+    const std::vector<sample_t>& samples_list() const;
+    aishu_t aishu;
+    tofsims_t tofsims;
+    dsims_t dsims;
+    dektak6m_t dektak6m;
+    camera_t camera_images;
+    void parse_unknown_filenames();
+    void parse_filename(std::string filename);
+    void parse_filenames(const std::vector<std::string>& filenames);
+    std::vector<std::string> unknown_filenames;
 };
 
 // extern database_t db;
+extern Logger global_logger;
 
 #endif // PROCESSOR_HPP

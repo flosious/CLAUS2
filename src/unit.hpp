@@ -31,14 +31,15 @@
 // #include <gsl/gsl_const_mksa.h>
 
 using namespace std;
-
+extern Logger global_logger;
 /// just supporting the SI system at the moment, integer exponents
 class unit_t
 {
+private:
+    class_logger_t logger;
 public:
 	class base_exponents_t
 	{
-	private:
 	public:
 		enum base_t
 		{
@@ -93,12 +94,12 @@ private:
 public:
 	base_exponents_t base_units_exponents{0,0,0,0,0,0,0,false};
 public:
-	unit_t() {};
-	unit_t(const unit_t& unit_) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(unit_.prefered_output_string) {};
-	unit_t(double multiplier) : multiplier(multiplier) {};
-	unit_t(const unit_t& unit_, double multiplier, string prefered_unit_string = "" ) : base_units_exponents(unit_.base_units_exponents), multiplier(multiplier), prefered_output_string(prefered_unit_string) {};
-	unit_t(const unit_t& unit_, string prefered_unit_string ) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(prefered_unit_string) {};
-	unit_t(base_exponents_t unit_exponents, double multiplier,string prefered_unit_string ="" ) : base_units_exponents(unit_exponents),multiplier(multiplier),prefered_output_string(prefered_unit_string) {};
+    unit_t() : logger(global_logger,__FILE__,"unit_t") {};
+    unit_t(const unit_t& unit_) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(unit_.prefered_output_string), logger(global_logger,__FILE__,"unit_t") {};
+    unit_t(double multiplier) : multiplier(multiplier),logger(global_logger,__FILE__,"unit_t") {};
+    unit_t(const unit_t& unit_, double multiplier, string prefered_unit_string = "" ) : base_units_exponents(unit_.base_units_exponents), multiplier(multiplier), prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
+    unit_t(const unit_t& unit_, string prefered_unit_string ) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
+    unit_t(base_exponents_t unit_exponents, double multiplier,string prefered_unit_string ="" ) : base_units_exponents(unit_exponents),multiplier(multiplier),prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
 	unit_t(string symbols,string prefered_string="");
 // 	unit_t(unit_t unit_, string prefered_string);
 	
@@ -192,7 +193,8 @@ namespace units
 // 		const unit_t atoms_per_ccm 	= {{-3,0,0,0,1,0,0},1E-6,"at/ccm"};
 		const unit_t atoms_per_ccm 	= {atoms/((SI::meter*prefixes::centi)^3),"at/ccm"};
 		const unit_t atoms_per_scm 	= {atoms/((SI::meter*prefixes::centi)^2),"at/scm"};
-		const unit_t Ang 			= {SI::meter,1E-10,"Ang"};
+        const unit_t Ang 			= {SI::meter,1E-10,"Ang"};
+        const unit_t celsius		= {SI::Kelvin,1,"C"};
 	}
 }
 
@@ -201,6 +203,7 @@ namespace constants
 	 const unit_t elementary_charge = {units::derived::coulomb,1.602176634E-19};
 	 const unit_t avogadro = {{0,0,0,0,-1,0,0},6.02214076E23};
 }
+
 
 
 #endif // UNIT_HPP

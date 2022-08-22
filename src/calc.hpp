@@ -56,6 +56,7 @@ public:
 		private:
 			cluster_t zaehler_p;
 			cluster_t nenner_p;
+            class_logger_t logger;
 		public:
 			cluster_relations_copies_t(const cluster_t& Z, const cluster_t& N, const quantity::abundance_t& abundance_ratio={});
 			const cluster_t& zaehler() const;
@@ -68,7 +69,9 @@ public:
 		private:
 // 			cluster_t* zaehler_p;
 // 			cluster_t* nenner_p;
+            class_logger_t logger;
 		public:
+
 			cluster_relations_t(const measurements_::sims_t& measurement, const cluster_t& zaehler_s, const cluster_t& nenner_s);
 // 			cluster_relations_t(cluster_t& zaehler, const cluster_t& nenner);
 			const measurements_::sims_t& measurement;
@@ -83,6 +86,7 @@ public:
 		{
 		private:
 // 			static const quantity::substance_amount_t rel_zero;
+            class_logger_t logger;
 		public:
 			Crel_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner);
 			///from measurement->matrix->sample; always set
@@ -98,6 +102,7 @@ public:
 		{
 		private:
 			bool intensities_are_set_in_clusters() const;
+            class_logger_t logger;
 		public:
 			Irel_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner);
 			///point by point
@@ -119,6 +124,7 @@ public:
 		class Crel_to_Irel_data_fit_routine_template : public cluster_relations_copies_t
 		{
 		private:
+            class_logger_t logger;
 			///just the isotopes are saved without data
 // 			cluster_t zaehler_p;
 			///just the isotopes are saved without data
@@ -138,7 +144,7 @@ public:
 // 			const quantity::map_t& Crel_to_Irel_map() const;
 			virtual const quantity::concentration_t Crel(const quantity::intensity_t Irel) const;
 			virtual const quantity::concentration_t Crel(const measurements_::sims_t& measurement) const;
-			virtual void plot_to_screen(double sleep_sec=1) const;
+//			virtual void plot_to_screen(double sleep_sec=1) const;
 			bool operator<(const Crel_to_Irel_data_fit_routine_template& obj) const;
 		}; // Crel_to_Irel_data_fit_routine_template
 	public:
@@ -147,13 +153,14 @@ public:
 		{
 		private:
 			fit_functions::polynom_t polynom_p;
+            class_logger_t logger;
 		public:
 			/// polynom must be from Crel_to_Irel_map !
 			Crel_to_Irel_data_polynomial_fit_t(const cluster_t& zaehler, const cluster_t& nenner, const quantity::map_t& Crel_to_Irel_map, fit_functions::polynom_t polynom);
 			const fit_functions::polynom_t& polynom() const;
 			const quantity::concentration_t Crel(const quantity::intensity_t Irel) const final;
 			const quantity::concentration_t Crel(const measurements_::sims_t& measurement) const final;
-			void plot_to_screen(double sleep_sec=1) const final;
+//			void plot_to_screen(double sleep_sec=1) const final;
 		}; // Crel_to_Irel_data_polynomial_fit_t
 		
 		///selection of the available fit routines
@@ -164,7 +171,7 @@ public:
 // 			cluster_t zaehler_p;
 			///just the isotopes are saved without data
 // 			cluster_t nenner_p;
-			
+            class_logger_t logger;
 		public:
 			Crel_to_Irel_data_fits_t(const quantity::map_t& Crel_to_Irel_map,const cluster_t& zaehler, const cluster_t& nenner);
 			quantity::map_t Crel_to_Irel_map;
@@ -181,6 +188,7 @@ public:
 		{
 		private:
 			///this is a helper class to have a nice interface
+            class_logger_t logger;
 			class collect_Irels_t
 			{
 			private:
@@ -220,11 +228,14 @@ public:
 		/// calculations following the principal: [E_1] / [E_2] = matrix_RSF * (E_1)/(E_2)
 		class matrix_t
 		{
+        private:
+            class_logger_t logger;
 		public:
 			///matrix_clusters similar to matrix_clusters_c from cluster.hpp, but more restrictive and error save
 			class clusters_t
 			{
 			private:
+                class_logger_t logger;
 				set<cluster_t> clusters_p;
 			public:
 				///
@@ -251,6 +262,8 @@ public:
 			///physical quantity mRSF (matrix RSF)
 			class RSF_t : public quantity::quantity_t, public cluster_relations_copies_t
 			{
+            private:
+                class_logger_t logger;
 			public:
 				string to_string() const;
 // 				RSF_t(const cluster_relations_copies_t& cluster_relation,const vector<double>& data);
@@ -272,6 +285,8 @@ public:
 			/// it internally creates a logical table of all RSFs and compares it to all given matrix_clusters
 			class RSFs_t
 			{
+            private:
+                class_logger_t logger;
 			protected:
 				static bool sort_rel_chisqr_to_fits_by_chisqr(const pair<double,Crel_to_Irel_data_polynomial_fit_t>& P1, const pair<double,Crel_to_Irel_data_polynomial_fit_t>& P2);
 				clusters_t matrix_clusters_p;
@@ -335,13 +350,14 @@ public:
 				RSFs_t symmetrical_RSFs() const;
 				///sets abundance_relations of all RSFs -> cluster_relations_copies_t
 				RSFs_t add_natural_abundances() const;
-				void plot_now(double sleep_sec=1) const;
+//				void plot_now(double sleep_sec=1) const;
 			}; // RSFs_t
 		public:
 			///calculation of matrix concentrations
 			class concentration_c
 			{
 			private:
+                class_logger_t logger;
 // 				clusters_t matrix_clusters;
 				measurements_::sims_t measurement_p;
 				matrix_clusters_c matrix_clusters;
@@ -432,5 +448,7 @@ public:
 		}; // sputter_depth_t
 	}; //calc_t::sims_t
 }; //calc_t
+
+extern Logger global_logger;
 
 #endif // CALC_T_HPP

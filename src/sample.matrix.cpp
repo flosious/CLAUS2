@@ -25,11 +25,11 @@
 /****************************/
 
 
-sample_t::matrix_t::matrix_t()
+sample_t::matrix_t::matrix_t() : logger(global_logger,__FILE__,"sample_t::matrix_t")
 {
 }
 
-sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes)
+sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes) : logger(global_logger,__FILE__,"sample_t::matrix_t")
 {
 // 	cout << endl << "IN-matrix::isotopes.size()=" << isotopes.size() << endl;
 // 	for (auto& i : isotopes)
@@ -52,7 +52,8 @@ sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes)
 		if (isos_in_ele.size()==0)
 			break;
 		elements.push_back({isos_in_ele});
-		isotopes = tools::vec::erase(isotopes,vec_positions_to_erase);
+//        isotopes = tools::vec::erase(isotopes,vec_positions_to_erase);
+        tools::vec::erase(isotopes,vec_positions_to_erase);
 	}
 // 	cout << endl << "OUT-matrix::isotopes.size()=" << isotopes.size() << endl;
 // 	for (auto& e : elements)
@@ -60,12 +61,12 @@ sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes)
 // 			cout << "iso=" << i.substance_amount.to_string() << endl;
 }
 
-sample_t::matrix_t::matrix_t(const string matrix_elements_s)
+sample_t::matrix_t::matrix_t(const string matrix_elements_s) : logger(global_logger,__FILE__,"sample_t::matrix_t")
 {
 	*this = matrix_t{tools::str::get_strings_between_delimiter(matrix_elements_s," ")};
 }
 
-sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
+sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s) : logger(global_logger,__FILE__,"sample_t::matrix_t")
 {
 	/* 
 	 * mole/abundance/concentration/atoms input values are asumed as absolutes, which are iternally normalized to 100at%: 
@@ -116,19 +117,19 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 			if (PSE.element(symbol)==nullptr)
 			{
 				*this = matrix_t(); //make me empty
-				logger::error("sample_t::matrix_t::matrix_t() symbol is not listed in the PSE, skipping use space as seperator for multiple symbols", ele_or_iso);
+                //logger::error("sample_t::matrix_t::matrix_t() symbol is not listed in the PSE, skipping use space as seperator for multiple symbols", ele_or_iso);
 				return;
 			}
 			if (symbol=="")
 			{
 				*this = matrix_t(); //make me empty
-				logger::error("sample_t::matrix_t::matrix_t() symbol not parseable, skipping", ele_or_iso);
+                //logger::error("sample_t::matrix_t::matrix_t() symbol not parseable, skipping", ele_or_iso);
 				return;
 			}
 			if (nucleons>0 && PSE.element(symbol)->isotope_from_nucleons(nucleons)==nullptr)
 			{
 				*this = matrix_t(); //make me empty
-				logger::error("sample_t::matrix_t::matrix_t() isotope is not listed in the PSE, skipping", ele_or_iso);
+                //logger::error("sample_t::matrix_t::matrix_t() isotope is not listed in the PSE, skipping", ele_or_iso);
 				return;
 			}
 			/*************/
@@ -165,7 +166,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 				if (std::find( isotopes.begin(),isotopes.end(),new_iso)!=isotopes.end())
 				{
 					*this = matrix_t(); //make me empty
-					logger::error("sample_t::matrix_t::matrix_t(): indistinguishable isotopes, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
+                    //logger::error("sample_t::matrix_t::matrix_t(): indistinguishable isotopes, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
 					return;
 				}
 				if (new_iso.substance_amount.is_set() && new_iso.substance_amount.data().at(0)>0) total_amount+=new_iso.substance_amount.data().at(0);
@@ -176,7 +177,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 		else
 		{
 			*this = matrix_t(); //make me empty
-			logger::error("sample_t::matrix_t::matrix_t(): not parseable, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
+            //logger::error("sample_t::matrix_t::matrix_t(): not parseable, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
 			return;
 		}
 	}
@@ -185,7 +186,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 	{
 // 		*this = matrix_t(); //make me empty
 // 		logger::error("sample_t::matrix_t::matrix_t(): more than 1 unknown amount, skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
-		logger::warning(3,"sample_t::matrix_t::matrix_t(): more than 1 unknown amount", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "),"setting subsstance amount to unknown");
+        //logger::warning(3,"sample_t::matrix_t::matrix_t(): more than 1 unknown amount", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "),"setting subsstance amount to unknown");
 		for (auto& iso : isotopes)
 			iso.substance_amount.clear();
 		*this = matrix_t(isotopes);
@@ -211,7 +212,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s)
 			if (!iso.substance_amount.is_set())
 			{
 				*this = matrix_t(); //make me empty
-				logger::error("sample_t::matrix_t::matrix_t(): !iso.substance_amount.is_set(), skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
+                //logger::error("sample_t::matrix_t::matrix_t(): !iso.substance_amount.is_set(), skipping", tools::vec::combine_vec_to_string(elements_or_isotopes_s," "));
 				return;
 			}
 			if (symbol_to_total_amount.find(iso.symbol)==symbol_to_total_amount.end())
@@ -391,10 +392,10 @@ const quantity::concentration_t sample_t::matrix_t::concentration(isotope_t iso)
 
 bool sample_t::matrix_t::operator==(const matrix_t& obj) const
 {
-	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator==()","entering");
+    //logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator==()","entering");
 	if (isotopes().size()!=obj.isotopes().size()) 
 	{
-		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator==()","isotopes.size()!=obj.isotopes.size()","returning FALSE");
+        //logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator==()","isotopes.size()!=obj.isotopes.size()","returning FALSE");
 		return false;
 	}
 	bool same_iso;
@@ -412,11 +413,11 @@ bool sample_t::matrix_t::operator==(const matrix_t& obj) const
 		}
 		if (!same_iso) 
 		{
-			logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator==()","!same_iso","returning FALSE");
+            //logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator==()","!same_iso","returning FALSE");
 			return false;
 		}
 	}
-	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator==()","returning true");
+    //logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator==()","returning true");
 	return true;
 }
 
@@ -427,15 +428,15 @@ bool sample_t::matrix_t::operator!=(const matrix_t& obj) const
 
 bool sample_t::matrix_t::operator<(const matrix_t& obj) const
 {
-	logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator<()","entering");
+    //logger::debug(logger_verbosity_offset+6,"sample_t::matrix_t::operator<()","entering");
 	if (isotopes().size()<obj.isotopes().size()) 
 	{
-		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator<()","returning true");
+        //logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator<()","returning true");
 		return true;
 	}
 	if (isotopes().size()>obj.isotopes().size())
 	{
-		logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator<()","returning FALSE");
+        //logger::debug(logger_verbosity_offset+5,"sample_t::matrix_t::operator<()","returning FALSE");
 		return false;
 	}
 	

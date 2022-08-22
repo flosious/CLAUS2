@@ -35,6 +35,8 @@ class msettings
 public:
 	class sims_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		sims_t();
 		sims_t(files_::sims_t::name_t& filename);
@@ -50,6 +52,8 @@ public:
 
 	class dsims_t : public sims_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		dsims_t();
 		dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents);
@@ -77,6 +81,8 @@ public:
 
 	class tofsims_t : public sims_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 // 		tofsims_t();
 		tofsims_t(files_::tofsims_t::name_t& filename, files_::tofsims_t::contents_t& filecontents);
@@ -89,4 +95,5 @@ public:
 		bool operator!=(const tofsims_t& obj) const;
 	};
 };
+extern Logger global_logger;
 #endif // MEASUREMENT_SETTINGS_T_HPP

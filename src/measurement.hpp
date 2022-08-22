@@ -24,8 +24,8 @@
 #include <string>
 #include <set>
 #include <map>
-#include <mgl2/mgl.h>
-#include <mgl2/fltk.h>
+//#include <mgl2/mgl.h>
+//#include <mgl2/fltk.h>
 #include <unistd.h>
 
 #include "sample.hpp"
@@ -36,7 +36,6 @@
 #include "origin.hpp"
 #include "statistics.hpp"
 
-#include "plot.hpp"
 #include "database_t.hpp"
 /************************/
 // class plot_t;
@@ -62,16 +61,18 @@ class measurements_
 public:	
 	class measurement_t
 	{
+    private:
+        class_logger_t logger;
 	protected:
 		///use these figures to diistinguish one measurement from another
 		static bool use_repetition;
 		static bool use_group;
 		static bool use_olcdb;
 		static bool use_sample;
-		database_t* sql_wrapper=nullptr;
+        database_t* database=nullptr;
 	public:
-		measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, list<sample_t>& samples_list, string method,database_t& sql_wrapper);
-		measurement_t(files_::file_t::name_t& filename, list<sample_t>& samples_list, string method,database_t& sql_wrapper);
+        measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, string method,database_t& database);
+        measurement_t(files_::file_t::name_t& filename, string method,database_t& database);
 		long long unsigned int memory_address() const;
 		string filename_with_path;
 		string to_string(const string del = ", ") const;
@@ -79,7 +80,8 @@ public:
 		string group;
 		string repetition;
 		int olcdb;
-		sample_t* sample=nullptr;
+//		sample_t* sample=nullptr;
+        sample_t sample;
 		/// dsims, tofsims, xps, profiler, ...
 		string method;
 		bool operator==(const measurement_t& obj) const;
@@ -93,30 +95,34 @@ public:
 	public:
 		class profiler_t : public measurement_t
 		{
+        private:
+            class_logger_t logger;
 		protected:
-			profiler_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, const crater_t::linescan_t& linescan_s, list<sample_t>& samples_list, string method,database_t& sql_wrapper);
+            profiler_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, const crater_t::linescan_t& linescan_s, string method,database_t& database);
 			crater_t::linescan_t linescan_p;
 		public:
 			crater_t::linescan_t& linescan();
 			//creates instantly a plot
-			void plot_now(double sleep_sec=1);
+//			void plot_now(double sleep_sec=1);
 		}; //profiler_t
 	public:
 		class dektak6m_t : public profiler_t
 		{
 		public:
-			dektak6m_t(files_::profilers_t::dektak6m_t& file, list<sample_t>& samples_list, database_t& sql_wrapper);
+            dektak6m_t(files_::profilers_t::dektak6m_t& file, database_t& database);
 		};
 		class P17_t : public profiler_t
 		{
 		public:
-			P17_t(files_::profilers_t::dektak6m_t& file, list<sample_t>& samples_list, database_t& sql_wrapper);
+            P17_t(files_::profilers_t::dektak6m_t& file, database_t& database);
 		};
 	}; // profilers_t
 	
 	class sims_t : public measurement_t
 	{
-		friend class processor;
+        friend class processor;
+    private:
+        class_logger_t logger;
 	protected:
 		///some general data filters
 		class filter_t
@@ -142,6 +148,7 @@ public:
 			class SR_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& M;
 				calc_t& calc;
 			public:
@@ -159,6 +166,7 @@ public:
 			class SD_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& M;
 				calc_t& calc;
 			public:
@@ -168,6 +176,7 @@ public:
 			class SF_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& M;
 				calc_t& calc;
 			public:
@@ -204,6 +213,7 @@ public:
 			class RSF_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& M;
 				calc_t& calc;
 			public:
@@ -232,6 +242,7 @@ public:
 			class concentration_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& M;
 				calc_t& calc;
 			public:
@@ -242,6 +253,7 @@ public:
 			class matrix_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& M;
 				calc_t& calc;
 			public:
@@ -258,6 +270,7 @@ public:
 				class quantity_c
 				{
 				private:
+                    class_logger_t logger;
 					quantity::quantity_t Y;
 					int minimum_index_position_p = -1;
 					int maximum_index_position_p = -1;
@@ -276,6 +289,7 @@ public:
 				class map_c
 				{
 				private:
+                    class_logger_t logger;
 					quantity::map_t XY_map_p;
 					int minimum_index_position_p = -1;
 					int maximum_index_position_p = -1;
@@ -301,11 +315,12 @@ public:
 					unsigned int minimum_index_position();
 					unsigned int maximum_index_position();
 					///plot 
-					void to_screen(float seconds=0) const;
+//					void to_screen(float seconds=0) const;
 					///checks if there is sufficient implanted area: implanted_area() >= background_area() * rel_treshold ;; implanted_area() >= abs_treshold
 					bool is_implanted(double abs_treshold = 10,  double rel_treshold=5);
 				};
 			private:
+                class_logger_t logger;
 				sims_t& M;
 				cluster_t& cluster;
 				double X_resolution_factor;
@@ -342,6 +357,7 @@ public:
 				bool is_implanted();
 			}; //implant_c
 		private:
+            class_logger_t logger;
 			map<cluster_t* const, implant_c> implants_s;
 		public:
 			implant_c& implant(cluster_t& cluster, double X_resolution_factor=10);
@@ -360,7 +376,7 @@ public:
 		void add_clusters(vector<cluster_t>& clusters_s);
 		cluster_t matrix_cluster_s;
 	public: 
-		sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, list<sample_t>& samples_list, string method, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+        sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, string method, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 
 		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
@@ -387,7 +403,7 @@ public:
 		matrix_clusters_c matrix_clusters();
 		
 		//creates instantly a plot
-		void plot_now(double sleep_sec=1);
+//		void plot_now(double sleep_sec=1);
 		///origin ready for import
 		void export_origin_ascii(string path="/tmp/", const string delimiter="\t");
 
@@ -421,10 +437,12 @@ public:
 	class dsims_t : public sims_t
 	{
 	private:
+        class_logger_t logger;
 		///for references
 		class db_t
 		{
 		private:
+            class_logger_t logger;
 			///loads all filenames counting as reference for this measurement M
 			static vector<string> ref_filenames();
 			///make this measurement M a reference
@@ -437,22 +455,26 @@ public:
 // 		vector<cluster_t> clusters;
 	public:
 		msettings::dsims_t settings;
-		dsims_t(files_::dsims_t& dsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+        dsims_t(files_::dsims_t& dsims_file, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
 	}; // dsims_t
 	
 	class tofsims_t : public sims_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		msettings::tofsims_t settings;
-		tofsims_t(files_::tofsims_t& tofsims_file, list<sample_t>& samples_list, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+        tofsims_t(files_::tofsims_t& tofsims_file, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+//        tofsims_t(files_::tofsims_t& tofsims_file, std::vector<sample_t>* samples_list, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 
 		bool operator==(const tofsims_t& obj) const;
 		bool operator!=(const tofsims_t& obj) const;
 	}; // tofsims_t
 }; // measurements_
 
+extern Logger global_logger;
 // extern database_t db;
 
 #endif // MEASUREMENT_T_HPP

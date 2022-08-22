@@ -36,13 +36,19 @@ using namespace std;
 
 class config_t 
 {
-
+private:
+    ///tofsims specific settings
+    class tofsims_t
+    {
+    public:
+        std::string export_path;
+    };
 public:	
 	/*CALCULATION METHOD STUFF*/
 	
     /*DEFAULTS*/
     ///default config file location
-    const string default_file = "config.conf";
+    const string default_file = "/home/florian/projects/claus2/build/config.conf";
     ///config file endings: *.conf & *.cfg
     unordered_set<string> file_endings {".conf", ".cfg", ".config"};
     

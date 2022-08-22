@@ -26,20 +26,22 @@
 #include "tools.hpp"
 #include "quantity.hpp"
 #include "cluster.hpp"
-// #include "measurement.hpp"
+
 
 using namespace std;
 
 class plot_t : public mglDraw
 {
 private:
-	
+    class_logger_t logger;
 	class axis_t
 	{
+    private:
 	public:
 		class range_t
 		{
 		private:
+            class_logger_t logger;
 			double backgound_minimum_c(const vector<const quantity::quantity_t*> Ys) const;
 			double backgound_minimum_p;
 		public:
@@ -58,17 +60,18 @@ private:
 		///defines a curve on an axis
 		class points_t
 		{
+        private:
+            class_logger_t logger;
 		public:
 			points_t(const quantity::map_t& XY, const string legende, const string color=" +");
-// 			points_t(const quantity::quantity_t* X,const quantity::quantity_t* Y, const string legende, const string color=" +");
 			const quantity::map_t XY;
-// 			const quantity::quantity_t X;
-// 			const quantity::quantity_t Y;
 			const string color;
 			const string legende="";
 		};
 		class line_t
 		{
+        private:
+            class_logger_t logger;
 		public:
 			const double x_start;
 			const double y_start;
@@ -82,9 +85,6 @@ private:
 		vector<line_t> lines;
 		double start=-1;
 		double stop=-1;
-		///prefered output units
-// 		static string unit_string(const unit_t& unit);
-// 		static string unit_string(quantity::quantity_t& quantity);
 	public:
 		///all the curves for this axis
 		vector<points_t> curves;
@@ -133,18 +133,9 @@ public:
 	axis_t Y1;
 	axis_t Y2;
 	axis_t Y3;
-// 	plot_t(const quantity::quantity_t& X, const quantity::quantity_t& Y, string legend);
-// 	plot_t(const quantity::quantity_t& X, const quantity::quantity_t& Y1, string Y1_legend, const quantity::quantity_t& Y2, string Y2_legend);
-// 	plot_t(const quantity::quantity_t& X, vector<pair<const quantity::quantity_t*,string>> Y1_quantities_to_legends, vector<pair<const quantity::quantity_t*,string>> Y2_quantities_to_legends);
-	
+
 	void to_screen(const string window_title="", double sleep_sec=2);
 	void to_file(const string filename);
-	///concentrations/intensities vs depth
-// 	static plot_t depth_profiles(const vector<const measurements_::sims_t*> Ms);
-	///concentrations/intensities vs time
-// 	static plot_t time_profiles(const vector<const measurements_::sims_t*> Ms);
-	///tries to plot depth_profiles and then time_profiles
-// 	static plot_t measurement(const measurements_::sims_t& M);
 };
-
+extern Logger global_logger;
 #endif //PLOT_T_HPP

@@ -7,15 +7,14 @@
 /*********     isotope_t       ******/
 /************************************/
 
-isotope_t::isotope_t() : symbol(""),nucleons(0)
+isotope_t::isotope_t() : symbol(""),nucleons(0), logger(global_logger,__FILE__,"isotope_t")
 {
 }
 
 
-isotope_t::isotope_t(string symbol_s, int nucleons_s, double abundance_s, double amount_s) :							 symbol(symbol_s), 
-																																   nucleons(nucleons_s),
-																																   abundance({abundance_s}),
-																																   substance_amount({amount_s})
+isotope_t::isotope_t(string symbol_s, int nucleons_s, double abundance_s, double amount_s)
+    : symbol(symbol_s), nucleons(nucleons_s), abundance({abundance_s}), substance_amount({amount_s}),
+      logger(global_logger,__FILE__,"isotope_t")
 {
 	if (abundance_s<0)
 		abundance.clear();
@@ -23,14 +22,14 @@ isotope_t::isotope_t(string symbol_s, int nucleons_s, double abundance_s, double
 		substance_amount.clear();
 }
 
-isotope_t::isotope_t(string str, double abundance_s, double amount_s)
+isotope_t::isotope_t(string str, double abundance_s, double amount_s) : logger(global_logger,__FILE__,"isotope_t")
 {
 	smatch match;
 	if (regex_search(str,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)$"))) /// 11B_fit
 	{
 		stringstream t;
 		t << match[1]  << "\t"  << match[2] << "\t" << match[3];
-		logger::debug(21,"isotope_t::isotope_t()","str",str, t.str());
+        //logger::debug(21,"isotope_t::isotope_t()","str",str, t.str());
 		if (match[1]!="") nucleons = tools::str::str_to_int(match[1]);
 		else 
 		{
@@ -39,7 +38,7 @@ isotope_t::isotope_t(string str, double abundance_s, double amount_s)
 		if (match[2]!="") symbol = match[2];
 		else
 		{
-			logger::error("isotope_t::isotope_t()","symbol=''", "iso:'"+str + "'","returning");
+            //logger::error("isotope_t::isotope_t()","symbol=''", "iso:'"+str + "'","returning");
 			symbol="";
 			return;
 		}
@@ -48,24 +47,26 @@ isotope_t::isotope_t(string str, double abundance_s, double amount_s)
 		*this = isotope_t{symbol,nucleons,abundance_s,amount_s};
 	}
 	else
-		logger::error("isotope_t::isotope_t()","regex_search(iso_p,match,regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",str,"returning");
+    {
+        //logger::error("isotope_t::isotope_t()","regex_search(iso_p,match,regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",str,"returning");
+    }
 }
 
 const quantity::mass_t isotope_t::mass() const
 {
 	if (symbol=="")
 	{
-		logger::error("isotope_t::mass() symbol not set", "this will likely cause calculation errors");
+        //logger::error("isotope_t::mass() symbol not set", "this will likely cause calculation errors");
 		return quantity::mass_t();
 	}
 	if (nucleons<=0)
 	{
-		logger::error("isotope_t::mass() nucleons not set or found", "this will likely cause calculation errors");
+        //logger::error("isotope_t::mass() nucleons not set or found", "this will likely cause calculation errors");
 		return quantity::mass_t();
 	}
 	if (PSE.element(symbol)->isotope_from_nucleons(nucleons)==nullptr) 
 	{
-		logger::error("quantity::mass_t::abundance() isotope not found in PSE", "this will likely cause calculation errors");
+        //logger::error("quantity::mass_t::abundance() isotope not found in PSE", "this will likely cause calculation errors");
 		return quantity::mass_t();
 	}
 	return quantity::mass_t({PSE.element(symbol)->isotope_from_nucleons(nucleons)->mass});
@@ -147,7 +148,7 @@ void isotope_t::set_natural_abundance_from_PSE()
 	auto iso_in_PSE = PSE.isotope(symbol,nucleons);
 	if (iso_in_PSE==nullptr)
 	{
-		logger::error("isotope_t::set_natural_abundance_from_PSE","could not find isotope in PSE: " + to_string());
+        //logger::error("isotope_t::set_natural_abundance_from_PSE","could not find isotope in PSE: " + to_string());
 		return;
 	}
 	abundance = quantity::abundance_t({iso_in_PSE->abundance});

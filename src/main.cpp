@@ -87,6 +87,8 @@
  */
 
 #include "processor.hpp"
+// #include <qt5/QtWidgets/QApplication> // not that easy .... needs a preprocessor ... qmake ... use qtcreator instead to create an external linkable library
+
 
 // void handler(int sig) {
 //   void *array[10];

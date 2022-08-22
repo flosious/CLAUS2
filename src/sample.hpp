@@ -37,22 +37,16 @@
 using namespace std;
 
 
-/*FORWARD DECLARE*/
-
-/*****************/
-
-
-
-
 class sample_t
 {
 	friend class config_t;
 private:
-	static const int logger_verbosity_offset = 0;
+//    class_logger_t logger;
 public:
 	class matrix_t
 	{
 	private:
+        class_logger_t logger;
 		///maybe loaded from DB if not set by ctor
 		///isotope mapping to its absolute concentration in amount of atoms or mole
 		/// OR relative concentration in at%; enforcing always 100at% within a matrix
@@ -109,6 +103,7 @@ public:
 	class implant_s
 	{
 	private:
+        class_logger_t logger;
 		static const int logger_verbosity_offset = 0;
 	public:
 		quantity::dose_t dose;
@@ -127,6 +122,7 @@ public:
 	class db_t
 	{
 	private:
+        class_logger_t logger;
 		static const int logger_verbosity_offset = 10;
 		const database_t& sql_wrapper;
 		static const string tablename;
@@ -137,17 +133,19 @@ public:
 		bool load_from_table();
 		const sample_t& sample;
 	public:
+        db_t(const sample_t& sample, const database_t& sql_wrapper);
 		bool insert(const implant_s implant, const string comment="");
 		///load entries from old db into this(new)
 		static bool migrate_claus1_db(database_t& sql_wrapper, const string filename = "migrate.database.sqlite3");
 		static bool create_table(database_t& sql_wrapper);
-		db_t(const sample_t& sample, const database_t& sql_wrapper);
 		matrix_t& matrix();
 		implant_s implant(const isotope_t& isotope);
 		const map<isotope_t,implant_s>& implants();
 	};
 	class chip_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		chip_t(int x=-1, int y=-1);
 		int x=-1;
@@ -183,8 +181,8 @@ public:
 	string monitor;
 	string simple_name;
 	const string wafer_string() const;
-	
-	matrix_t& matrix();
+    void set_matrix(const sample_t::matrix_t& mat);
+    const matrix_t& matrix() const;
 	
 	
 	/*database stuff*/
@@ -195,11 +193,13 @@ public:
 	/*operators*/
 	bool operator==(const sample_t& obj) const;
 	bool operator!=(const sample_t& obj) const;
-	bool operator<(sample_t& obj);
-	bool operator>(sample_t& obj);
+//    bool operator>(sample_t& obj);
+//    bool operator<(sample_t& obj);
+    bool operator>(const sample_t& obj) const;
+    bool operator<(const sample_t& obj) const;
 	/***********/
 };
 
 // extern database_t db;
-
+//extern Logger global_logger;
 #endif // SAMPLE_T_HPP

@@ -55,15 +55,13 @@ public:
 	*/
 	class mgroup_t 
 	{
+    private:
+        class_logger_t logger;
 	// 	friend class config_t;
 	protected:
 		static bool use_olcdb;
 		static bool use_group;
 		static bool use_settings;
-	protected:
-		///measurements belonging to this group
-// 		mgroup_t(filenames::filename_t& fn, files_::file_t& f, list<sample_t>& samples_list);
-		
 	public:
 		mgroup_t(measurements_::measurement_t& measurement);
 		string to_string(const string del=", ");
@@ -86,6 +84,7 @@ public:
 	class sims_t: public mgroup_t
 	{
 	private:
+        class_logger_t logger;
 	protected:
 		class calc_t
 		{
@@ -93,6 +92,8 @@ public:
 			///calculates the ratios of intensities of 2 (matrix)clusters and their corresponding elemental substance_amount
 			class Crel_to_Irel_c
 			{
+            private:
+                class_logger_t logger;
 			protected:
 				Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc);
 				calc_t& calc;
@@ -134,6 +135,7 @@ public:
 			class SR_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
@@ -152,6 +154,7 @@ public:
 			class SD_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
@@ -165,6 +168,7 @@ public:
 			class SF_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
@@ -184,6 +188,7 @@ public:
 			class RSF_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
@@ -206,6 +211,7 @@ public:
 			class concentration_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
@@ -221,6 +227,7 @@ public:
 			class matrix_c
 			{
 			private:
+                class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
 				const vector<measurements_::sims_t*>& measurements;
@@ -326,14 +333,15 @@ public:
 	{
 // 		friend class processor;
 	private:
+        class_logger_t logger;
 		vector<measurements_::dsims_t> measurements_p;
 		const msettings::dsims_t settings_p;
 	public:
 		dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
 		dsims_t(measurements_::dsims_t& dsims_measurements);
-		const msettings::sims_t* settings() const override;
-		vector<measurements_::sims_t*> measurements() override;
-		vector<measurements_::sims_t> measurements_copy() override;
+		const msettings::sims_t* settings() const final;
+		vector<measurements_::sims_t*> measurements() final;
+		vector<measurements_::sims_t> measurements_copy() final;
 		string to_string(const string del=", ");
 		
 		/*normalize to primary current*/
@@ -346,20 +354,22 @@ public:
 	class tofsims_t: public sims_t
 	{
 	private:
+        class_logger_t logger;
 		vector<measurements_::tofsims_t> measurements_p;
 		const msettings::tofsims_t settings_p;
 	public:
 		tofsims_t(vector<measurements_::tofsims_t>& tofsims_measurements);
 		tofsims_t(measurements_::tofsims_t& tofsims_measurements);
-		const msettings::sims_t* settings() const override;
-		vector<measurements_::sims_t*> measurements() override;
-		vector<measurements_::sims_t> measurements_copy() override;
+		virtual ~tofsims_t();
+		const msettings::sims_t* settings() const final;
+		vector<measurements_::sims_t*> measurements() final;
+		vector<measurements_::sims_t> measurements_copy() final;
 		string to_string(const string del=", ");
 		bool operator==(const tofsims_t& obj) const;
 		bool operator!=(const tofsims_t& obj) const;
 	};
 	
 };
-
+extern Logger global_logger;
 
 #endif // MEASUREMENT_GROUP_T_HPP

@@ -32,7 +32,7 @@
 // #include "sample.hpp"  // geht nicht wegen sample_t->files_ -> cluster_t->sample_t
 
 // #include "crater.hpp"
-#include <mgl2/fltk.h>
+//#include <mgl2/fltk.h>
 // #include "measurement.hpp"
 #include "histogram.hpp"
 
@@ -40,12 +40,15 @@ using namespace std;
 
 
 
-class cluster_t : public mglDraw
+class cluster_t
 {
+private:
+    class_logger_t logger;
 public:
 	class RSF_t : public quantity::quantity_t
 	{
 	private:
+        class_logger_t logger;
 		vector<cluster_t> reference_clusters_p;
 	public:
 		///when no reference_cluster is set, then the reference_intensity from measurement::sims_t will be used
@@ -69,9 +72,8 @@ public:
 		quantity::dose_t dose;
 	};
 	friend class crater_t;
-private:
 public:
-	int Draw(mglGraph * gr) override;
+//	int Draw(mglGraph * gr) override;
 	/// 28Si2 Ge2
 	cluster_t(string clustername, 
 			  quantity::sputter_time_t sputter_time={},
@@ -138,6 +140,7 @@ public:
 class matrix_clusters_c
 {
 private:
+    class_logger_t logger;
 public:
 	matrix_clusters_c(vector<cluster_t>& clusters, const vector<isotope_t> matrix_isotopes);
 	///only clusters with exactly ONE element can be a matrix_cluster, e.g. 30Si2 28Si; but NOT 28Si70Ge
@@ -164,5 +167,7 @@ public:
 	
 	
 };
+
+extern Logger global_logger;
 
 #endif // CLUSTER_T_HPP

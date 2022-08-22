@@ -35,12 +35,15 @@ class pse_t
 {
 // 	friend class config_t;
 private:
+    class_logger_t logger;
 	const string source_url="https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl";
-	const string filename="pse.csv";
+    const string filename="/home/florian/projects/claus2/build/pse.csv";
 	const string delimiter = ",";
 	
 	class pse_isotope_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		pse_isotope_t(const double abundance_s, const int nucleons_s, const double mass_s, const string symbol_alternative_s="");
 		const double abundance;
@@ -55,6 +58,8 @@ private:
 	};
 	class pse_element_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		pse_element_t(string symbol_s, int protons_s, vector<pse_isotope_t>& isotope_s);
 		pse_element_t(string symbol_s, int protons_s, pse_isotope_t& isotope_s);
@@ -76,6 +81,7 @@ private:
 	
 	vector<pse_element_t> elements_p;
 public:
+    pse_t();
 // 	pse_t(const vector<pse_element_t> elements_s);
 	const vector<pse_element_t>& elements();
 	const pse_element_t* element(string symbol);
@@ -93,5 +99,6 @@ public:
 };
 
 extern pse_t PSE;
+extern Logger global_logger;
 
 #endif // PSE_HPP

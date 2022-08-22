@@ -22,11 +22,12 @@
 measurements_::profilers_t::profiler_t::profiler_t(files_::file_t::name_t& filename, 
 												   files_::file_t::contents_t& filecontents, 
 												   const crater_t::linescan_t& linescan_s,
-												   list<sample_t>& samples_list, 
+
 												   string method,
 												   database_t& sql_wrapper) :
-												   measurement_t(filename,filecontents,samples_list,method,sql_wrapper),
-												   linescan_p(linescan_s)
+                                                   measurement_t(filename,filecontents,method,sql_wrapper),
+                                                   linescan_p(linescan_s),
+                                                   logger(global_logger,__FILE__,"measurements_::profilers_t::profiler_t")
 {
 }
 
@@ -39,7 +40,7 @@ crater_t::linescan_t& measurements_::profilers_t::profiler_t::linescan()
 /******* 	 profiler_t::dektak6m_t    **********/
 /************************************************/
 
-measurements_::profilers_t::dektak6m_t::dektak6m_t(files_::profilers_t::dektak6m_t& file, list<sample_t>& samples_list, database_t& sql_wrapper) : 
-	profiler_t(file.name,file.contents,file.contents.linescan(),samples_list,"dektak6m",sql_wrapper)
+measurements_::profilers_t::dektak6m_t::dektak6m_t(files_::profilers_t::dektak6m_t& file, database_t& sql_wrapper) :
+    profiler_t(file.name,file.contents,file.contents.linescan(),"dektak6m",sql_wrapper)
 {
 }

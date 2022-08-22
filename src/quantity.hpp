@@ -41,7 +41,7 @@ namespace quantity
 	class quantity_t
 	{
 	private:
-		
+        class_logger_t logger;
 		const std::map<double,double> data_XY_1D();
 		fit_functions::polynom_t polynom(unsigned int polynom_grade) const; 
 		static int get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec);
@@ -49,6 +49,7 @@ namespace quantity
 		class dimension_t
 		{
 		private:
+
 			static string string_builder(const string base,int exponent);
 		public:
 			constexpr dimension_t(
@@ -59,7 +60,14 @@ namespace quantity
 				int substance_amount=0,
 				int absolute_temperature=0,
 				int luminous_intensity=0
-				) : length(length), mass(mass),time(time),electic_current(electic_current),substance_amount(substance_amount),absolute_temperature(absolute_temperature),luminous_intensity(luminous_intensity) {};
+                )
+                    : length(length),
+                      mass(mass),
+                      time(time),
+                      electic_current(electic_current),
+                      substance_amount(substance_amount),
+                      absolute_temperature(absolute_temperature),
+                      luminous_intensity(luminous_intensity)              {};
 			int length;
 			int mass;
 			int time;
@@ -452,6 +460,7 @@ namespace quantity
 	class map_t
 	{
 	private:
+        class_logger_t logger;
 		vector<pair<double,double>> XYdata_pairs() const;
 		static bool sort_by_x(const pair<double,double>& P1, const pair<double,double>& P2);
 		static bool sort_by_y(const pair<double,double>& P1, const pair<double,double>& P2);
@@ -551,10 +560,13 @@ namespace quantity
 	}; // map_t
 	class table_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		class column_t
 		{
 		private:
+            class_logger_t logger;
 			///line_id -> quantity_entry; each entry can be a vector
 			map<long long unsigned int, quantity_t> quantity_entries_p;
 		public:
@@ -613,6 +625,7 @@ namespace quantity
 		long long unsigned int get_new_sequential_line_id() const;
 		column_t* column(const column_t& col);
 	public:
+        table_t();
 		/// line_id --> line_name
 		map<long long unsigned int,string> line_names;
 		bool add(const table_t& table);
@@ -643,7 +656,8 @@ namespace quantity
 		bool is_set() const;
 	}; //table_t
 	
-	
+
 }
 
+extern Logger global_logger;
 #endif // QUANTITY_HPP

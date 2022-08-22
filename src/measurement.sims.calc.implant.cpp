@@ -22,7 +22,7 @@
 /*******       measurements_::sims_t::calc_t::implant_c::quantity_c        *********/
 /***********************************************************************************/
 
-measurements_::sims_t::calc_t::implant_c::quantity_c::quantity_c(const quantity::quantity_t& Y) :Y(Y)
+measurements_::sims_t::calc_t::implant_c::quantity_c::quantity_c(const quantity::quantity_t& Y) :Y(Y), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::implant_c::quantity_c")
 {
 }
 
@@ -57,7 +57,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 	auto min_pos_finer = cut_Y.min_idx()+start;
 	auto min_pos_finest = Y.get_data_by_index(min_pos_finer*3/4 , min_pos_finer*5/4).polyfit(2).min_idx() + min_pos_finer*3/4;
 	
-	logger::debug(5,"measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index_position()","coarse_minimum=" + ::to_string(coarse_minimum)+"; min_pos_finer="+::to_string(min_pos_finer)+"; min_pos_finest="+::to_string(min_pos_finest));
+    //logger::debug(5,"measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index_position()","coarse_minimum=" + ::to_string(coarse_minimum)+"; min_pos_finer="+::to_string(min_pos_finer)+"; min_pos_finest="+::to_string(min_pos_finest));
 	
 // 	cout << "cut_Y.min_idx()=" << cut_Y.min_idx() << endl;
 // 	plot_t P(false,false);
@@ -87,7 +87,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 
 	if (!statistics::get_extrema_indices(maxIdx,minIdx,YY.data(),deviation))
 	{
-		logger::error("measurements_::sims_t::calc_t::implant_c::minimum_index_position()","statistics::get_extrema_indices","false","returning 0");
+        //logger::error("measurements_::sims_t::calc_t::implant_c::minimum_index_position()","statistics::get_extrema_indices","false","returning 0");
 		return 0;
 	}
 	sort(maxIdx.begin(),maxIdx.end());
@@ -118,7 +118,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 		return 0;
 	
 	min_pos = area_to_min_pos.rbegin()->second; // max area
-	logger::info(3,"measurements_::sims_t::calc_t::implant_c::minimum_index_position()","min_pos: " + ::to_string(min_pos));
+    //logger::info(3,"measurements_::sims_t::calc_t::implant_c::minimum_index_position()","min_pos: " + ::to_string(min_pos));
 	minimum_index_position_p = min_pos;
 	return minimum_index_position_p;
 }
@@ -152,17 +152,17 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_index
 	maximum_index_position_p = statistics::get_max_index_from_Y(intensity_poly6.data());
 	
 	//debugging
-	double seconds_for_fit_plot=0; 
-	if (seconds_for_fit_plot>=0)
-	{
-		plot_t plot(true,true); //log, lin
-		plot.Y1.range(1,1E6,true);
-		plot.Y2.range(1,1E6,true);
-		plot.Y3.range(1,1E6,true);
-		plot.Y1.add_curve(Y,Y.to_string());
-		plot.Y2.add_curve(intensity_poly6,intensity_poly6.to_string());
-		plot.to_screen("measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_index_position()",seconds_for_fit_plot);
-	}
+//	double seconds_for_fit_plot=0;
+//	if (seconds_for_fit_plot>=0)
+//	{
+//		plot_t plot(true,true); //log, lin
+//		plot.Y1.range(1,1E6,true);
+//		plot.Y2.range(1,1E6,true);
+//		plot.Y3.range(1,1E6,true);
+//		plot.Y1.add_curve(Y,Y.to_string());
+//		plot.Y2.add_curve(intensity_poly6,intensity_poly6.to_string());
+//		plot.to_screen("measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_index_position()",seconds_for_fit_plot);
+//	}
 	
 	return maximum_index_position_p;
 }
@@ -174,9 +174,13 @@ quantity::quantity_t measurements_::sims_t::calc_t::implant_c::quantity_c::maxim
 	int vicinity_end = (1 - vicinity_range) * Y.data().size();
 	
 	if (maximum_index_position() >= vicinity_end)
-		logger::warning(3,"measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_position()","maximum close at end");
+    {
+        //logger::warning(3,"measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_position()","maximum close at end");
+    }
 	if (maximum_index_position() <= vicinity_start)
-		logger::warning(3,"measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_position()","maximum close at start");
+    {
+        //logger::warning(3,"measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_position()","maximum close at start");
+    }
 	
 	return Y.at(maximum_index_position());
 }
@@ -191,12 +195,12 @@ quantity::quantity_t measurements_::sims_t::calc_t::implant_c::quantity_c::backg
 /*******         measurements_::sims_t::calc_t::implant_c::map_c           *********/
 /***********************************************************************************/
 
-measurements_::sims_t::calc_t::implant_c::map_c::map_c()
+measurements_::sims_t::calc_t::implant_c::map_c::map_c() : logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::implant_c::map_c")
 {
 	minimum_index_position_p=-1;
 	maximum_index_position_p=-1;
 }
-measurements_::sims_t::calc_t::implant_c::map_c::map_c(const quantity::map_t& XY_map) : XY_map_p(XY_map)
+measurements_::sims_t::calc_t::implant_c::map_c::map_c(const quantity::map_t& XY_map) : XY_map_p(XY_map), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::implant_c::map_c")
 {
 // 	quantity_c Y_c(XY_map.Y());
 // 	minimum_index_position_p = Y_c.minimum_index_position();
@@ -284,16 +288,16 @@ bool measurements_::sims_t::calc_t::implant_c::map_c::is_implanted(double abs_tr
 	if (!background_area().is_set())
 		return false;
 	auto Q_tresh = (XY_map().X().max() -XY_map().X().min()) * quantity::quantity_t(XY_map_p.Y() ,abs_treshold );
-	logger::debug(4,"measurements_::sims_t::calc_t::implant_c::map_c::is_implanted","implanted_area(): " + implanted_area().to_string_short() + "; background_area(): "+background_area().to_string_short()+"; abs_treshold=" + ::to_string(abs_treshold) + "; Q_tresh: "+ Q_tresh.to_string_short()+ "; rel_treshold=" + ::to_string(rel_treshold), "return true");
+    //logger::debug(4,"measurements_::sims_t::calc_t::implant_c::map_c::is_implanted","implanted_area(): " + implanted_area().to_string_short() + "; background_area(): "+background_area().to_string_short()+"; abs_treshold=" + ::to_string(abs_treshold) + "; Q_tresh: "+ Q_tresh.to_string_short()+ "; rel_treshold=" + ::to_string(rel_treshold), "return true");
 	if ( implanted_area() < background_area() * rel_treshold ) 
 	{
-		logger::debug(5,"measurements_::sims_t::calc_t::implant_c::map_c::is_implanted","implanted_area() < background_area() * rel_treshold","returning false");
+        //logger::debug(5,"measurements_::sims_t::calc_t::implant_c::map_c::is_implanted","implanted_area() < background_area() * rel_treshold","returning false");
 		return false;
 	}
 	
 	if (implanted_area() < Q_tresh)
 	{
-		logger::debug(5,"measurements_::sims_t::calc_t::implant_c::map_c::is_implanted","implanted_area() < Q_tresh","returning false");
+        //logger::debug(5,"measurements_::sims_t::calc_t::implant_c::map_c::is_implanted","implanted_area() < Q_tresh","returning false");
 		return false;
 	}
 	//but what if background_area() = 0? --> use abs_treshold
@@ -307,7 +311,8 @@ bool measurements_::sims_t::calc_t::implant_c::map_c::is_implanted(double abs_tr
 /***********************************************************************************/
 
 measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& M, cluster_t& cluster, double X_resolution_factor) :
-	implant_parameters(M.sample->implant(cluster.corresponding_isotope(M.reference_isotopes))), M(M), cluster(cluster), X_resolution_factor(X_resolution_factor)
+    implant_parameters(M.sample.implant(cluster.corresponding_isotope(M.reference_isotopes))), M(M), cluster(cluster), X_resolution_factor(X_resolution_factor),
+    logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::implant_c")
 {
 // 	auto mapper = M.concentration_vs_sputter_depth(cluster);
 // 	if (mapper.is_set())
@@ -326,7 +331,7 @@ measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& M, cluster_t& cluste
 // 		I_vs_ST_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
 	
 	
-	logger::debug(11,"measurements_::sims_t::calc_t::implant_c::implant_c()","new implant object created",cluster.to_string(),M.to_string_short());
+    //logger::debug(11,"measurements_::sims_t::calc_t::implant_c::implant_c()","new implant object created",cluster.to_string(),M.to_string_short());
 }
 
 quantity::concentration_t measurements_::sims_t::calc_t::implant_c::background_concentration()
@@ -416,7 +421,7 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_dose()
 		cluster.implant_parameters.min_intensity = I_vs_SD().minimum_value();
 	
 	quantity::SF_t SF_p = ( implant_parameters.dose / I_vs_SD().area() ).change_unit(units::derived::atoms_per_ccm/units::derived::counts*units::SI::second);
-	logger::info(3,"measurements_::sims_t::calc_t::implant_c::SF_from_dose()",M.to_string_short() + " " + cluster.to_string() + " " + SF_p.to_string());
+    //logger::info(3,"measurements_::sims_t::calc_t::implant_c::SF_from_dose()",M.to_string_short() + " " + cluster.to_string() + " " + SF_p.to_string());
 	
 	return SF_p;
 }
@@ -435,7 +440,7 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_max()
 		cluster.implant_parameters.max_intensity = I_max;
 	
 	quantity::SF_t SF_p = ( implant_parameters.concentration_maximum / I_max ). change_unit(units::derived::atoms_per_ccm/units::derived::counts*units::SI::second);
-	logger::info(3,"measurements_::sims_t::calc_t::implant_c::SF_from_max()",M.to_string_short() + " " + cluster.to_string() + " " + SF_p.to_string());
+    //logger::info(3,"measurements_::sims_t::calc_t::implant_c::SF_from_max()",M.to_string_short() + " " + cluster.to_string() + " " + SF_p.to_string());
 		
 	return SF_p;
 }
@@ -500,24 +505,24 @@ bool measurements_::sims_t::calc_t::implant_c::is_implanted()
 {
 	if (I_vs_ST().XY_map().is_set() && !I_vs_ST().is_implanted())
 	{
-		logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted","I_vs_ST().XY_map().is_set() && !I_vs_ST().is_implanted()");
+        //logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted","I_vs_ST().XY_map().is_set() && !I_vs_ST().is_implanted()");
 		return false;
 	}
 	if (C_vs_SD().XY_map().is_set() && !C_vs_SD().is_implanted())
 	{
-		logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted","C_vs_SD().XY_map().is_set() && !C_vs_SD().is_implanted()");
+        //logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted","C_vs_SD().XY_map().is_set() && !C_vs_SD().is_implanted()");
 		return false;
 	}
 	if (I_vs_SD().XY_map().is_set() && !I_vs_SD().is_implanted())
 	{
-		logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted","I_vs_SD().XY_map().is_set() && !I_vs_SD().is_implanted()");
+        //logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted","I_vs_SD().XY_map().is_set() && !I_vs_SD().is_implanted()");
 		return false;
 	}
 	if (C_vs_ST().XY_map().is_set() && !C_vs_ST().is_implanted())
 	{
-		logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted","C_vs_ST().XY_map().is_set() && !C_vs_ST().is_implanted()");
+        //logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted","C_vs_ST().XY_map().is_set() && !C_vs_ST().is_implanted()");
 		return false;
 	}
-	logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted",cluster.to_string() + " " + M.sample->to_string(),"returning true");
+    //logger::debug(5,"measurements_::sims_t::calc_t::implant_c::is_implanted",cluster.to_string() + " " + M.sample.to_string(),"returning true");
 	return true;
 }

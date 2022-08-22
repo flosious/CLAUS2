@@ -32,6 +32,7 @@
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_minmax.h>
 #include <gsl/gsl_fit.h>
+#include "log.hpp"
 
 using namespace std;
 
@@ -43,6 +44,7 @@ public:
 	class asym2sig_t
 	{
 	private:
+        class_logger_t logger;
 		double chisq_p=-1;
 		double chisq0_p=-1;
 		double gof_p=-1;
@@ -51,6 +53,7 @@ public:
 // 		static int function_1st_derivative(const gsl_vector * x, void *data, gsl_matrix * J);
 		static int function(const gsl_vector * x, void *data, gsl_vector * f);
 	public:
+        asym2sig_t();
 		//fitparameters
 		/// offset
 		double y0;
@@ -80,6 +83,7 @@ public:
 	class polynom_t
 	{
 	private:
+        class_logger_t logger;
 		bool successfully_fitted_p=false;
 		double chisq_p=-1;
 		double chisq_relative_p=-1;
@@ -122,6 +126,7 @@ public:
 	class linear_t
 	{
 	private:
+        class_logger_t logger;
 		double chisq_p=-1;
 		bool successfully_fitted_p=false;
 		double cov_p;
@@ -140,5 +145,5 @@ public:
 		vector<double> y_data(vector<double> x_data);
 	};
 };
-
+extern Logger global_logger;
 #endif // FIT_FUCTIONS

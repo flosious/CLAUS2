@@ -19,7 +19,8 @@
 #include "msettings.hpp"
 
 msettings::sims_t::sims_t(files_::sims_t::name_t& filename) : 
-		sputter_ion(ion_t(filename.sputter_element(),{{1}})), secondary_polarity(filename.secondary_polarity()), sputter_energy(filename.sputter_energy())
+        sputter_ion(ion_t(filename.sputter_element(),{{1}})), secondary_polarity(filename.secondary_polarity()), sputter_energy(filename.sputter_energy()),
+        logger(global_logger,__FILE__,"msettings::sims_t")
 {
 // 	secondary_polarity = filename.secondary_polarity();
 // 	secondary_voltage = filename.secondary_voltage();

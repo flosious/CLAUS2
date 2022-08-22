@@ -17,16 +17,15 @@
 */
 
 #include "crater.hpp"
-#include "plot.hpp"
 
 /************/
 /*LINESCAN_T*/
 /************/
-crater_t::linescan_t::linescan_t()
+crater_t::linescan_t::linescan_t() : logger(global_logger,__FILE__,"crater_t::linescan_t")
 {
 }
 
-crater_t::linescan_t::linescan_t(quantity::quantity_t xy, quantity::quantity_t z) : xy(xy),z(z)
+crater_t::linescan_t::linescan_t(quantity::quantity_t xy, quantity::quantity_t z) : xy(xy),z(z), logger(global_logger,__FILE__,"crater_t::linescan_t")
 {
 }
 
@@ -84,7 +83,7 @@ quantity::quantity_t crater_t::linescan_t::depth()
 	
 	if (fit_params().gof()<0.4)
 	{
-		logger::warning(1,"crater_t::linescan_t::depth()", "fit_params().gof()<0.4",tools::to_string(fit_params().gof()),"skipping");
+        //logger::warning(1,"crater_t::linescan_t::depth()", "fit_params().gof()<0.4",tools::to_string(fit_params().gof()),"skipping");
 		return {};
 	}
 	
@@ -110,36 +109,36 @@ string crater_t::linescan_t::to_string(string prefix)
 	return ss.str();
 }
 
-void crater_t::linescan_t::plot_now(double sleep_sec)
-{
-	plot_t plot(false,false);
-	if (!is_set())
-		return;
-	plot.Y1.add_points(xy,z,"raw","k");
-	fit(); // perform the fit (will save data in assoziated fit_functions::asym2sig)
-	if (fitted)
-	{
-// 		plot.Y1.add_points(xy,fit(),"fit","r");
-		fit_functions::polynom_t slopiness({fit_params().y0,fit_params().m});
-// 		plot.Y1.add_polynom({xy,z},slopiness,"","b");
-// 		auto y_start = slopiness.y_data({fit_params().xc}).front();
-// 		auto y_stop = y_start - depth().data().front();
-// 		plot.Y1.add_arrow(fit_params().xc,y_start,fit_params().xc,y_stop,"Ab",depth().round_(1).to_string());
+//void crater_t::linescan_t::plot_now(double sleep_sec)
+//{
+//	plot_t plot(false,false);
+//	if (!is_set())
+//		return;
+//	plot.Y1.add_points(xy,z,"raw","k");
+//	fit(); // perform the fit (will save data in assoziated fit_functions::asym2sig)
+//	if (fitted)
+//	{
+//// 		plot.Y1.add_points(xy,fit(),"fit","r");
+//		fit_functions::polynom_t slopiness({fit_params().y0,fit_params().m});
+//// 		plot.Y1.add_polynom({xy,z},slopiness,"","b");
+//// 		auto y_start = slopiness.y_data({fit_params().xc}).front();
+//// 		auto y_stop = y_start - depth().data().front();
+//// 		plot.Y1.add_arrow(fit_params().xc,y_start,fit_params().xc,y_stop,"Ab",depth().round_(1).to_string());
 		
-		//plot a planar profile
-		auto asym2sig_planar = fit_params();
-		asym2sig_planar.y0 =0;
-		asym2sig_planar.m = 0;
-		quantity::quantity_t z_slope(z,slopiness.y_data(xy.data()));
-		plot.Y2.add_points(xy,z-z_slope,"raw planarized","b");;
-		plot.Y2.add_arrow(fit_params().xc,0,fit_params().xc,-depth().data().front(),"Ab",depth().round_(1).to_string());
-// 		double range_start = plot.Y2.range().start;
-// 		double range_stop = plot.Y1.range().stop;
-// 		plot.Y1.range(range_start,range_stop,false);
-// 		plot.Y2.range(range_start,range_stop,false);
-	}
-	plot.to_screen(to_string(),sleep_sec);
-}
+//		//plot a planar profile
+//		auto asym2sig_planar = fit_params();
+//		asym2sig_planar.y0 =0;
+//		asym2sig_planar.m = 0;
+//		quantity::quantity_t z_slope(z,slopiness.y_data(xy.data()));
+//		plot.Y2.add_points(xy,z-z_slope,"raw planarized","b");;
+//		plot.Y2.add_arrow(fit_params().xc,0,fit_params().xc,-depth().data().front(),"Ab",depth().round_(1).to_string());
+//// 		double range_start = plot.Y2.range().start;
+//// 		double range_stop = plot.Y1.range().stop;
+//// 		plot.Y1.range(range_start,range_stop,false);
+//// 		plot.Y2.range(range_start,range_stop,false);
+//	}
+//	plot.to_screen(to_string(),sleep_sec);
+//}
 
 
 
@@ -166,19 +165,19 @@ const string crater_t::sputter_beam_t::to_string(const string del) const
 /**************/
 /** CRATER_T **/
 /**************/
-crater_t::crater_t()
+crater_t::crater_t() : logger(global_logger,__FILE__,"crater_t")
 {
 }
 
-crater_t::crater_t(const quantity::sputter_depth_t& sputter_depth) : sputter_depth(sputter_depth)
+crater_t::crater_t(const quantity::sputter_depth_t& sputter_depth) : sputter_depth(sputter_depth), logger(global_logger,__FILE__,"crater_t")
 {
 }
-crater_t::crater_t(const quantity::sputter_time_t& sputter_time) : sputter_time(sputter_time)
+crater_t::crater_t(const quantity::sputter_time_t& sputter_time) : sputter_time(sputter_time), logger(global_logger,__FILE__,"crater_t")
 {
 }
 
 crater_t::crater_t(const quantity::sputter_time_t& sputter_time, const quantity::sputter_depth_t& sputter_depth) : 
-	sputter_time(sputter_time), sputter_depth(sputter_depth)
+    sputter_time(sputter_time), sputter_depth(sputter_depth), logger(global_logger,__FILE__,"crater_t")
 {
 }
 
@@ -264,7 +263,7 @@ quantity::quantity_t crater_t::common_X_quantity(const vector<quantity::quantity
 	
 	if (mins.size()==0 || maxs.size()==0)
 	{
-		logger::error("crater_t::common_X_quantity()", "mins.size()==0 || maxs.size()==0","","returning false");
+        //logger::error("crater_t::common_X_quantity()", "mins.size()==0 || maxs.size()==0","","returning false");
 		return {};
 	}
 	
@@ -276,20 +275,24 @@ quantity::quantity_t crater_t::common_X_quantity(const vector<quantity::quantity
 	
 	if (resolution<=0)
 	{
-		logger::error("crater_t::common_X_quantity()","resolution<=0","","returning false");
+        //logger::error("crater_t::common_X_quantity()","resolution<=0","","returning false");
 		return {};
 	}
 	else
-		logger::debug(11,"crater_t::common_X_quantity()","resolution: ", tools::to_string(resolution));
+    {
+        //logger::debug(11,"crater_t::common_X_quantity()","resolution: ", tools::to_string(resolution));
+    }
 	
 	const int common_dimension_data_size = floor(x_max-x_min)/resolution+1;
 	if (common_dimension_data_size<3)
 	{
-		logger::error("crater_t::common_X_quantity()","common_dimension_data_size<3",tools::to_string(common_dimension_data_size),"returning false");
+        //logger::error("crater_t::common_X_quantity()","common_dimension_data_size<3",tools::to_string(common_dimension_data_size),"returning false");
 		return {};
 	}
 	else
-		logger::debug(11,"crater_t::common_X_quantity()","common_dimension_data_size: ", tools::to_string(common_dimension_data_size));
+    {
+        //logger::debug(11,"crater_t::common_X_quantity()","common_dimension_data_size: ", tools::to_string(common_dimension_data_size));
+    }
 	
 	vector<double> X_data(common_dimension_data_size);
 	for (int i=0;i<common_dimension_data_size;i++)
@@ -302,7 +305,7 @@ quantity::sputter_depth_t crater_t::common_sputter_depth(vector<cluster_t>& clus
 {
 	if(clusters.size()==0)
 	{
-		logger::error("crater_t::common_sputter_depth()","clusters.size()==0","","returning empty");
+        //logger::error("crater_t::common_sputter_depth()","clusters.size()==0","","returning empty");
 		return {};
 	}
 	vector<quantity::quantity_t> sputter_depths; 
@@ -311,10 +314,10 @@ quantity::sputter_depth_t crater_t::common_sputter_depth(vector<cluster_t>& clus
 		if (clusters.at(i).sputter_depth.is_set())
 			sputter_depths.push_back(clusters.at(i).sputter_depth);
 	}
-	logger::debug(7,"crater_t::common_sputter_depth","sputter_depths.size()="+tools::to_string(sputter_depths.size()) + " clusters.size()="+tools::to_string(clusters.size()));
+    //logger::debug(7,"crater_t::common_sputter_depth","sputter_depths.size()="+tools::to_string(sputter_depths.size()) + " clusters.size()="+tools::to_string(clusters.size()));
 	if (sputter_depths.size() != clusters.size() )
 	{
-		logger::error("crater_t::common_sputter_depth()","sputter_depths.size() != clusters.size()","check exported clusters for sputter_depth","returning empty");
+        //logger::error("crater_t::common_sputter_depth()","sputter_depths.size() != clusters.size()","check exported clusters for sputter_depth","returning empty");
 		return {};
 	}
 	return quantity::sputter_depth_t{common_X_quantity(sputter_depths)};
@@ -324,7 +327,7 @@ quantity::sputter_time_t crater_t::common_sputter_time(vector<cluster_t>& cluste
 {
 	if(clusters.size()==0)
 	{
-		logger::error("crater_t::common_sputter_time","clusters.size()==0","","returning empty");
+        //logger::error("crater_t::common_sputter_time","clusters.size()==0","","returning empty");
 		return {};
 	}
 	vector<quantity::quantity_t> sputter_times; 
@@ -335,7 +338,7 @@ quantity::sputter_time_t crater_t::common_sputter_time(vector<cluster_t>& cluste
 	}
 	if (sputter_times.size() != clusters.size() )
 	{
-		logger::error("crater_t::common_sputter_time","sputter_times.size() != clusters.size()","check exported clusters for sputter_time","returning empty");
+        //logger::error("crater_t::common_sputter_time","sputter_times.size() != clusters.size()","check exported clusters for sputter_time","returning empty");
 		return {};
 	}
 	return quantity::sputter_time_t{common_X_quantity(sputter_times)};
@@ -345,17 +348,17 @@ crater_t crater_t::change_resolution(quantity::sputter_depth_t sputter_depth_res
 {
 	if (!sputter_depth.is_set())
 	{
-		logger::error("crater_t::change_resolution","!sputter_depth().is_set()","","returning this");
+        //logger::error("crater_t::change_resolution","!sputter_depth().is_set()","","returning this");
 		return *this;
 	}
 	if (!sputter_depth_res.is_set())
 	{
-		logger::error("crater_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
+        //logger::error("crater_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
 		return *this;
 	}
 	if (sputter_depth_res.data().size()==1 && sputter_depth_res.data().at(0)==0)
 	{
-		logger::error("crater_t::change_resolution","!sputter_depth_res is 0","","returning this");
+        //logger::error("crater_t::change_resolution","!sputter_depth_res is 0","","returning this");
 		return *this;
 	}
 	crater_t copy_C = *this;
@@ -373,17 +376,17 @@ crater_t crater_t::change_resolution(quantity::sputter_time_t sputter_time_res)
 {
 	if (!sputter_time.is_set())
 	{
-		logger::error("crater_t::change_resolution","!sputter_depth().is_set()","","returning this");
+        //logger::error("crater_t::change_resolution","!sputter_depth().is_set()","","returning this");
 		return *this;
 	}
 	if (!sputter_time_res.is_set())
 	{
-		logger::error("crater_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
+        //logger::error("crater_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
 		return *this;
 	}
 	if (sputter_time_res.data().size()==1 && sputter_time_res.data().at(0)==0)
 	{
-		logger::error("crater_t::change_resolution","!sputter_depth_res is 0","","returning this");
+        //logger::error("crater_t::change_resolution","!sputter_depth_res is 0","","returning this");
 		return *this;
 	}
 	crater_t copy_C = *this;
@@ -399,7 +402,7 @@ crater_t crater_t::change_resolution(quantity::sputter_time_t sputter_time_res)
 
 quantity::current_t& crater_t::sputter_current()
 {
-// 	logger::debug(10,"crater_t::sputter_current()","sputter_beam.sputter_current()",sputter_beam.sputter_current.to_string());
+// 	//logger::debug(10,"crater_t::sputter_current()","sputter_beam.sputter_current()",sputter_beam.sputter_current.to_string());
 	if (sputter_beam.sputter_time.is_set() && sputter_time.is_set())
 	{
 		sputter_beam.sputter_current = sputter_beam.sputter_current.interp(sputter_beam.sputter_time,sputter_time);
@@ -412,7 +415,7 @@ quantity::current_t& crater_t::sputter_current()
 	}
 	else if (sputter_beam.sputter_depth.is_set() || sputter_beam.sputter_time.is_set())
 	{
-		logger::error("crater_t::sputter_current()","can not interpolate sputter_beam, there seem to be differences in exported clusters sputter_time / depth","","return empty");
+        //logger::error("crater_t::sputter_current()","can not interpolate sputter_beam, there seem to be differences in exported clusters sputter_time / depth","","return empty");
 		sputter_beam.sputter_current.clear();
 	}
 	return sputter_beam.sputter_current;

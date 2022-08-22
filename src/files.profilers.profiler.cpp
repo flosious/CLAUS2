@@ -25,6 +25,6 @@ files_::profilers_t::profiler_t::contents_t::contents_t(string& filename_with_pa
 
 crater_t::linescan_t files_::profilers_t::profiler_t::contents_t::linescan()
 {
-	logger::error("files_::profilers_t::profiler_t::contents_t::linescan()","virtual function called, this should never happen, tell florian");
+    //logger::error("files_::profilers_t::profiler_t::contents_t::linescan()","virtual function called, this should never happen, tell florian");
 	return {};
 }

@@ -25,7 +25,10 @@ calc_t::sims_t::sims_t(const vector<measurements_::sims_t>& measurements) : meas
 /********    cluster_relations_copies_t     ************/
 /*******************************************************/
 
-calc_t::sims_t::cluster_relations_copies_t::cluster_relations_copies_t(const cluster_t& Z, const cluster_t& N, const quantity::abundance_t& abundance_ratio) : zaehler_p(Z), nenner_p(N), abundance_ratio(abundance_ratio)
+calc_t::sims_t::cluster_relations_copies_t::cluster_relations_copies_t(const cluster_t& Z,
+                                                                       const cluster_t& N,
+                                                                       const quantity::abundance_t& abundance_ratio)
+        : zaehler_p(Z), nenner_p(N), abundance_ratio(abundance_ratio), logger(global_logger,__FILE__,"calc_t::sims_t::cluster_relations_copies_t")
 {
 }
 
@@ -47,12 +50,17 @@ calc_t::sims_t::cluster_relations_t::cluster_relations_t(const measurements_::si
 														 const cluster_t& nenner_s) : 
 														 measurement(measurement), 
 														 zaehler(measurement.cluster(zaehler_s)), 
-														 nenner(measurement.cluster(nenner_s))
+                                                         nenner(measurement.cluster(nenner_s)),
+                                                         logger(global_logger,__FILE__,"calc_t::sims_t::cluster_relations_t")
 {
 	if (zaehler==nullptr)
-		logger::fatal("calc_t::sims_t::cluster_relations_t::cluster_relations_t()","zaehler==nullptr", zaehler_s.to_string());
+    {
+//		logger::fatal("calc_t::sims_t::cluster_relations_t::cluster_relations_t()","zaehler==nullptr", zaehler_s.to_string());
+    }
 	if (nenner == nullptr)
-		logger::fatal("calc_t::sims_t::cluster_relations_t::cluster_relations_t()","nenner==nullptr", nenner_s.to_string());
+    {
+//		logger::fatal("calc_t::sims_t::cluster_relations_t::cluster_relations_t()","nenner==nullptr", nenner_s.to_string());
+    }
 }
 
 bool calc_t::sims_t::cluster_relations_t::clusters_exist() const
@@ -68,7 +76,7 @@ bool calc_t::sims_t::cluster_relations_t::clusters_exist() const
 
 
 calc_t::sims_t::Crel_t::Crel_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner) :
-							cluster_relations_t(measurement,zaehler,nenner)
+                            cluster_relations_t(measurement,zaehler,nenner), logger(global_logger,__FILE__,"calc_t::sims_t::Crel_t")
 {
 }
 
@@ -82,7 +90,7 @@ const quantity::substance_amount_t calc_t::sims_t::Crel_t::substance_amount(cons
 
 const quantity::substance_amount_t calc_t::sims_t::Crel_t::substance_amount(const isotope_t& iso) const
 {
-	auto iso_mat = measurement.sample->matrix().isotope(iso);
+    auto iso_mat = measurement.sample.matrix().isotope(iso);
 	if (iso_mat==nullptr)
 		return quantity::substance_amount_t({0},units::derived::atom_percent,quantity::dimensions::SI::relative);
 // 	cout << "substance_amount:" << iso_mat->substance_amount.to_string_detailed() << endl;
@@ -97,18 +105,18 @@ const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_eleme
 		return {};
 	if (Crel_isotopical.is_inf() || Crel_isotopical==0) 
 		return Crel_isotopical;
-	if (!measurement.sample->matrix().is_set())
+    if (!measurement.sample.matrix().is_set())
 		return {};
 	if (zaehler==nullptr || nenner == nullptr)
 		return {};
 	//ATTENTION zaehler could be nullptr
-	if (measurement.sample->matrix().isotope(zaehler->isotopes.front())==nullptr)
+    if (measurement.sample.matrix().isotope(zaehler->isotopes.front())==nullptr)
 		return {};
 	//ATTENTION nenner could be nullptr
-	if (measurement.sample->matrix().isotope(nenner->isotopes.front())==nullptr)
+    if (measurement.sample.matrix().isotope(nenner->isotopes.front())==nullptr)
 		return {};
-	const auto abu_Z = measurement.sample->matrix().isotope(zaehler->isotopes.front())->abundance;
-	const auto abu_N = measurement.sample->matrix().isotope(nenner->isotopes.front())->abundance;
+    const auto abu_Z = measurement.sample.matrix().isotope(zaehler->isotopes.front())->abundance;
+    const auto abu_N = measurement.sample.matrix().isotope(nenner->isotopes.front())->abundance;
 	
 	if (!abu_Z.is_set() || !abu_N.is_set())
 		return {};
@@ -118,7 +126,7 @@ const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_eleme
 
 const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_isotopes() const
 {
-	logger::debug(21,"calc_t::sims_t::Crel_t::from_sample_matrix_isotopes()","entering");
+//	logger::debug(21,"calc_t::sims_t::Crel_t::from_sample_matrix_isotopes()","entering");
 	if (zaehler == nullptr || nenner==nullptr)
 		return {};
 	auto amount_zaehler = substance_amount(*zaehler);
@@ -128,7 +136,7 @@ const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_isoto
 // 	cout << nenner->to_string() << " amount_nenner:" << amount_nenner.to_string_detailed() << endl;
 	if (amount_zaehler == amount_nenner && amount_nenner==0)
 	{
-		logger::info(6,"calc_t::sims_t::Crel_t::from_sample_matrix_isotopes()","zaehler + nenner have 0 substance_amount in matrix",nenner->to_string()+" "+zaehler->to_string(), measurement.to_string_short());
+//		logger::info(6,"calc_t::sims_t::Crel_t::from_sample_matrix_isotopes()","zaehler + nenner have 0 substance_amount in matrix",nenner->to_string()+" "+zaehler->to_string(), measurement.to_string_short());
 		return {};
 	}
 	
@@ -141,7 +149,7 @@ const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_isoto
 /*******************************************************/
 
 calc_t::sims_t::Irel_t::Irel_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner) :
-								cluster_relations_t(measurement,zaehler,nenner)
+                                cluster_relations_t(measurement,zaehler,nenner), logger(global_logger,__FILE__,"calc_t::sims_t::Irel_t")
 {
 // 	zaehler_p;
 }
@@ -218,7 +226,8 @@ calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel_to_Irel_data_fit_ro
 																							   const cluster_t& nenner, 
 																							   const quantity::map_t& Crel_to_Irel_map) :
 // 																							   zaehler_p(zaehler.isotopes), nenner_p(nenner.isotopes),
-																							   Crel_to_Irel_map(Crel_to_Irel_map), cluster_relations_copies_t(zaehler,nenner)
+                                                                                               Crel_to_Irel_map(Crel_to_Irel_map), cluster_relations_copies_t(zaehler,nenner),
+                                                                                               logger(global_logger,__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fit_routine_template")
 {
 }
 
@@ -250,21 +259,21 @@ bool calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::operator<(const Cre
 
 const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel(const measurements_::sims_t& measurement) const
 {
-	logger::error("calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel(measurement)","you should never read this, tell Florian","return empty","");
+//	logger::error("calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel(measurement)","you should never read this, tell Florian","return empty","");
 	return {};
 }
 
 const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel(const quantity::intensity_t Irel) const
 {
-	logger::error("calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel(Irel)","you should never read this, tell Florian","return empty");
+//	logger::error("calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel(Irel)","you should never read this, tell Florian","return empty");
 	return {};
 }
 
-void calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::plot_to_screen(double sleep_sec) const
-{
-	logger::error("calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::plot_to_screen()","you should never read this, tell Florian","return");
-	return;
-}
+//void calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::plot_to_screen(double sleep_sec) const
+//{
+////	logger::error("calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::plot_to_screen()","you should never read this, tell Florian","return");
+//	return;
+//}
 
 string calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::to_string() const
 {
@@ -281,7 +290,7 @@ calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::Crel_to_Irel_data_polynomial
 // 																					   const pair<quantity::concentration_t, quantity::intensity_t> Crel_to_Irel_data, 
 																					   const quantity::map_t& Crel_to_Irel_map,
 																					   fit_functions::polynom_t polynom) : 
-										Crel_to_Irel_data_fit_routine_template(zaehler,nenner,Crel_to_Irel_map), 
+                                        Crel_to_Irel_data_fit_routine_template(zaehler,nenner,Crel_to_Irel_map), logger(global_logger,__FILE__,"calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t"),
 										polynom_p(polynom)
 {
 }
@@ -306,7 +315,7 @@ const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_polynomial_fit
 {
 	if (!measurement.are_intensities_of_clusters_set({zaehler(),nenner()}))
 	{
-		logger::warning(3,"calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::Crel()","!measurement.are_intensities_of_clusters_set( "+measurement.to_string_short() +" )","returning empty");
+//		logger::warning(3,"calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::Crel()","!measurement.are_intensities_of_clusters_set( "+measurement.to_string_short() +" )","returning empty");
 		return {};
 	}
 	auto Irel = measurement.cluster(zaehler())->intensity / measurement.cluster(nenner())->intensity;
@@ -314,22 +323,22 @@ const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_polynomial_fit
 	return Crel(Irel);
 }
 
-void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double sleep_sec) const
-{
-	plot_t plot(false,false);
-	stringstream plot_title;
+//void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double sleep_sec) const
+//{
+//	plot_t plot(false,false);
+//	stringstream plot_title;
 
-	auto Crel_to_Irel_map_withot_infs = Crel_to_Irel_map.remove_inf();
-// 	cout << endl << Crel_to_Irel_map_withot_infs.to_string_list() << endl;
-	plot.Y1.add_points(Crel_to_Irel_map_withot_infs,zaehler().to_string() + " / " + nenner().to_string()," ro");
-	if (polynom().successfully_fitted())
-	{
-// 		plot.Y1.add_polynom(Crel_to_Irel_map,polynom(),polynom().to_string()); 
-		plot.Y1.add_polynom(Crel_to_Irel_map_withot_infs,polynom(),polynom().to_string()); 
-	}
-	plot_title << "{" << zaehler().to_string() << "} / {" << nenner().to_string() <<  "}";
-	plot.to_screen(plot_title.str(),sleep_sec);
-}
+//	auto Crel_to_Irel_map_withot_infs = Crel_to_Irel_map.remove_inf();
+//// 	cout << endl << Crel_to_Irel_map_withot_infs.to_string_list() << endl;
+//	plot.Y1.add_points(Crel_to_Irel_map_withot_infs,zaehler().to_string() + " / " + nenner().to_string()," ro");
+//	if (polynom().successfully_fitted())
+//	{
+//// 		plot.Y1.add_polynom(Crel_to_Irel_map,polynom(),polynom().to_string());
+//		plot.Y1.add_polynom(Crel_to_Irel_map_withot_infs,polynom(),polynom().to_string());
+//	}
+//	plot_title << "{" << zaehler().to_string() << "} / {" << nenner().to_string() <<  "}";
+//	plot.to_screen(plot_title.str(),sleep_sec);
+//}
 
 
 /*******************************************************/
@@ -338,7 +347,8 @@ void calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::plot_to_screen(double s
 
 calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_data_fits_t(const quantity::map_t& Crel_to_Irel_map, const cluster_t& zaehler, const cluster_t& nenner) :
 													Crel_to_Irel_map(Crel_to_Irel_map), 
-													cluster_relations_copies_t(zaehler,nenner)
+                                                    cluster_relations_copies_t(zaehler,nenner),
+                                                    logger(global_logger,__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fits_t")
 // 													zaehler_p(zaehler.isotopes),nenner_p(nenner.isotopes)
 {
 }
@@ -363,13 +373,14 @@ const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t calc_t::sims_t::Crel_to
 calc_t::sims_t::Crel_to_Irel_data_collector_t::Crel_to_Irel_data_collector_t(const cluster_t& zaehler, 
 																				   const cluster_t& nenner,
 																				   const vector<measurements_::sims_t>& measurements) :
-																				   zaehler(zaehler), nenner(nenner),measurements(measurements)
+                                                                                   zaehler(zaehler), nenner(nenner),measurements(measurements),
+                                                                                   logger(global_logger,__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fits_t")
 {
 }
 
 const calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t calc_t::sims_t::Crel_to_Irel_data_collector_t::elemental_Crel()
 {
-	logger::debug(21,"calc_t::sims_t::Crel_to_Irel_data_collector_t::elemental_Crel()","entering...");
+//	logger::debug(21,"calc_t::sims_t::Crel_to_Irel_data_collector_t::elemental_Crel()","entering...");
 	map<const quantity::concentration_t, const calc_t::sims_t::Irel_t> Crel_data_to_Irels;
 	for (const auto& M : measurements)
 	{
@@ -384,9 +395,9 @@ const calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t calc_t::sim
 }
 const calc_t::sims_t::Crel_to_Irel_data_collector_t::collect_Irels_t calc_t::sims_t::Crel_to_Irel_data_collector_t::isotopical_Crel()
 {
-	logger::debug(21,"calc_t::sims_t::Crel_to_Irel_data_collector_t::isotopical_Crel()","entering...");
+//	logger::debug(21,"calc_t::sims_t::Crel_to_Irel_data_collector_t::isotopical_Crel()","entering...");
 	map<const quantity::concentration_t, const calc_t::sims_t::Irel_t> Crel_data_to_Irels;
-	for (const auto& M : measurements)
+    for (const auto& M : measurements)
 	{
 		calc_t::sims_t::Crel_t Crel(M,zaehler,nenner);
 		if (!Crel.from_sample_matrix_elements().is_set())

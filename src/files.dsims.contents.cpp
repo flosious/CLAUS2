@@ -28,7 +28,9 @@
 /*****  files_::dsims_t::contents_t  ****/
 /***************************************/
 
-files_::dsims_t::contents_t::contents_t(string& filename_with_path) : files_::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"})
+files_::dsims_t::contents_t::contents_t(string& filename_with_path)
+    : files_::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"}), logger(global_logger,__FILE__,"files_::dsims_t::contents_t")
+
 {
 }
 
@@ -95,10 +97,12 @@ vector<cluster_t> files_::dsims_t::contents_t::clusters()
 		if (cluster.is_set()) 
 		{
 			collected_clusters.push_back(cluster);
-			logger::debug(11,"files_::dsims_t::contents_t::clusters()","cluster.to_string()",cluster.to_string());
+            //logger::debug(11,"files_::dsims_t::contents_t::clusters()","cluster.to_string()",cluster.to_string());
 		}
 		else
-			logger::error("files_::dsims_t::contents_t::clusters()", "!cluster.is_set()",clustername);
+        {
+            //logger::error("files_::dsims_t::contents_t::clusters()", "!cluster.is_set()",clustername);
+        }
 	}
 	return collected_clusters;
 }
@@ -110,13 +114,13 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 	if (check_Ipr()) ipr_shift_correction();
 	if (!parse_units_dimensions_clusternames())
 	{
-		logger::error("files_::dsims_t::contents_t::columns()","could not parse_units_dimensions_clusternames","","return empty");
+        //logger::error("files_::dsims_t::contents_t::columns()","could not parse_units_dimensions_clusternames","","return empty");
 		return {};
 	}
 	remove_corrupted_lines();
 	if (cluster_names().size()<1)
 	{
-		logger::error("files_::dsims_t::contents_t::columns()", "cluster_names().size()<1 && !parse_units_dimensions_clusternames()","","returning empty");
+        //logger::error("files_::dsims_t::contents_t::columns()", "cluster_names().size()<1 && !parse_units_dimensions_clusternames()","","returning empty");
 		return {};
 	}
 	
@@ -135,18 +139,18 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 		col.data=tools::mat::str_vec_to_double_vec(col_data_string);
 		if (col.data.size()==0) continue;
 		columns_s.push_back(col);
-		logger::debug(13,"files_::dsims_t::contents_t::columns()",col.to_string());
+        //logger::debug(13,"files_::dsims_t::contents_t::columns()",col.to_string());
 	}
 	
 	if (dimensions().size() != data_cols_lines.size())
 	{
-		logger::warning(3,"files_::dsims_t::contents_t::columns()","dimensions().size() != data_cols_lines.size()","bug in ckb_asc Cs+","fixed using last unit in line");
+        //logger::warning(3,"files_::dsims_t::contents_t::columns()","dimensions().size() != data_cols_lines.size()","bug in ckb_asc Cs+","fixed using last unit in line");
 		columns_s.back().unit = units().back();
-		logger::debug(12,"files_::dsims_t::contents_t::columns()","cols_per_element=",tools::to_string(cols_per_element));
-		logger::debug(12,"files_::dsims_t::contents_t::columns()","dimensions().size()=",tools::to_string(dimensions().size()));
-		logger::debug(12,"files_::dsims_t::contents_t::columns()","cluster_names().size()=",tools::to_string(cluster_names().size()));
-		logger::debug(12,"files_::dsims_t::contents_t::columns()","units().size()=",tools::to_string(units().size()));
-		logger::debug(12,"files_::dsims_t::contents_t::columns()","data_cols_lines.size()=",tools::to_string(data_cols_lines.size()));
+        //logger::debug(12,"files_::dsims_t::contents_t::columns()","cols_per_element=",tools::to_string(cols_per_element));
+        //logger::debug(12,"files_::dsims_t::contents_t::columns()","dimensions().size()=",tools::to_string(dimensions().size()));
+        //logger::debug(12,"files_::dsims_t::contents_t::columns()","cluster_names().size()=",tools::to_string(cluster_names().size()));
+        //logger::debug(12,"files_::dsims_t::contents_t::columns()","units().size()=",tools::to_string(units().size()));
+        //logger::debug(12,"files_::dsims_t::contents_t::columns()","data_cols_lines.size()=",tools::to_string(data_cols_lines.size()));
 	}
 	return columns_s;
 }
@@ -166,7 +170,7 @@ const crater_t::sputter_beam_t files_::dsims_t::contents_t::Ipr()
 		if (col.dimension=="I") 
 		sputter_current_s = quantity::current_t(col.data,col.unit);
 	}
-	logger::debug(10,"files_::dsims_t::contents_t::Ipr()","sputter_current_s.to_string()",sputter_current_s.to_string());
+    //logger::debug(10,"files_::dsims_t::contents_t::Ipr()","sputter_current_s.to_string()",sputter_current_s.to_string());
 	return {sputter_current_s,sputter_time,sputter_depth_s};
 }
 
@@ -191,7 +195,7 @@ const vector<string>& files_::dsims_t::contents_t::cluster_names()
 
 bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 {
-	logger::debug(21,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","entering","");
+    //logger::debug(21,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","entering","");
 	cluster_names_p.clear();
 	units_p.clear();
 	dimensions_p.clear();
@@ -217,7 +221,7 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 	}
 	if (samples.size()!=1) 
 	{
-		logger::error("files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","samples.size()!=1",filename_with_path,"returning false");
+        //logger::error("files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","samples.size()!=1",filename_with_path,"returning false");
 		return false;
 	}
 	for (int i=0;i<((raw_header_tensor().at(c))[elements_line_number]).size();i++) {
@@ -236,8 +240,9 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 		}
 	}
         
-	if (units_p.size()!=dimensions_p.size()) {
-		logger::error("files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","units_p.size()!=dimensions_p.size()", tools::to_string(units_p.size())+"!="+tools::to_string(dimensions_p.size()));
+    if (units_p.size()!=dimensions_p.size())
+    {
+        //logger::error("files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","units_p.size()!=dimensions_p.size()", tools::to_string(units_p.size())+"!="+tools::to_string(dimensions_p.size()));
 		return false;
 	}
 	int cols_per_element = dimensions_p.size()/cluster_names_p.size();
@@ -260,7 +265,7 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 // 		return false;
 // 	}
 
-	logger::debug(21,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","exiting","");
+    //logger::debug(21,"files_::dsims_t::contents_t::parse_units_dimensions_clusternames()","exiting","");
     return true;
 }
 
@@ -310,7 +315,7 @@ void files_::dsims_t::contents_t::remove_corrupted_lines()
 	if (raw_data_tensor().size()==0) return;
 	for (set<int>::reverse_iterator it=corrupted_lines_p.rbegin();it!=corrupted_lines_p.rend();++it)
 	{
-		logger::info(1,"files_::dsims_t::contents_t::remove_corrupted_lines()","line="+ std::to_string(*it), filename_with_path,"erasing line");
+        //logger::info(1,"files_::dsims_t::contents_t::remove_corrupted_lines()","line="+ std::to_string(*it), filename_with_path,"erasing line");
 		raw_data_tensor_p.at(0).erase(raw_data_tensor_p.at(0).begin()+*it);
 	}
 }
@@ -324,7 +329,7 @@ bool files_::dsims_t::contents_t::ipr_shift_correction()
 	vector<vector<string>>* mat = &raw_data_tensor_p.at(0);
     if (mat->size()==0) 
 	{
-		logger::error("files_::dsims_t::contents_t::ipr_shift_correction()","raw_data_tensor_p.at(0).size()==0",to_string(),"returning false");
+        //logger::error("files_::dsims_t::contents_t::ipr_shift_correction()","raw_data_tensor_p.at(0).size()==0",to_string(),"returning false");
 		return false;
 	}
 	int cols_per_element = dimensions().size()/cluster_names().size();

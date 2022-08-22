@@ -30,6 +30,7 @@ public:
 	class sims_t
 	{
 	private:
+        class_logger_t logger;
 		///Ms are unique, so it is effectively a set
 		///sort data using measurement as reference column to sort lines   	/*************************/
 		vector<const measurements_::sims_t*> measurements;							// M1* // Q1 // Q2 // .. //
@@ -55,5 +56,5 @@ public:
 		quantity::table_t measurement_line_names() const;
 	};
 };
-
+extern Logger global_logger;
 #endif // DATA_COLLECTOR_T_HPP

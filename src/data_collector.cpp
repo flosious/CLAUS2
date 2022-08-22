@@ -1,6 +1,6 @@
 #include "data_collector.hpp"
 
-data_collectors_t::sims_t::sims_t(const vector<measurements_::sims_t*>& Ms_s) 
+data_collectors_t::sims_t::sims_t(const vector<measurements_::sims_t*>& Ms_s)  : logger(global_logger,__FILE__,"data_collectors_t::sims_t")
 {
 	measurements.reserve(Ms_s.size());
 	for (const auto M : Ms_s)
@@ -14,7 +14,7 @@ quantity::table_t::column_t data_collectors_t::sims_t::get_column_concentrations
 	quantity::table_t::column_t col;
 	for (auto& M : measurements)
 	{
-		const auto mat_concentration = M->sample->matrix().concentration(iso);
+        const auto mat_concentration = M->sample.matrix().concentration(iso);
 		if (mat_concentration.is_set())
 		{
 			col.add_quantity_entry(M->memory_address(),mat_concentration);
@@ -29,7 +29,7 @@ quantity::table_t::column_t data_collectors_t::sims_t::get_column_concentrations
 	quantity::table_t::column_t col;
 	for (auto& M : measurements)
 	{
-		const auto mat_concentration = M->sample->matrix().concentration(ele);
+        const auto mat_concentration = M->sample.matrix().concentration(ele);
 		if (mat_concentration.is_set())
 		{
 			col.add_quantity_entry(M->memory_address(),mat_concentration);

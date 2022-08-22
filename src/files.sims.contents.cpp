@@ -22,13 +22,13 @@
 /*** sims_t ***/
 /**************/
 files_::sims_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : 
-										files_::file_t::contents_t(filename_with_path,delimiter,identifiers)
+                                        files_::file_t::contents_t(filename_with_path,delimiter,identifiers), logger(global_logger,__FILE__,"files_::sims_t::contents_t")
 {
 }
 
 vector<cluster_t> files_::sims_t::contents_t::clusters()
 {
-	logger::fatal("you should never be able to read this","virtual const vector<cluster_t> filecontents::sims_t::clusters()");
+    //logger::fatal("you should never be able to read this","virtual const vector<cluster_t> filecontents::sims_t::clusters()");
 	return {};
 }
 void files_::sims_t::contents_t::column_t::to_screen()

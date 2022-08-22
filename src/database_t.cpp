@@ -23,11 +23,11 @@
 
 
 
-database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle)
+database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle), logger(global_logger,__FILE__,"database_t")
 { 
 } 
 
-database_t::database_t(sqlite3* sql_handle, string filename) : sql_handle(sql_handle), file_location(filename)
+database_t::database_t(sqlite3* sql_handle, string filename) : sql_handle(sql_handle), file_location(filename), logger(global_logger,__FILE__,"database_t")
 {
 }
 
@@ -37,30 +37,30 @@ bool database_t::open() {
 
 	if (sql_handle!=nullptr)
 	{
-		logger::debug(logger_verbosity_offset+11,"database_t::open()","database already opened","","return true");
+        //logger::debug(logger_verbosity_offset+11,"database_t::open()","database already opened","","return true");
 		return true;
 	}
     exit = sqlite3_open(file_location.c_str(), &this->sql_handle);
   
     if (exit) 
 	{
-		logger::error("database_t::open()","could not open database",file_location,"returning false");
+        //logger::error("database_t::open()","could not open database",file_location,"returning false");
 		return false;  
 		
 	}
 	execute_sql("PRAGMA secure_delete = true");
-	logger::debug(logger_verbosity_offset+11,"database_t::open()","database successfully opened","","return true");
+    //logger::debug(logger_verbosity_offset+11,"database_t::open()","database successfully opened","","return true");
     return true; 
 }
 
 // bool database_t::create_tables() 
 // {
 // 	if (!create_table_everything()) 
-// 		logger::error("database_t::create_tables()","!create_table_everything()");
+// 		//logger::error("database_t::create_tables()","!create_table_everything()");
 // 	if (!create_table_samples()) 
-// 		logger::error("database_t::create_tables()","!create_table_samples()");
+// 		//logger::error("database_t::create_tables()","!create_table_samples()");
 // 	if (!create_table_measurements()) 
-// 		logger::error("database_t::create_tables()","!create_table_measurements()");
+// 		//logger::error("database_t::create_tables()","!create_table_measurements()");
 // 	return true;
 // }
 
@@ -234,14 +234,14 @@ bool database_t::execute_sql(string sql, int (*func_ptr)(void*,int,char**,char**
     char *zErrMsg = 0;
 	int rc = sqlite3_exec(this->sql_handle, sql.c_str(), func_ptr, func_arg, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		logger::error("database_t::execute_sql()","sql-command: " + sql,zErrMsg,"returning false");
-// 		logger::error("database_t::execute_sql()", "SQL error: ") + zErrMsg);
+        //logger::error("database_t::execute_sql()","sql-command: " + sql,zErrMsg,"returning false");
+// 		//logger::error("database_t::execute_sql()", "SQL error: ") + zErrMsg);
 // 		std::cout << "execute_sql() SQL error: "<< zErrMsg << std::endl;
 // 		std::cout << "sql-command: " << sql << "\n";
 		sqlite3_free(zErrMsg);
 		return false;
 	}
-	logger::debug(logger_verbosity_offset+10,"database_t::execute_sql()","sql command executed successfully",sql,"returning true");
+    //logger::debug(logger_verbosity_offset+10,"database_t::execute_sql()","sql command executed successfully",sql,"returning true");
 	return true;
 }
 

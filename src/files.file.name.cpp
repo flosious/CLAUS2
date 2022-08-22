@@ -27,7 +27,8 @@ files_::file_t::name_t::name_t(string& filename_with_path_s,
 											filename_with_path(filename_with_path_s),
 											delimiter(delimiter_s),
 											OR_identifiers_s(OR_identifiers_s),
-											AND_identifiers_s(AND_identifiers_s)
+                                            AND_identifiers_s(AND_identifiers_s),
+                                            logger(global_logger,__FILE__,"files_::file_t::name_t")
 {	
 	parse_filename_parts();
 }
@@ -58,11 +59,13 @@ const string files_::file_t::name_t::simple_name()
 		simple_name_p = not_parseable_filename_parts().at(0);
 	
 	if (simple_name_p=="")
-		logger::warning(1,"files_::file_t::name_t::simple_name()","simple_name_p=='' && lot()==''",filename_with_path,"using " + simple_name_p);
+    {
+//		logger::warning(1,"files_::file_t::name_t::simple_name()","simple_name_p=='' && lot()==''",filename_with_path,"using " + simple_name_p);
+    }
 	return simple_name_p;
 }
 
-const bool files_::file_t::name_t::is_correct_type()
+bool files_::file_t::name_t::is_correct_type()
 {
 	if (filename()=="") return false;
 	
@@ -70,7 +73,7 @@ const bool files_::file_t::name_t::is_correct_type()
 	{
 		if ((filename()+"."+filename_type_ending()).find(fti)==string::npos)
 		{
-			logger::debug(33,"files_::file_t::name_t::is_correct_type()","wrong AND file type: " + filename_with_path );
+            //logger::debug(33,"files_::file_t::name_t::is_correct_type()","wrong AND file type: " + filename_with_path );
 			return false;
 		}
 	}
@@ -88,7 +91,7 @@ const bool files_::file_t::name_t::is_correct_type()
 			return true;
 		}
 	}
-	logger::debug(33,"files_::file_t::name_t::is_correct_type()","wrong OR file type: " +  filename_with_path );
+    //logger::debug(33,"files_::file_t::name_t::is_correct_type()","wrong OR file type: " +  filename_with_path );
 	return false;
 }
 
@@ -110,7 +113,9 @@ string files_::file_t::name_t::group()
 {
 	parse_filename_parts();
 	if (group_p=="")
-		logger::warning(1,"files_::file_t::name_t::group()","group_p==''",filename_with_path,"using " + group_p);
+    {
+//		logger::warning(1,"files_::file_t::name_t::group()","group_p==''",filename_with_path,"using " + group_p);
+    }
 // 		logger::info("files_::file_t::group() unkown" ,filename_with_path);
 		
 	return group_p;
@@ -119,7 +124,10 @@ string files_::file_t::name_t::lot()
 {
 	parse_filename_parts();
 	if (lot_p=="")
-		logger::warning(1,"files_::file_t::lot() unkown", filename_with_path);
+    {
+//		logger::warning(1,"files_::file_t::lot() unkown", filename_with_path);
+    }
+
 // 	if (lot_p=="" && not_parseable_filename_parts().size()>0)
 // 		lot_p =  not_parseable_filename_parts().at(0);
 	
@@ -139,11 +147,13 @@ string files_::file_t::name_t::monitor()
 // 		logger::info("files_::file_t::monitor() " +filename(),monitor_p);
 	return monitor_p;
 }
-const int files_::file_t::name_t::olcdb()
+int files_::file_t::name_t::olcdb()
 {
 	parse_filename_parts();
 	if (olcdb_p<0)
-		logger::warning(1,"files_::file_t::name_t::olcdb()","olcdb_p<0",filename_with_path,"using " + tools::to_string(olcdb_p));
+    {
+//		logger::warning(1,"files_::file_t::name_t::olcdb()","olcdb_p<0",filename_with_path,"using " + tools::to_string(olcdb_p));
+    }
 // 		logger::warning("files_::file_t::olcdb() unkown",filename_with_path);
 	return olcdb_p;
 }
@@ -230,7 +240,7 @@ void files_::file_t::name_t::parse_filename_parts()
 		if (lot_p=="") 
 		{
 			lot_p = filename_part;
-			logger::debug(15,"files_::file_t::name_t::parse_filename_parts","filename_part:lot_p as simple name : " + lot_p);
+//			logger::debug(15,"files_::file_t::name_t::parse_filename_parts","filename_part:lot_p as simple name : " + lot_p);
 			continue;
 		}
 		if (wafer_p==-1) if(parse_wafer(filename_part)) continue;
@@ -241,7 +251,7 @@ void files_::file_t::name_t::parse_filename_parts()
 // 		if (parse_crater_depth(filename_part)) continue;
 		// no parser worked
 		not_parseable_filename_parts_p.push_back(filename_part);
-		logger::debug(15,"files_::file_t::name_t::parse_filename_parts","filename_part : not_parseable : " + filename_part);
+//		logger::debug(15,"files_::file_t::name_t::parse_filename_parts","filename_part : not_parseable : " + filename_part);
 			
 	}
 // 	if (lot_p=="" || olcdb_p==-1 || wafer_p==-1 || group_p=="") 
@@ -259,7 +269,7 @@ bool files_::file_t::name_t::parse_monitor(string filename_part)
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) || regex_search(filename_part,match,reg3)) 
 	{
 		monitor_p = match[1];
-		logger::debug(17,"files_::file_t::name_t::parse_monitor",monitor_p);
+//		logger::debug(17,"files_::file_t::name_t::parse_monitor",monitor_p);
 		return true;
 	}
 	return false;
@@ -275,7 +285,7 @@ bool files_::file_t::name_t::parse_chip(string filename_part)
 	{
 		chip_x_p = tools::str::str_to_int(match[1]);
 		chip_y_p = tools::str::str_to_int(match[2]);
-		logger::debug(7,"files_::file_t::name_t::parse_chip",::to_string( chip_x_p) + " " + ::to_string( chip_y_p));
+//		logger::debug(7,"files_::file_t::name_t::parse_chip",::to_string( chip_x_p) + " " + ::to_string( chip_y_p));
 		return true;
 	}
 	return false;
@@ -288,7 +298,7 @@ bool files_::file_t::name_t::parse_olcdb(string filename_part)
 	if (regex_search(filename_part,match,reg)) 
 	{
 		olcdb_p = tools::str::str_to_int(filename_part);
-		logger::debug(17,"files_::file_t::name_t::parse_olcdb",::to_string(olcdb_p));
+//		logger::debug(17,"files_::file_t::name_t::parse_olcdb",::to_string(olcdb_p));
 		return true;
 	}
 	return false;
@@ -298,11 +308,12 @@ bool files_::file_t::name_t::parse_lot(string filename_part)
 {
 	smatch match;
 	regex reg ("^([a-zA-Z]{1,4}[0-9]{1,4})([#[0-9A-Za-z]*?]*?)$"); 
-	if (regex_search(filename_part,match,reg)) 
+    if (regex_search(filename_part,match,reg))
 	{
 		lot_p = match[1];
 		lot_split_p = match[2];
-		logger::debug(17,"files_::file_t::name_t::parse_lot",lot_p + " " + lot_split_p);
+        logger.debug(__func__,filename_with_path).value(lot_p,10,lot_split_p);
+//		logger::debug(17,"files_::file_t::name_t::parse_lot",lot_p + " " + lot_split_p);
 		return true;
 	}
 	return false;
@@ -315,7 +326,7 @@ bool files_::file_t::name_t::parse_wafer(string filename_part)
 	if (regex_search(filename_part,match,reg)) 
 	{
 		wafer_p = tools::str::str_to_int(match[1]);
-		logger::debug(17,"files_::file_t::name_t::parse_wafer",::to_string(wafer_p));
+        //logger::debug(17,"files_::file_t::name_t::parse_wafer",::to_string(wafer_p));
 		return true;
 	}
 	return false;
@@ -331,7 +342,7 @@ bool files_::file_t::name_t::parse_group(string filename_part)
 // 		cout << "filename_part=" << filename_part << endl;
 		group_p = match[1];
 		repetition_p = match[2];
-		logger::debug(17,"files_::file_t::name_t::parse_group",group_p + " " + repetition_p);
+        //logger::debug(17,"files_::file_t::name_t::parse_group",group_p + " " + repetition_p);
 // 		cout << "match[1]=" << match[1] << endl;
 // 		cout << "match[2]=" << match[2] << endl;
 // 		cout << "group_p=" << group_p << endl;
@@ -349,7 +360,7 @@ bool files_::file_t::name_t::parse_repetitor(string filename_part)
 	if (regex_search(filename_part,match,reg1) || regex_search(filename_part,match,reg2) /*|| regex_search(filename_part,match,reg3)*/) 
 	{
 		repetition_p = match[1];
-		logger::debug(17,"files_::file_t::name_t::parse_repetitor",repetition_p);
+        //logger::debug(17,"files_::file_t::name_t::parse_repetitor",repetition_p);
 		return true;
 	}
 	return false;
@@ -422,7 +433,7 @@ bool files_::file_t::name_t::operator==(files_::file_t::name_t& obj)
 {
 	if (filename_with_path == obj.filename_with_path) 
 // 		logger::error("comparing identical filenames, you should never read this","tell florian");
-		logger::error("files_::file_t::name_t::operator==","filename_with_path == obj.filename_with_path",tools::to_string(filename_with_path)+"=="+tools::to_string(obj.filename_with_path),"you should never read this, tell florian");
+        //logger::error("files_::file_t::name_t::operator==","filename_with_path == obj.filename_with_path",tools::to_string(filename_with_path)+"=="+tools::to_string(obj.filename_with_path),"you should never read this, tell florian");
 	
 	if (olcdb() != obj.olcdb()) return false;
 	if (lot() != obj.lot()) return false;
@@ -448,7 +459,7 @@ bool files_::file_t::name_t::operator!=(files_::file_t::name_t& obj)
 
 
 files_::file_t::crater_in_name_t::crater_in_name_t(string& filename_with_path_s,const string delimiter_s,const set<string> OR_identifiers_s,const set<string> AND_identifiers_s) :
-	files_::file_t::name_t(filename_with_path_s,delimiter_s,OR_identifiers_s,AND_identifiers_s)
+    files_::file_t::name_t(filename_with_path_s,delimiter_s,OR_identifiers_s,AND_identifiers_s), logger(global_logger,__FILE__,"files_::file_t::crater_in_name_t")
 {
 }
 

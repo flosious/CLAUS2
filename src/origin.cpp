@@ -31,11 +31,13 @@ origin_t::column_t::column_t(const quantity::quantity_t& quantity, string prefix
 {
 }
 
-origin_t::column_t::column_t(const vector<double>& data_s, string longname, string unit, string comment) :
+origin_t::column_t::column_t(const vector<double>& data_s, string longname, string unit, string comment)
+    :
 	data(tools::vec::double_to_string(data_s)),
 	longname(longname),
 	unit(unit),
-	comment(comment)
+    comment(comment),
+    logger(global_logger,__FILE__,"origin_t::column_t")
 {
 }
 

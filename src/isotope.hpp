@@ -37,7 +37,7 @@ using namespace std;
 class isotope_t
 {
 private:
-
+    class_logger_t logger;
 public:
 	isotope_t();
 	///nucleons_s=-1 -> isotope with highest natural abundance
@@ -59,7 +59,7 @@ public:
 	const bool operator!=(const isotope_t& obj) const;
 	const bool operator<(const isotope_t& obj) const;
 };
-
+extern Logger global_logger;
 
 
 

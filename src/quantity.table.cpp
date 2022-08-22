@@ -4,16 +4,17 @@
 /*********  quantity::table_t::column_t  ************/
 /****************************************************/
 
-quantity::table_t::column_t::column_t() : name(""), comment("")
+quantity::table_t::column_t::column_t() : name(""), comment(""), logger(global_logger,__FILE__,"quantity::table_t::column_t")
 {
 }
 
-quantity::table_t::column_t::column_t(long long unsigned int line_id,const quantity_t& q, string name, string comment) : name(name), comment(comment)
+quantity::table_t::column_t::column_t(long long unsigned int line_id,const quantity_t& q, string name, string comment)
+    : name(name), comment(comment), logger(global_logger,__FILE__,"quantity::table_t::column_t")
 {
 	quantity_entries_p.insert(pair<long long unsigned int, quantity::quantity_t>(line_id,q));
 	if (!q.is_set())
 	{
-		logger::debug(7,"quantity::table_t::column_t::column_t()","q is not set!",q.to_string());
+        //logger::debug(7,"quantity::table_t::column_t::column_t()","q is not set!",q.to_string());
 	}
 }
 
@@ -111,7 +112,7 @@ bool quantity::table_t::column_t::add_quantity_entry(long long unsigned int line
 		return false;
 	if (quantity_entries().find(line_id)!=quantity_entries().end())
 	{
-		logger::error("quantity::table_t::column_t::add_quantity_entry","line_id already exists","quantity_entries.at("+ ::to_string(line_id)+")="+quantity_entries().at(line_id).to_string(),"returning false");
+        //logger::error("quantity::table_t::column_t::add_quantity_entry","line_id already exists","quantity_entries.at("+ ::to_string(line_id)+")="+quantity_entries().at(line_id).to_string(),"returning false");
 		return false;
 	}
 	quantity_entries_p.insert(pair<long long unsigned int,quantity::quantity_t>(line_id,q));
@@ -127,7 +128,7 @@ bool quantity::table_t::column_t::unset_quantity_entry(long long unsigned int li
 {
 	if (quantity_entries().find(line_id)==quantity_entries().end())
 	{
-		logger::error("quantity::table_t::column_t::unset_quantity_entry()","could not find line_id=" + ::to_string(line_id),"returning false");
+        //logger::error("quantity::table_t::column_t::unset_quantity_entry()","could not find line_id=" + ::to_string(line_id),"returning false");
 		return false;
 	}
 	quantity_entries_p.at(line_id).clear();
@@ -142,7 +143,7 @@ bool quantity::table_t::column_t::unset_quantities(const quantity_t& q)
 	{
 		if (!unset_quantity_entry(id))
 		{
-			logger::error("quantity::table_t::column_t::unset_quantities()",q.to_string(),"keep on going and returning false at the end");
+            //logger::error("quantity::table_t::column_t::unset_quantities()",q.to_string(),"keep on going and returning false at the end");
 			success=false;
 		}
 	}
@@ -153,7 +154,7 @@ bool quantity::table_t::column_t::replace_quantity_entry(long long unsigned int 
 {
 	if (quantity_entries().find(line_id)==quantity_entries().end())
 	{
-		logger::error("quantity::table_t::column_t::replace_quantity_entry()","could not find line_id=" + ::to_string(line_id),"returning false");
+        //logger::error("quantity::table_t::column_t::replace_quantity_entry()","could not find line_id=" + ::to_string(line_id),"returning false");
 		return false;
 	}
 	quantity_entries_p.at(line_id)=q_replacement;
@@ -178,7 +179,7 @@ bool quantity::table_t::column_t::erase_quantity_entry(long long unsigned int li
 {
 	if (quantity_entries_p.find(line_id)==quantity_entries_p.end())
 	{
-		logger::debug(7,"quantity::table_t::column_t::erase_quantity_entry()","could not find line_id=" + ::to_string(line_id), to_string(),"returning false");
+        //logger::debug(7,"quantity::table_t::column_t::erase_quantity_entry()","could not find line_id=" + ::to_string(line_id), to_string(),"returning false");
 		return false;
 	}
 	quantity_entries_p.erase(line_id);
@@ -255,6 +256,11 @@ quantity::table_t::column_t quantity::table_t::column_t::cut_median(float alpha)
 /*********  quantity::table_t  ************/
 /******************************************/
 
+quantity::table_t::table_t() : logger(global_logger,__FILE__,"quantity::table_t::table_t")
+{
+
+}
+
 const set<long long unsigned int> quantity::table_t::line_ids() const
 {
 	set<long long unsigned int> ids;
@@ -310,7 +316,7 @@ bool quantity::table_t::add(const quantity::quantity_t& Q, string col_name, long
 {
 	if (!Q.is_set())
 	{
-		logger::error("quantity::table_t::add()","Q not set",Q.to_string(),"returning false");
+        //logger::error("quantity::table_t::add()","Q not set",Q.to_string(),"returning false");
 		return false;
 	}
 	column_t col(line_id,Q,col_name);
@@ -322,7 +328,7 @@ bool quantity::table_t::add(const column_t& col)
 		return false;
 	if (find(columns_p.begin(),columns_p.end(),col)==columns_p.end()) ///col NOT yet in table
 	{
-		logger::debug(7,"quantity::table_t::add()","col not found in table",col.to_string(),"adding col");
+        //logger::debug(7,"quantity::table_t::add()","col not found in table",col.to_string(),"adding col");
 		//add the column to the table
 		columns_p.push_back(col);
 	}
@@ -331,12 +337,12 @@ bool quantity::table_t::add(const column_t& col)
 		auto col_in_table = column(col); // the column within the table
 		if (col_in_table==nullptr)
 		{
-			logger::error("quantity::table_t::add()","column not found in table",col.to_string(),"returning false");
+            //logger::error("quantity::table_t::add()","column not found in table",col.to_string(),"returning false");
 			return false;
 		}
 		if (!col_in_table->add_entries(col))
 		{
-			logger::error("quantity::table_t::add()","add_entries() returned false",col.to_string(),"returning false");
+            //logger::error("quantity::table_t::add()","add_entries() returned false",col.to_string(),"returning false");
 			return false;
 		}
 	}
@@ -349,7 +355,7 @@ bool quantity::table_t::add(const vector<column_t>& cols)
 	{
 		if (!add(col))
 		{
-			logger::error("quantity::table_t::add()",col.to_string(),"keep on going and returning false at the end");
+            //logger::error("quantity::table_t::add()",col.to_string(),"keep on going and returning false at the end");
 			success=false;
 		}
 	}
@@ -443,7 +449,7 @@ quantity::map_t quantity::table_t::get_map() const
 {
 	if (columns().size()>1)
 		return get_map(0,1);
-	logger::debug(7,"quantity::table_t::get_map()","columns().size()<2");
+    //logger::debug(7,"quantity::table_t::get_map()","columns().size()<2");
 	return {};
 }
 
@@ -451,7 +457,7 @@ quantity::map_t quantity::table_t::get_map(int X_col_idx, int Y_col_idx) const
 {
 	if (X_col_idx > columns().size() || Y_col_idx > columns().size())
 	{
-		logger::debug(6,"quantity::table_t::get_map(X_idx,Y_idx)","X_col_idx < columns().size() || Y_col_idx < columns().size()");
+        //logger::debug(6,"quantity::table_t::get_map(X_idx,Y_idx)","X_col_idx < columns().size() || Y_col_idx < columns().size()");
 		return {};
 	}
 	return get_map(columns_p.at(X_col_idx),columns_p.at(Y_col_idx));

@@ -19,8 +19,9 @@
 
 #include "files.hpp"
 
-files_::file_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : 
-	filename_with_path(filename_with_path), delimiter(delimiter),identifiers(identifiers)
+files_::file_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers, std::vector<unsigned int> delete_cols_before_parsing) :
+    filename_with_path(filename_with_path), delimiter(delimiter),identifiers(identifiers), logger(global_logger,__FILE__,"files_::file_t::contents_t"),
+    delete_cols_before_parsing(delete_cols_before_parsing)
 {
 }
 
@@ -75,7 +76,7 @@ const string& files_::file_t::contents_t::contents_string()
 		
 		if (!tools::file::file_exists(filename_with_path)) 
 		{
-			logger::error("files_::file_t::contents_t::contents_string()", "!tools::file::file_exists(filename_with_path)", filename_with_path,"skipping file");
+            //logger::error("files_::file_t::contents_t::contents_string()", "!tools::file::file_exists(filename_with_path)", filename_with_path,"skipping file");
 			return contents_p;
 		}
 		contents_p = tools::file::load_file_to_string(filename_with_path);
@@ -83,7 +84,7 @@ const string& files_::file_t::contents_t::contents_string()
 	return contents_p;
 }
 
-const bool files_::file_t::contents_t::is_correct_type()
+bool files_::file_t::contents_t::is_correct_type()
 {
 	if (contents_string()=="") return false;
 	for (auto& fci : identifiers)
@@ -101,7 +102,14 @@ bool files_::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vec
 	raw_data_tensor->clear();
 	raw_header_tensor->clear();
 	vector<vector<string>> raw_mat = tools::mat::format_string_to_matrix(contents_string(),LINE_DELIMITER,delimiter);
-	
+    if (delete_cols_before_parsing.size()>0)
+    {
+        auto raw_mat_transposed = tools::mat::transpose_matrix(raw_mat);
+        tools::vec::erase(raw_mat_transposed,delete_cols_before_parsing);
+        logger.info(__func__,"delete_cols_before_parsing").signal("deleted");
+        raw_mat = tools::mat::transpose_matrix(raw_mat_transposed);
+    }
+
 	tools::mat::remove_empty_lines_from_matrix(&raw_mat);
 	vector<vector<string> > header_temp, data_temp;
 	bool data_scanned=false;
@@ -152,7 +160,7 @@ vector<vector<vector<string> > >& files_::file_t::contents_t::raw_header_tensor(
 	
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
-		logger::debug(33,"files_::file_t::contents_t::raw_header_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no header");
+        //logger::debug(33,"files_::file_t::contents_t::raw_header_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no header");
 	}
 	return raw_header_tensor_p;
 }
@@ -162,7 +170,7 @@ vector<vector<vector<string> > >& files_::file_t::contents_t::raw_data_tensor()
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
 	{
 // 		logger::debug("files_::file_t::contents_t::raw_data_tensor() !parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)");
-		logger::debug(33,"files_::file_t::contents_t::raw_data_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no data");
+        //logger::debug(33,"files_::file_t::contents_t::raw_data_tensor()", "!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p)","no data");
 // 		return {};
 	}
 	return raw_data_tensor_p;

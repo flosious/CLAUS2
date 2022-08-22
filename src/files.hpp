@@ -28,6 +28,7 @@
 #include "element.hpp"
 #include "ion.hpp"
 #include "crater.hpp"
+#include <iostream>
 // #include "matrix.hpp"
 
 class files_
@@ -39,6 +40,7 @@ public:
 		class name_t
 		{
 		private:
+            class_logger_t logger;
 			string group_p="";
 			string lot_p="";
 			string lot_split_p="";
@@ -83,10 +85,10 @@ public:
 			virtual const string simple_name();
 			int chip_x();
 			int chip_y();
-			const int olcdb();
+            int olcdb();
 			int wafer();
 			void to_screen(string prefix="");
-			const bool is_correct_type(); 
+            bool is_correct_type();
 			bool operator==(name_t& obj);
 			bool operator!=(name_t& obj);
 			bool operator<(name_t& obj);
@@ -94,6 +96,8 @@ public:
 		///extends name_t for crater detection
 		class crater_in_name_t : public name_t
 		{
+        private:
+            class_logger_t logger;
 		protected:
 			string filename_without_crater_depths_s="";
 			quantity::total_sputter_depth_t total_sputter_depths_p;
@@ -106,6 +110,9 @@ public:
 		class contents_t
 		{
 			friend class config_t;
+        private:
+            class_logger_t logger;
+            std::vector<unsigned int> delete_cols_before_parsing;
 		protected:
 			///should be freed after parse_data_and_header_tensors, as it has no longer use
 			string contents_p;
@@ -123,10 +130,10 @@ public:
 			const string& contents_string();
 			string filename_with_path;
 			/*ctors*/
-			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
+            contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers,std::vector<unsigned int> delete_cols_before_parsing={});
 		public:
 			string matrix();
-			const bool is_correct_type(); 
+            bool is_correct_type();
 			string to_string(const string del = ",");
 			///this does not work as intended for some reason
 			bool operator< (const contents_t& obj) const;
@@ -142,6 +149,7 @@ public:
 		class name_t : public file_t::crater_in_name_t
 		{
 		private:
+            class_logger_t logger;
 			string filename_without_crater_depths_s="";
 			vector<quantity::total_sputter_depth_t> total_sputter_depths_p;
 			bool parse_sputter_energy_element_polarity();
@@ -165,6 +173,8 @@ public:
 		};
 		class contents_t : public file_t::contents_t
 		{
+        private:
+            class_logger_t logger;
 		public:
 			virtual vector<cluster_t> clusters();
 			string to_string(const string del = ",");
@@ -187,6 +197,8 @@ public:
 	
 	class dsims_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		class name_t : public sims_t::name_t
 		{
@@ -196,6 +208,7 @@ public:
 		class contents_t : public sims_t::contents_t
 		{
 		private:
+            class_logger_t logger;
 			map<string,string> infos_and_settings_p;
 			///will create a map: keys->values from raw_data_tensor()
 			const map<string,string>& infos_and_settings();
@@ -252,17 +265,20 @@ public:
 		};	
 		dsims_t(string& filename);
 		dsims_t(files_::dsims_t::name_t& name_s, files_::dsims_t::contents_t& contents_s);
-		bool operator<(dsims_t& obj);
-		name_t name;
+        bool operator<(const dsims_t& obj) const;
+        name_t name;
 		contents_t contents;
 	}; //dsims_t
 	
 	class tofsims_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		class name_t : public sims_t::name_t
 		{
 		private:
+            class_logger_t logger;
 			bool parse_analysis_energy_element();
 			ion_t analysis_ion_p;
 			quantity::energy_t analysis_energy_p;
@@ -274,6 +290,7 @@ public:
 		class contents_t : public sims_t::contents_t
 		{
 		private:
+            class_logger_t logger;
 			vector<column_t> cols_p;
 		protected:
 			vector<isotope_t> parse_isotopes(string isotopes) const;
@@ -286,7 +303,10 @@ public:
 		};
 		tofsims_t(string& filename);
 		tofsims_t(files_::tofsims_t::name_t& name_s, files_::tofsims_t::contents_t& contents_s);
-		bool operator<(tofsims_t& obj);
+		bool operator==(const tofsims_t& obj) const;
+		bool operator!=(const tofsims_t& obj) const;
+// 		bool operator<(tofsims_t& obj);
+		bool operator<(const tofsims_t& obj) const;
 		name_t name;
 		contents_t contents;
 	}; // tofsims_t
@@ -294,6 +314,8 @@ public:
 	///contains all profiler files
 	class profilers_t
 	{
+    private:
+
 	protected:
 		///a general class
 		class profiler_t
@@ -310,9 +332,13 @@ public:
 	public:
 		class dektak6m_t 
 		{
+        private:
+            class_logger_t logger;
 		public:
 			class contents_t : public profiler_t::contents_t
 			{
+            private:
+                class_logger_t logger;
 			public:
 				contents_t(string& filename_with_path);
 				crater_t::linescan_t linescan() override;
@@ -323,9 +349,13 @@ public:
 		}; // dektak6m_t
 		class P17_t : profiler_t
 		{
+        private:
+            class_logger_t logger;
 		public:
 			class contents_t : public profiler_t::contents_t
 			{
+            private:
+                class_logger_t logger;
 			public:
 				contents_t(string& filename_with_path);
 				crater_t::linescan_t linescan() override;
@@ -338,11 +368,63 @@ public:
 	
 	class jpg_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		jpg_t(string& filename);
 		bool operator<(jpg_t& obj);
 		file_t::crater_in_name_t name;
 	};
-};
+    ///replace "#" in csv-file with ",,#"
+    class aishu_t
+    {
+    private:
+        class_logger_t logger;
+        class name_t : public file_t::name_t
+        {
+        public:
+            name_t(std::string filename);
+        };
 
+        class contents_t : public file_t::contents_t
+        {
+        private:
+            class_logger_t logger;
+            class block_t
+            {
+            private:
+                ///pure data structure
+                class chip_t
+                {
+                public:
+                    int pos_x;
+                    int pos_y;
+                    std::vector<quantity::quantity_t> quantities;
+                };
+                std::vector<std::vector<std::string>> header;
+                std::vector<std::vector<std::string>> data;
+                const std::string header_to_string() const;
+                ///chip1 - col_start=2; chip2 - col_start=9
+                chip_t chip(int chip_number);
+                class_logger_t logger;
+            public:
+                block_t(const std::vector<std::vector<std::string>>& header,
+                        const std::vector<std::vector<std::string>>& data);
+                quantity::quantity_t temperature();
+                chip_t chip1();
+                chip_t chip2();
+            };
+        public:
+            contents_t(string& filename_with_path);
+            std::vector<block_t> blocks();
+        };
+    public:
+        aishu_t(string& filename);
+        name_t name;
+        contents_t contents;
+        void export_to_aishu_format(string export_filename_w_path="");
+        bool operator<(const aishu_t& obj) const;
+    };
+};
+extern Logger global_logger;
 #endif // FILES_HPP

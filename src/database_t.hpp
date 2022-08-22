@@ -72,9 +72,10 @@ using namespace std;
 
 ///this is a warpper for sqlite3
 class database_t {
-	friend class config_t;
+//	friend class config_t;
 // 	friend class processor;
 private:
+    class_logger_t logger;
 	static const int logger_verbosity_offset = 3;
     sqlite3* sql_handle=nullptr;
     bool close();
@@ -86,11 +87,11 @@ private:
 	///just allow the processor to open and close
 	
 public:
-	const string file_location = "database.sqlite3";
+    string file_location = "database.sqlite3";
 	database_t(sqlite3* sql_handle);
 	database_t(sqlite3* sql_handle, string filename);
 	~database_t();
-	bool open();
+    bool open();
 	bool execute_sql(string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr) const;
 	
 	/*call backs*/
@@ -101,5 +102,5 @@ public:
 };
 
 /// sqlite3
-// extern database_t db;
+extern Logger global_logger;
 #endif // database_HPP

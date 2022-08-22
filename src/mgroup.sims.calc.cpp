@@ -64,7 +64,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 			
 			if (C.intensity.is_set() && Iref.is_set() && !M->matrix_clusters().is_cluster_in_matrix(C))
 			{
-				logger::debug(11,"mgroups_::sims_t::calc_t::normalize_to_ref_intensity()","Iref="+Iref.to_string_detailed());
+                //logger::debug(11,"mgroups_::sims_t::calc_t::normalize_to_ref_intensity()","Iref="+Iref.to_string_detailed());
 				C.intensity = ((C.intensity / Iref ) * Iref.median());
 // 				cout << endl << C.intensity.to_string_detailed() << endl;
 			}
@@ -102,7 +102,9 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 /*****   SR_c  **********/
 /*************************/
 
-mgroups_::sims_t::calc_t::SR_c::SR_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
+mgroups_::sims_t::calc_t::SR_c::SR_c(calc_t& calc)
+    : MG(calc.MG), calc(calc), measurements(calc.measurements),
+      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::SR_c")
 {
 }
 
@@ -139,17 +141,17 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices(
 	
 	for (auto& M : measurements)
 	{
-		if (!M->sample->matrix().is_set()) continue;
+        if (!M->sample.matrix().is_set()) continue;
 		for (auto& mat_to_SR : mat_to_SRs)
 		{
-			if (M->sample->matrix() == mat_to_SR.first)
+            if (M->sample.matrix() == mat_to_SR.first)
 			{
 				if (mat_to_SR.second.is_vector())
 				{
 					/*	this is unhandled at the moment, but will be important when reference samples with layer of different matrices are used.
 					 *	one could use all the mean(SR point at matrix concentration) ... yeah maybe later...;-)
 					 */
-					logger::error("mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices()","SR is a vector, dont know how to handle, tell florian",M->to_string(),"ignoring");
+                    //logger::error("mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices()","SR is a vector, dont know how to handle, tell florian",M->to_string(),"ignoring");
 				}
 				if (overwrite || !M->crater.SR.is_set())
 					M->crater.SR = mat_to_SR.second;
@@ -164,7 +166,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
 {
 	if (MG.matrix_clusters().size()!=2)
 	{
-		logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
+        //logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
 		return calc;
 	}
 	const isotope_t relevant_isotope = MG.matrix_isotopes().front();
@@ -178,13 +180,13 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
 	//plot
 	if (!P.successfully_fitted())
 	{
-		logger::warning(2,"mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrices","polynom not succesfully fitted: " + SR_vs_C.to_string());
+        //logger::warning(2,"mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrices","polynom not succesfully fitted: " + SR_vs_C.to_string());
 		return calc;
 	}
-	plot_t plot(false,false);
-	plot.Y1.add_points(SR_vs_C,"SR vs " + relevant_isotope.to_string()," Ro");
-	plot.Y1.add_polynom(SR_vs_C,P,P.to_string());
-	plot.to_screen("SR_vs_C",0);
+//	plot_t plot(false,false);
+//	plot.Y1.add_points(SR_vs_C,"SR vs " + relevant_isotope.to_string()," Ro");
+//	plot.Y1.add_polynom(SR_vs_C,P,P.to_string());
+//	plot.to_screen("SR_vs_C",0);
 	
 	//copy to other measurements
 	for (auto& M : MG.measurements())
@@ -207,7 +209,9 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
 /******   SD_c  **********/
 /*************************/
 
-mgroups_::sims_t::calc_t::SD_c::SD_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
+mgroups_::sims_t::calc_t::SD_c::SD_c(calc_t& calc)
+    : MG(calc.MG), calc(calc), measurements(calc.measurements),
+      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::SD_c")
 {
 }
 
@@ -230,7 +234,9 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SD_c::from_SR(bool overwrit
 /*****   SF_c  **********/
 /*************************/
 
-mgroups_::sims_t::calc_t::SF_c::SF_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
+mgroups_::sims_t::calc_t::SF_c::SF_c(calc_t& calc)
+    : MG(calc.MG), calc(calc), measurements(calc.measurements),
+      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::SF_c")
 {
 }
 
@@ -266,7 +272,7 @@ const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::SF_c::RSFs
 		auto matrix_clusters = M->matrix_clusters();
 		if (!matrix_clusters.intensity_sum().is_set())
 		{
-			logger::error("mgroups_::sims_t::calc_t::RSF_c::RSFs_to_ref_intensities()","!M->reference_intensity().is_set()","continue");
+            //logger::error("mgroups_::sims_t::calc_t::RSF_c::RSFs_to_ref_intensities()","!M->reference_intensity().is_set()","continue");
 			continue;
 		}
 		for (auto& C : M->clusters)
@@ -316,7 +322,9 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_max(bool
 /*****  RSF_c    *********/
 /*************************/
 
-mgroups_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
+mgroups_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc)
+    : MG(calc.MG), calc(calc), measurements(calc.measurements),
+      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::RSF_c")
 {
 }
 
@@ -328,7 +336,7 @@ const map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::RSF_c::clu
 		auto matrix_clusters = M->matrix_clusters();
 		if (!matrix_clusters.intensity_sum().is_set())
 		{
-			logger::error("mgroups_::sims_t::calc_t::RSF_c::clusters_to_ref_intensities()","!M->reference_intensity().is_set(), " + M->to_string_short(),"continue");
+            //logger::error("mgroups_::sims_t::calc_t::RSF_c::clusters_to_ref_intensities()","!M->reference_intensity().is_set(), " + M->to_string_short(),"continue");
 			continue;
 		}
 		for (auto& C : M->clusters)
@@ -395,9 +403,9 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::copy_to_same_matrice
 			continue; // no RSFs at all for this cluster at all
 		for (auto& M : measurements)
 		{
-			if (!M->sample->matrix().is_set()) 
+            if (!M->sample.matrix().is_set())
 				continue; // unknown matrix
-			auto mat = mat_to_RSF.find(M->sample->matrix());
+            auto mat = mat_to_RSF.find(M->sample.matrix());
 			if (mat==mat_to_RSF.end()) 
 				continue; // no RSF for this matrix and cluster
 			if (mat->second.is_vector())
@@ -405,7 +413,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::copy_to_same_matrice
 				/*	this is unhandled at the moment, but will be important when reference samples with layer of different matrices are used.
 				*	one could use all the mean(RSF point at matrix concentration) ... yeah maybe later...;-)
 				*/
-				logger::error("mgroups_::sims_t::calc_t::RSF_c::from_others()","RSF is a vector, dont know how to handle, tell florian",M->to_string(),"ignoring");
+                //logger::error("mgroups_::sims_t::calc_t::RSF_c::from_others()","RSF is a vector, dont know how to handle, tell florian",M->to_string(),"ignoring");
 				continue;
 			}
 			if (overwrite || !M->cluster(C)->RSF.is_set())
@@ -427,7 +435,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 {
 	if (MG.matrix_clusters().size()!=2)
 	{
-		logger::error("mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
+        //logger::error("mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
 		return calc;
 	}
 	const isotope_t relevant_isotope = MG.matrix_isotopes().front();
@@ -441,11 +449,11 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 	//plot
 	if (!P.successfully_fitted())
 		return calc;
-	plot_t plot(false,false);
-	plot.Y1.add_points(RSF_vs_C,"RSF("+ cluster.to_string() +") vs " + relevant_isotope.to_string()," Ro");
-// 	plot.Y1.add_curve(RSF_vs_C.polyfit(P,100),P.to_string());
-	plot.Y1.add_polynom(RSF_vs_C,P,P.to_string());
-	plot.to_screen("RSF("+ cluster.to_string() +")_vs_C",0);
+//	plot_t plot(false,false);
+//	plot.Y1.add_points(RSF_vs_C,"RSF("+ cluster.to_string() +") vs " + relevant_isotope.to_string()," Ro");
+//// 	plot.Y1.add_curve(RSF_vs_C.polyfit(P,100),P.to_string());
+//	plot.Y1.add_polynom(RSF_vs_C,P,P.to_string());
+//	plot.to_screen("RSF("+ cluster.to_string() +")_vs_C",0);
 	
 	//copy to other measurements
 	for (auto& M : MG.measurements())
@@ -461,7 +469,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 		if (!relevant_C->concentration.is_set())
 			continue;
 		c_in_m->RSF = RSF_vs_C.polyfit(relevant_C->concentration,P); //SR point by point
-		logger::debug(5,"mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrices","RSF: "+c_in_m->RSF.to_string()+" of "+ c_in_m->to_string() +" copied");
+        //logger::debug(5,"mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrices","RSF: "+c_in_m->RSF.to_string()+" of "+ c_in_m->to_string() +" copied");
 	}
 	return calc;
 }
@@ -471,7 +479,9 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 /**   concentration_c  **/
 /*************************/
 
-mgroups_::sims_t::calc_t::concentration_c::concentration_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
+mgroups_::sims_t::calc_t::concentration_c::concentration_c(calc_t& calc)
+    : MG(calc.MG), calc(calc), measurements(calc.measurements),
+      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::concentration_c")
 {
 }
 
@@ -499,7 +509,8 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(boo
 
 
 mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc) :
-																				zaehler(zaehler), nenner(nenner), calc(calc)
+                                                                                zaehler(zaehler), nenner(nenner), calc(calc),
+                                                                                logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::Crel_to_Irel_c")
 {
 }
 
@@ -511,7 +522,7 @@ const quantity::intensity_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel(const
 	const cluster_t* N = M->cluster(nenner);
 	if (Z == nullptr || N == nullptr)
 	{
-		logger::error("mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel()","nullptr in M= " + M->to_string_short(),zaehler.to_string(),nenner.to_string());
+        //logger::error("mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel()","nullptr in M= " + M->to_string_short(),zaehler.to_string(),nenner.to_string());
 		return {};
 	}
 	if (!Z->intensity.is_set() || !N->intensity.is_set())
@@ -525,7 +536,7 @@ const quantity::intensity_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel_from_
 	const cluster_t* N = M->cluster(nenner);
 	if (Z == nullptr || N == nullptr)
 	{
-		logger::error("mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel()","nullptr in M= " + M->to_string_short(),zaehler.to_string(),nenner.to_string());
+        //logger::error("mgroups_::sims_t::calc_t::Crel_to_Irel_c::Irel()","nullptr in M= " + M->to_string_short(),zaehler.to_string(),nenner.to_string());
 		return {};
 	}
 	if (!Z->intensity.is_set() || !N->intensity.is_set())
@@ -538,10 +549,10 @@ const quantity::concentration_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_f
 {
 	quantity::concentration_t Crel;
 	cout << "M*:\t" << M << endl;
-	if (M->sample->matrix().isotope({"70Ge"})==nullptr)
+    if (M->sample.matrix().isotope({"70Ge"})==nullptr)
 		cout << "nullptr" << endl;
 	else
-		cout << M->sample->matrix().isotope({"70Ge"}) << endl;
+        cout << M->sample.matrix().isotope({"70Ge"}) << endl;
 	return {};
 	const auto matrix_isotopes = calc.MG.matrix_isotopes();
 	cout << "measurements:" << endl;
@@ -550,19 +561,20 @@ const quantity::concentration_t mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_f
 	
 	cout << "M.to_string_short():"  << endl;
 	cout << M->to_string_short() << endl;
-	cout << "M.sample->matrix():"  << endl;
-	sample_t::matrix_t mat = M->sample->matrix();
-	cout << "M.sample->matrix().to_string():"  << endl;
+    cout << "M.sample.matrix():"  << endl;
+    sample_t::matrix_t mat = M->sample.matrix();
+    cout << "M.sample.matrix().to_string():"  << endl;
 	cout << mat.to_string() << endl;
-	cout << "M.sample->matrix().isotope({'70Ge'})" <<endl;
+    cout << "M.sample.matrix().isotope({'70Ge'})" <<endl;
 	
 	cout << "zaehler.corresponding_isotope(matrix_isotopes)=" << zaehler.corresponding_isotope(matrix_isotopes).to_string() << endl;
 	cout << "nenner.corresponding_isotope(matrix_isotopes)=" << nenner.corresponding_isotope(matrix_isotopes).to_string() << endl;
 	
 	
-	cout << "Zmat_iso:" << endl;
-	isotope_t* Zmat_iso = M->sample->matrix().isotope(zaehler.corresponding_isotope(matrix_isotopes));
-	isotope_t* Nmat_iso = M->sample->matrix().isotope(nenner.corresponding_isotope(matrix_isotopes));
+    cout << "Zmat_iso:" << endl;
+
+    const isotope_t* Zmat_iso = M->sample.matrix().isotope(zaehler.corresponding_isotope(matrix_isotopes));
+    const isotope_t* Nmat_iso = M->sample.matrix().isotope(nenner.corresponding_isotope(matrix_isotopes));
 	if (Nmat_iso == nullptr || !Nmat_iso->substance_amount.is_set()) 
 		return {}; //division by 0
 	if (Zmat_iso == nullptr || !Zmat_iso->substance_amount.is_set())
@@ -595,7 +607,7 @@ const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::
 	quantity::quantity_t Crel, Irel;
 	for (auto& M : calc.measurements)
 	{
-// 		if (!M->sample->matrix().is_set()) continue;
+// 		if (!M->sample.matrix().is_set()) continue;
 		auto Z = M->cluster(zaehler);
 		if (Z==nullptr) continue;
 		if (!Z->intensity.is_set()) continue;
@@ -609,7 +621,7 @@ const pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::calc_t::
 		Crel << (Z->concentration / N->concentration);
 	}
 // 	Crel_template = quantity::quantity_t(Crel.name(),{},Crel.unit());
-	logger::debug(7,"mgroups_::sims_t::calc_t::Crel_to_Irel_c::known_Crels_from_Clusters_to_Irels()","Z="+zaehler.to_string()+" N="+nenner.to_string(),"Irel=" + Irel.to_string(), "Crel=" + Crel.to_string());
+    //logger::debug(7,"mgroups_::sims_t::calc_t::Crel_to_Irel_c::known_Crels_from_Clusters_to_Irels()","Z="+zaehler.to_string()+" N="+nenner.to_string(),"Irel=" + Irel.to_string(), "Crel=" + Crel.to_string());
 	
 // 	plot_t plot;
 // 	plot.Y2.log10_scale=false;

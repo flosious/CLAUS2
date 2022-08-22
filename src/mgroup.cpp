@@ -28,7 +28,8 @@ bool mgroups_::mgroup_t::use_settings=true;
 // }
 
 mgroups_::mgroup_t::mgroup_t(measurements_::measurement_t& measurement) : 
-							olcdb(measurement.olcdb), group(measurement.group)
+                            olcdb(measurement.olcdb), group(measurement.group),
+                            logger(global_logger,__FILE__,"mgroups_::mgroup_t")
 {
 }
 

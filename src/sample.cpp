@@ -5,7 +5,8 @@
 /*******************************/
 
 sample_t::implant_s::implant_s(quantity::dose_t dose, quantity::concentration_t concentration_maximum, quantity::depth_t depth_at_concentration_maxium) :
-								dose(dose), concentration_maximum(concentration_maximum), depth_at_concentration_maxium(depth_at_concentration_maxium)
+                                dose(dose), concentration_maximum(concentration_maximum), depth_at_concentration_maxium(depth_at_concentration_maxium),
+                                logger(global_logger,__FILE__,"sample_t::implant_s")
 {
 }
 
@@ -22,7 +23,8 @@ string sample_t::implant_s::to_string() const
 
 const string sample_t::db_t::tablename = "implanted_samples";
 
-sample_t::db_t::db_t(const sample_t& sample, const database_t& sql_wrapper) : sample(sample), sql_wrapper(sql_wrapper)
+sample_t::db_t::db_t(const sample_t& sample, const database_t& sql_wrapper)
+    : sample(sample), sql_wrapper(sql_wrapper), logger(global_logger,__FILE__,"sample_t::db_t")
 {
 // 	if (!create_table())
 // 		logger::error("sample_t::db_t::db_t()","could not create sql table","","");
@@ -45,7 +47,7 @@ bool sample_t::db_t::migrate_claus1_db(database_t& sql_wrapper, const string fil
 	database_t claus1(claus1_sql_handle,filename);
 	if (!claus1.open())
 	{
-		logger::error("sample_t::db_t::migrate_claus1_db()","!claus1.open",filename);
+        //logger::error("sample_t::db_t::migrate_claus1_db()","!claus1.open",filename);
 		return false;
 	}
 	map<string,vector<string>> table_entries_s;
@@ -53,16 +55,16 @@ bool sample_t::db_t::migrate_claus1_db(database_t& sql_wrapper, const string fil
 	sql << "SELECT * FROM everything;";
 	if (!claus1.execute_sql(sql.str(),database_t::callback_lines_map,&table_entries_s)) 
 	{
-		logger::error("sample_t::db_t::migrate_claus1_db()","!claus1.execute_sql",sql.str(),claus1.file_location);
+        //logger::error("sample_t::db_t::migrate_claus1_db()","!claus1.execute_sql",sql.str(),claus1.file_location);
 		return false;
 	}
 	if (table_entries_s.size()==0)
 	{
-		logger::error("sample_t::db_t::migrate_claus1_db()","table_entries_s.size()==0");
+        //logger::error("sample_t::db_t::migrate_claus1_db()","table_entries_s.size()==0");
 		return false;
 	}
 	unsigned int size = table_entries_s.at("lot").size();
-	logger::info(1,"sample_t::db_t::migrate_claus1_db()","table_entries=" + tools::to_string(size));
+    //logger::info(1,"sample_t::db_t::migrate_claus1_db()","table_entries=" + tools::to_string(size));
 	for (int i=0;i<size;i++)
 	{
 		sql.str("");
@@ -105,9 +107,13 @@ bool sample_t::db_t::migrate_claus1_db(database_t& sql_wrapper, const string fil
 		
 		sql << "'" << table_entries_s.at("comments").at(i) << "');";
 		if (!sql_wrapper.execute_sql(sql.str()))
-			logger::error("sample_t::db_t::migrate_claus1_db()","sql_wrapper.execute_sql",sql.str());
+        {
+            //logger::error("sample_t::db_t::migrate_claus1_db()","sql_wrapper.execute_sql",sql.str());
+        }
 		else
-			logger::info(1,"sample_t::db_t::migrate_claus1_db()","SUCCESS: ",sql.str());
+        {
+            //logger::info(1,"sample_t::db_t::migrate_claus1_db()","SUCCESS: ",sql.str());
+        }
 	}
 	return true;
 }
@@ -138,7 +144,7 @@ bool sample_t::db_t::create_table(database_t& sql_wrapper)
 
 bool sample_t::db_t::load_from_table()
 {
-	logger::debug(logger_verbosity_offset+6,"sample_t::db_t::load_from_table()","entering");
+    //logger::debug(logger_verbosity_offset+6,"sample_t::db_t::load_from_table()","entering");
 	if (implants_s.size()>0 || matrix_s.is_set()) // already loaded
 		return true;
 	map<string,vector<string>> table_entries_s;
@@ -155,17 +161,17 @@ bool sample_t::db_t::load_from_table()
 		sql1 += " AND monitor='" + sample.monitor+"'";
 	sql1 += ";";
 
-	logger::debug(logger_verbosity_offset+5,"sample_t::db_t::load_from_table()","sql1=",sql1);
+    //logger::debug(logger_verbosity_offset+5,"sample_t::db_t::load_from_table()","sql1=",sql1);
 
 	if (!sql_wrapper.execute_sql(sql1,database_t::callback_lines_map,&table_entries_s)) 
 	{
-		logger::error("sample_t::db_t::load_from_table()","could not load db_t table to local map","","returning false");
+        //logger::error("sample_t::db_t::load_from_table()","could not load db_t table to local map","","returning false");
 		return false;
 	}
 	
 	if (table_entries_s.size()==0)
 	{
-		logger::debug(logger_verbosity_offset+5,"sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
+        //logger::debug(logger_verbosity_offset+5,"sample_t::db_t::load_from_table()", sample.to_name() + " DB: no table entries","","returning false");
 		return false;
 	}
 	
@@ -178,11 +184,13 @@ bool sample_t::db_t::load_from_table()
 			matrix_t M(m);
 			if (!M.is_set())
 			{
-				logger::error("sample_t::db_t::load_from_table()","db matrix is not parseable",m,sample.to_name());
+                //logger::error("sample_t::db_t::load_from_table()","db matrix is not parseable",m,sample.to_name());
 			}
 			matrix_s = M;
 			if (matrix_s.is_set())
-				logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name()+" DB: matrix:", matrix_s.to_string());
+            {
+                //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name()+" DB: matrix:", matrix_s.to_string());
+            }
 			break;
 		}
 	}
@@ -197,7 +205,7 @@ bool sample_t::db_t::load_from_table()
 		if (iso.symbol=="") continue;
 		if (implants_s.find(iso)!=implants_s.end())
 		{
-			logger::warning(3,"sample_t::db_t::load_from_table()","more then 1 identical isotope implanted in sample: check database",sample.to_name() +"  " +iso.to_string(),"skipping");
+            //logger::warning(3,"sample_t::db_t::load_from_table()","more then 1 identical isotope implanted in sample: check database",sample.to_name() +"  " +iso.to_string(),"skipping");
 			continue;
 		}
 		quantity::dose_t D;
@@ -210,27 +218,33 @@ bool sample_t::db_t::load_from_table()
 		if (table_entries_s.at("maximum_concentration").at(line)!="" && table_entries_s.at("maximum_concentration").at(line)!="NULL")
 			C_max = quantity::concentration_t({tools::str::str_to_double(table_entries_s.at("maximum_concentration").at(line))});
 		if (D.is_set())
-			logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() +" DB: dose("+iso.to_string()+")="+D.to_string());
+        {
+            //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() +" DB: dose("+iso.to_string()+")="+D.to_string());
+        }
 		if (SD_max.is_set())
-			logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: depth_at_maximum_concentration("+iso.to_string()+")="+SD_max.to_string());
+        {
+            //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: depth_at_maximum_concentration("+iso.to_string()+")="+SD_max.to_string());
+        }
 		if (C_max.is_set())
-			logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: maximum_concentration("+iso.to_string()+")="+C_max.to_string());
+        {
+            //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: maximum_concentration("+iso.to_string()+")="+C_max.to_string());
+        }
 		implant_s I{D,C_max,SD_max};
 		implants_s.insert(pair<isotope_t,implant_s>(iso,I));
 	}
 	
-	logger::debug(logger_verbosity_offset+6,"sample_t::db_t::load_from_table()","exiting");
+    //logger::debug(logger_verbosity_offset+6,"sample_t::db_t::load_from_table()","exiting");
 	return true;
 }
 
 sample_t::matrix_t& sample_t::db_t::matrix()
 {
-	logger::debug(logger_verbosity_offset+6,"sample_t::db_t::matrix()","entering");
+    //logger::debug(logger_verbosity_offset+6,"sample_t::db_t::matrix()","entering");
 	if (matrix_s.is_set())
 		return matrix_s;
 	if (!load_from_table())
 	{
-		logger::debug(logger_verbosity_offset+4,"sample_t::db_t::matrix()","!load_from_table()","could not find " + sample.to_name()+ " in " +tablename,"returning empty");
+        //logger::debug(logger_verbosity_offset+4,"sample_t::db_t::matrix()","!load_from_table()","could not find " + sample.to_name()+ " in " +tablename,"returning empty");
 		return  matrix_s;
 	}
 
@@ -264,7 +278,7 @@ bool sample_t::chip_t::operator!=(const sample_t::chip_t& obj) const
 	return !(operator==(obj));
 }
 
-sample_t::chip_t::chip_t(const int x, const int y) : x(x), y(y)
+sample_t::chip_t::chip_t(const int x, const int y) : x(x), y(y), logger(global_logger,__FILE__,"sample_t::chip_t")
 {
 }
 
@@ -354,9 +368,11 @@ sample_t::sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f,data
 																chip(fn.chip_x(),fn.chip_y()),
 																simple_name(fn.simple_name()),
 																matrix_p(f.matrix()),
-																sql_wrapper(&sql_wrapper)
+                                                                sql_wrapper(&sql_wrapper)
+//                                                                logger(global_logger,__FILE__,"sample_t")
 // 																database(*this,sql_wrapper)
 {
+    load_from_database();
 // 	cout << "f.matrix() = " << f.matrix().to_string() << endl;
 }
 
@@ -366,9 +382,11 @@ sample_t::sample_t(files_::file_t::name_t& fn, database_t& sql_wrapper) : wafer(
 																lot_split(fn.lot_split()),
 																chip(fn.chip_x(),fn.chip_y()),
 																simple_name(fn.simple_name()),
-																sql_wrapper(&sql_wrapper)
+                                                                sql_wrapper(&sql_wrapper)
+//                                                                logger(global_logger,__FILE__,"sample_t")
 // 																database(*this,sql_wrapper)
 {
+    load_from_database();
 }
 
 const string sample_t::wafer_string() const
@@ -382,12 +400,16 @@ const string sample_t::wafer_string() const
 	return ss.str();
 }
 
-
-sample_t::matrix_t& sample_t::matrix()
+void sample_t::set_matrix(const sample_t::matrix_t& mat)
 {
-	if (matrix_p.is_set()) return matrix_p;
+    matrix_p = mat;
+}
+
+const sample_t::matrix_t& sample_t::matrix() const
+{
+//	if (matrix_p.is_set()) return matrix_p;
 	// do something to populate matrix_p --> look up Database
-	load_from_database();
+//load_from_database();
 	
 	return matrix_p;
 }
@@ -456,7 +478,9 @@ string sample_t::to_string(const string del)
 string sample_t::to_name(const string del) const
 {
 	stringstream ss;
-	ss << "lot: " << lot;
+//    cout << lot << "\t" << wafer << endl;
+//    return "";
+    ss << "lot: " << lot;
 	if (lot_split!="")
 		ss << lot_split;
 	ss << ", wafer: " << wafer;
@@ -470,7 +494,7 @@ string sample_t::to_name(const string del) const
 	return ss.str();
 }
 
-bool sample_t::operator<(sample_t& obj)
+bool sample_t::operator<(const sample_t& obj) const
 {	
 	if (use_simple_name)
 	{
@@ -506,7 +530,7 @@ bool sample_t::operator<(sample_t& obj)
 	return false;
 }
 
-bool sample_t::operator>(sample_t& obj)
+bool sample_t::operator>(const sample_t& obj) const
 {
 	if (!operator<(obj) && operator!=(obj)) return true;
 	return false;

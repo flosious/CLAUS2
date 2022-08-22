@@ -37,7 +37,7 @@ class element_t
 {
 // 	friend class matrix_t;
 private:
-	
+    class_logger_t logger;
 // 	vector<isotope_t> isotopes_p;
 	void set_elemental_substance_amount();
 // 	quantity::substance_amount_t substance_amount_p;
@@ -64,6 +64,6 @@ public:
 	bool operator<(const element_t& obj) const;
 	bool is_set();
 };
-
+extern Logger global_logger;
 
 #endif // ELEMENT_T_HPP

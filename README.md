@@ -1,1 +1,1 @@
-new version of CLAUS from ground up, trying to reduce complexity
+using qtCreator; folder qtGUI contains all frontend files and the main; src contains the backend files

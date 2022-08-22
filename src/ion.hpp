@@ -37,6 +37,7 @@ using namespace std;
 class ion_t
 {
 private:
+    class_logger_t logger;
 // 	const vector<element_t> elements_p;
 // 	const quantity::electrical_charge_t electric_charge_p;
 // 	vector< element_t > elements_p;
@@ -51,6 +52,6 @@ public:
 	string to_string(const string del="+") const;
 	bool is_set() const;
 };
-
+extern Logger global_logger;
 
 #endif // ION_T_HPP

@@ -31,7 +31,7 @@
 // }
 
 histogram_builder_t::histogram_builder_t(quantity::quantity_t qs) :
-		/*start(qs.min()),stop(qs.max()),*/ qs(qs.sort())
+        /*start(qs.min()),stop(qs.max()),*/ qs(qs.sort()), logger(global_logger,__FILE__,"histogram_builder_t")
 {
 }
 
@@ -77,7 +77,7 @@ histogram_t histogram_builder_t::equally_summand_distanced_bins(quantity::quanti
 	q_summand = q_summand.change_unit(qs.unit());
 	if (!q_summand.is_set())
 	{
-		logger::error("histogram_builder_t::equally_summand_distanced_bins","units not changeable", q_summand.to_string(), qs.to_string());
+        //logger::error("histogram_builder_t::equally_summand_distanced_bins","units not changeable", q_summand.to_string(), qs.to_string());
 		return histogram_t{{}};
 	}
 	vector<histogram_t::bin_t> bins;
@@ -101,7 +101,7 @@ histogram_t histogram_builder_t::equally_factor_distanced_bins(quantity::quantit
 	q_factor = q_factor.change_unit(qs.unit());
 	if (!q_factor.is_set())
 	{
-		logger::error("histogram_builder_t::equally_factor_distanced_bins","units not changeable", q_factor.to_string(), qs.to_string());
+        //logger::error("histogram_builder_t::equally_factor_distanced_bins","units not changeable", q_factor.to_string(), qs.to_string());
 		return histogram_t{{}};
 	}
 	vector<histogram_t::bin_t> bins;
@@ -125,7 +125,7 @@ histogram_t histogram_builder_t::equally_factor_distanced_bins(quantity::quantit
 /***      			 histogram_t   			           *****/
 /***********************************************************/
 
-histogram_t::histogram_t(const vector<bin_t>& bins) :bins_p(bins)
+histogram_t::histogram_t(const vector<bin_t>& bins) :bins_p(bins), logger(global_logger,__FILE__,"histogram_t")
 {
 }
 
@@ -223,7 +223,9 @@ const map<unsigned int, histogram_t::bin_t> histogram_t::quantity_data_size_to_i
 /*****  		histogram_t::bin_t      			 *******/
 /***********************************************************/
 
-histogram_t::bin_t::bin_t(const quantity::quantity_t& start, const quantity::quantity_t& stop) : start_p(start), stop_p(stop)
+histogram_t::bin_t::bin_t(const quantity::quantity_t& start, const quantity::quantity_t& stop)
+    : start_p(start), stop_p(stop),
+      logger(global_logger,__FILE__,"histogram_t::bin_t")
 {
 }
 

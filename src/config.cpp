@@ -27,7 +27,7 @@ int config_t::load_file(string filename_with_path)
     if (config_lines.size()==0) return 0;
     if (parse(config_lines)>0) 
 	{
-		logger::info(3,"config_t::load_file()",filename_with_path + " successfully loaded");
+        //logger::info(3,"config_t::load_file()",filename_with_path + " successfully loaded");
 		return 1;
 	}
     return 0;
@@ -94,7 +94,7 @@ int config_t::parse(vector<string> config_lines) {
 // 		else if (key=="use_mass_interference_filter" || key=="mass_interference_filter") { if (value.find("1")!=string::npos) processor::use_mass_interference_filter=true;}
 // 		else if (key=="force_quantity::SF_to_foreign_matrix" || key=="force_RSF") { if (value.find("1")!=string::npos) 				processor::force_quantity::SF_to_foreign_matrix=true;}
 		
-// 		else if (key=="debug") { if (value.find("1")!=string::npos) 								logger::activate_debug=true;}
+// 		else if (key=="debug") { if (value.find("1")!=string::npos) 								//logger::activate_debug=true;}
 		
 // 		else if (key=="use_directory_files_list") { if (value.find("1")!=string::npos) 				files_t::use_directory_files_list=true;}
 //         else if (key=="use_wildcards_in_filenames") { if (value.find("1")!=string::npos) 			files_t::use_wildcards_in_filenames=true; }
@@ -124,7 +124,7 @@ int config_t::parse(vector<string> config_lines) {
         else 
 		{
 // 			cout << "config_t::\tCould not parse: " << config_lines[i] << endl;
-			logger::error("config_t::parse","could not parse",config_lines[i], key);
+            //logger::error("config_t::parse","could not parse",config_lines[i], key);
 			parsed_lines--;
 		}
 // 		cout << "KEY=" << key << "\tvalue=" << value << endl;
@@ -213,12 +213,12 @@ void config_t::save_test(string value)
 // 		}
 // 		else 
 // 		{
-// 			logger::error("config_t::save_sample_definition()", "unknown input value", definition,"continue");
+// 			//logger::error("config_t::save_sample_definition()", "unknown input value", definition,"continue");
 // 			continue;
 // 		}
 // 		new_definition << definition << " ";
 // 	}
-// 	logger::info(2,"config_t::save_sample_definition()",new_definition.str());
+// 	//logger::info(2,"config_t::save_sample_definition()",new_definition.str());
 // }
 
 

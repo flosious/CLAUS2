@@ -20,7 +20,8 @@
 #include "mgroup.hpp"
 
 mgroups_::tofsims_t::tofsims_t(measurements_::tofsims_t& tofsims_measurements) : 
-				sims_t(tofsims_measurements), settings_p(tofsims_measurements.settings)
+                sims_t(tofsims_measurements) , settings_p(tofsims_measurements.settings),
+                logger(global_logger,__FILE__,"mgroups_::tofsims_t")
 {
 	measurements_p.push_back(tofsims_measurements);
 }
@@ -37,6 +38,11 @@ mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t >& tofsims_
 		tofsims_measurements.erase(DM);
 		DM--;
 	}
+}
+
+mgroups_::tofsims_t::~tofsims_t()
+{
+	
 }
 
 bool mgroups_::tofsims_t::operator==(const mgroups_::tofsims_t& obj) const

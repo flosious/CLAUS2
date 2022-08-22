@@ -20,7 +20,8 @@
 #include "mgroup.hpp"
 
 mgroups_::dsims_t::dsims_t(measurements_::dsims_t& dsims_measurements) : 
-				sims_t(dsims_measurements), settings_p(dsims_measurements.settings)
+                sims_t(dsims_measurements), settings_p(dsims_measurements.settings),
+                logger(global_logger,__FILE__,"mgroups_::dsims_t")
 {
 	measurements_p.push_back(dsims_measurements);
 }

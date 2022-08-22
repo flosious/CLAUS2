@@ -32,7 +32,8 @@ files_::sims_t::name_t::name_t(string& filename_with_path_s,
 							files_::file_t::crater_in_name_t(filename_with_path_s,
 													delimiter_s,
 													OR_identifiers_s,
-													AND_identifiers_s)
+                                                    AND_identifiers_s),
+                            logger(global_logger,__FILE__,"files_::sims_t::name_t")
 {
 }
 

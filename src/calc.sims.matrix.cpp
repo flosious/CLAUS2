@@ -25,7 +25,8 @@ calc_t::sims_t::matrix_t::matrix_t(const vector<isotope_t>& matrix_isotopes,
 								   matrix_isotopes_p(matrix_isotopes),
 								   measurements_p(measurements),
 								   matrix_clusters_p(matrix_clusters_from_matrix_isotopes()),
-								   RSFs_p(matrix_clusters(),isotopical_Crel_to_median_Irel_linear_fitted(),RSFs)
+                                   RSFs_p(matrix_clusters(),isotopical_Crel_to_median_Irel_linear_fitted(),RSFs),
+                                   logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t")
 // 								   RSFs_p(matrix_clusters(),elemental_Crel_to_median_Irel_linear_fitted(),RSFs)
 {
 // 	for (auto& M:measurements)
@@ -80,7 +81,7 @@ const set<cluster_t> calc_t::sims_t::matrix_t::matrix_clusters_from_matrix_isoto
 
 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted() const
 {
-	logger::debug(13,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","entering");
+    //logger::debug(13,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","entering");
 	vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
 	for (const auto& Z : matrix_clusters().clusters())
 	{
@@ -92,19 +93,19 @@ const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t:
 			auto const RSF = Crel_to_Irel_data_collector.elemental_Crel().Irel_from_median().polynom({0,1},{0,1});
 			if (!RSF.polynom().successfully_fitted())
 			{
-				logger::info(3,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","RSF not successfully fitted", "Z:" + RSF.zaehler().to_string() + ", N:" + RSF.nenner().to_string());
+                //logger::info(3,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","RSF not successfully fitted", "Z:" + RSF.zaehler().to_string() + ", N:" + RSF.nenner().to_string());
 				continue;
 			}
 			Crels_to_Irels.push_back(RSF);
 		}
 	}
-	logger::debug(13,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","leaving");
+    //logger::debug(13,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","leaving");
 	return Crels_to_Irels;
 }
 
 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted() const
 {
-	logger::debug(13,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","entering");
+    //logger::debug(13,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","entering");
 	vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
 	for (const auto& Z : matrix_clusters().clusters())
 	{
@@ -116,14 +117,14 @@ const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t:
 			auto const RSF = Crel_to_Irel_data_collector.isotopical_Crel().Irel_from_median().polynom({0,1},{0,1});
 			if (!RSF.polynom().successfully_fitted())
 			{
-				logger::info(3,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","RSF not successfully fitted", "Z:" + RSF.zaehler().to_string() + ", N:" + RSF.nenner().to_string());
+                //logger::info(3,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","RSF not successfully fitted", "Z:" + RSF.zaehler().to_string() + ", N:" + RSF.nenner().to_string());
 				continue;
 			}
 // 			RSF.plot_to_screen(0);
 			Crels_to_Irels.push_back(RSF);
 		}
 	}
-	logger::debug(13,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","leaving");
+    //logger::debug(13,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","leaving");
 	return Crels_to_Irels;
 }
 
@@ -233,16 +234,17 @@ calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler,
 									   unit_t unit_s, 
 									   quantity::quantity_t::dimension_t dim_s) :
 									   cluster_relations_copies_t(zaehler,nenner,abundance_ratio),
-									   quantity::quantity_t("mRSF",data_s,unit_s,dim_s)
+                                       quantity::quantity_t("mRSF",data_s,unit_s,dim_s),
+                                       logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::RSF_t")
 {
 	if (!is_relative())
 	{
-		logger::error("calc_t::sims_t::matrix_t::RSF_t::RSF_t()","quantity not relative, but matrix RSF should always be relative",to_string());
+        //logger::error("calc_t::sims_t::matrix_t::RSF_t::RSF_t()","quantity not relative, but matrix RSF should always be relative",to_string());
 		clear();
 	}
 	if (zaehler==nenner)
 	{
-		logger::error("calc_t::sims_t::matrix_t::RSF_t::RSF_t()","zaehler==nenner",to_string());
+        //logger::error("calc_t::sims_t::matrix_t::RSF_t::RSF_t()","zaehler==nenner",to_string());
 		clear();
 	}
 }
@@ -312,7 +314,7 @@ calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSF_t::invert() const
 /*********     clusters_t    ************/
 /****************************************/
 
-calc_t::sims_t::matrix_t::clusters_t::clusters_t(const set<cluster_t>& matrix_clusters) 
+calc_t::sims_t::matrix_t::clusters_t::clusters_t(const set<cluster_t>& matrix_clusters) : logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::clusters_t")
 {
 	for (auto& C : matrix_clusters)
 	{
@@ -346,7 +348,7 @@ const cluster_t calc_t::sims_t::matrix_t::clusters_t::cluster(const isotope_t& i
 	const auto cs = clusters(iso);
 	if (cs.size()==1)
 		return cs.front();
-	logger::error("calc_t::sims_t::matrix_t::clusters_t::cluster()","found multiple clusters for 1 corresponding isotope","returning empty");
+    //logger::error("calc_t::sims_t::matrix_t::clusters_t::cluster()","found multiple clusters for 1 corresponding isotope","returning empty");
 	return {};
 }
 
@@ -355,7 +357,7 @@ const cluster_t calc_t::sims_t::matrix_t::clusters_t::cluster(const isotope_t& i
 // 	const auto cs = clusters(ele);
 // 	if (cs.size()==1)
 // 		return cs.front();
-// 	logger::info(4,"calc_t::sims_t::matrix_t::clusters_t::cluster()","found multiple clusters for 1 corresponding element","returning empty");
+// 	//logger::info(4,"calc_t::sims_t::matrix_t::clusters_t::cluster()","found multiple clusters for 1 corresponding element","returning empty");
 // 	return {};
 // }
 
@@ -400,7 +402,7 @@ bool calc_t::sims_t::matrix_t::clusters_t::has_mixed_isotopes_in_clusters() cons
 			{
 				if (ref_iso==iso)
 					continue;
-				logger::warning(3,"calc_t::sims_t::matrix_t::clusters_t::has_mixed_isotopes_in_clusters()","ref_iso!=iso",C.to_string(),"returning true");
+                //logger::warning(3,"calc_t::sims_t::matrix_t::clusters_t::has_mixed_isotopes_in_clusters()","ref_iso!=iso",C.to_string(),"returning true");
 				return true;
 			}
 		}
@@ -420,7 +422,7 @@ bool calc_t::sims_t::matrix_t::clusters_t::has_mixed_elements_in_clusters() cons
 			{
 				if (ref_iso.symbol==iso.symbol)
 					continue;
-				logger::warning(3,"calc_t::sims_t::matrix_t::clusters_t::has_mixed_elements_in_clusters()","ref_iso.symbol==iso.symbol",C.to_string(),"returning true");
+                //logger::warning(3,"calc_t::sims_t::matrix_t::clusters_t::has_mixed_elements_in_clusters()","ref_iso.symbol==iso.symbol",C.to_string(),"returning true");
 				return true;
 			}
 		}
@@ -444,9 +446,10 @@ vector<element_t> calc_t::sims_t::matrix_t::clusters_t::elements() const
 calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters, 
 										 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
 										 const vector<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
-										 matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs)
+                                         matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs),
+                                         logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::RSFs_t")
 {
-	logger::debug(11,"calc_t::sims_t::matrix_t::RSFs_t::RSFs_t","entering");
+    //logger::debug(11,"calc_t::sims_t::matrix_t::RSFs_t::RSFs_t","entering");
 // 	cout << "RSFs" << endl;
 // 	for (auto& rsf : RSFs)
 // 		cout << rsf.to_string() << endl;
@@ -464,7 +467,8 @@ calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters,
 calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters, 
 										 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
 										 const set<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
-										 matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs.begin(),RSFs.end())
+                                         matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs.begin(),RSFs.end()),
+                                         logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::RSFs_t")
 {
 	
 }
@@ -598,11 +602,11 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fits_
 		}
 		else	
 		{
-			logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","trying to improve: "+ F.to_string());
+            //logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","trying to improve: "+ F.to_string());
 			const auto new_map = F.Crel_to_Irel_map.remove_outliners(F.polynom(),gof_reshold);
-			logger::info(4,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","new_map: "+ new_map.to_string());
+            //logger::info(4,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","new_map: "+ new_map.to_string());
 			const fit_functions::polynom_t new_polynom = new_map.polynom(F.polynom().rank(),F.polynom().fit_parameters());
-			logger::info(4,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","new_polynom: "+ new_polynom.to_string());
+            //logger::info(4,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","new_polynom: "+ new_polynom.to_string());
 			new_fits.push_back(Crel_to_Irel_data_polynomial_fit_t(F.zaehler(),F.nenner(),new_map,new_polynom));
 // 			cout  << "F.Crel_to_Irel_map().Y()=" << F.Crel_to_Irel_map().Y().to_string_detailed() << endl;
 // 			cout << "new_map.Y()=" << new_map.Y().to_string_detailed() << endl;
@@ -666,7 +670,9 @@ const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t& calc_t::sims_t::matrix
 	double gof_min=0;
 	/*this will be catastrophical if Crel_to_Irel_lin_fits_p is empty*/
 	if (Crel_to_Irel_lin_fits_p.size()==0)
-		logger::fatal("calc_t::sims_t::matrix_t::RSFs_t::RSF_with_worst_gof()","Crel_to_Irel_lin_fits_p is empty, can NOT return nullptr as ref");
+    {
+        //logger::fatal("calc_t::sims_t::matrix_t::RSFs_t::RSF_with_worst_gof()","Crel_to_Irel_lin_fits_p is empty, can NOT return nullptr as ref");
+    }
 	const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t * result=nullptr;
 	for (auto& fits : Crel_to_Irel_lin_fits_p)
 	{
@@ -803,9 +809,9 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::symmetrical_R
 		
 		rsf << RSF(rsf.nenner(),rsf.zaehler()).invert(); 
 		new_RSFs.push_back(RSF_t(rsf.zaehler(), rsf.nenner(), rsf.mean(), rsf.abundance_ratio));
-		logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs()",new_RSFs.back().to_string());
+        //logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs()",new_RSFs.back().to_string());
 		new_RSFs.push_back(RSF_t(rsf.nenner(), rsf.zaehler(), rsf.mean().invert(), rsf.abundance_ratio.invert()));
-		logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs()",new_RSFs.back().to_string());
+        //logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs()",new_RSFs.back().to_string());
 	}
 // 	cout << endl << "new_RSFs: " << endl;
 // 	for (auto& rsf : new_RSFs)
@@ -824,18 +830,18 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_natural_a
 			continue;
 		if (PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)==nullptr) 
 		{
-			logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.zaehler().isotopes.front().to_string());
+            //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.zaehler().isotopes.front().to_string());
 			continue;
 		}
 		if (PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)==nullptr)
 		{
-			logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.nenner().isotopes.front().to_string());
+            //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.nenner().isotopes.front().to_string());
 			continue;
 		}
 		quantity::abundance_t abu_Z ({PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)->abundance});
 		quantity::abundance_t abu_N ({PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)->abundance});
 		rsf.abundance_ratio = abu_Z / abu_N;
-		logger::info(2,"calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()", rsf.to_string());
+        //logger::info(2,"calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()", rsf.to_string());
 	}
 	
 	for (auto& rsf : new_RSFs.Crel_to_Irel_lin_fits_p)
@@ -845,18 +851,18 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_natural_a
 			continue;
 		if (PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)==nullptr) 
 		{
-			logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.zaehler().isotopes.front().to_string());
+            //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.zaehler().isotopes.front().to_string());
 			continue;
 		}
 		if (PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)==nullptr) 
 		{
-			logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.nenner().isotopes.front().to_string());
+            //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.nenner().isotopes.front().to_string());
 			continue;
 		}
 		quantity::abundance_t abu_Z ({PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)->abundance});
 		quantity::abundance_t abu_N ({PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)->abundance});
 		rsf.abundance_ratio = abu_Z / abu_N;
-		logger::info(2,"calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()", rsf.to_string());
+        //logger::info(2,"calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()", rsf.to_string());
 	}
 	return new_RSFs;
 }
@@ -909,31 +915,33 @@ const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::
 	return all_possible_RFS;
 }
 
-void calc_t::sims_t::matrix_t::RSFs_t::plot_now(double sleep_sec) const
-{
-	plot_t plot;
-// 	cout << endl << "Crel_to_Irel_lin_fits:" << Crel_to_Irel_lin_fits().size() << endl;
-	for (auto& RSF_fits : Crel_to_Irel_lin_fits())
-	{
-// 		RSF_fits.plot_to_screen(0);
-// 		continue;
-		plot_t::window_t w;
-		stringstream plot_title;
+//void calc_t::sims_t::matrix_t::RSFs_t::plot_now(double sleep_sec) const
+//{
+//	plot_t plot;
+//// 	cout << endl << "Crel_to_Irel_lin_fits:" << Crel_to_Irel_lin_fits().size() << endl;
+//	for (auto& RSF_fits : Crel_to_Irel_lin_fits())
+//	{
+//// 		RSF_fits.plot_to_screen(0);
+//// 		continue;
+//		plot_t::window_t w;
+//		stringstream plot_title;
 		
-		w.Y1.log10_scale=false;
-		auto Crel_to_Irel_map_withot_infs = RSF_fits.Crel_to_Irel_map.remove_inf();
+//		w.Y1.log10_scale=false;
+//		auto Crel_to_Irel_map_withot_infs = RSF_fits.Crel_to_Irel_map.remove_inf();
 		
-		w.Y1.add_points(Crel_to_Irel_map_withot_infs,RSF_fits.zaehler().to_string() + " / " + RSF_fits.nenner().to_string()," ro");
-		plot_title << "{" << RSF_fits.zaehler().to_string() << "} / {" << RSF_fits.nenner().to_string() <<  "}";
-		w.title = plot_title.str();
-		if (!RSF_fits.polynom().successfully_fitted())
-			logger::warning(3,"calc_t::sims_t::matrix_t::RSFs_t::plot_now()",RSF_fits.to_string(),"continue");
-		else
-			w.Y1.add_polynom(Crel_to_Irel_map_withot_infs,RSF_fits.polynom(),RSF_fits.polynom().to_string());
-		plot.windows.push_back(w);
-	}
-	plot.to_screen("",0);
-}
+//		w.Y1.add_points(Crel_to_Irel_map_withot_infs,RSF_fits.zaehler().to_string() + " / " + RSF_fits.nenner().to_string()," ro");
+//		plot_title << "{" << RSF_fits.zaehler().to_string() << "} / {" << RSF_fits.nenner().to_string() <<  "}";
+//		w.title = plot_title.str();
+//		if (!RSF_fits.polynom().successfully_fitted())
+//        {
+//            //logger::warning(3,"calc_t::sims_t::matrix_t::RSFs_t::plot_now()",RSF_fits.to_string(),"continue");
+//        }
+//		else
+//			w.Y1.add_polynom(Crel_to_Irel_map_withot_infs,RSF_fits.polynom(),RSF_fits.polynom().to_string());
+//		plot.windows.push_back(w);
+//	}
+//	plot.to_screen("",0);
+//}
 
 /* this is a rather complicated method
  * it calculates the concentration of all matrix clusters, where the RSFs are given
@@ -944,7 +952,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 		return *this;
 	if (unknown_RSFs().size()>2)
 	{
-		logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_missing_RSFs_from_virtual_cluster()","unknown_RSFs().size()>2","returning this");
+        //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_missing_RSFs_from_virtual_cluster()","unknown_RSFs().size()>2","returning this");
 		return *this;
 	}
 	
@@ -960,7 +968,8 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 // }
 
 calc_t::sims_t::matrix_t::concentration_c::concentration_c(const RSFs_t& RSFs, const measurements_::sims_t& measurement) : 
-			measurement_p(measurement),matrix_clusters(measurement_p.clusters,RSFs.matrix_clusters().isotopes()),RSFs_p(RSFs)
+            measurement_p(measurement),matrix_clusters(measurement_p.clusters,RSFs.matrix_clusters().isotopes()),RSFs_p(RSFs),
+            logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::concentration_c")
 {
 // 	clear_concentrations_of_mcs();
 	if (use_elemental()) // add natural isotope ratios
@@ -984,7 +993,7 @@ calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentrati
 // 		auto C = measurement_p.cluster(mc);
 		if (C==nullptr)
 		{
-			logger::error("calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","measurement_p.cluster(mc)==nullptr",C->to_string(),"returning this");
+            //logger::error("calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","measurement_p.cluster(mc)==nullptr",C->to_string(),"returning this");
 			return *this;
 		}
 		if (!C->concentration.is_set())
@@ -995,7 +1004,7 @@ calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentrati
 		auto substract = (C->concentration.change_unit(units::derived::atom_percent));
 		if (!substract.is_set())
 		{
-			logger::error("calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","!substract.is_set()",C->to_string(),"returning this");
+            //logger::error("calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","!substract.is_set()",C->to_string(),"returning this");
 			return *this;
 		}
 		if (use_elemental())
@@ -1005,7 +1014,7 @@ calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentrati
 		}
 		residual_concentration = residual_concentration - substract;
 	}
-	logger::info(3,"calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","clusters_with_unknown_concentrations: " + to_string(clusters_with_unknown_concentrations.size()),"residual_concentration: " + residual_concentration.to_string());
+    //logger::info(3,"calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()","clusters_with_unknown_concentrations: " + to_string(clusters_with_unknown_concentrations.size()),"residual_concentration: " + residual_concentration.to_string());
 	//ATTENTION does not work yet, ignores abundances
 	if (clusters_with_unknown_concentrations.size()==1)
 	{
@@ -1061,7 +1070,7 @@ bool calc_t::sims_t::matrix_t::concentration_c::use_elemental() const
 		const auto s = matrix_clusters.clusters_from_ele(ele).size();
 		if (s!=1)
 		{
-			logger::info(3,"calc_t::sims_t::matrix_t::concentration_c::use_elemental()","matrix_clusters.clusters("+ele.to_string()+")="+to_string(s)+"!=1","using isotopical");
+            //logger::info(3,"calc_t::sims_t::matrix_t::concentration_c::use_elemental()","matrix_clusters.clusters("+ele.to_string()+")="+to_string(s)+"!=1","using isotopical");
 			return false;
 		}
 	}
@@ -1073,7 +1082,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::cluster(con
 	const isotope_t cor_iso = cluster.corresponding_isotope(matrix_clusters.isotopes());
 	if (!cor_iso.is_set())
 	{
-		logger::error("calc_t::sims_t::matrix_t::concentration_c::cluster","corresponding isotope not found",cluster.to_string(),"returning empty");
+        //logger::error("calc_t::sims_t::matrix_t::concentration_c::cluster","corresponding isotope not found",cluster.to_string(),"returning empty");
 		return {};
 	}
 	if (use_elemental())
@@ -1095,13 +1104,13 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::isotope(con
 	{
 		if (!rsf.is_set())
 		{
-			logger::error("calc_t::sims_t::matrix_t::concentration_c::isotope()","!rsf.is_set()",rsf.to_string(), "returning empty");
+            //logger::error("calc_t::sims_t::matrix_t::concentration_c::isotope()","!rsf.is_set()",rsf.to_string(), "returning empty");
 			return {};
 		}
 		calc_t::sims_t::Irel_t irel(measurement_p,rsf.zaehler(),rsf.nenner());
 		if (!irel.from_clusters_pbp().is_set())
 		{
-			logger::error("calc_t::sims_t::matrix_t::concentration_c::isotope()","!rsf.is_set()",rsf.to_string(), "returning empty");
+            //logger::error("calc_t::sims_t::matrix_t::concentration_c::isotope()","!rsf.is_set()",rsf.to_string(), "returning empty");
 			return {};
 		}
 		quantity::concentration_t relativ_concentration((rsf)*irel.from_clusters_pbp());
@@ -1116,7 +1125,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::element(con
 	const auto clusters = matrix_clusters.clusters_from_ele(element);
 	if (clusters.size()!=1)
 	{
-		logger::error("calc_t::sims_t::matrix_t::concentration_c::element()","clusters.size()= " + to_string(clusters.size()) + " !=1", element.to_string(), "returning empty");
+        //logger::error("calc_t::sims_t::matrix_t::concentration_c::element()","clusters.size()= " + to_string(clusters.size()) + " !=1", element.to_string(), "returning empty");
 		return {};
 	}
 	
@@ -1127,13 +1136,13 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::element(con
 // 		cout << endl << rsf.to_string() << endl;	
 		if (!rsf.is_set())
 		{
-			logger::warning(2,"calc_t::sims_t::matrix_t::concentration_c::element()","!rsf.is_set()",rsf.to_string(), "returning empty");
+            //logger::warning(2,"calc_t::sims_t::matrix_t::concentration_c::element()","!rsf.is_set()",rsf.to_string(), "returning empty");
 			return {};
 		}
 		calc_t::sims_t::Irel_t irel(measurement_p,rsf.zaehler(),rsf.nenner());
 		if (!irel.from_clusters_pbp().is_set())
 		{
-			logger::error("calc_t::sims_t::matrix_t::concentration_c::element()","!rsf.is_set()",rsf.to_string(), "returning empty");
+            //logger::error("calc_t::sims_t::matrix_t::concentration_c::element()","!rsf.is_set()",rsf.to_string(), "returning empty");
 			return {};
 		}
 		quantity::concentration_t relativ_concentration((rsf/rsf.abundance_ratio)*irel.from_clusters_pbp());
@@ -1144,7 +1153,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::element(con
 // 		cout << irel.from_clusters_pbp().to_string() << endl;
 	}
 	quantity::concentration_t resulting_cluster_conc(cluster_conc.invert().change_unit(units::derived::atom_percent));
-	logger::info(2,"calc_t::sims_t::matrix_t::concentration_c::element()",element.to_string() + ": " + resulting_cluster_conc.to_string());
+    //logger::info(2,"calc_t::sims_t::matrix_t::concentration_c::element()",element.to_string() + ": " + resulting_cluster_conc.to_string());
 	return resulting_cluster_conc;
 }
 

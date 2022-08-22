@@ -22,7 +22,9 @@
 /**** mgroups_::sims_t::calc_t::matrix_c ***/
 /*******************************************/
 
-mgroups_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc) : MG(calc.MG), calc(calc), measurements(calc.measurements)
+mgroups_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc)
+    : MG(calc.MG), calc(calc), measurements(calc.measurements),
+      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::matrix_c")
 {
 }
 
@@ -36,7 +38,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::median_const_from_
 		{
 // 			logger::debug(7,"mgroups_::sims_t::calc_t::matrix_c::median_const_from_db()",C->to_string() + " substance_amount",mat_C_to_I.second.to_string());
 			C->concentration = (quantity::concentration_t( (C->intensity / C->intensity.median() ) * mat_C_to_I.second)).change_unit("at%");
-			logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::median_const_from_db()",C->to_string(),C->concentration.to_string());
+            //logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::median_const_from_db()",C->to_string(),C->concentration.to_string());
 		}
 	}	
 	return calc;
@@ -59,7 +61,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::const_from_db(quan
 		if (!C->concentration.is_set() || overwrite)
 		{
 			C->concentration = quantity::concentration_t( (C->intensity / operation(C->intensity) ) * mat_C_to_I.second).change_unit("at%");
-			logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::const_from_db()",C->concentration.to_string());
+            //logger::debug(13,"mgroups_::sims_t::calc_t::matrix_c::const_from_db()",C->concentration.to_string());
 		}
 	}	
 	return calc;
@@ -76,13 +78,13 @@ bool mgroups_::sims_t::calc_t::matrix_c::intensities_are_set() const
 			auto CC = tools::find_in_V(C,M->clusters);
 			if (CC==nullptr)
 			{
-				logger::error("mgroups_::sims_t::calc_t::matrix_c::intensities_are_set()","could NOT find cluster " + C.to_string() + " in measurement " + M->to_string(),"returning false");
+                //logger::error("mgroups_::sims_t::calc_t::matrix_c::intensities_are_set()","could NOT find cluster " + C.to_string() + " in measurement " + M->to_string(),"returning false");
 				result = false;
 				continue;
 			}
 			if (!CC->intensity.is_set())
 			{
-				logger::error("mgroups_::sims_t::calc_t::matrix_c::intensities_are_set()","intensity is not set in cluster " + C.to_string() + " in measurement " + M->to_string(),"returning false");
+                //logger::error("mgroups_::sims_t::calc_t::matrix_c::intensities_are_set()","intensity is not set in cluster " + C.to_string() + " in measurement " + M->to_string(),"returning false");
 				result = false;
 				continue;
 			}
@@ -106,12 +108,12 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::interpolate(const 
 	*/
 	if (!MG.check_matrix_cluster_consistency())
 	{
-		logger::error("mgroups_::sims_t::calc_t::matrix_c::interpolate()","MG.check_matrix_cluster_consistency returned false","returning");
+        //logger::error("mgroups_::sims_t::calc_t::matrix_c::interpolate()","MG.check_matrix_cluster_consistency returned false","returning");
 		return calc;
 	}
 	if (!intensities_are_set())
 	{
-		logger::error("mgroups_::sims_t::calc_t::matrix_c::interpolate()","not all intensities are set","returning");
+        //logger::error("mgroups_::sims_t::calc_t::matrix_c::interpolate()","not all intensities are set","returning");
 		return calc;
 	}
 	return calc;
@@ -121,12 +123,12 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::linear_interpolate
 {
 	if (!MG.check_matrix_cluster_consistency())
 	{
-		logger::error("mgroups_::sims_t::calc_t::matrix_c::linear_interpolated_elemental_concentration()","MG.check_matrix_cluster_consistency returned false","returning");
+        //logger::error("mgroups_::sims_t::calc_t::matrix_c::linear_interpolated_elemental_concentration()","MG.check_matrix_cluster_consistency returned false","returning");
 		return calc;
 	}
 	if (!intensities_are_set())
 	{
-		logger::error("mgroups_::sims_t::calc_t::matrix_c::linear_interpolated_elemental_concentration()","not all intensities are set","returning");
+        //logger::error("mgroups_::sims_t::calc_t::matrix_c::linear_interpolated_elemental_concentration()","not all intensities are set","returning");
 		return calc;
 	}
 	

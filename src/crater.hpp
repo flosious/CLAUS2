@@ -37,7 +37,8 @@ public:
 	class linescan_t
 	{
 	private:
-		fit_functions::asym2sig_t asym2sig;
+        class_logger_t logger;
+        fit_functions::asym2sig_t asym2sig;
 		bool fitted=false;
 	public:
 		linescan_t();
@@ -55,7 +56,7 @@ public:
 		quantity::quantity_t fit();
 		string to_string(string prefix="");
 		bool is_set() const;
-		void plot_now(double sleep_sec);
+//		void plot_now(double sleep_sec);
 	};
 	class sputter_beam_t
 	{
@@ -69,6 +70,7 @@ public:
 /***********/	
 	friend class processor;
 private:
+    class_logger_t logger;
 	quantity::sputter_time_t total_sputter_time_s;
 	///calculates common X points from all clusters and sets sputter_depth_s and/or sputter_time
 	quantity::sputter_depth_t total_sputter_depths;
@@ -103,6 +105,6 @@ public:
 	///finds a common minimal sputter_time
 	quantity::sputter_time_t common_sputter_time(vector<cluster_t>& clusters);
 };
-
+extern Logger global_logger;
 
 #endif // CRATER_T_HPP

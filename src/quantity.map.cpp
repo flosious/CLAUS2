@@ -1,20 +1,20 @@
 #include "quantity.hpp"
 
-quantity::map_t::map_t() : X_p(), Y_p()
+quantity::map_t::map_t() : X_p(), Y_p(), logger(global_logger,__FILE__,"quantity::map_t")
 {
 }
 
-quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y) : X_p(X), Y_p(Y)
+quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y) : X_p(X), Y_p(Y), logger(global_logger,__FILE__,"quantity::map_t")
 {
 	if (X.data().size()!=Y.data().size())
 	{
-		logger::error("quantity::map_t::map_t()","X and Y have different sizes: X=" + X.to_string()+"; Y="+ Y.to_string(),"setting to empty");
+        //logger::error("quantity::map_t::map_t()","X and Y have different sizes: X=" + X.to_string()+"; Y="+ Y.to_string(),"setting to empty");
 		*this = {};
 	}
 	
 }
 
-quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y, const vector<pair<double,double>>& XYdata_pairs) : X_p(X), Y_p(Y)
+quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y, const vector<pair<double,double>>& XYdata_pairs) : X_p(X), Y_p(Y), logger(global_logger,__FILE__,"quantity::map_t")
 {
 	vector<double> Xdata(XYdata_pairs.size());
 	vector<double> Ydata(XYdata_pairs.size());
@@ -77,7 +77,7 @@ const quantity::map_t quantity::map_t::remove_by_X(quantity::quantity_t X_s) con
 	X_s = X_s.change_unit(X().unit());
 	if (!X_s.is_set())
 	{
-		logger::error("quantity::map_t::remove_X()()","X() units are not the same",to_string() + " " + X_s.to_string());
+        //logger::error("quantity::map_t::remove_X()()","X() units are not the same",to_string() + " " + X_s.to_string());
 		return *this;
 	}
 	vector<unsigned int> rem_idx;
@@ -243,12 +243,12 @@ const quantity::map_t quantity::map_t::change_resolution(const quantity_t new_X_
 {
 	if (!new_X_resolution.is_set())
 	{
-		logger::error("quantity::map_t::change_resolution()","!new_X_resolution.is_set()","returning empty");
+        //logger::error("quantity::map_t::change_resolution()","!new_X_resolution.is_set()","returning empty");
 		return {};
 	}
 	if (new_X_resolution.data().front()<=0)
 	{
-		logger::error("quantity::map_t::change_resolution()","new_X_resolution.data().front()<=0","returning empty");
+        //logger::error("quantity::map_t::change_resolution()","new_X_resolution.data().front()<=0","returning empty");
 		return {};
 	}
 	const auto new_X = X().change_resolution(new_X_resolution);
@@ -274,8 +274,8 @@ quantity::map_t quantity::map_t::remove_outliners( fit_functions::polynom_t poly
 // 		cout << endl << X.to_string() << endl;
 		result_map = result_map.remove_by_X(X);
 		polynom_s = result_map.polynom(polynom_s.rank(),polynom_s.fit_parameters());
-		logger::info(3,"quantity::map_t::remove_outliners()","removing from map: " + X.to_string());
-		logger::info(3,"quantity::map_t::remove_outliners()","new polynom: " + polynom_s.to_string());
+        //logger::info(3,"quantity::map_t::remove_outliners()","removing from map: " + X.to_string());
+        //logger::info(3,"quantity::map_t::remove_outliners()","new polynom: " + polynom_s.to_string());
 	}
 	return result_map;
 }

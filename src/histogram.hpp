@@ -30,6 +30,7 @@ public:
 	class bin_t
 	{
 	private:
+        class_logger_t logger;
 		///quantities (vector) within the bin within the bin
 		quantity::quantity_t quantities_in_bin_p;
 		///range start of this bin
@@ -50,6 +51,7 @@ public:
 		int operator<<(const quantity::quantity_t& q);
 	}; // bin_t
 private:
+    class_logger_t logger;
 	///the actual histogram
 	vector<bin_t> bins_p;
 public:
@@ -77,6 +79,7 @@ public:
 class histogram_builder_t
 {
 private:
+    class_logger_t logger;
 	const quantity::quantity_t qs;
 // 	const quantity::quantity_t start;
 // 	const quantity::quantity_t stop;
@@ -91,5 +94,5 @@ public:
 	/// bin_pos[i] = min() * q_factor^i
 	histogram_t equally_factor_distanced_bins(quantity::quantity_t q_factor) const;
 }; //histogram_t
-
+extern Logger global_logger;
 #endif // QUANTITY_HPP

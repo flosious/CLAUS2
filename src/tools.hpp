@@ -28,6 +28,8 @@
 #include <time.h>
 #include <iomanip>
 #include <sstream>
+
+#include <sys/stat.h>
 // #include <curl/curl.h> // libcurl4-gnutls-dev
 // #include <gsl/gsl_sys.h>
 
@@ -181,6 +183,8 @@ public:
     };
     class file {
     public:
+        /// 2- folder, 1-file, 0-unknown, -1-error
+        static int is_file_or_folder(const std::string file_or_folder);
 		static void remove_file_type_from_name(vector<string>* filenames, string filetye_delimiter=".");
 		static void remove_file_type_from_name(string* filenames, string filetye_delimiter=".");
         static vector<vector<string>> load(string filename, string delimiter);
@@ -216,6 +220,28 @@ public:
 	class vec 
 	{
 	public:
+
+        template<class T>
+        static std::vector<T*> pointers(std::vector<T> values)
+        {
+            std::vector<T*> pp(values.size());
+            for (int i=0;i<values.size();i++)
+            {
+                pp[i] = &values.at(i);
+            }
+            return pp;
+        }
+        template<class T>
+        static std::vector<const T*> const_pointers(std::vector<T> values)
+        {
+            std::vector<const T*> pp(values.size());
+            for (int i=0;i<values.size();i++)
+            {
+                pp[i] = &values.at(i);
+            }
+            return pp;
+        }
+
 		template<class In>
 		static string to_string(const vector<In>& I)
 		{
@@ -246,7 +272,7 @@ public:
 			return find_in_V(key,keys);
 		}
 		template <typename F>
-		static vector<F> erase(const vector<F>& erase_from, vector<unsigned int>& positions_to_erase)
+		static vector<F> erase_copy(const vector<F>& erase_from, vector<unsigned int>& positions_to_erase)
 		{
 			if (erase_from.size()==0) return {};
 			if (positions_to_erase.size()==0) return erase_from;
@@ -259,7 +285,7 @@ public:
 			for (auto& pos : positions_to_erase)
 			{
 				for (int i=pos_start;i<pos;i++)
-				{
+				{	
 					result.at(result_idx) = erase_from.at(i);
 					result_idx++;
 				}
@@ -272,6 +298,23 @@ public:
 			}
 				
 			return result;
+		}
+		template <typename F>
+		static void erase(vector<F>& erase_from, vector<unsigned int>& positions_to_erase)
+		{
+			if (erase_from.size()==0) return;
+			if (positions_to_erase.size()==0) return;
+// 			if (erase_from.size() == positions_to_erase.size()) return {};
+			std::sort(positions_to_erase.begin(),positions_to_erase.end());
+			std::reverse(positions_to_erase.begin(),positions_to_erase.end());
+// 			for (auto it=erase_from.begin();it!=erase_from.end();)
+			for (auto pos : positions_to_erase)
+			{
+// 				std::cout << "erase: " << pos  << std::endl;
+				erase_from.erase(erase_from.begin()+pos);
+			}
+				
+			return;
 		}
 		
 // 		template <typename T> static vector<T> add(vector<T> *start,/*vector*/<T> *ende);

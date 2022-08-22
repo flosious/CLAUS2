@@ -1,9 +1,25 @@
 #include "tools.hpp"
 
 
+
+int tools::file::is_file_or_folder(const std::string file_or_folder)
+{
+    struct stat s;
+    if (stat(file_or_folder.c_str(),&s) == 0)
+    {
+        if (s.st_mode & S_IFDIR)
+            return 2; // directory
+        else if (s.st_mode & S_IFREG)
+            return 1; // file
+        else
+            return 0; // sth else
+    }
+    return -1; // error
+}
+
 time_t tools::file::creation_date(string filename)
 {
-	
+
 	struct stat t_stat;
 // 	cout << filename << endl;
 	stat(filename.c_str(),&t_stat);

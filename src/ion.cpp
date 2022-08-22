@@ -22,15 +22,15 @@
 /***************************/
 /*******    ion_t   ********/
 /***************************/
-ion_t::ion_t()
+ion_t::ion_t() : logger(global_logger,__FILE__,"ion_t")
 {
 }
 
-ion_t::ion_t(vector<element_t> elements_s,  quantity::electrical_charge_t electric_charge_s) : elements(elements_s), electric_charge(electric_charge_s)
+ion_t::ion_t(vector<element_t> elements_s,  quantity::electrical_charge_t electric_charge_s) : elements(elements_s), electric_charge(electric_charge_s), logger(global_logger,__FILE__,"ion_t")
 {
 }
 
-ion_t::ion_t(element_t element_s,  quantity::electrical_charge_t electric_charge_s) : elements({element_s}), electric_charge(electric_charge_s)
+ion_t::ion_t(element_t element_s,  quantity::electrical_charge_t electric_charge_s) : elements({element_s}), electric_charge(electric_charge_s), logger(global_logger,__FILE__,"ion_t")
 {
 }
 

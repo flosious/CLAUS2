@@ -18,16 +18,17 @@
 
 #include "files.hpp"
 
-files_::dsims_t::dsims_t(string& filename) : name(filename),contents(filename)
+files_::dsims_t::dsims_t(string& filename) : name(filename),contents(filename), logger(global_logger,__FILE__,"files_::dsims_t")
 {
 }
 
 files_::dsims_t::dsims_t(files_::dsims_t::name_t& name_s, files_::dsims_t::contents_t& contents_s) : 
-			name(name_s), contents(contents_s)
+            name(name_s), contents(contents_s),
+            logger(global_logger,__FILE__,"files_::dsims_t")
 {
 }
 
-bool files_::dsims_t::operator<(files_::dsims_t& obj)
+bool files_::dsims_t::operator<(const files_::dsims_t& obj) const
 {
 	if (name.filename() < obj.name.filename()) return true;
 	if (name.filename() > obj.name.filename()) return false;

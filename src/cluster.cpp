@@ -1,6 +1,6 @@
 #include "cluster.hpp"
 
-cluster_t::cluster_t()
+cluster_t::cluster_t() :  logger(global_logger,__FILE__,"cluster_t")
 {
 }
 
@@ -13,7 +13,8 @@ cluster_t::cluster_t(set<isotope_t> isotopes,
 					 sputter_time(sputter_time), 
 					 intensity(intensity), 
 					 sputter_depth(sputter_depth), 
-					 concentration(concentration)
+                     concentration(concentration),
+                     logger(global_logger,__FILE__,"cluster_t")
 {
 }
 
@@ -26,7 +27,8 @@ cluster_t::cluster_t(string clustername,
 			  intensity(intensity), 
 			  sputter_depth(sputter_depth), 
 			  concentration(concentration),
-			  isotopes(parse_clustername(clustername))
+              isotopes(parse_clustername(clustername)),
+              logger(global_logger,__FILE__,"cluster_t")
 {
 }
 
@@ -46,20 +48,20 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 			isotopes.push_back(iso);
 		else
 		{
-			logger::error("cluster_t::parse_clustername()","regex_search(iso_p,match,regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",clustername,"return {}");
+            //logger::error("cluster_t::parse_clustername()","regex_search(iso_p,match,regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",clustername,"return {}");
 			return {};
 		}
 	}
-	logger::debug(20,"cluster_t::parse_clustername()","clustername",clustername);
+    //logger::debug(20,"cluster_t::parse_clustername()","clustername",clustername);
 	return isotopes;
 }
 
 
-cluster_t::cluster_t(const vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s)
+cluster_t::cluster_t(const vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s), logger(global_logger,__FILE__,"cluster_t")
 {
 }
 
-cluster_t::cluster_t(const isotope_t isotope_s) : isotopes({isotope_s})
+cluster_t::cluster_t(const isotope_t isotope_s) : isotopes({isotope_s}), logger(global_logger,__FILE__,"cluster_t")
 {
 }
 
@@ -130,7 +132,7 @@ quantity::concentration_t cluster_t::concentration_background(float treshold) co
 	double relative_size = (double)histo.quantity_data_size_to_its_bin().rbegin()->first/sum;
 	if (relative_size < treshold)
 	{
-		logger::info(3,"cluster_t::concentration_background()","number of points for background detection not sufficient: relative_size=" + std::to_string(relative_size));
+        //logger::info(3,"cluster_t::concentration_background()","number of points for background detection not sufficient: relative_size=" + std::to_string(relative_size));
 		return {};
 	}
 // 	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).get_data_by_index_rel(0,0.25).median();
@@ -175,67 +177,67 @@ bool cluster_t::operator<(const cluster_t& obj) const
 
 
 
-int cluster_t::Draw(mglGraph* gr)
-{
-	int data_points=0;
-	if (sputter_depth.is_set())
-		data_points = sputter_depth.data().size();
-	else
-		data_points = sputter_time.data().size();
+//int cluster_t::Draw(mglGraph* gr)
+//{
+//	int data_points=0;
+//	if (sputter_depth.is_set())
+//		data_points = sputter_depth.data().size();
+//	else
+//		data_points = sputter_time.data().size();
 	
-	mglData y(data_points);
-	mglData x(data_points);
-// 	mglData y2(data_points);
+//	mglData y(data_points);
+//	mglData x(data_points);
+//// 	mglData y2(data_points);
 	
-	if (sputter_time.is_set())
-	{
-		gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data()));
-// 		gr->Axis("X");
-		x.Set(sputter_time.data());
-		gr->Label('x',"sputter time",0);
-// 		gr->Plot(x);
-	}
+//	if (sputter_time.is_set())
+//	{
+//		gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data()));
+//// 		gr->Axis("X");
+//		x.Set(sputter_time.data());
+//		gr->Label('x',"sputter time",0);
+//// 		gr->Plot(x);
+//	}
 		
-	if (intensity.is_set())
-	{
-		y.Set(intensity.data());
+//	if (intensity.is_set())
+//	{
+//		y.Set(intensity.data());
 		
-		gr->SetRange('y',1,1E6);
-		gr->SetFunc("","lg(y)");
+//		gr->SetRange('y',1,1E6);
+//		gr->SetFunc("","lg(y)");
 		
-// 		gr->SetOrigin(0,0,0);
-		gr->Axis("UE");
-// 		gr->Label(y,"intensity T","E"); -> labes each data point
-		gr->Label('y',"intensity",0);
-// 		gr->Plot(x,y);
-		gr->Plot(y,"k","legend 'intensity'");
-// 		concentration_p = quantity::concentration_t((intensity()*1E17).data());
-	}
+//// 		gr->SetOrigin(0,0,0);
+//		gr->Axis("UE");
+//// 		gr->Label(y,"intensity T","E"); -> labes each data point
+//		gr->Label('y',"intensity",0);
+//// 		gr->Plot(x,y);
+//		gr->Plot(y,"k","legend 'intensity'");
+//// 		concentration_p = quantity::concentration_t((intensity()*1E17).data());
+//	}
 	
-	gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data()));
-	gr->SetOrigin(0,1E6);
-	gr->Axis("x_");
+//	gr->SetRange('x',0,statistics::get_max_from_Y(sputter_time.data()));
+//	gr->SetOrigin(0,1E6);
+//	gr->Axis("x_");
 	
-// 	x.Set(sputter_time.data());
-// 	gr->Label('x',"");
+//// 	x.Set(sputter_time.data());
+//// 	gr->Label('x',"");
 		
-	if (concentration.is_set())
-	{
-		y.Set(concentration.data());
+//	if (concentration.is_set())
+//	{
+//		y.Set(concentration.data());
 		
-		gr->SetRange('y',1E15,1E21);
+//		gr->SetRange('y',1E15,1E21);
 		
-		gr->SetOrigin(statistics::get_max_from_Y(sputter_time.data()),0);
+//		gr->SetOrigin(statistics::get_max_from_Y(sputter_time.data()),0);
 		
-		gr->Axis("yUE","B");
-// 		gr->SetFunc("","lg(y)");
-		gr->Label('y',"#B{concentration}",0);
-// 		gr->SetTickShift(mglPoint(100,10,0,0)); // does not work?
-		gr->Plot(y,"B","legend 'concentration'");
-	}
-	gr->Grid();	
-	return 0;
-}
+//		gr->Axis("yUE","B");
+//// 		gr->SetFunc("","lg(y)");
+//		gr->Label('y',"#B{concentration}",0);
+//// 		gr->SetTickShift(mglPoint(100,10,0,0)); // does not work?
+//		gr->Plot(y,"B","legend 'concentration'");
+//	}
+//	gr->Grid();
+//	return 0;
+//}
 
 quantity::abundance_t cluster_t::abundance()
 {
@@ -266,19 +268,19 @@ isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_is
 	{
 		if (find(reference_isotopes.begin(),reference_isotopes.end(),i)==reference_isotopes.end())
 		{
-			logger::debug(14,"cluster_t::corresponding_isotope()","not found cluster isotope in reference_isotopes", i.to_string(),"this is a good message");
+            //logger::debug(14,"cluster_t::corresponding_isotope()","not found cluster isotope in reference_isotopes", i.to_string(),"this is a good message");
 			isos.insert(i);
 		}
 	}
 	
 	if (isos.size()==0)
 	{
-		logger::error("cluster_t::corresponding_isotope()","complex reference clusters are not supported","","returning empty");
+        //logger::error("cluster_t::corresponding_isotope()","complex reference clusters are not supported","","returning empty");
 		return {};
 	}
 	if (isos.size()>1)
 	{
-		logger::error("cluster_t::corresponding_isotope()","detected more than 1 possible corresponding isotope in cluster; unknown matrix isotopes? check database",to_string(),"returning empty");
+        //logger::error("cluster_t::corresponding_isotope()","detected more than 1 possible corresponding isotope in cluster; unknown matrix isotopes? check database",to_string(),"returning empty");
 		return {};
 	}
 	return *isos.begin();
@@ -288,24 +290,24 @@ cluster_t cluster_t::interpolate(const quantity::quantity_t& new_Q, const quanti
 {
 	if (!new_Q.is_set() || !old_Q.is_set())
 	{
-		logger::error("cluster_t::interpolate()","!new_Q.is_set() || !old_Q.is_set()","","returning empty");
+        //logger::error("cluster_t::interpolate()","!new_Q.is_set() || !old_Q.is_set()","","returning empty");
 		return {};
 	}
 
 	if (new_Q.unit().base_units_exponents != old_Q.unit().base_units_exponents)// same base units?
 	{
-		logger::error("cluster_t::interpolate()","new_Q.unit().base_units_exponents != old_Q.unit().base_units_exponents","","returning empty");
+        //logger::error("cluster_t::interpolate()","new_Q.unit().base_units_exponents != old_Q.unit().base_units_exponents","","returning empty");
 		return {};
 	}
 	//new data is not allowed to be larger compared to old data
 	if (new_Q.max() > old_Q.max())
 	{
-		logger::error("cluster_t::interpolate()","new_Q.max()=" + new_Q.max().to_string() +" > old_Q.max()="+old_Q.max().to_string(),"","returning empty");
+        //logger::error("cluster_t::interpolate()","new_Q.max()=" + new_Q.max().to_string() +" > old_Q.max()="+old_Q.max().to_string(),"","returning empty");
 		return {};
 	}
 	if (new_Q.min() < old_Q.min())
 	{
-		logger::error("cluster_t::interpolate()","new_Q.min()="+new_Q.min().to_string()+" < old_Q.min()="+old_Q.min().to_string(),"","returning empty");
+        //logger::error("cluster_t::interpolate()","new_Q.min()="+new_Q.min().to_string()+" < old_Q.min()="+old_Q.min().to_string(),"","returning empty");
 		return {};
 	}
 	cluster_t new_cluster(isotopes);
@@ -395,7 +397,7 @@ string matrix_clusters_c::to_string(const string del) const
 /*"30Si" can be a reference cluster for elemental Si or isotopical purified Si*/
 /*"30Si 28Si" can be a reference cluster for elemental Si or isotopical purified Si*/
 /*"74Ge 28Si" can be a reference cluster for elemental Si+Ge or isotopical purified Si+Ge*/
-matrix_clusters_c::matrix_clusters_c(vector<cluster_t>& clusters_s, const vector<isotope_t> matrix_isotopes)
+matrix_clusters_c::matrix_clusters_c(vector<cluster_t>& clusters_s, const vector<isotope_t> matrix_isotopes) : logger(global_logger,__FILE__,"matrix_clusters_c")
 {
 	if (matrix_isotopes.size()==0)
 		return;
@@ -510,10 +512,10 @@ cluster_t * matrix_clusters_c::cluster(const isotope_t iso)
 {
 	for (auto& C: clusters)
 	{
-		logger::debug(12,"matrix_clusters_c::cluster("+iso.to_string()+")","cluster=" + C->to_string());
+        //logger::debug(12,"matrix_clusters_c::cluster("+iso.to_string()+")","cluster=" + C->to_string());
 		for (auto& I : C->isotopes)
 		{
-			logger::debug(12,"matrix_clusters_c::cluster("+iso.to_string()+")","cluster->isotope="+I.to_string());
+            //logger::debug(12,"matrix_clusters_c::cluster("+iso.to_string()+")","cluster->isotope="+I.to_string());
 			if (I==iso)
 				return C;
 		}
@@ -538,11 +540,12 @@ void matrix_clusters_c::set_natural_abundances()
 
 
 cluster_t::RSF_t::RSF_t(const quantity::quantity_t& q, const vector<cluster_t>& reference_clusters_s) : 
-			quantity_t("RSF",q.data(),q.unit(),q.dimension()), reference_clusters_p(RSF_t(reference_clusters_s).reference_clusters_p)
+            quantity_t("RSF",q.data(),q.unit(),q.dimension()), reference_clusters_p(RSF_t(reference_clusters_s).reference_clusters_p),
+            logger(global_logger,__FILE__,"cluster_t::RSF_t")
 {
 }
 
-cluster_t::RSF_t::RSF_t(const vector<cluster_t>& reference_clusters_s)
+cluster_t::RSF_t::RSF_t(const vector<cluster_t>& reference_clusters_s) : logger(global_logger,__FILE__,"cluster_t::RSF_t")
 {
 	reference_clusters_p.reserve(reference_clusters_s.size());
 	for (const auto& C : reference_clusters_s)

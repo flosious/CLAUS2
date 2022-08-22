@@ -33,9 +33,12 @@ using namespace std;
 class origin_t
 {
 private:
+    class_logger_t logger;
 public:
 	class column_t
 	{
+    private:
+        class_logger_t logger;
 	public:
 		string longname="";
 		string unit="";
@@ -52,5 +55,5 @@ public:
 	origin_t(vector<cluster_t>& clusters);
 	string to_string();
 };
-
+extern Logger global_logger;
 #endif // ORIGIN_T_HPP

@@ -23,7 +23,8 @@
 /*****************************************/
 
 files_::profilers_t::dektak6m_t::dektak6m_t(string& filename) : 
-	name(filename,"_",{".TXT",".txt",".profile"},{}), contents(filename)
+    name(filename,"_",{".TXT",".txt",".profile"},{}), contents(filename),
+    logger(global_logger,__FILE__,"files_::profilers_t::dektak6m_t")
 {
 }
 
@@ -33,7 +34,8 @@ files_::profilers_t::dektak6m_t::dektak6m_t(string& filename) :
 /*************************************************/
 
 files_::profilers_t::dektak6m_t::contents_t::contents_t(string& filename_with_path) :
-	profiler_t::contents_t(filename_with_path,",",{"Scan Type","Stylus Type"})
+    profiler_t::contents_t(filename_with_path,",",{"Scan Type","Stylus Type"}),
+    logger(global_logger,__FILE__,"files_::profilers_t::dektak6m_t::contents_t")
 {
 }
 

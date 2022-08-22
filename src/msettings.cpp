@@ -14,7 +14,7 @@
 /****  Sims_t  ******/
 /********************/
 
-msettings::sims_t::sims_t()
+msettings::sims_t::sims_t() : logger(global_logger,__FILE__,"msettings::sims_t")
 {
 }
 

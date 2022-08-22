@@ -23,7 +23,7 @@
 /****  Dsims_t  *****/
 /********************/
 
-msettings::dsims_t::dsims_t() : sims_t()
+msettings::dsims_t::dsims_t() : sims_t(), logger(global_logger,__FILE__,"msettings::dsims_t")
 {
 }
 
@@ -32,13 +32,22 @@ msettings::dsims_t::dsims_t(files_::dsims_t& file) : dsims_t(file.name,file.cont
 {
 }
 
-msettings::dsims_t::dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents) : sims_t(filename)
+msettings::dsims_t::dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents) : sims_t(filename), logger(global_logger,__FILE__,"msettings::dsims_t")
 {
 	ion_t sputter_ion_from_file = ion_t(filecontents.sputter_element(),{{1}}); // Cs + or O2 +
 	/*overwrite values from filename with contents*/
-	if (sims_t::secondary_polarity!="" && sims_t::secondary_polarity != filecontents.secondary_polarity()) logger::warning(1,"msettings::dsims_t::dsims_t","secondary_polarity in filename differs from file contents, taking contents",filename.filename_with_path);
-	if (sims_t::sputter_energy.is_set() && sims_t::sputter_energy != filecontents.sputter_energy()) logger::warning(1,"msettings::dsims_t::dsims_t","secondary_voltage in filename differs from file contents, taking contents",filename.filename_with_path);
-	if (sims_t::sputter_ion.is_set() && sims_t::sputter_ion != sputter_ion_from_file ) logger::warning(1,"msettings::dsims_t::dsims_t","sputter_ion in filename "+sims_t::sputter_ion.to_string()+" differs from file contents, taking contents",filename.filename_with_path);
+    if (sims_t::secondary_polarity!="" && sims_t::secondary_polarity != filecontents.secondary_polarity())
+    {
+        //logger::warning(1,"msettings::dsims_t::dsims_t","secondary_polarity in filename differs from file contents, taking contents",filename.filename_with_path);
+    }
+    if (sims_t::sputter_energy.is_set() && sims_t::sputter_energy != filecontents.sputter_energy())
+    {
+        //logger::warning(1,"msettings::dsims_t::dsims_t","secondary_voltage in filename differs from file contents, taking contents",filename.filename_with_path);
+    }
+    if (sims_t::sputter_ion.is_set() && sims_t::sputter_ion != sputter_ion_from_file )
+    {
+//        logger::warning(1,"msettings::dsims_t::dsims_t","sputter_ion in filename "+sims_t::sputter_ion.to_string()+" differs from file contents, taking contents",filename.filename_with_path);
+    }
 	secondary_polarity = filecontents.secondary_polarity();
 	sputter_energy = filecontents.sputter_energy();
 	sputter_ion = sputter_ion_from_file;

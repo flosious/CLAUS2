@@ -23,15 +23,26 @@
 /****       tofsims_t        *****/
 /*********************************/
 
-files_::tofsims_t::tofsims_t(string& filename) : name(filename),contents(filename)
+files_::tofsims_t::tofsims_t(string& filename) : name(filename),contents(filename), logger(global_logger,__FILE__,"files_::tofsims_t")
 {
 }
 files_::tofsims_t::tofsims_t(files_::tofsims_t::name_t& name_s, files_::tofsims_t::contents_t& contents_s) : 
-			name(name_s), contents(contents_s)
+            name(name_s), contents(contents_s), logger(global_logger,__FILE__,"files_::tofsims_t")
 {
 }
 
-bool files_::tofsims_t::operator<(tofsims_t& obj)
+bool files_::tofsims_t::operator==(const tofsims_t& obj) const
+{
+	if (name.filename() != obj.name.filename()) return false;
+	return true;
+}
+
+bool files_::tofsims_t::operator!=(const tofsims_t& obj) const
+{
+	return !operator==(obj);
+}
+
+bool files_::tofsims_t::operator<(const tofsims_t& obj) const
 {
 	if (name.filename() < obj.name.filename()) return true;
 	if (name.filename() > obj.name.filename()) return false;
