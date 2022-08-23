@@ -178,12 +178,47 @@ std::map<files_treeview_t::methods,std::string> files_treeview_t::method_names
     {xps, "xps"}
 };
 
+void files_treeview_t::set_actions()
+{
+    test_action = new QAction("test",this);
+    selections_to_measurements_action = new QAction("convert selected to measurements",this);
+    delete_selection_action = new QAction("delete selected",this);
+}
+
+void files_treeview_t::set_contextMenu()
+{
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    contextMenu = new QMenu(this);
+
+    contextMenu->addAction(test_action);
+    contextMenu->addAction(selections_to_measurements_action);
+    contextMenu->addAction(delete_selection_action);
+}
+
+void files_treeview_t::connect_signals_to_slots()
+{
+    connect(test_action,&QAction::triggered, this, &files_treeview_t::test);
+//    connect(test_action,&QAction::triggered, this, &files_treeview_t::test);
+    connect(selections_to_measurements_action,&QAction::triggered, this, &files_treeview_t::selections_to_measurements);
+    connect(delete_selection_action,&QAction::triggered, this, &files_treeview_t::delete_selection);
+}
+
 files_treeview_t::files_treeview_t(QWidget *parent) : QTreeView(parent), logger(global_logger,__FILE__,"files_treeview_t")
 {
     //sets the model
+    set_actions();
+    set_contextMenu();
+    connect_signals_to_slots();
     createModel();
-//    update();
 }
+
+//will not be executed when right clicking on treeview ...
+//void files_treeview_t::contextMenuEvent(QContextMenuEvent *event)
+//{
+//    logger.debug(__func__,"this").enter();
+//}
+
+
 
 void files_treeview_t::createModel()
 {
@@ -278,6 +313,25 @@ void files_treeview_t::update(methods method_id, const std::vector<QStandardItem
        model->setItem(method_id,col,itemCols.at(col));
 }
 
+int files_treeview_t::total_lines_count() const
+{
+    return LAST;
+}
+
+void files_treeview_t::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Delete)
+    {
+        delete_selection();
+    }
+    else
+		QTreeView::keyPressEvent(e);
+}
+
+/**********************************/
+/*****         slots            ***/
+/**********************************/
+
 void files_treeview_t::update()
 {
     logger.debug(__func__,"this").enter();
@@ -300,52 +354,94 @@ void files_treeview_t::update()
     return;
 }
 
-int files_treeview_t::total_lines_count() const
+void files_treeview_t::test()
 {
-    return LAST;
+    logger.debug(__func__,"this").enter();
 }
 
-void files_treeview_t::keyPressEvent(QKeyEvent *e)
+void files_treeview_t::delete_selection()
 {
-    if (e->key() == Qt::Key_Delete)
+    if (selectionModel()==nullptr)
+        return;
+    bool erased = false;
+    QModelIndexList indexes = selectionModel()->selectedIndexes();
+    std::vector<unsigned int> deletions_idxs;
+
+
+    deletions_idxs = tofsims_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
     {
-        if (selectionModel()==nullptr)
-            return;
-		bool erased = false;
-        QModelIndexList indexes = selectionModel()->selectedIndexes();
-        std::vector<unsigned int> deletions_idxs;
-
-
-        deletions_idxs = tofsims_entries().get_selected_rows();
-        if (deletions_idxs.size()>0)
-        {
-            tools::vec::erase<files_::tofsims_t>(claus->tofsims.files(),deletions_idxs);
-            erased=true;
-        }
-
-        deletions_idxs = dsims_entries().get_selected_rows();
-        if (deletions_idxs.size()>0)
-        {
-            tools::vec::erase<files_::dsims_t>(claus->dsims.files,deletions_idxs);
-            erased=true;
-        }
-
-        deletions_idxs = aishu_entries().get_selected_rows();
-        if (deletions_idxs.size()>0)
-        {
-            tools::vec::erase<files_::aishu_t>(claus->aishu.files,deletions_idxs);
-//            auto T = claus->tofsims.files();
-            erased=true;
-        }
-        deletions_idxs = unknown_filenames_entries().get_selected_rows();
-        if (deletions_idxs.size()>0)
-        {
-            tools::vec::erase(claus->unknown_filenames,deletions_idxs);
-			erased=true;
-		}
-        if (erased)
-			update();
+        tools::vec::erase<files_::tofsims_t>(claus->tofsims.files(),deletions_idxs);
+        erased=true;
     }
-    else
-		QTreeView::keyPressEvent(e);
+
+    deletions_idxs = dsims_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
+    {
+        tools::vec::erase<files_::dsims_t>(claus->dsims.files,deletions_idxs);
+        erased=true;
+    }
+
+    deletions_idxs = aishu_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
+    {
+        tools::vec::erase<files_::aishu_t>(claus->aishu.files,deletions_idxs);
+        erased=true;
+    }
+    deletions_idxs = unknown_filenames_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
+    {
+        tools::vec::erase(claus->unknown_filenames,deletions_idxs);
+        erased=true;
+    }
+    if (erased)
+        update();
+    return;
 }
+
+void files_treeview_t::selections_to_measurements()
+{
+    logger.debug(__func__,"this").enter();
+    std::vector<unsigned int> rows;
+
+    //tofsims
+    rows = tofsims_entries().get_selected_rows();
+    for (auto file_idx : rows)
+    {
+        auto& file = claus->tofsims.files().at(file_idx);
+        claus->tofsims.add_to_measurement(file);
+        logger.info(__func__,"tofsims.file").value(file.name.to_string(),10,"tofsims");
+    }
+    logger.debug(__func__,"tofsims.files").signal("deleting...");
+    tools::vec::erase(claus->tofsims.files(),rows);
+
+    //dsims
+    std::vector<files_::dsims_t*> dsims_files; // testing
+    rows = dsims_entries().get_selected_rows();
+    for (auto file_idx : rows)
+    {
+        auto& file = claus->dsims.files.at(file_idx);
+        dsims_files.push_back(&file); // testing
+        claus->dsims.add_to_measurement(file);
+        logger.info(__func__,"dsims.file").value(file.name.to_string(),10,"dsims");
+    }
+    logger.debug(__func__,"dsims.files").signal("deleting...");
+
+    ///testing...
+    auto filtered_files = claus->dsims.filter_files(dsims_files).by_olcdb(53430).files();
+    for (auto& ff : filtered_files)
+    {
+        logger.info(__func__,"filtered_file").value((ff->name.filename()));
+    }
+    ///
+    tools::vec::erase(claus->dsims.files,rows);
+    update();
+//    ui->measurements_treeView->update();
+    emit update_measurements_treeview();
+    logger.debug(__func__,"this").exit();
+}
+
+
+/**********************************/
+/*****         signals          ***/
+/**********************************/

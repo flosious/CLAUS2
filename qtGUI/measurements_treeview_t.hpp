@@ -20,6 +20,7 @@
 
 class measurements_treeview_t : public QTreeView
 {
+    Q_OBJECT
 private:
     class_logger_t logger;
     ///this is the order of parent points in the treeview; leave "LAST" at last position
@@ -78,8 +79,8 @@ public:
 //    parent_entry_t p17_entries();
 //    parent_entry_t camera_images_entries();
     ///will reload from processor: klaus()->"method"->measurements
+public slots:
     void update();
-    void selections_to_measurements();
 };
 extern processor *claus;
 extern Logger global_logger;

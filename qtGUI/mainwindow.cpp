@@ -8,9 +8,12 @@ MainWindow::MainWindow(QWidget *parent)
     logger.debug(__func__,"MainWindow").enter();
     ui->setupUi(this);
     setAcceptDrops(true);
-//    ui->measurements_treeView->set_plot_window(ui->measurement_plot_window);
+
     ui->files_treeView->update();
     ui->measurements_treeView->update();
+
+    QObject::connect(ui->files_treeView, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
+
     logger.debug(__func__,"MainWindow").exit();
 }
 
@@ -112,43 +115,44 @@ void MainWindow::dropEvent(QDropEvent *e)
 void MainWindow::on_button_files_to_measurements_clicked()
 {
     logger.debug(__func__,"this").enter();
-    std::vector<unsigned int> rows;
+    ui->files_treeView->selections_to_measurements();
+//    std::vector<unsigned int> rows;
 
-    //tofsims
-    rows = ui->files_treeView->tofsims_entries().get_selected_rows();
-    for (auto file_idx : rows)
-    {
-        auto& file = claus->tofsims.files().at(file_idx);
-        claus->tofsims.add_to_measurement(file);
-        logger.info(__func__,"tofsims.file").value(file.name.to_string(),10,"tofsims");
-    }
-    logger.debug(__func__,"tofsims.files").signal("deleting...");
-    tools::vec::erase(claus->tofsims.files(),rows);
+//    //tofsims
+//    rows = ui->files_treeView->tofsims_entries().get_selected_rows();
+//    for (auto file_idx : rows)
+//    {
+//        auto& file = claus->tofsims.files().at(file_idx);
+//        claus->tofsims.add_to_measurement(file);
+//        logger.info(__func__,"tofsims.file").value(file.name.to_string(),10,"tofsims");
+//    }
+//    logger.debug(__func__,"tofsims.files").signal("deleting...");
+//    tools::vec::erase(claus->tofsims.files(),rows);
 
-    //dsims
-    std::vector<files_::dsims_t*> dsims_files; // testing
-    rows = ui->files_treeView->dsims_entries().get_selected_rows();
-    for (auto file_idx : rows)
-    {
-        auto& file = claus->dsims.files.at(file_idx);
-        dsims_files.push_back(&file); // testing
-        claus->dsims.add_to_measurement(file);
-        logger.info(__func__,"dsims.file").value(file.name.to_string(),10,"dsims");
-    }
-    logger.debug(__func__,"dsims.files").signal("deleting...");
+//    //dsims
+//    std::vector<files_::dsims_t*> dsims_files; // testing
+//    rows = ui->files_treeView->dsims_entries().get_selected_rows();
+//    for (auto file_idx : rows)
+//    {
+//        auto& file = claus->dsims.files.at(file_idx);
+//        dsims_files.push_back(&file); // testing
+//        claus->dsims.add_to_measurement(file);
+//        logger.info(__func__,"dsims.file").value(file.name.to_string(),10,"dsims");
+//    }
+//    logger.debug(__func__,"dsims.files").signal("deleting...");
 
-    ///testing...
-    auto filtered_files = claus->dsims.filter_files(dsims_files).by_olcdb(53430).files();
-    for (auto& ff : filtered_files)
-    {
-        logger.info(__func__,"filtered_file").value((ff->name.filename()));
-    }
-    ///
+//    ///testing...
+//    auto filtered_files = claus->dsims.filter_files(dsims_files).by_olcdb(53430).files();
+//    for (auto& ff : filtered_files)
+//    {
+//        logger.info(__func__,"filtered_file").value((ff->name.filename()));
+//    }
+//    ///
 
-    tools::vec::erase(claus->dsims.files,rows);
+//    tools::vec::erase(claus->dsims.files,rows);
 
-    ui->files_treeView->update();
-    ui->measurements_treeView->update();
+//    ui->files_treeView->update();
+//    ui->measurements_treeView->update();
     logger.debug(__func__,"this").exit();
 }
 
@@ -221,4 +225,15 @@ void MainWindow::on_tab_log_clear_button_clicked()
     ui->tab_log_table->clearContents();
     ui->tab_log_table->setRowCount(0);
     logger.clear_messages();
+}
+
+void MainWindow::on_files_treeView_customContextMenuRequested(const QPoint &pos)
+{
+    logger.debug(__func__,"this").enter();
+    QModelIndex index = ui->files_treeView->indexAt(pos);
+    if (index.isValid())
+    {
+        logger.debug(__func__,"pos").value("x="+std::to_string(pos.x()) + "; y="+std::to_string(pos.y()));
+        ui->files_treeView->contextMenu->exec(ui->files_treeView->viewport()->mapToGlobal(pos));
+    }
 }

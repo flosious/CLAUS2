@@ -14,6 +14,7 @@
 #include "../src/processor.hpp"
 #include "../src/filenames_collector_t.hpp"
 #include "../src/log.hpp"
+#include "qobject.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -39,11 +40,11 @@ private slots:
     void on_tab_log_debug_stateChanged(int arg1);
 
     void on_tab_log_clear_button_clicked();
+    void on_files_treeView_customContextMenuRequested(const QPoint &pos);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
-
 public:
     Ui::MainWindow *ui;
     MainWindow(QWidget *parent = nullptr);

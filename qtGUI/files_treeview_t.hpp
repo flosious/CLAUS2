@@ -6,9 +6,11 @@
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include "../src/processor.hpp"
+#include <QMenu>
 
 class files_treeview_t : public QTreeView
 {
+    Q_OBJECT
 private:
     class_logger_t logger;
     ///this is the order of parent points in the treeview; leave "LAST" at last position
@@ -61,8 +63,16 @@ protected:
     ///sets the model
     void createModel();
     void update(methods method_id, const std::vector<QStandardItem*>& itemCols);
+    void set_actions();
+    void set_contextMenu();
+    void connect_signals_to_slots();
 public:
     files_treeview_t(QWidget *parent = nullptr);
+//    void contextMenuEvent(QContextMenuEvent *event) override;
+    QMenu* contextMenu;
+    QAction* test_action;
+    QAction* selections_to_measurements_action;
+    QAction* delete_selection_action;
 
     unknown_filenames_t unknown_filenames_entries();
     tofsims_t tofsims_entries();
@@ -73,9 +83,15 @@ public:
 //    parent_entry_t dektak6m_entries();
 //    parent_entry_t p17_entries();
 //    parent_entry_t camera_images_entries();
+
+public slots:
     ///will reload from processor: klaus()->"method"->files
     void update();
+    void test();
+    void delete_selection();
     void selections_to_measurements();
+signals:
+    void update_measurements_treeview();
 };
 extern processor *claus;
 extern Logger global_logger;

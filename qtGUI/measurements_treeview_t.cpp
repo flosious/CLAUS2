@@ -222,24 +222,7 @@ void measurements_treeview_t::update(methods method_id, const std::vector<QStand
     logger.debug(__func__,"this").exit();
 }
 
-void measurements_treeview_t::update()
-{
-    logger.debug(__func__,"this").enter();
 
-    //tofsims
-    update(tofsims, tofsims_entries().itemCols());
-    logger.debug(__func__,"this").signal("tofsims_entries updated");
-    setSelectionMode(QTreeView::MultiSelection);
-
-    //dsims
-    update(dsims, dsims_entries().itemCols());
-    logger.debug(__func__,"this").signal("dsims_entries updated");
-    setSelectionMode(QTreeView::MultiSelection);
-
-    setModel(model);
-    logger.debug(__func__,"this").exit();
-    return;
-}
 
 int measurements_treeview_t::total_lines_count() const
 {
@@ -277,4 +260,28 @@ void measurements_treeview_t::keyPressEvent(QKeyEvent *e)
     }
     else
         QTreeView::keyPressEvent(e);
+}
+
+
+/**********************************/
+/*****         slots            ***/
+/**********************************/
+
+void measurements_treeview_t::update()
+{
+    logger.debug(__func__,"this").enter();
+
+    //tofsims
+    update(tofsims, tofsims_entries().itemCols());
+    logger.debug(__func__,"this").signal("tofsims_entries updated");
+    setSelectionMode(QTreeView::MultiSelection);
+
+    //dsims
+    update(dsims, dsims_entries().itemCols());
+    logger.debug(__func__,"this").signal("dsims_entries updated");
+    setSelectionMode(QTreeView::MultiSelection);
+
+    setModel(model);
+    logger.debug(__func__,"this").exit();
+    return;
 }
