@@ -19,9 +19,16 @@
 
 #include "files.hpp"
 
-files_::file_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers, std::vector<unsigned int> delete_cols_before_parsing) :
-    filename_with_path(filename_with_path), delimiter(delimiter),identifiers(identifiers), logger(global_logger,__FILE__,"files_::file_t::contents_t"),
-    delete_cols_before_parsing(delete_cols_before_parsing)
+files_::file_t::contents_t::contents_t(string& filename_with_path,
+                                       const string& delimiter,
+                                       const set<string>& identifiers,
+                                       std::vector<unsigned int> delete_cols_before_parsing,
+                                       const std::string& contents_s) :
+    filename_with_path(filename_with_path), delimiter(delimiter),
+    identifiers(identifiers),
+    logger(global_logger,__FILE__,"files_::file_t::contents_t"),
+    delete_cols_before_parsing(delete_cols_before_parsing),
+    contents_p(contents_s)
 {
 }
 

@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2022 Florian Bärwolf
+    floribaer@gmx.de
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -41,7 +60,6 @@ void MainWindow::dropEvent(QDropEvent *e)
         dropped_files.reserve(urlList.size());
         for (int i=0; i < urlList.size() ; i++)
         {
-//            std::cout << urlList.at(i).toString().toStdString() << std::endl;
               dropped_files.push_back(urlList.at(i).toString().toStdString());
         }
 
@@ -59,8 +77,9 @@ void MainWindow::dropEvent(QDropEvent *e)
         ///all filenames are unknown in the beginning
         const auto new_filenames = filenames_collector.filenames();
 
-        int next_tof_file_idx = claus->tofsims.files().size();
+        int next_tof_file_idx = claus->tofsims.files.size();
         int next_dsims_file_idx = claus->dsims.files.size();
+        int next_dektak6m_file_idx = claus->dektak6m.files.size();
         claus->parse_filenames(new_filenames);
         //unknown + tofsims + dsims + camera(blder) + xps + dektak6m + p17 + ...
 
@@ -69,15 +88,15 @@ void MainWindow::dropEvent(QDropEvent *e)
             logger.debug(__func__,"measurement Tab").enter();
             vector<unsigned int> indices;
             //tofsims
-            for (int i = next_tof_file_idx; i<claus->tofsims.files().size(); i++)
+            for (int i = next_tof_file_idx; i<claus->tofsims.files.size(); i++)
             {
 
-                auto& F = claus->tofsims.files().at(i);
+                auto& F = claus->tofsims.files.at(i);
                 logger.info(__func__,"measurement Tab").value(F.name.filename(),10,"tofsims");
-                claus->tofsims.add_to_measurement(F);
+                claus->tofsims.add_file_to_measurement(F);
                 indices.push_back(i);
             }
-            tools::vec::erase(claus->tofsims.files(),indices);
+            tools::vec::erase(claus->tofsims.files,indices);
 
             indices.clear();
             //dsims
@@ -85,10 +104,21 @@ void MainWindow::dropEvent(QDropEvent *e)
             {
                 auto& F = claus->dsims.files.at(i);
                 logger.info(__func__,"measurement Tab").value(F.name.filename(),10,"dsims");
-                claus->dsims.add_to_measurement(F);
+                claus->dsims.add_file_to_measurement(F);
                 indices.push_back(i);
             }
             tools::vec::erase(claus->dsims.files,indices);
+
+            indices.clear();
+            //dektak6m
+            for (int i = next_dektak6m_file_idx; i<claus->dektak6m.files.size(); i++)
+            {
+                auto& F = claus->dektak6m.files.at(i);
+                logger.info(__func__,"measurement Tab").value(F.name.filename(),10,"dektak6m");
+                claus->dektak6m.add_file_to_measurement(F);
+                indices.push_back(i);
+            }
+            tools::vec::erase(claus->dektak6m.files,indices);
 
             logger.debug(__func__,"measurement Tab").exit();
         }
@@ -116,51 +146,14 @@ void MainWindow::on_button_files_to_measurements_clicked()
 {
     logger.debug(__func__,"this").enter();
     ui->files_treeView->selections_to_measurements();
-//    std::vector<unsigned int> rows;
-
-//    //tofsims
-//    rows = ui->files_treeView->tofsims_entries().get_selected_rows();
-//    for (auto file_idx : rows)
-//    {
-//        auto& file = claus->tofsims.files().at(file_idx);
-//        claus->tofsims.add_to_measurement(file);
-//        logger.info(__func__,"tofsims.file").value(file.name.to_string(),10,"tofsims");
-//    }
-//    logger.debug(__func__,"tofsims.files").signal("deleting...");
-//    tools::vec::erase(claus->tofsims.files(),rows);
-
-//    //dsims
-//    std::vector<files_::dsims_t*> dsims_files; // testing
-//    rows = ui->files_treeView->dsims_entries().get_selected_rows();
-//    for (auto file_idx : rows)
-//    {
-//        auto& file = claus->dsims.files.at(file_idx);
-//        dsims_files.push_back(&file); // testing
-//        claus->dsims.add_to_measurement(file);
-//        logger.info(__func__,"dsims.file").value(file.name.to_string(),10,"dsims");
-//    }
-//    logger.debug(__func__,"dsims.files").signal("deleting...");
-
-//    ///testing...
-//    auto filtered_files = claus->dsims.filter_files(dsims_files).by_olcdb(53430).files();
-//    for (auto& ff : filtered_files)
-//    {
-//        logger.info(__func__,"filtered_file").value((ff->name.filename()));
-//    }
-//    ///
-
-//    tools::vec::erase(claus->dsims.files,rows);
-
-//    ui->files_treeView->update();
-//    ui->measurements_treeView->update();
     logger.debug(__func__,"this").exit();
 }
 
 void MainWindow::on_remove_files_duplicates_clicked()
 {
-// 	std::vector<files_::tofsims_t> TF_copy = claus->tofsims.files();
-    std::set<files_::tofsims_t> TT(claus->tofsims.files().begin(),claus->tofsims.files().end());
-    claus->tofsims.files() = {TT.begin(),TT.end()};
+// 	std::vector<files_::tofsims_t> TF_copy = claus->tofsims.files;
+    std::set<files_::tofsims_t> TT(claus->tofsims.files.begin(),claus->tofsims.files.end());
+    claus->tofsims.files = {TT.begin(),TT.end()};
 
     std::set<files_::dsims_t> DT(claus->dsims.files.begin(),claus->dsims.files.end());
     claus->dsims.files = {DT.begin(),DT.end()};
@@ -188,13 +181,15 @@ void MainWindow::on_measurements_treeView_clicked(const QModelIndex &index)
     if (ui->measurements_treeView->tofsims_entries().get_selected_rows().size()>0)
     {
         ui->measurement_plot_window->clearGraphs();
-        auto& M = claus->tofsims.measurements().at(ui->measurements_treeView->tofsims_entries().get_selected_rows().back());
+        auto& M = claus->tofsims.measurements.at(ui->measurements_treeView->tofsims_entries().get_selected_rows().back());
         ui->measurement_plot_window->plot(M);
     }
 }
 
 void MainWindow::on_tab_log_warning_stateChanged(int arg1)
 {
+    if (global_logger==nullptr)
+        return;
     if (arg1==0)
         global_logger->set_print_warning(false);
     else if (arg1==2)
@@ -204,6 +199,8 @@ void MainWindow::on_tab_log_warning_stateChanged(int arg1)
 
 void MainWindow::on_tab_log_info_stateChanged(int arg1)
 {
+    if (global_logger==nullptr)
+        return;
     if (arg1==0)
         global_logger->set_print_info(false);
     else if (arg1==2)
@@ -213,6 +210,8 @@ void MainWindow::on_tab_log_info_stateChanged(int arg1)
 
 void MainWindow::on_tab_log_debug_stateChanged(int arg1)
 {
+    if (global_logger==nullptr)
+        return;
     if (arg1==0)
         global_logger->set_print_debug(false);
     else if (arg1==2)

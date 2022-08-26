@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2022 Florian Bärwolf
+    floribaer@gmx.de
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
 #include "files_treeview_t.hpp"
 
 /*****************************************/
@@ -7,7 +26,6 @@
 files_treeview_t::parent_entry_t::parent_entry_t(methods method_id, files_treeview_t *files_treeview) :
         method_id(method_id), files_treeview(files_treeview)
 {
-
 }
 
 std::vector<unsigned int> files_treeview_t::parent_entry_t::get_selected_rows() const
@@ -34,8 +52,6 @@ void files_treeview_t::parent_entry_t::selections_to_measurements()
 
 std::vector<QStandardItem*> files_treeview_t::parent_entry_t::itemCols(const std::vector<std::vector<std::string>>& lines_and_cols )
 {
-//    if (lines_and_cols.size()==0)
-//        return {};
     std::vector<QStandardItem*> items;
     items.reserve(2);
     QStandardItem *item, *child;
@@ -66,19 +82,44 @@ std::vector<QStandardItem*> files_treeview_t::parent_entry_t::itemCols(const std
 
 
 /*****************************************/
-/**     parent_entry_t::tofsims_t       **/
+/**     parent_entry_t::jpg             **/
 /*****************************************/
 
-files_treeview_t::tofsims_t::tofsims_t(files_treeview_t *files_treeview) :
-        parent_entry_t(tofsims,files_treeview)
+files_treeview_t::jpg_t::jpg_t(files_treeview_t *files_treeview) :
+        parent_entry_t(jpg,files_treeview)
 {
 }
 
-std::vector<QStandardItem*> files_treeview_t::tofsims_t::itemCols()
+std::vector<QStandardItem*> files_treeview_t::jpg_t::itemCols()
 {
-    auto& files = claus->tofsims.files();
+    auto& files = claus->jpg.files;
     std::vector<std::vector<std::string>> lines_and_cols(files.size());
-    for (size_t i=0; i < files.size();i++) // tofsims.files() is temporary file
+    for (size_t i=0; i < files.size();i++) // tofsims.files is temporary file
+    {
+        auto& F = files.at(i);
+        std::vector<std::string> cols_in_line(2);
+        cols_in_line.at(0) = F.name.filename_with_path.c_str();
+        cols_in_line.at(1) = "";
+        lines_and_cols.at(i) = cols_in_line;
+    }
+    return parent_entry_t::itemCols(lines_and_cols);
+}
+
+
+/*****************************************/
+/**     parent_entry_t::dektak6m_t      **/
+/*****************************************/
+
+files_treeview_t::dektak6m_t::dektak6m_t(files_treeview_t *files_treeview) :
+        parent_entry_t(dektak6m,files_treeview)
+{
+}
+
+std::vector<QStandardItem*> files_treeview_t::dektak6m_t::itemCols()
+{
+    auto& files = claus->dektak6m.files;
+    std::vector<std::vector<std::string>> lines_and_cols(files.size());
+    for (size_t i=0; i < files.size();i++)
     {
         auto& F = files.at(i);
         std::vector<std::string> cols_in_line(2);
@@ -91,7 +132,32 @@ std::vector<QStandardItem*> files_treeview_t::tofsims_t::itemCols()
 
 
 /*****************************************/
-/**     parent_entry_t::dsims_t       **/
+/**     parent_entry_t::tofsims_t       **/
+/*****************************************/
+
+files_treeview_t::tofsims_t::tofsims_t(files_treeview_t *files_treeview) :
+        parent_entry_t(tofsims,files_treeview)
+{
+}
+
+std::vector<QStandardItem*> files_treeview_t::tofsims_t::itemCols()
+{
+    auto& files = claus->tofsims.files;
+    std::vector<std::vector<std::string>> lines_and_cols(files.size());
+    for (size_t i=0; i < files.size();i++) // tofsims.files is temporary file
+    {
+        auto& F = files.at(i);
+        std::vector<std::string> cols_in_line(2);
+        cols_in_line.at(0) = F.name.filename_with_path.c_str();
+        cols_in_line.at(1) = F.contents.to_string();
+        lines_and_cols.at(i) = cols_in_line;
+    }
+    return parent_entry_t::itemCols(lines_and_cols);
+}
+
+
+/*****************************************/
+/**     parent_entry_t::dsims_t         **/
 /*****************************************/
 
 files_treeview_t::dsims_t::dsims_t(files_treeview_t *files_treeview) :
@@ -114,9 +180,9 @@ std::vector<QStandardItem*> files_treeview_t::dsims_t::itemCols()
     return parent_entry_t::itemCols(lines_and_cols);
 }
 
-/*****************************************/
-/**     parent_entry_t::aishu       **/
-/*****************************************/
+/***********************************/
+/**     parent_entry_t::aishu     **/
+/***********************************/
 
 files_treeview_t::aishu_t::aishu_t(files_treeview_t *files_treeview) :
         parent_entry_t(aishu,files_treeview)
@@ -127,7 +193,7 @@ std::vector<QStandardItem*> files_treeview_t::aishu_t::itemCols()
 {
     auto& files = claus->aishu.files;
     std::vector<std::vector<std::string>> lines_and_cols(files.size());
-    for (size_t i=0; i < files.size();i++) // tofsims.files() is temporary file
+    for (size_t i=0; i < files.size();i++) // tofsims.files is temporary file
     {
         auto& F = files.at(i);
         std::vector<std::string> cols_in_line(2);
@@ -138,9 +204,9 @@ std::vector<QStandardItem*> files_treeview_t::aishu_t::itemCols()
     return parent_entry_t::itemCols(lines_and_cols);
 }
 
-/*****************************************/
+/***************************************************/
 /**     parent_entry_t::unknown_filenames_t       **/
-/*****************************************/
+/***************************************************/
 
 files_treeview_t::unknown_filenames_t::unknown_filenames_t(files_treeview_t *files_treeview) :
         parent_entry_t(unknown_filenames,files_treeview)
@@ -153,7 +219,7 @@ std::vector<QStandardItem*> files_treeview_t::unknown_filenames_t::itemCols()
 
     std::vector<std::vector<std::string>> lines_and_cols(files.size());
 
-    for (size_t i=0; i < files.size();i++) // tofsims.files() is temporary file
+    for (size_t i=0; i < files.size();i++) // tofsims.files is temporary file
     {
         auto& F = files.at(i);
         std::vector<std::string> cols_in_line(2);
@@ -173,9 +239,8 @@ std::map<files_treeview_t::methods,std::string> files_treeview_t::method_names
     {tofsims,"tofsims"},
     {aishu,"aishu"},
     {dsims,"dsims"},
-    {dektak6m, "dektak6m"},
-    {p17, "p17"},
-    {xps, "xps"}
+    {jpg, "jpg"},
+    {dektak6m, "dektak6m"}
 };
 
 void files_treeview_t::set_actions()
@@ -242,7 +307,7 @@ void files_treeview_t::createModel()
 	model->setItem(unknown_filenames,1,item);
 
     //tofsims
-    if (claus->tofsims.files().size()>0)
+    if (claus->tofsims.files.size()>0)
     {
         label.str("");
         label  << method_names[tofsims];
@@ -302,6 +367,16 @@ files_treeview_t::dsims_t files_treeview_t::dsims_entries()
 {
     return dsims_t(this);
 }
+files_treeview_t::dektak6m_t files_treeview_t::dektak6m_entries()
+{
+    return dektak6m_t(this);
+}
+
+files_treeview_t::jpg_t files_treeview_t::jpg_entries()
+{
+    return jpg_t(this);
+}
+
 files_treeview_t::aishu_t files_treeview_t::aishu_entries()
 {
     return aishu_t(this);
@@ -344,6 +419,12 @@ void files_treeview_t::update()
     //dsims
     update(dsims, dsims_entries().itemCols());
     logger.debug(__func__,"this").signal("dsims_entries updated");
+    //dektak6m
+    update(dektak6m, dektak6m_entries().itemCols());
+    logger.debug(__func__,"this").signal("dektak6m_entries updated");
+    //camera
+    update(jpg, jpg_entries().itemCols());
+    logger.debug(__func__,"this").signal("jpg_entries updated");
     //aishu
     update(aishu, aishu_entries().itemCols());
     logger.debug(__func__,"this").signal("aishu_entries updated");
@@ -371,7 +452,7 @@ void files_treeview_t::delete_selection()
     deletions_idxs = tofsims_entries().get_selected_rows();
     if (deletions_idxs.size()>0)
     {
-        tools::vec::erase<files_::tofsims_t>(claus->tofsims.files(),deletions_idxs);
+        tools::vec::erase<files_::tofsims_t>(claus->tofsims.files,deletions_idxs);
         erased=true;
     }
 
@@ -382,12 +463,27 @@ void files_treeview_t::delete_selection()
         erased=true;
     }
 
+    deletions_idxs = jpg_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
+    {
+        tools::vec::erase<files_::jpg_t>(claus->jpg.files,deletions_idxs);
+        erased=true;
+    }
+
+    deletions_idxs = dektak6m_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
+    {
+        tools::vec::erase<files_::profilers_t::dektak6m_t>(claus->dektak6m.files,deletions_idxs);
+        erased=true;
+    }
+
     deletions_idxs = aishu_entries().get_selected_rows();
     if (deletions_idxs.size()>0)
     {
         tools::vec::erase<files_::aishu_t>(claus->aishu.files,deletions_idxs);
         erased=true;
     }
+
     deletions_idxs = unknown_filenames_entries().get_selected_rows();
     if (deletions_idxs.size()>0)
     {
@@ -408,12 +504,13 @@ void files_treeview_t::selections_to_measurements()
     rows = tofsims_entries().get_selected_rows();
     for (auto file_idx : rows)
     {
-        auto& file = claus->tofsims.files().at(file_idx);
-        claus->tofsims.add_to_measurement(file);
+        auto& file = claus->tofsims.files.at(file_idx);
+        claus->tofsims.add_file_to_measurement(file);
         logger.info(__func__,"tofsims.file").value(file.name.to_string(),10,"tofsims");
     }
     logger.debug(__func__,"tofsims.files").signal("deleting...");
-    tools::vec::erase(claus->tofsims.files(),rows);
+    tools::vec::erase(claus->tofsims.files,rows);
+
 
     //dsims
     std::vector<files_::dsims_t*> dsims_files; // testing
@@ -422,19 +519,27 @@ void files_treeview_t::selections_to_measurements()
     {
         auto& file = claus->dsims.files.at(file_idx);
         dsims_files.push_back(&file); // testing
-        claus->dsims.add_to_measurement(file);
+        claus->dsims.add_file_to_measurement(file);
         logger.info(__func__,"dsims.file").value(file.name.to_string(),10,"dsims");
     }
     logger.debug(__func__,"dsims.files").signal("deleting...");
-
-    ///testing...
-    auto filtered_files = claus->dsims.filter_files(dsims_files).by_olcdb(53430).files();
-    for (auto& ff : filtered_files)
-    {
-        logger.info(__func__,"filtered_file").value((ff->name.filename()));
-    }
-    ///
     tools::vec::erase(claus->dsims.files,rows);
+
+
+    //dektak6m
+    std::vector<files_::profilers_t::dektak6m_t*> dektak6m_files; // testing
+    rows = dektak6m_entries().get_selected_rows();
+    for (auto file_idx : rows)
+    {
+        auto& file = claus->dektak6m.files.at(file_idx);
+        dektak6m_files.push_back(&file); // testing
+        claus->dektak6m.add_file_to_measurement(file);
+        logger.info(__func__,"dektak6m.file").value(file.name.to_string(),10,"dektak6m");
+    }
+    logger.debug(__func__,"dektak6m.files").signal("deleting...");
+    tools::vec::erase(claus->dektak6m.files,rows);
+
+
     update();
 //    ui->measurements_treeView->update();
     emit update_measurements_treeview();

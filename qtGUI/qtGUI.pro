@@ -84,6 +84,7 @@ SOURCES += \
     mainwindow.cpp \
     measurements_treeview_t.cpp \
     measurements_window.cpp \
+    mgroups_treeview_t.cpp \
     plotwindow.cpp \
     qcustomplot.cpp \
     table_log.cpp
@@ -123,6 +124,7 @@ HEADERS += \
     mainwindow.h \
     measurements_treeview_t.hpp \
     measurements_window.hpp \
+    mgroups_treeview_t.hpp \
     plotwindow.h \
     qcustomplot.h \
     table_log.hpp

@@ -23,8 +23,8 @@
 /***********************/
 
 
-files_::tofsims_t::contents_t::contents_t(string& filename_with_path)
-    : files_::sims_t::contents_t(filename_with_path,"\t",{"# Profile Smoothing","# Profile Compression"}),
+files_::tofsims_t::contents_t::contents_t(string& filename_with_path, const std::string& contents_string)
+    : files_::sims_t::contents_t(filename_with_path,"\t",{"# Profile Smoothing","# Profile Compression"},contents_string),
       logger(global_logger,__FILE__,"files_::tofsims_t::contents_t")
 {
 }

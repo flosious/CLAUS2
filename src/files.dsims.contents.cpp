@@ -28,8 +28,8 @@
 /*****  files_::dsims_t::contents_t  ****/
 /***************************************/
 
-files_::dsims_t::contents_t::contents_t(string& filename_with_path)
-    : files_::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"}), logger(global_logger,__FILE__,"files_::dsims_t::contents_t")
+files_::dsims_t::contents_t::contents_t(string& filename_with_path, const std::string& contents_string)
+    : files_::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"},contents_string), logger(global_logger,__FILE__,"files_::dsims_t::contents_t")
 
 {
 }

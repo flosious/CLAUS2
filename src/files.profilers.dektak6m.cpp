@@ -22,8 +22,8 @@
 /*********    dektak6m_t  	**************/
 /*****************************************/
 
-files_::profilers_t::dektak6m_t::dektak6m_t(string& filename) : 
-    name(filename,"_",{".TXT",".txt",".profile"},{}), contents(filename),
+files_::profilers_t::dektak6m_t::dektak6m_t(string& filename, const std::string& contents_string) :
+    name(filename,"_",{".TXT",".txt",".profile"},{}), contents(filename, contents_string),
     logger(global_logger,__FILE__,"files_::profilers_t::dektak6m_t")
 {
 }
@@ -33,8 +33,8 @@ files_::profilers_t::dektak6m_t::dektak6m_t(string& filename) :
 /*********  dektak6m_t::contents_t  **************/
 /*************************************************/
 
-files_::profilers_t::dektak6m_t::contents_t::contents_t(string& filename_with_path) :
-    profiler_t::contents_t(filename_with_path,",",{"Scan Type","Stylus Type"}),
+files_::profilers_t::dektak6m_t::contents_t::contents_t(string& filename_with_path, const std::string& contents_string) :
+    profiler_t::contents_t(filename_with_path,",",{"Scan Type","Stylus Type"},contents_string),
     logger(global_logger,__FILE__,"files_::profilers_t::dektak6m_t::contents_t")
 {
 }

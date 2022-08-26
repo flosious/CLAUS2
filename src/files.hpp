@@ -127,11 +127,12 @@ public:
 			void to_screen(string prefix="");
 			string delimiter;
 			set<string> identifiers;
-			const string& contents_string();
+//            const std::string& contents_string();
 			string filename_with_path;
 			/*ctors*/
-            contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers,std::vector<unsigned int> delete_cols_before_parsing={});
+            contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers,std::vector<unsigned int> delete_cols_before_parsing={}, const std::string& contents_string="");
 		public:
+            const std::string& contents_string();
 			string matrix();
             bool is_correct_type();
 			string to_string(const string del = ",");
@@ -190,7 +191,7 @@ public:
 				string to_string() const;
 			};
 		protected:
-			contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
+            contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers, const std::string& contents_string="");
 			vector<column_t> columns_s;
 		};
 	}; // sims_t
@@ -261,9 +262,9 @@ public:
 			const quantity::quantity_t total_acquisition_time(const string find_this="Total acquisition time (s)");
 			const crater_t crater();
 			void to_screen(string prefix="");
-			contents_t(string& filename_with_path);
+            contents_t(string& filename_with_path, const std::string& contents_string="");
 		};	
-		dsims_t(string& filename);
+        dsims_t(string& filename, const std::string& contents_string="");
 		dsims_t(files_::dsims_t::name_t& name_s, files_::dsims_t::contents_t& contents_s);
         bool operator<(const dsims_t& obj) const;
         name_t name;
@@ -299,9 +300,9 @@ public:
 			quantity::sputter_time_t sputter_time();
 			quantity::sputter_depth_t sputter_depth();
 			vector<cluster_t> clusters() override;
-			contents_t(string& filename_with_path);
+            contents_t(string& filename_with_path, const std::string& contents_string="");
 		};
-		tofsims_t(string& filename);
+        tofsims_t(string& filename, const std::string& contents_string="");
 		tofsims_t(files_::tofsims_t::name_t& name_s, files_::tofsims_t::contents_t& contents_s);
 		bool operator==(const tofsims_t& obj) const;
 		bool operator!=(const tofsims_t& obj) const;
@@ -324,7 +325,7 @@ public:
 			class contents_t : public file_t::contents_t
 			{
 			public:
-				contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers);
+                contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers, const std::string& contents_string="");
 				///should be overwritten
 				virtual crater_t::linescan_t linescan();
 			};
@@ -340,10 +341,10 @@ public:
             private:
                 class_logger_t logger;
 			public:
-				contents_t(string& filename_with_path);
+                contents_t(string& filename_with_path, const std::string& contents_string="");
 				crater_t::linescan_t linescan() override;
 			};
-			dektak6m_t(string& filename);
+            dektak6m_t(string& filename, const std::string& contents_string="");
 			file_t::crater_in_name_t name;
 			contents_t contents;
 		}; // dektak6m_t
@@ -357,10 +358,10 @@ public:
             private:
                 class_logger_t logger;
 			public:
-				contents_t(string& filename_with_path);
+                contents_t(string& filename_with_path, const std::string& contents_string="");
 				crater_t::linescan_t linescan() override;
 			};
-			P17_t(string& filename);
+            P17_t(string& filename, const std::string& contents_string="");
 			tofsims_t::name_t name;
 			contents_t contents;
 		}; //P17_t
@@ -415,11 +416,11 @@ public:
                 chip_t chip2();
             };
         public:
-            contents_t(string& filename_with_path);
+            contents_t(string& filename_with_path, const std::string& contents_string="");
             std::vector<block_t> blocks();
         };
     public:
-        aishu_t(string& filename);
+        aishu_t(string& filename, const std::string& contents_string="");
         name_t name;
         contents_t contents;
         void export_to_aishu_format(string export_filename_w_path="");

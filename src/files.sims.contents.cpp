@@ -21,8 +21,8 @@
 /**************/
 /*** sims_t ***/
 /**************/
-files_::sims_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers) : 
-                                        files_::file_t::contents_t(filename_with_path,delimiter,identifiers), logger(global_logger,__FILE__,"files_::sims_t::contents_t")
+files_::sims_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers, const std::string& contents_string) :
+    files_::file_t::contents_t(filename_with_path,delimiter,identifiers,{},contents_string), logger(global_logger,__FILE__,"files_::sims_t::contents_t")
 {
 }
 

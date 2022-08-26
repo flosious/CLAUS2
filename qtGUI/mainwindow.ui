@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>929</width>
-    <height>524</height>
+    <height>557</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,7 +27,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;... for further automation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -83,10 +83,13 @@
           <item>
            <widget class="QSplitter" name="splitter">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>

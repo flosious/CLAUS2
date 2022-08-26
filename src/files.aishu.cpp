@@ -18,8 +18,8 @@
 
 #include "files.hpp"
 
-files_::aishu_t::aishu_t(string& filename)
-    : logger(global_logger,__FILE__,"files_::aishu_t"), name(filename), contents(filename)
+files_::aishu_t::aishu_t(string& filename, const std::string& contents_string)
+    : logger(global_logger,__FILE__,"files_::aishu_t"), name(filename), contents(filename, contents_string)
 {
 }
 
@@ -83,8 +83,8 @@ files_::aishu_t::name_t::name_t(std::string filename) : file_t::name_t(filename,
 
 }
 
-files_::aishu_t::contents_t::contents_t(string& filename_with_path)
-    : file_t::contents_t(filename_with_path,",",{"Circuit"},{0,1}),
+files_::aishu_t::contents_t::contents_t(string& filename_with_path, const std::string& contents_string)
+    : file_t::contents_t(filename_with_path,",",{"Circuit"},{0,1},contents_string),
       logger(global_logger,__FILE__,"files_::aishu_t::contents_t")
 {
 

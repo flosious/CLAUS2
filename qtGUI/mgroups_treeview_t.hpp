@@ -16,28 +16,31 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef MGROUPS_TREEVIEW_T_H
+#define MGROUPS_TREEVIEW_T_H
 
-#ifndef TABLE_LOG_HPP
-#define TABLE_LOG_HPP
+#include <map>
+#include <QTreeView>
+#include <QStandardItem>
+#include "../src/mgroup.hpp"
+#include "../src/measurement.hpp"
 
-#include <QTableWidget>
-//#include "../src/log.hpp"
-
-
-class table_log : public QTableWidget
+template<typename G,typename M>
+class section_t
 {
-
 public:
-    table_log(QWidget *parent = nullptr);
-    enum color_t{none,white,red,blue,yellow,black,green,cyan,magenta};
-    ///will add missing rows
-    void add_row(const std::vector<std::string>& row, color_t color);
-    void set_header(const std::vector<std::string>& header_s);
-protected:
-    std::vector<std::string> header;
-
-private:
-    QWidget *parent;
+    section_t(G& group, const std::vector<M*>& measurements);
+    std::map<QStandardItem*,G*> group_item;
+    std::map<QStandardItem*, M*> measurement_items;
 };
 
-#endif // TABLE_LOG_HPP
+class mgroups_treeview : public QTreeView
+{
+    Q_OBJECT
+private:
+//    std::map<QStandardItem*,>
+public:
+    mgroups_treeview();
+};
+
+#endif // MGROUPS_TREEVIEW_T_H

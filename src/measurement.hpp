@@ -46,8 +46,6 @@ using namespace std;
 /************************/
 // FORWARD DECLARATIONS //
 
-class mgroups_;
-
 // namespace calc
 // {
 // 	class SR_c;
@@ -75,7 +73,8 @@ public:
         measurement_t(files_::file_t::name_t& filename, string method,database_t& database);
 		long long unsigned int memory_address() const;
 		string filename_with_path;
-		string to_string(const string del = ", ") const;
+        string to_string(const string del = ", ") const;
+        const string to_string_short(const string del = ", ") const;
 		bool is_set() const;
 		string group;
 		string repetition;
@@ -114,7 +113,7 @@ public:
 		class P17_t : public profiler_t
 		{
 		public:
-            P17_t(files_::profilers_t::dektak6m_t& file, database_t& database);
+            P17_t(files_::profilers_t::P17_t& file, database_t& database);
 		};
 	}; // profilers_t
 	

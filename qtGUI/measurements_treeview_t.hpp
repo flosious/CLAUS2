@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2022 Florian Bärwolf
+    floribaer@gmx.de
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
 #ifndef MEASUREMENTS_TREEVIEW_T_HPP
 #define MEASUREMENTS_TREEVIEW_T_HPP
 
@@ -24,7 +43,7 @@ class measurements_treeview_t : public QTreeView
 private:
     class_logger_t logger;
     ///this is the order of parent points in the treeview; leave "LAST" at last position
-    enum methods {tofsims, dsims, dektak6m, p17, xps, LAST};
+    enum methods {tofsims, dsims, dektak6m, LAST};
     static std::map<methods,std::string> method_names;
 
     class parent_entry_t
@@ -39,6 +58,14 @@ private:
         methods method_id;
         ///the current model used in treeview
         measurements_treeview_t *measurements_treeview=nullptr;
+    };
+    class dektak6m_t : public parent_entry_t
+    {
+    private:
+        class_logger_t logger;
+    public:
+        dektak6m_t(measurements_treeview_t *measurements_treeview);
+        std::vector<QStandardItem*> itemCols();
     };
     class tofsims_t : public parent_entry_t
     {
@@ -68,9 +95,18 @@ protected:
     void update(methods method_id, const std::vector<QStandardItem*>& itemCols);
     QWidget *parent;
     QCustomPlot *measurement_plot_window;
+    void set_actions();
+    void set_contextMenu();
+    void connect_signals_to_slots();
 public:
     measurements_treeview_t(QWidget *parent = nullptr);
+    QMenu* contextMenu;
+//    QAction* group_selection_action;
+//    QAction* ungroup_selection_action;
+    QAction* delete_selection_action;
+
     tofsims_t tofsims_entries();
+    dektak6m_t dektak6m_entries();
     dsims_t dsims_entries();
     void set_plot_window(QCustomPlot *measurement_plot_window_s);
 //    parent_entry_t dsims_entries();
@@ -80,7 +116,12 @@ public:
 //    parent_entry_t camera_images_entries();
     ///will reload from processor: klaus()->"method"->measurements
 public slots:
+    ///will reload from processor: klaus()->"method"->files
     void update();
+//    void delete_selection();
+//    void selections_to_measurements();
+signals:
+//    void update_measurements_treeview();
 };
 extern processor *claus;
 extern Logger global_logger;

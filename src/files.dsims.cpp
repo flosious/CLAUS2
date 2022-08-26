@@ -18,7 +18,7 @@
 
 #include "files.hpp"
 
-files_::dsims_t::dsims_t(string& filename) : name(filename),contents(filename), logger(global_logger,__FILE__,"files_::dsims_t")
+files_::dsims_t::dsims_t(string& filename, const std::string& contents_string) : name(filename),contents(filename, contents_string), logger(global_logger,__FILE__,"files_::dsims_t")
 {
 }
 

@@ -68,22 +68,28 @@ private:
             files_t by_sample(const sample_t& sample);
             files_t by_sample_matrix(const sample_t::matrix_t& matrix);
         };
+        template<class T>
+        class items_t
+        {
+        protected:
+            std::vector<T*> items_p;
+        public:
+            items_t(const std::vector<T>& measurements);
+            items_t(const std::vector<T*>& measurements);
+            std::vector<T*> files() const;
+            items_t by_olcdb(int olcdb);
+            items_t by_lot(std::string_view lot);
+            items_t by_wafer(int wafer);
+            items_t by_sample(const sample_t& sample);
+            items_t by_sample_matrix(const sample_t::matrix_t& matrix);
+        };
     };
-
-    class camera_t
-    {
-
-    };
-	
-    class dektak6m_t
-    {
-
-    };
-	
-    class dsims_t
+    template<typename file_type>
+    class tool_with_files
     {
     private:
         class_logger_t logger;
+    protected:
         ///all available filenames
         std::vector<string>* filenames_list = nullptr;
         ///all samples measured by any method
@@ -91,73 +97,105 @@ private:
         database_t* database = nullptr;
         config_t* config = nullptr;
     public:
-        filter::files_t<files_::dsims_t> filter_files(const std::vector<files_::dsims_t*>& files_s);
-        filter::files_t<files_::dsims_t> filter_files();
-        std::vector<files_::dsims_t> files;
-        std::vector<measurements_::dsims_t> measurements;
-        std::vector<mgroups_::dsims_t> mgroups;
+        tool_with_files(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database,config_t& config) :
+            filenames_list(&filenames_list), samples_list(&samples_list), database(&database), config(&config),logger(global_logger,__FILE__,"processor::tool_with_files")
+        {}
+//        tool_with_files(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
+        std::vector<file_type> files;
 
-        dsims_t(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
-        void add_all_files_to_measurements();
-        void add_to_measurement(files_::dsims_t& F);
+        filter::items_t<file_type> filter_files();
     };
-public:
-    class tofsims_t
+
+
+
+    template<typename file_type, typename measurement_type>
+    class tool_with_files_measurements : public tool_with_files<file_type>
     {
     private:
         class_logger_t logger;
-        std::vector<mgroups_::tofsims_t> mgroups_p;
-        ///all available filenames
-        std::vector<string>* filenames_list = nullptr;
-        ///all samples measured by any method
-        std::vector<sample_t>* samples_list = nullptr;
-        database_t* database = nullptr;
-        config_t* config = nullptr;
-        ///ungrouped measurements
-        std::vector<measurements_::tofsims_t> measurements_p;
-        ///filename+path --> files_::tofsims_t
-        std::vector<files_::tofsims_t> files_p;
     public:
-        tofsims_t(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
-        std::vector<files_::tofsims_t>& files();
-        ///ungrouped measurements
-        std::vector<measurements_::tofsims_t>& measurements();
-        std::vector<mgroups_::tofsims_t>& mgroups();
-        ///just samples measured by tofsims
-        std::vector<sample_t> samples() const;
-        ///add the new group MG to the std::vector mgroups_p
-        void add( mgroups_::tofsims_t& MG);
-        ///add the new measurement M to the std::vector meaasurements_p
-        void add(measurements_::tofsims_t& M);
-        ///adds multiple measurements Ms to the std::vector measurements_p (more efficient)
-        void add(std::vector<measurements_::tofsims_t>& Ms);
-        ///add the new file F to the std::vector files_p
-        void add( files_::tofsims_t& F);
-        ///adds multiple files Fs to the std::vector filesp (more efficient)
-        void add(std::vector<files_::tofsims_t>& Fs);
-        ///removes the file F from the std::vector files_p
-        void remove(files_::tofsims_t& F);
-        ///removes the measurement M from the std::vector meaasurements_p
-        void remove(measurements_::tofsims_t& M);
-        ///will move the Ms to a new group or adds to the existing one
-        void group(std::vector<measurements_::tofsims_t>& Ms);
-        ///will create a measurement from the File F and save it in the std::vector measurements_p
-        void add_all_files_to_measurements();
-        void add_to_measurement(files_::tofsims_t& F);
-        ///will move all measurements to the already existing mgroup MG
-        void move_to_existing_group(std::vector<measurements_::tofsims_t>& Ms, mgroups_::tofsims_t& MG);
-        ///will move all Ms within MG to the meausrements_p std::vector and erase MG from mgroups_p std::vector
-        void ungroup(mgroups_::tofsims_t& MG);
-        ///will remove M within MG from the group MG to the std::vector measurements_p
-        void remove_from_group(measurements_::tofsims_t& M, mgroups_::tofsims_t& MG);
-        ///will remove MG and its containing Ms
-        void remove(mgroups_::tofsims_t& MG);
+        tool_with_files_measurements(
+                        std::vector<string>& filenames_list,std::vector<sample_t>& samples_list,database_t& database,config_t& config) :
+            tool_with_files<file_type>(filenames_list,samples_list,database,config),logger(global_logger,__FILE__,"processor::tool_with_files_measurements")
+        {}
+//        tool_with_files_measurements(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
+        std::vector<measurement_type> measurements;
+        void add_all_files_to_measurements()
+        {
+            for (file_type& F : this->files)
+            {
+                add_file_to_measurement(F);
+            }
+        }
+//        void add_all_files_to_measurements();
+        void add_file_to_measurement(file_type& F)
+        {
+            measurement_type M(F,*this->database); // is this correct?
+            measurements.push_back(M);
+        }
+//        void add_file_to_measurement(file_type& F);
+        filter::items_t<measurement_type> filter_measurement();
     };
-    class aishu_t
+
+
+
+    template<typename file_type, typename measurement_type, typename mgroup_type>
+    class tool_with_files_measurements_groups : public tool_with_files_measurements<file_type,measurement_type>
     {
     private:
+        class_logger_t logger;
     public:
-        std::vector<files_::aishu_t> files;
+        tool_with_files_measurements_groups(std::vector<string>& filenames_list,std::vector<sample_t>& samples_list,database_t& database,config_t& config) :
+            tool_with_files_measurements<file_type, measurement_type>(filenames_list,samples_list,database,config),logger(global_logger,__FILE__,"processor::tool_with_files_measurements_groups")
+        {}
+//        tool_with_files_measurements_groups(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
+        std::vector<mgroup_type> mgroups;
+
+        filter::items_t<mgroup_type> filter_mgroups();
+        ///removes the group; add its measurements back to the vector
+        void ungroup_measurements(unsigned int index)
+        {
+            if (index >= mgroups.size()) return;
+            this->measurements.insert(this->measurements.end(),mgroups[index].measurements_p.begin(),mgroups[index].measurements_p.end());
+            mgroups.erase(mgroups.begin()+index);
+        }
+        void auto_group_measurements(bool ignore_olcdb=false)
+        {
+            for (auto& M : this->measurements)
+            {
+                bool grouped = false;
+                for (auto& G : mgroups)
+                {
+                    if (M.group != G.group) continue;
+                    if (!ignore_olcdb && (M.olcdb != G.olcdb)) continue;
+                    if (M.settings != G.settings_p) continue;
+                    G.measurements_p.push_back(M); // add M to existing mgroup G
+                    grouped = true;
+                    break;
+                }
+                if (!grouped)
+                {
+                    mgroup_type G(M);
+                    G.measurements_p.push_back(G);
+                }
+            }
+            this->measurements.clear();
+        }
+        void group_measurements(std::vector<unsigned int> measurement_indexes)
+        {
+            std::vector<measurement_type> Ms = tools::vec::filter_as_copies_from_indices(this->measurements,measurement_indexes);
+            mgroup_type G(Ms);
+            mgroups.push_back(G);
+            tools::vec::erase(this->measurements,measurement_indexes);
+        }
+        void add_measurements_to_group(unsigned int mgroup_idx, std::vector<unsigned int> measurement_indexes)
+        {
+            if (mgroup_idx>=mgroups.size()) return;
+            auto& G = mgroups.at(mgroup_idx);
+            std::vector<measurement_type> Ms = tools::vec::filter_as_copies_from_indices(this->measurements,measurement_indexes);
+            G.measurements_p.insert(G.measurements_p.end(),Ms.begin(),Ms.end());
+            tools::vec::erase(this->measurements,measurement_indexes);
+        }
     };
 
 private:
@@ -172,11 +210,11 @@ public:
     const config_t& config() const;
     ///all samples measured by any method
     const std::vector<sample_t>& samples_list() const;
-    aishu_t aishu;
-    tofsims_t tofsims;
-    dsims_t dsims;
-    dektak6m_t dektak6m;
-    camera_t camera_images;
+    tool_with_files<files_::aishu_t> aishu;
+    tool_with_files_measurements_groups<files_::tofsims_t,measurements_::tofsims_t,mgroups_::tofsims_t> tofsims;
+    tool_with_files_measurements_groups<files_::dsims_t,measurements_::dsims_t,mgroups_::dsims_t> dsims;
+    tool_with_files_measurements<files_::profilers_t::dektak6m_t,measurements_::profilers_t::dektak6m_t> dektak6m;
+    tool_with_files<files_::jpg_t> jpg;
     void parse_unknown_filenames();
     void parse_filename(std::string filename);
     void parse_filenames(const std::vector<std::string>& filenames);

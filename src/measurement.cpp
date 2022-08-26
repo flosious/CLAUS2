@@ -101,6 +101,16 @@ string measurements_::measurement_t::to_string(const string del) const
 	return ss.str();
 }
 
+
+const string measurements_::measurement_t::to_string_short(const string del) const
+{
+    //logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
+    stringstream ss;
+    ss << measurement_t::to_string();
+    return ss.str();
+}
+
+
 bool measurements_::measurement_t::operator<(const measurements_::measurement_t& obj) const
 {
 	if (use_olcdb)

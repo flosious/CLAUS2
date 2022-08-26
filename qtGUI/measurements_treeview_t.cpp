@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2022 Florian Bärwolf
+    floribaer@gmx.de
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
 #include "measurements_treeview_t.hpp"
 
 
@@ -82,19 +101,13 @@ measurements_treeview_t::tofsims_t::tofsims_t(measurements_treeview_t *measureme
 std::vector<QStandardItem*> measurements_treeview_t::tofsims_t::itemCols()
 {
     logger.debug(__func__,"this").enter();
-//    auto& measurements = claus->tofsims.measurements();
-    int s = claus->tofsims.measurements().size();
+    int s = claus->tofsims.measurements.size();
     std::vector<std::vector<std::string>> lines_and_cols(s);
-    logger.debug(__func__,"claus->tofsims.measurements().size()").value(std::to_string(s));
-//    for (size_t i=0; i < s;i++)
+    logger.debug(__func__,"claus->tofsims.measurements.size()").value(std::to_string(s));
     int c=0;
-//    auto Ms_copy = claus->tofsims.measurements();
-//    for (auto& M : Ms_copy)
-//        cout << M.to_string() << endl;
 
-    for (auto& M : claus->tofsims.measurements())
+    for (auto& M : claus->tofsims.measurements)
     {
-//        auto& M = claus->tofsims.measurements().at(i);
         logger.debug(__func__,"measurement.at("+std::to_string(c)+")").value(M.to_string_short());
         std::vector<std::string> cols_in_line(1);
 
@@ -102,6 +115,36 @@ std::vector<QStandardItem*> measurements_treeview_t::tofsims_t::itemCols()
         logger.debug(__func__,"measurement.at("+std::to_string(c)+")").signal("cols_in_line.at(0)");
         lines_and_cols.at(c) = cols_in_line;
         logger.debug(__func__,"measurement.at("+std::to_string(c)+")").signal("lines_and_cols.at(" + std::to_string(c)+")");
+        c++;
+    }
+
+    logger.debug(__func__,"this").exit();
+    return parent_entry_t::itemCols(lines_and_cols);
+}
+
+/*****************************************/
+/**     parent_entry_t::dektak6m_t      **/
+/*****************************************/
+
+measurements_treeview_t::dektak6m_t::dektak6m_t(measurements_treeview_t *measurements_treeview) :
+        parent_entry_t(dektak6m,measurements_treeview), logger(global_logger,__FILE__,"measurements_treeview_t::dektak6m_t")
+{
+}
+
+std::vector<QStandardItem*> measurements_treeview_t::dektak6m_t::itemCols()
+{
+    logger.debug(__func__,"this").enter();
+    int s = claus->dektak6m.measurements.size();
+    std::vector<std::vector<std::string>> lines_and_cols(s);
+    logger.debug(__func__,"claus->dektak6m.measurements.size()").value(std::to_string(s));
+    int c=0;
+
+    for (auto& M : claus->dektak6m.measurements)
+    {
+        logger.debug(__func__,"measurement.at("+std::to_string(c)+")").value(M.to_string_short());
+        std::vector<std::string> cols_in_line(1);
+        cols_in_line.at(0) = M.to_string_short();
+        lines_and_cols.at(c) = cols_in_line;
         c++;
     }
 
@@ -146,9 +189,7 @@ std::map<measurements_treeview_t::methods,std::string> measurements_treeview_t::
 {
     {tofsims,"tofsims"},
     {dsims,"dsims"},
-    {dektak6m, "dektak6m"},
-    {p17, "p17"},
-    {xps, "xps"}
+    {dektak6m, "dektak6m"}
 };
 
 measurements_treeview_t::measurements_treeview_t(QWidget *parent)
@@ -191,6 +232,14 @@ void measurements_treeview_t::createModel()
     item->setSelectable(false);
     model->setItem(dsims,0,item);
 
+    //dektak6m
+    label.str("");
+    label  << method_names[dektak6m];
+    item = new QStandardItem( QString( label.str().c_str() ) );
+    item->setEditable(false);
+    item->setSelectable(false);
+    model->setItem(dektak6m,0,item);
+
     setSelectionMode(QTreeView::MultiSelection);
     setModel(model);
 }
@@ -202,6 +251,11 @@ measurements_treeview_t::tofsims_t measurements_treeview_t::tofsims_entries()
 measurements_treeview_t::dsims_t measurements_treeview_t::dsims_entries()
 {
     return dsims_t(this);
+}
+
+measurements_treeview_t::dektak6m_t measurements_treeview_t::dektak6m_entries()
+{
+    return dektak6m_t(this);
 }
 
 
@@ -243,7 +297,7 @@ void measurements_treeview_t::keyPressEvent(QKeyEvent *e)
         deletions_idxs = tofsims_entries().get_selected_rows();
         if (deletions_idxs.size()>0)
         {
-            tools::vec::erase<measurements_::tofsims_t>(claus->tofsims.measurements(),deletions_idxs);
+            tools::vec::erase<measurements_::tofsims_t>(claus->tofsims.measurements,deletions_idxs);
             erased=true;
         }
 
@@ -252,6 +306,14 @@ void measurements_treeview_t::keyPressEvent(QKeyEvent *e)
         if (deletions_idxs.size()>0)
         {
             tools::vec::erase<measurements_::dsims_t>(claus->dsims.measurements,deletions_idxs);
+            erased=true;
+        }
+
+        //dektak6m
+        deletions_idxs = dektak6m_entries().get_selected_rows();
+        if (deletions_idxs.size()>0)
+        {
+            tools::vec::erase<measurements_::profilers_t::dektak6m_t>(claus->dektak6m.measurements,deletions_idxs);
             erased=true;
         }
 
@@ -279,6 +341,11 @@ void measurements_treeview_t::update()
     //dsims
     update(dsims, dsims_entries().itemCols());
     logger.debug(__func__,"this").signal("dsims_entries updated");
+    setSelectionMode(QTreeView::MultiSelection);
+
+    //dektak6m
+    update(dektak6m, dektak6m_entries().itemCols());
+    logger.debug(__func__,"this").signal("dektak6m_entries updated");
     setSelectionMode(QTreeView::MultiSelection);
 
     setModel(model);

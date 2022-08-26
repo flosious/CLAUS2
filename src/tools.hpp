@@ -220,6 +220,30 @@ public:
 	class vec 
 	{
 	public:
+        template<class T>
+        static std::vector<T*> filter_as_pointers_from_indices(std::vector<T> values, std::vector<unsigned int> indices)
+        {
+            std::vector<T*> filtered_values;
+            filtered_values.reserve(indices.size());
+            for (auto idx : indices)
+            {
+                if (idx>=values.size()) continue;
+                filtered_values.push_back(&values.at(idx));
+            }
+            return filtered_values;
+        }
+        template<class T>
+        static std::vector<T> filter_as_copies_from_indices(std::vector<T> values, std::vector<unsigned int> indices)
+        {
+            std::vector<T> filtered_values;
+            filtered_values.reserve(indices.size());
+            for (auto idx : indices)
+            {
+                if (idx>=values.size()) continue;
+                filtered_values.push_back(values.at(idx));
+            }
+            return filtered_values;
+        }
 
         template<class T>
         static std::vector<T*> pointers(std::vector<T> values)
