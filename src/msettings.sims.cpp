@@ -18,6 +18,10 @@
 
 #include "msettings.hpp"
 
+msettings::sims_t::sims_t() : logger(global_logger,__FILE__,"msettings::sims_t")
+{
+}
+
 msettings::sims_t::sims_t(files_::sims_t::name_t& filename) : 
         sputter_ion(ion_t(filename.sputter_element(),{{1}})), secondary_polarity(filename.secondary_polarity()), sputter_energy(filename.sputter_energy()),
         logger(global_logger,__FILE__,"msettings::sims_t")
@@ -29,6 +33,7 @@ msettings::sims_t::sims_t(files_::sims_t::name_t& filename) :
 
 bool msettings::sims_t::operator==(const msettings::sims_t& obj) const
 {
+    if (!is_set() && !obj.is_set()) return true;
 	if (secondary_polarity != obj.secondary_polarity) return false;
 	if (sputter_energy != obj.sputter_energy) return false;
 	if (sputter_ion != obj.sputter_ion) return false;
@@ -40,7 +45,7 @@ bool msettings::sims_t::operator!=(const msettings::sims_t& obj) const
 	return !operator==(obj);
 }
 
-bool msettings::sims_t::is_set()
+bool msettings::sims_t::is_set() const
 {
 	if (secondary_polarity=="") return false;
 	if (!sputter_energy.is_set()) return false;
@@ -51,8 +56,8 @@ bool msettings::sims_t::is_set()
 const string msettings::sims_t::to_string(const string del) const
 {
 	stringstream ss;
-	ss << sputter_energy.to_string() << del;
-	ss << sputter_ion.to_string() << del;
+    ss << sputter_energy.to_string_short() << del;
+    ss << sputter_ion.to_string() << del;
 	ss << "secondary_polarity: " << secondary_polarity;
 	return ss.str();
 }

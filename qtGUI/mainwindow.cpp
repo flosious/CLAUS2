@@ -30,8 +30,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->files_treeView->update();
     ui->measurements_treeView->update();
+    ui->mgroups_treeview->update();
 
     QObject::connect(ui->files_treeView, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
+    QObject::connect(ui->measurements_treeView, SIGNAL(update_mgroups_treeview()), ui->mgroups_treeview, SLOT(update()));
+    QObject::connect(ui->mgroups_treeview, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
+
+//    ui->mgroups_treeview->header()->setStretchLastSection(false);
 
     logger.debug(__func__,"MainWindow").exit();
 }
@@ -80,19 +85,26 @@ void MainWindow::dropEvent(QDropEvent *e)
         int next_tof_file_idx = claus->tofsims.files.size();
         int next_dsims_file_idx = claus->dsims.files.size();
         int next_dektak6m_file_idx = claus->dektak6m.files.size();
+
+        int dsims_measurements_size_before_adding = claus->dsims.measurements.size();
+        int tofsims_measurements_size_before_adding = claus->tofsims.measurements.size();
+
         claus->parse_filenames(new_filenames);
         //unknown + tofsims + dsims + camera(blder) + xps + dektak6m + p17 + ...
 
-        if (ui->tabWidget->currentIndex()==1) //measurement tab
+        if (ui->tabWidget->currentIndex()==1 || ui->tabWidget->currentIndex()==2) //measurement tab or mgroup tab
         {
-            logger.debug(__func__,"measurement Tab").enter();
+//            func_logger_t f_logger(logger,"tab: "+std::to_string(ui->tabWidget->currentIndex()));
+//            auto flogger = logger.debug(__func__,"tab: "+std::to_string(ui->tabWidget->currentIndex()));
+            std::string log_object("tab: " + std::to_string(ui->tabWidget->currentIndex()));
+            logger.debug(__func__,log_object).enter();
             vector<unsigned int> indices;
             //tofsims
             for (int i = next_tof_file_idx; i<claus->tofsims.files.size(); i++)
             {
 
                 auto& F = claus->tofsims.files.at(i);
-                logger.info(__func__,"measurement Tab").value(F.name.filename(),10,"tofsims");
+                logger.info(__func__,log_object).value(F.name.filename(),10,"tofsims");
                 claus->tofsims.add_file_to_measurement(F);
                 indices.push_back(i);
             }
@@ -103,7 +115,7 @@ void MainWindow::dropEvent(QDropEvent *e)
             for (int i = next_dsims_file_idx; i<claus->dsims.files.size(); i++)
             {
                 auto& F = claus->dsims.files.at(i);
-                logger.info(__func__,"measurement Tab").value(F.name.filename(),10,"dsims");
+                logger.info(__func__,log_object).value(F.name.filename(),10,"dsims");
                 claus->dsims.add_file_to_measurement(F);
                 indices.push_back(i);
             }
@@ -114,16 +126,35 @@ void MainWindow::dropEvent(QDropEvent *e)
             for (int i = next_dektak6m_file_idx; i<claus->dektak6m.files.size(); i++)
             {
                 auto& F = claus->dektak6m.files.at(i);
-                logger.info(__func__,"measurement Tab").value(F.name.filename(),10,"dektak6m");
+                logger.info(__func__,log_object).value(F.name.filename(),10,"dektak6m");
                 claus->dektak6m.add_file_to_measurement(F);
                 indices.push_back(i);
             }
             tools::vec::erase(claus->dektak6m.files,indices);
 
-            logger.debug(__func__,"measurement Tab").exit();
+            //auto group newly added items, but not the old ones
+            if (ui->tabWidget->currentIndex()==2)
+            {
+                std::vector<unsigned int> measurement_indices;
+                //dsims
+                measurement_indices.resize(claus->dsims.measurements.size()-dsims_measurements_size_before_adding);
+                std::iota(measurement_indices.begin(),measurement_indices.end(),dsims_measurements_size_before_adding);
+                claus->dsims.auto_group_measurements(measurement_indices);
+
+                //tofsims
+                measurement_indices.resize(claus->tofsims.measurements.size()-tofsims_measurements_size_before_adding);
+                std::iota(measurement_indices.begin(),measurement_indices.end(),tofsims_measurements_size_before_adding);
+                claus->tofsims.auto_group_measurements(measurement_indices);
+
+//                ui->mgroups_treeview->resizeColumns();
+            }
+            logger.debug(__func__,log_object).exit();
         }
+
         ui->measurements_treeView->update();
         ui->files_treeView->update();
+        ui->mgroups_treeview->update();
+
         //aishu special treatment
         if (claus->aishu.files.size()>0)
         {
@@ -134,6 +165,9 @@ void MainWindow::dropEvent(QDropEvent *e)
             }
             logger.debug(__func__,"aishu.files").exit();
         }
+
+
+
         logger.debug(__func__,"this").exit();
         //focus tab to files_treeView
 //        ui->tabWidget->setCurrentWidget(ui->tab_files);
@@ -191,9 +225,10 @@ void MainWindow::on_tab_log_warning_stateChanged(int arg1)
     if (global_logger==nullptr)
         return;
     if (arg1==0)
-        global_logger->set_print_warning(false);
+        ui->tab_log_table->set_print_warning(false);
     else if (arg1==2)
-        global_logger->set_print_warning(true);
+        ui->tab_log_table->set_print_warning(true);
+    ui->tab_log_table->update(*global_logger);
     logger.debug(__func__,"set_print_warning").value(std::to_string(arg1));
 }
 
@@ -202,9 +237,10 @@ void MainWindow::on_tab_log_info_stateChanged(int arg1)
     if (global_logger==nullptr)
         return;
     if (arg1==0)
-        global_logger->set_print_info(false);
+        ui->tab_log_table->set_print_info(false);
     else if (arg1==2)
-        global_logger->set_print_info(true);
+        ui->tab_log_table->set_print_info(true);
+    ui->tab_log_table->update(*global_logger);
     logger.debug(__func__,"set_print_info").value(std::to_string(arg1));
 }
 
@@ -212,10 +248,12 @@ void MainWindow::on_tab_log_debug_stateChanged(int arg1)
 {
     if (global_logger==nullptr)
         return;
+
     if (arg1==0)
-        global_logger->set_print_debug(false);
+        ui->tab_log_table->set_print_debug(false);
     else if (arg1==2)
-        global_logger->set_print_debug(true);
+        ui->tab_log_table->set_print_debug(true);
+    ui->tab_log_table->update(*global_logger);
     logger.debug(__func__,"set_print_debug").value(std::to_string(arg1));
 }
 
@@ -234,5 +272,41 @@ void MainWindow::on_files_treeView_customContextMenuRequested(const QPoint &pos)
     {
         logger.debug(__func__,"pos").value("x="+std::to_string(pos.x()) + "; y="+std::to_string(pos.y()));
         ui->files_treeView->contextMenu->exec(ui->files_treeView->viewport()->mapToGlobal(pos));
+    }
+}
+
+void MainWindow::on_measurements_treeView_customContextMenuRequested(const QPoint &pos)
+{
+    QModelIndex index = ui->measurements_treeView->indexAt(pos);
+    if (index.isValid())
+    {
+        logger.debug(__func__,"pos").value("x="+std::to_string(pos.x()) + "; y="+std::to_string(pos.y()));
+        ui->measurements_treeView->contextMenu->exec(ui->measurements_treeView->viewport()->mapToGlobal(pos));
+    }
+}
+
+void MainWindow::on_mgroups_treeview_clicked(const QModelIndex &index)
+{
+    //testing
+//    ui->mgroups_treeview->dsims_section.get_selected_rows();
+//    ui->mgroups_treeview->tofsims_section.get_selected_rows();
+}
+
+void MainWindow::on_mgroups_treeview_customContextMenuRequested(const QPoint &pos)
+{
+    QModelIndex index = ui->mgroups_treeview->indexAt(pos);
+    if (index.isValid())
+    {
+//        logger.debug(__func__,"pos").value("x="+std::to_string(pos.x()) + "; y="+std::to_string(pos.y()));
+        ui->mgroups_treeview->contextMenu->exec(ui->mgroups_treeview->viewport()->mapToGlobal(pos));
+    }
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    if (index==7) // log tab
+    {
+        logger.debug(__func__,"this").enter();
+        ui->tab_log_table->update(*global_logger);
     }
 }

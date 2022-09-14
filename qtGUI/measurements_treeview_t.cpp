@@ -195,13 +195,16 @@ std::map<measurements_treeview_t::methods,std::string> measurements_treeview_t::
 measurements_treeview_t::measurements_treeview_t(QWidget *parent)
     : QTreeView(parent), parent(parent), logger(global_logger,__FILE__,"measurements_treeview_t")
 {
-    //sets the model
+    set_actions();
+    set_contextMenu();
+    connect_signals_to_slots();
     createModel();
 //    setDragDropMode(DragDrop);
 //    setDragEnabled(true);
     setAcceptDrops(true);
     viewport()->setAcceptDrops(true);
     setDropIndicatorShown(true);
+
 
 //    update();
 }
@@ -213,6 +216,7 @@ void measurements_treeview_t::createModel()
     QStandardItem *item = nullptr;
     model = new QStandardItemModel (total_lines_count(), total_columns_count);
     model->setHorizontalHeaderLabels({"method"});
+
     std::stringstream label;
 
     //tofsims
@@ -276,7 +280,28 @@ void measurements_treeview_t::update(methods method_id, const std::vector<QStand
     logger.debug(__func__,"this").exit();
 }
 
+void measurements_treeview_t::set_actions()
+{
+    group_selection_action = new QAction("group selected",this);
+    delete_selection_action = new QAction("delete selected",this);
+    auto_group_action = new QAction("auto group",this);
 
+}
+void measurements_treeview_t::set_contextMenu()
+{
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    contextMenu = new QMenu(this);
+
+    contextMenu->addAction(group_selection_action);
+    contextMenu->addAction(delete_selection_action);
+    contextMenu->addAction(auto_group_action);
+}
+void measurements_treeview_t::connect_signals_to_slots()
+{
+    connect(group_selection_action,&QAction::triggered, this, &measurements_treeview_t::group_selection);
+    connect(delete_selection_action,&QAction::triggered, this, &measurements_treeview_t::delete_selection);
+    connect(auto_group_action,&QAction::triggered, this, &measurements_treeview_t::auto_group);
+}
 
 int measurements_treeview_t::total_lines_count() const
 {
@@ -349,6 +374,110 @@ void measurements_treeview_t::update()
     setSelectionMode(QTreeView::MultiSelection);
 
     setModel(model);
+    resizeColumnToContents(0);
     logger.debug(__func__,"this").exit();
     return;
+}
+
+void measurements_treeview_t::delete_selection()
+{
+    if (selectionModel()==nullptr)
+        return;
+    bool erased = false;
+    QModelIndexList indexes = selectionModel()->selectedIndexes();
+    std::vector<unsigned int> deletions_idxs;
+
+
+    deletions_idxs = tofsims_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
+    {
+        tools::vec::erase<measurements_::tofsims_t>(claus->tofsims.measurements,deletions_idxs);
+        erased=true;
+    }
+
+    deletions_idxs = dsims_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
+    {
+        tools::vec::erase<measurements_::dsims_t>(claus->dsims.measurements,deletions_idxs);
+        erased=true;
+    }
+
+    deletions_idxs = dektak6m_entries().get_selected_rows();
+    if (deletions_idxs.size()>0)
+    {
+        tools::vec::erase<measurements_::profilers_t::dektak6m_t>(claus->dektak6m.measurements,deletions_idxs);
+        erased=true;
+    }
+
+    if (erased)
+        update();
+    return;
+}
+
+void measurements_treeview_t::group_selection()
+{
+    logger.debug(__func__,"this").enter();
+    if (selectionModel()==nullptr)
+        return;
+    bool go_update=false;
+    std::vector<unsigned int> selected_idxs;
+
+    selected_idxs = tofsims_entries().get_selected_rows();
+    if (selected_idxs.size()>0)
+    {
+        logger.debug(__func__,"tofsims selected_idxs.size()").value(selected_idxs.size());
+        go_update = true;
+        std::vector<measurements_::tofsims_t*> Ms;
+        Ms.reserve(selected_idxs.size());
+        for (auto idx : selected_idxs)
+        {
+            if (idx<claus->tofsims.measurements.size())
+            {
+                Ms.push_back(&claus->tofsims.measurements.at(idx));
+            }
+        }
+        mgroups_::tofsims_t MG(Ms);
+        claus->tofsims.mgroups.push_back(MG);
+        tools::vec::erase<measurements_::tofsims_t>(claus->tofsims.measurements,selected_idxs);
+    }
+
+    selected_idxs = dsims_entries().get_selected_rows();
+    if (selected_idxs.size()>0)
+    {
+        logger.debug(__func__,"dsims selected_idxs.size()").value(selected_idxs.size());
+        go_update = true;
+        std::vector<measurements_::dsims_t*> Ms;
+        Ms.reserve(selected_idxs.size());
+        for (auto idx : selected_idxs)
+        {
+            if (idx<claus->dsims.measurements.size())
+            {
+                Ms.push_back(&claus->dsims.measurements.at(idx));
+            }
+        }
+        mgroups_::dsims_t MG(Ms);
+        claus->dsims.mgroups.push_back(MG);
+        tools::vec::erase<measurements_::dsims_t>(claus->dsims.measurements,selected_idxs);
+    }
+
+    if (go_update)
+    {
+        update();
+        emit update_mgroups_treeview();
+    }
+    return;
+}
+
+void measurements_treeview_t::auto_group()
+{
+    bool go_update = false;
+    if (claus->dsims.measurements.size()+claus->tofsims.measurements.size() > 0)
+        go_update = true;
+    claus->dsims.auto_group_ungrouped_measurements();
+    claus->tofsims.auto_group_ungrouped_measurements();
+    if (go_update)
+    {
+        update();
+        emit update_mgroups_treeview();
+    }
 }

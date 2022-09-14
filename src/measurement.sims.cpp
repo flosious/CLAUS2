@@ -469,8 +469,8 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
         filename << "_m" << sample.monitor;
     if (sample.chip.is_set())
         filename << "_c" << sample.chip.to_string();
-	if (group!="")
-		filename << "_g" << group;
+    if (group_id!="")
+        filename << "_g" << group_id;
 	if (repetition!="")
 		filename << "_r" << repetition;
 	filename << ".txt";

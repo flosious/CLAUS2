@@ -28,7 +28,7 @@ bool mgroups_::mgroup_t::use_settings=true;
 // }
 
 mgroups_::mgroup_t::mgroup_t(measurements_::measurement_t& measurement) : 
-                            olcdb(measurement.olcdb), group(measurement.group),
+                            olcdb(measurement.olcdb), group_id(measurement.group_id),
                             logger(global_logger,__FILE__,"mgroups_::mgroup_t")
 {
 }
@@ -38,7 +38,7 @@ string mgroups_::mgroup_t::to_string(const string del)
 {
 	stringstream ss;
 	if (use_olcdb) ss << "olcdb: " << olcdb << del;
-	if (use_group) ss << "group: " << group;
+    if (use_group) ss << "group: " << group_id;
 	return ss.str();
 }
 
@@ -48,7 +48,7 @@ bool mgroups_::mgroup_t::operator==(const mgroups_::mgroup_t& obj) const
 		if (olcdb!=obj.olcdb) return false;
 	
 	if (use_group)
-		if (group!=obj.group) return false;
+        if (group_id!=obj.group_id) return false;
 		
 	return true;
 }

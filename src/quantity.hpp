@@ -318,6 +318,7 @@ namespace quantity
 		mass_t(vector<double> data_s={},unit_t unit_s=units::derived::amu, dimension_t dim_s=dimensions::SI::mass); // atomic mass units
 		mass_t(const quantity_t& quantity_s);
 	}; 
+
 	class abundance_t : public quantity_t
 	{
 	public:

@@ -47,7 +47,7 @@ public:
 		ion_t sputter_ion;
 		bool operator==(const sims_t& obj) const;
 		bool operator!=(const sims_t& obj) const;
-		bool is_set();
+        bool is_set() const;
 	};
 
 	class dsims_t : public sims_t
@@ -58,7 +58,7 @@ public:
 		dsims_t();
 		dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents);
 		dsims_t(files_::dsims_t& file);
-		const string to_string(const string del=", ") const;
+        const string to_string(const string del=", ") const;
 		
 		quantity::sputter_time_t total_sputter_time;
 		quantity::sputter_time_t total_acquisition_time;
@@ -84,7 +84,6 @@ public:
     private:
         class_logger_t logger;
 	public:
-// 		tofsims_t();
 		tofsims_t(files_::tofsims_t::name_t& filename, files_::tofsims_t::contents_t& filecontents);
 		tofsims_t(files_::tofsims_t& file);
 		

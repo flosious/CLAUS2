@@ -40,12 +40,14 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
     class_logger_t logger;
-
+//    QProgressBar *files_loading_progress_bar;
 private slots:
 
     void on_button_files_to_measurements_clicked();
@@ -60,6 +62,13 @@ private slots:
 
     void on_tab_log_clear_button_clicked();
     void on_files_treeView_customContextMenuRequested(const QPoint &pos);
+    void on_measurements_treeView_customContextMenuRequested(const QPoint &pos);
+
+    void on_mgroups_treeview_clicked(const QModelIndex &index);
+
+    void on_mgroups_treeview_customContextMenuRequested(const QPoint &pos);
+
+    void on_tabWidget_currentChanged(int index);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;

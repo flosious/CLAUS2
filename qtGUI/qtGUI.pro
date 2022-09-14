@@ -79,7 +79,6 @@ SOURCES += \
     ../src/tools.web.cpp \
     ../src/unit.cpp \
     files_treeview_t.cpp \
-    loggerwindow.cpp \
     main.cpp \
     mainwindow.cpp \
     measurements_treeview_t.cpp \
@@ -87,7 +86,8 @@ SOURCES += \
     mgroups_treeview_t.cpp \
     plotwindow.cpp \
     qcustomplot.cpp \
-    table_log.cpp
+    sims_measurement_plot_treeview_t.cpp \
+    table_log_t.cpp
 
 HEADERS += \
     ../src/calc.hpp \
@@ -120,18 +120,17 @@ HEADERS += \
     ../src/tools.hpp \
     ../src/unit.hpp \
     files_treeview_t.hpp \
-    loggerwindow.hpp \
     mainwindow.h \
     measurements_treeview_t.hpp \
     measurements_window.hpp \
     mgroups_treeview_t.hpp \
     plotwindow.h \
     qcustomplot.h \
-    table_log.hpp
+    sims_measurement_plot_treeview_t.hpp \
+    table_log_t.hpp
 
 FORMS += \
     fileSelector.ui \
-    loggerwindow.ui \
     mainwindow.ui
 
 # Default rules for deployment.

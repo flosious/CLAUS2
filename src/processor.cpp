@@ -76,6 +76,22 @@ processor::processor(vector<string> args_p) :   logger(global_logger,__FILE__,"p
                                                 aishu(unknown_filenames,samples_list_p,database,config_p)
 {	
     logger.debug(__func__,"claus").enter();
+
+    /*testing*/
+//    std::vector<int> veci(19);
+//    for (int i=0;i<veci.size();i++)
+//    {
+//        veci[i] = i*i;
+//    }
+//    int* idx_pointer = &veci[5];
+//    for (int i=0;i<veci.size();i++)
+//    {
+//        if (&veci[i]==idx_pointer)
+//            std::cout << "FOUND idx=" <<i << std::endl;
+//    }
+//    exit(1);
+    /*********/
+
 //	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     config_p.load();
 	/*connect to sqlite3 database*/

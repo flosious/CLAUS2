@@ -26,18 +26,26 @@ mgroups_::dsims_t::dsims_t(measurements_::dsims_t& dsims_measurements) :
 	measurements_p.push_back(dsims_measurements);
 }
 
-mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurements) : 
-									dsims_t(dsims_measurements.back())
+mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t* > dsims_measurements) :
+    sims_t(*(dsims_measurements.front())), settings_p(dsims_measurements.front()->settings),
+    logger(global_logger,__FILE__,"mgroups_::dsims_t")
 {
-	dsims_measurements.pop_back();
-	for (auto DM=dsims_measurements.begin();DM!=dsims_measurements.end();DM++)
-	{
-		dsims_t MG(*DM);
-		if (*this != MG) continue;
-		measurements_p.push_back(*DM);
-		dsims_measurements.erase(DM);
-		DM--;
-	}
+    measurements_p = (tools::vec::pointers_to_values(dsims_measurements));
+}
+
+mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurements) : 
+    sims_t(dsims_measurements.front()), settings_p(dsims_measurements.front().settings),
+    logger(global_logger,__FILE__,"mgroups_::dsims_t"), measurements_p(dsims_measurements)
+{
+//	dsims_measurements.pop_back();
+//	for (auto DM=dsims_measurements.begin();DM!=dsims_measurements.end();DM++)
+//	{
+//		dsims_t MG(*DM);
+//		if (*this != MG) continue;
+//		measurements_p.push_back(*DM);
+//		dsims_measurements.erase(DM);
+//		DM--;
+//	}
 }
 
 bool mgroups_::dsims_t::operator==(const mgroups_::dsims_t& obj) const

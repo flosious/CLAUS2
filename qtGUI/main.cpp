@@ -22,7 +22,6 @@
 #include "../src/processor.hpp"
 #include "../src/tools.hpp"
 #include "../src/log.hpp"
-#include "loggerwindow.hpp"
 
 //global scope
 processor *claus = nullptr;
@@ -40,9 +39,9 @@ int main(int argc, char *argv[])
     claus = &KLAUS;
     MainWindow w; // creating the mainwindow, it needs claus
     w.show();
-    global_logger->set_window(w.ui->tab_log_table); //give the logger a gui to plot
-    global_logger->window_header(); // create the header
-    global_logger->update_window(); // show whatever is already logged
+//    global_logger->set_window(w.ui->tab_log_table); //give the logger a gui to plot
+//    global_logger->window_header(); // create the header
+//    global_logger->update_window(); // show whatever is already logged
 
 
     return a.exec();

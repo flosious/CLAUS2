@@ -69,12 +69,13 @@ public:
 		///"51087" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
         int olcdb;
 		///measurement group identifier: "5" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-        string group;
-		///"d-sims", "tof-sims", "xps", "profiler", ...
+        string group_id;
+        ///given by user, optional
+        string name="";
 		/*ctors*/
 
 		/*functions*/
-
+        void int remove_measurements();
 		/*static functions*/
 		/*operators*/
 		bool operator==( const mgroup_t& obj) const;
@@ -337,9 +338,10 @@ public:
 	public:
         vector<measurements_::dsims_t> measurements_p;
         msettings::dsims_t settings_p;
-		dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
+        dsims_t(vector<measurements_::dsims_t*> dsims_measurements);
+        dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
 		dsims_t(measurements_::dsims_t& dsims_measurements);
-		const msettings::sims_t* settings() const final;
+        const msettings::sims_t* settings() const final;
 		vector<measurements_::sims_t*> measurements() final;
 		vector<measurements_::sims_t> measurements_copy() final;
 		string to_string(const string del=", ");
@@ -357,8 +359,9 @@ public:
         class_logger_t logger;
 	public:
         vector<measurements_::tofsims_t> measurements_p;
-        const msettings::tofsims_t settings_p;
-		tofsims_t(vector<measurements_::tofsims_t>& tofsims_measurements);
+        msettings::tofsims_t settings_p;
+        tofsims_t(vector<measurements_::tofsims_t*> tofsims_measurements);
+        tofsims_t(vector<measurements_::tofsims_t>& tofsims_measurements);
 		tofsims_t(measurements_::tofsims_t& tofsims_measurements);
 		virtual ~tofsims_t();
 		const msettings::sims_t* settings() const final;

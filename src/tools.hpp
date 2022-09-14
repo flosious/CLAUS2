@@ -220,6 +220,15 @@ public:
 	class vec 
 	{
 	public:
+        ///returns -1 if not found
+        template<class T>
+        static int get_index_position_by_comparing_pointers(const std::vector<T>& values, const T* search_val)
+        {
+            for (unsigned int i=0;i<values.size();i++)
+                if (&values[i] == search_val)
+                    return i;
+            return -1;
+        }
         template<class T>
         static std::vector<T*> filter_as_pointers_from_indices(std::vector<T> values, std::vector<unsigned int> indices)
         {
@@ -245,6 +254,18 @@ public:
             return filtered_values;
         }
 
+        template<class T>
+        static std::vector<T> pointers_to_values(std::vector<T*> values)
+        {
+            std::vector<T> pp;
+            pp.reserve(values.size());
+            for (int i=0;i<values.size();i++)
+            {
+//                pp[i] = *values.at(i);
+                pp.push_back(*values.at(i));
+            }
+            return pp;
+        }
         template<class T>
         static std::vector<T*> pointers(std::vector<T> values)
         {
@@ -324,7 +345,7 @@ public:
 			return result;
 		}
 		template <typename F>
-		static void erase(vector<F>& erase_from, vector<unsigned int>& positions_to_erase)
+        static void erase(std::vector<F>& erase_from, std::vector<unsigned int> positions_to_erase)
 		{
 			if (erase_from.size()==0) return;
 			if (positions_to_erase.size()==0) return;

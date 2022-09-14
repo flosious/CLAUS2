@@ -35,13 +35,27 @@ msettings::tofsims_t::tofsims_t(files_::tofsims_t& file) : tofsims_t(file.name,f
 
 bool msettings::tofsims_t::operator==(const tofsims_t& obj) const
 {
+//    if (!is_set() && !obj.is_set())
+//        return true;
 	if (sims_t::operator!=(obj)) 
+    {
+        std::cout << "sims_t::operator!=" << std::endl;
 		return false;
-	if (analysis_ion != obj.analysis_ion) 
+    }
+    if ((analysis_ion.is_set() || obj.analysis_ion.is_set()) && (analysis_ion != obj.analysis_ion))
+    {
+        std::cout << "analysis_ion != obj.analysis_ion" << std::endl;
 		return false;
-	if (analysis_energy != obj.analysis_energy) 
+    }
+//    if ((analysis_ion.is_set() && !obj.analysis_ion.is_set()) || (analysis_ion.is_set() && !obj.analysis_ion.is_set()))
+//        return false;
+
+    if ((analysis_energy.is_set() || obj.analysis_energy.is_set()) && (analysis_energy != obj.analysis_energy))
+    {
+        std::cout << "analysis_energy != obj.analysis_energy" << std::endl;
 		return false;
-	
+    }
+    std::cout << "TRUE" << std::endl;
 	return true;
 }
 

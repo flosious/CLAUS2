@@ -70,21 +70,23 @@ const string msettings::dsims_t::to_string(const string del) const
 	stringstream ss;
 // 	const string del = ",";
 	ss << sims_t::to_string() << del;
-	ss << chamber_pressure.to_string() << del;
-	ss << egate.to_string() << del;
-	ss << mass_resolution.to_string() << del;
-	ss << field_aperture.to_string() << del;
-	ss << contrast_aperture.to_string() << del;
-	ss << entrance_slit.to_string() << del;
-	ss << exit_slit.to_string() << del;
-	ss << energy_window.to_string() << del;
-	ss << em_yield.to_string() << del;
-	ss << em_voltage.to_string() << del;
+    ss << chamber_pressure.to_string_short() << del;
+    ss << egate.to_string_short() << del;
+    ss << mass_resolution.to_string_short() << del;
+    ss << field_aperture.to_string_short() << del;
+    ss << contrast_aperture.to_string_short() << del;
+    ss << entrance_slit.to_string_short() << del;
+    ss << exit_slit.to_string_short() << del;
+    ss << energy_window.to_string_short() << del;
+    ss << em_yield.to_string_short() << del;
+    ss << em_voltage.to_string_short() << del;
 	return ss.str();
 }
 
 bool msettings::dsims_t::operator==(const msettings::dsims_t& obj) const
 {
+//    if (!is_set() && !obj.is_set())
+//        return true;
 	if (sims_t::operator!=(obj))
 		return false;
 	if (egate != obj.egate) 

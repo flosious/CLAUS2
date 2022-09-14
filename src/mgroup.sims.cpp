@@ -318,7 +318,7 @@ set<cluster_t> mgroups_::sims_t::clusters()
 string mgroups_::sims_t::to_string_short() const
 {
 	stringstream out;
-	out << olcdb << "_g"<<group << "_" << settings()->to_string_short();
+    out << olcdb << "_g"<<group_id << "_" << settings()->to_string_short();
 	return out.str();
 }
 

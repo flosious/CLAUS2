@@ -27,7 +27,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;... for further automation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -109,6 +109,95 @@
        <attribute name="title">
         <string>measurement groups</string>
        </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QSplitter" name="splitter_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="mgroups_treeview_t" name="mgroups_treeview">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+          <widget class="QStackedWidget" name="stackedWidget">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page_3">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QSplitter" name="splitter_3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <widget class="plotwindow" name="MG_tab_measurement_plotwindow" native="true">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </widget>
+               <widget class="QTreeView" name="MG_tab_measurement_cluster_treeview">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_4">
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="plotwindow" name="widget_2" native="true"/>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_samples">
        <attribute name="title">
@@ -177,7 +266,7 @@
          </layout>
         </item>
         <item>
-         <widget class="table_log" name="tab_log_table"/>
+         <widget class="table_log_t" name="tab_log_table"/>
         </item>
        </layout>
       </widget>
@@ -235,9 +324,14 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>table_log</class>
+   <class>mgroups_treeview_t</class>
+   <extends>QTreeView</extends>
+   <header>mgroups_treeview_t.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>table_log_t</class>
    <extends>QTableWidget</extends>
-   <header>table_log.hpp</header>
+   <header>table_log_t.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -85,6 +85,8 @@ private:
     };
     QStandardItemModel* model;
 protected:
+    QWidget *parent;
+    QCustomPlot *measurement_plot_window;
     int total_lines_count() const;
     void keyPressEvent(QKeyEvent *e) override;
 //    void dragMoveEvent(QDragMoveEvent *e) override;
@@ -93,17 +95,15 @@ protected:
     ///sets the model
     void createModel();
     void update(methods method_id, const std::vector<QStandardItem*>& itemCols);
-    QWidget *parent;
-    QCustomPlot *measurement_plot_window;
     void set_actions();
     void set_contextMenu();
     void connect_signals_to_slots();
 public:
     measurements_treeview_t(QWidget *parent = nullptr);
     QMenu* contextMenu;
-//    QAction* group_selection_action;
-//    QAction* ungroup_selection_action;
+    QAction* group_selection_action;
     QAction* delete_selection_action;
+    QAction* auto_group_action;
 
     tofsims_t tofsims_entries();
     dektak6m_t dektak6m_entries();
@@ -118,10 +118,11 @@ public:
 public slots:
     ///will reload from processor: klaus()->"method"->files
     void update();
-//    void delete_selection();
-//    void selections_to_measurements();
+    void delete_selection();
+    void group_selection();
+    void auto_group();
 signals:
-//    void update_measurements_treeview();
+    void update_mgroups_treeview();
 };
 extern processor *claus;
 extern Logger global_logger;

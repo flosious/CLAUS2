@@ -71,12 +71,13 @@ public:
 	public:
         measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, string method,database_t& database);
         measurement_t(files_::file_t::name_t& filename, string method,database_t& database);
+        virtual ~measurement_t() = default;
 		long long unsigned int memory_address() const;
 		string filename_with_path;
         string to_string(const string del = ", ") const;
         const string to_string_short(const string del = ", ") const;
 		bool is_set() const;
-		string group;
+        string group_id;
 		string repetition;
 		int olcdb;
 //		sample_t* sample=nullptr;
@@ -99,6 +100,7 @@ public:
 		protected:
             profiler_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, const crater_t::linescan_t& linescan_s, string method,database_t& database);
 			crater_t::linescan_t linescan_p;
+            virtual ~profiler_t() = default;
 		public:
 			crater_t::linescan_t& linescan();
 			//creates instantly a plot
@@ -376,7 +378,7 @@ public:
 		cluster_t matrix_cluster_s;
 	public: 
         sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, string method, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
-
+        virtual ~sims_t() = default;
 		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
 		bool are_intensities_of_clusters_set(const vector<cluster_t>& clusters_s) const;

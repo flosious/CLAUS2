@@ -1585,8 +1585,7 @@ vector<int> quantity::quantity_t::bin_data(const vector<double>& bins) const
 }
 
 /*********************/
-
-quantity::mass_t::mass_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("mass",data_s,unit_s,dim_s){}
+quantity::mass_t::mass_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("mass",data_s,unit_s,dim_s) {}
 quantity::mass_t::mass_t(const quantity_t& quantity_s) : mass_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::abundance_t::abundance_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("abundance",data_s,unit_s,dim_s){}

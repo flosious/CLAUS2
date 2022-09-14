@@ -24,7 +24,7 @@ bool measurements_::measurement_t::use_olcdb=true;
 bool measurements_::measurement_t::use_group=true;
 
 measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, string method, database_t& database) :
-                                                repetition(filename.repetition()), olcdb(filename.olcdb()),group(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
+                                                repetition(filename.repetition()), olcdb(filename.olcdb()),group_id(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
                                                 sample(filename,database), logger(global_logger,__FILE__,"measurements_::measurement_t")
 {
 //    sample_t s(filename,filecontents,database);
@@ -42,7 +42,7 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, fi
 }
 
 measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, string method, database_t& database) :
-            repetition(filename.repetition()), olcdb(filename.olcdb()), group(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
+            repetition(filename.repetition()), olcdb(filename.olcdb()), group_id(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
             sample(filename,database), logger(global_logger,__FILE__,"measurements_::measurement_t")
 {
 //	if (sample==nullptr)
@@ -55,6 +55,8 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, st
 //			sample = &samples_list.back();
 //		}
 //	}
+//    stringstream ss;
+//    ss.str();
 }
 
 long long unsigned int measurements_::measurement_t::memory_address() const
@@ -96,7 +98,7 @@ string measurements_::measurement_t::to_string(const string del) const
     ss << "olcdb: " << olcdb;
     ss << del << sample.to_name(del);
 //    ss << del << sample;
-	if (group!="") ss << del << "group: " << group;
+    if (group_id!="") ss << del << "group: " << group_id;
 	if (repetition!="") ss << del << "repetition: " << repetition ;
 	return ss.str();
 }
@@ -120,8 +122,8 @@ bool measurements_::measurement_t::operator<(const measurements_::measurement_t&
 	}
 	if (use_group)
 	{
-		if (group < obj.group) return true;
-		if (group > obj.group) return false;
+        if (group_id < obj.group_id) return true;
+        if (group_id > obj.group_id) return false;
 	}
 	if (use_repetition)
 	{

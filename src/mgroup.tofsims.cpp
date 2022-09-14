@@ -26,18 +26,26 @@ mgroups_::tofsims_t::tofsims_t(measurements_::tofsims_t& tofsims_measurements) :
 	measurements_p.push_back(tofsims_measurements);
 }
 
-mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t >& tofsims_measurements) : 
-									tofsims_t(tofsims_measurements.back())
+mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t* > tofsims_measurements) :
+    sims_t(*(tofsims_measurements.front())), settings_p(tofsims_measurements.front()->settings),
+    logger(global_logger,__FILE__,"mgroups_::tofsims_t")
 {
-	tofsims_measurements.pop_back();
-	for (auto DM=tofsims_measurements.begin();DM!=tofsims_measurements.end();DM++)
-	{
-		tofsims_t MG(*DM);
-		if (*this != MG) continue;
-		measurements_p.push_back(*DM);
-		tofsims_measurements.erase(DM);
-		DM--;
-	}
+    measurements_p = (tools::vec::pointers_to_values(tofsims_measurements));
+}
+
+mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t >& tofsims_measurements) : 
+    sims_t(tofsims_measurements.front()), settings_p(tofsims_measurements.front().settings),
+    logger(global_logger,__FILE__,"mgroups_::tofsims_t"), measurements_p(tofsims_measurements)
+{
+//	tofsims_measurements.pop_back();
+//	for (auto DM=tofsims_measurements.begin();DM!=tofsims_measurements.end();DM++)
+//	{
+//		tofsims_t MG(*DM);
+//		if (*this != MG) continue;
+//		measurements_p.push_back(*DM);
+//		tofsims_measurements.erase(DM);
+//		DM--;
+//	}
 }
 
 mgroups_::tofsims_t::~tofsims_t()

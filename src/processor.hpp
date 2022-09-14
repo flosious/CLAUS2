@@ -135,10 +135,23 @@ private:
         }
 //        void add_file_to_measurement(file_type& F);
         filter::items_t<measurement_type> filter_measurement();
+        ///true if measurement was successfully removed; false otherwise
+        bool remove_measurement(const measurement_type* measurement_pointer)
+        {
+            for (int i=0;i<measurements.size();i++)
+            {
+                if (&measurements.at(i) == measurement_pointer)
+                {
+                    tools::vec::erase(measurements,{static_cast<unsigned int>(i)});
+                    return true;
+                }
+            }
+            return false;
+        }
     };
 
 
-
+public:
     template<typename file_type, typename measurement_type, typename mgroup_type>
     class tool_with_files_measurements_groups : public tool_with_files_measurements<file_type,measurement_type>
     {
@@ -152,35 +165,21 @@ private:
         std::vector<mgroup_type> mgroups;
 
         filter::items_t<mgroup_type> filter_mgroups();
-        ///removes the group; add its measurements back to the vector
-        void ungroup_measurements(unsigned int index)
+        void ungroup(int index)
         {
-            if (index >= mgroups.size()) return;
-            this->measurements.insert(this->measurements.end(),mgroups[index].measurements_p.begin(),mgroups[index].measurements_p.end());
-            mgroups.erase(mgroups.begin()+index);
-        }
-        void auto_group_measurements(bool ignore_olcdb=false)
-        {
-            for (auto& M : this->measurements)
+            if (index >= 0 && index < mgroups.size())
             {
-                bool grouped = false;
-                for (auto& G : mgroups)
-                {
-                    if (M.group != G.group) continue;
-                    if (!ignore_olcdb && (M.olcdb != G.olcdb)) continue;
-                    if (M.settings != G.settings_p) continue;
-                    G.measurements_p.push_back(M); // add M to existing mgroup G
-                    grouped = true;
-                    break;
-                }
-                if (!grouped)
-                {
-                    mgroup_type G(M);
-                    G.measurements_p.push_back(G);
-                }
+                this->measurements.insert(this->measurements.end(),mgroups[index].measurements_p.begin(),mgroups[index].measurements_p.end());
+                mgroups.erase(mgroups.begin()+index);
             }
-            this->measurements.clear();
         }
+        ///removes the group; add its measurements back to the vector
+        void ungroup(const mgroup_type* mgroup_pointer)
+        {
+            int index = tools::vec::get_index_position_by_comparing_pointers(mgroups,mgroup_pointer);
+            return ungroup(index);
+        }
+
         void group_measurements(std::vector<unsigned int> measurement_indexes)
         {
             std::vector<measurement_type> Ms = tools::vec::filter_as_copies_from_indices(this->measurements,measurement_indexes);
@@ -195,6 +194,92 @@ private:
             std::vector<measurement_type> Ms = tools::vec::filter_as_copies_from_indices(this->measurements,measurement_indexes);
             G.measurements_p.insert(G.measurements_p.end(),Ms.begin(),Ms.end());
             tools::vec::erase(this->measurements,measurement_indexes);
+        }
+        void auto_group_measurements(std::vector<unsigned int> measurement_indexes,bool ignore_olcdb=false)
+        {
+            for (auto& idx : measurement_indexes)
+            {
+                if (idx >= this->measurements.size()) continue;
+                measurement_type& M = this->measurements.at(idx);
+                bool found_group=false;
+                for (auto& MG : this->mgroups)
+                {
+                    if (!ignore_olcdb && (M.olcdb != MG.olcdb))
+                    {
+                        logger.debug(__func__,MG.to_string_short()).if_statement("M.olcdb",M.settings.to_string_short(),"!=","MG.olcdb",MG.settings_p.to_string_short());
+                        continue;
+                    }
+                    if (M.group_id != MG.group_id)
+                    {
+                        logger.debug(__func__,MG.to_string_short()).if_statement("M.group_id",M.settings.to_string_short(),"!=","MG.group_id",MG.settings_p.to_string_short());
+                        continue;
+                    }
+                    if (M.settings != MG.settings_p)
+                    {
+                        logger.debug(__func__,MG.to_string_short()).if_statement("M.settings",M.settings.to_string_short(),"!=","MG.settings_p",MG.settings_p.to_string_short());
+                        continue;
+                    }
+                    found_group = true;
+                    MG.measurements_p.push_back(M);
+//                    logger.debug(M.to_string_short()).value("measurement added to existing group",19,"adding into group: " + MG.to_string_short());
+                }
+                if (!found_group)
+                {
+                    mgroup_type new_MG(M);
+                    this->mgroups.push_back(new_MG);
+                }
+            }
+            tools::vec::erase(this->measurements,measurement_indexes);
+        }
+
+        void auto_group_ungrouped_measurements(bool ignore_olcdb=false)
+        {
+            std::vector<unsigned int> measurement_indexes(this->measurements.size());
+            std::iota(measurement_indexes.begin(),measurement_indexes.end(),0);
+            return auto_group_measurements(measurement_indexes,ignore_olcdb);
+        }
+
+        ///true if measurement was successfully removed; false otherwise
+        bool remove_mgroup(const mgroup_type* mgroup_pointer)
+        {
+            int idx = tools::vec::get_index_position_by_comparing_pointers(mgroups,mgroup_pointer);
+            if (idx>=0)
+            {
+                tools::vec::erase(mgroups,{static_cast<unsigned int>(idx)});
+                return true;
+            }
+            return false;
+        }
+        ///returns the total number of erased elements
+        int ungroup_measurements_from_group(std::vector<measurement_type*> measurements_in_group, const mgroup_type* mgroup_pointer=nullptr)
+        {
+            int c=0;
+            int idx;
+            std::vector<unsigned int> skip_indices;
+            for (auto& mgroup : this->mgroups)
+            {
+                std::vector<unsigned int> erase_idx;
+                for (int i=0;i<measurements_in_group.size();i++)
+                {
+                    for (auto& skip : skip_indices)
+                        if (skip==i)
+                            continue;
+                    auto* measurement = measurements_in_group.at(i);
+                    idx = tools::vec::get_index_position_by_comparing_pointers(mgroup.measurements_p,measurement);
+                    if (idx>=0)
+                    {
+                        c++;
+                        this->measurements.push_back(mgroup.measurements_p.at(idx));
+                        erase_idx.push_back(idx);
+                        skip_indices.push_back(i);
+                    }
+                }
+                if (erase_idx.size()>0)
+                {
+                    tools::vec::erase(mgroup.measurements_p,erase_idx);
+                }
+            }
+            return c;
         }
     };
 

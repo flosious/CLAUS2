@@ -275,6 +275,7 @@ files_treeview_t::files_treeview_t(QWidget *parent) : QTreeView(parent), logger(
     set_contextMenu();
     connect_signals_to_slots();
     createModel();
+    resizeColumnToContents(0);
 }
 
 //will not be executed when right clicking on treeview ...
@@ -431,6 +432,7 @@ void files_treeview_t::update()
 
     setSelectionMode(QTreeView::MultiSelection);
     setModel(model);
+    resizeColumnToContents(0);
     logger.debug(__func__,"this").exit();
     return;
 }

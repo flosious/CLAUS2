@@ -29,7 +29,7 @@
 #include "tools.hpp"
 #include <memory>
 #include <string_view>
-#include "table_log.hpp"
+//#include "table_log.hpp"
 
 class logger_message_t
 {
@@ -128,7 +128,13 @@ protected:
 //                std::string_view message_details=""); // automatically determined
 //                unsigned int verbosity_level=0); // automatically determined
         ///simple signaling message: e.g. "HERE"
-        void signal(std::string_view message_description, unsigned int verbosity_level = 15, std::string_view message_details="");
+        template<typename A>
+        void signal(A message_description, unsigned int verbosity_level = 15, std::string_view message_details="")
+        {
+            stringstream ss;
+            ss << message_description;
+            log(ss.str(),message_details,verbosity_level);
+        }
         ///enter a function
         void enter(unsigned int verbosity_level = 15, std::string_view message_details="");
         ///exit a function
@@ -136,40 +142,45 @@ protected:
         ///inform about a quantity
         void quantity(std::string_view quantity_to_string_short, unsigned int verbosity_level = 10, std::string_view message_details="");
         ///inform about a value
-        void value(std::string_view value_to_string, unsigned int verbosity_level = 10, std::string_view message_details="");
+        template<typename V>
+        void value(V value, unsigned int verbosity_level = 10, std::string_view message_details="")
+        {
+            stringstream ss;
+            ss << value;
+            log(ss.str(),message_details,verbosity_level);
+        }
         /// condition for existence: if (!A().is_set) --> then exit  :: logger_t::use_case_t::is_set(A().to_string(),FALSE,"exit"); //same as is_set()
         void is_statement(std::string_view concerning_object_name, bool value, std::string_view consequence="" ,unsigned int verbosity_level = 10);
         /// condition for more then existings ...
-        void if_statement(std::string_view concerning_object_A_name, std::string_view concerning_object_A_value, std::string_view comparator, std::string_view concerning_object_B_name, std::string_view concerning_object_B_value,unsigned int verbosity_level = 10);
+//        void if_statement(std::string_view concerning_object_A_name, std::string_view concerning_object_A_value, std::string_view comparator, std::string_view concerning_object_B_name, std::string_view concerning_object_B_value,unsigned int verbosity_level = 10);
+        template<typename A, typename B>
+        void if_statement(std::string_view concerning_object_A_name, A concerning_object_A_value, std::string_view comparator, std::string_view concerning_object_B_name, B concerning_object_B_value,unsigned int verbosity_level = 10)
+        {
+            stringstream message_description, message_details;
+            message_description << concerning_object_A_name << comparator << concerning_object_B_name;
+            message_details << concerning_object_A_value << comparator << concerning_object_B_value;
+            log(message_description.str(),message_details.str(),verbosity_level);
+        }
     };
-#ifdef QT_DEBUG
-    bool print_debug_p=true;
-#else
-    bool print_debug=false;
-#endif
-    bool print_warning_p=true;
-    bool print_info_p=true;
+
     ///qt window / gui
-    table_log *window_p;
+//    table_log *window_p;
 public:
-    logger_t(table_log *window_s = nullptr);
-#ifdef QT_DEBUG
+    logger_t();
     bool print_to_standard_output=true;
-#else
-    bool print_to_standard_output=false;
-#endif
+    const std::vector<logger_message_t>& messages() const;
     ///creates the window header
-    void window_header();
-    virtual table_log *window();
-    void set_window(table_log *window_s);
-    void set_print_debug(bool print_debug_s);
-    void set_print_warning(bool print_warning_s);
-    void set_print_info(bool print_info_s);
-    virtual bool print_debug() const;
-    virtual bool print_info() const;
-    virtual bool print_warning() const;
+//    void window_header();
+//    virtual table_log *window();
+//    void set_window(table_log *window_s);
+//    void set_print_debug(bool print_debug_s);
+//    void set_print_warning(bool print_warning_s);
+//    void set_print_info(bool print_info_s);
+//    virtual bool print_debug() const;
+//    virtual bool print_info() const;
+//    virtual bool print_warning() const;
     ///clears and reprints the contents()
-    void update_window();
+//    void update_window();
 
 
     ///adds a fatal message to the messages; using default parameters
@@ -219,11 +230,11 @@ public:
     ///adds a mtype message to the messages vector
     virtual void add_message(const logger_message_t& message);
     ///filter type
-    filter_t filter();
+    filter_t filter() const;
     void to_screen();
     std::string to_string(const string line_delimiter);
     void to_file(string path_with_filename);
-};
+}; // logger_t
 
 using Logger = std::shared_ptr<logger_t>;
 
@@ -241,16 +252,29 @@ protected:
 //    std::shared_ptr<loggerwindow> window() const override;
 public:
     class_logger_t(Logger& logger_s, std::string_view source_file_name_p, std::string_view class_name_p);
-    virtual table_log *window() override;
+//    virtual table_log *window() override;
     vector<logger_message_t>& messages() override;
-    virtual bool print_debug() const override;
-    virtual bool print_info() const override;
-    virtual bool print_warning() const override;
+//    virtual bool print_debug() const override;
+//    virtual bool print_info() const override;
+//    virtual bool print_warning() const override;
     use_case_t fatal(std::string_view func_name, std::string_view object_name) override;
     use_case_t error(std::string_view func_name, std::string_view object_name) override;
     use_case_t warning(std::string_view func_name, std::string_view object_name) override;
     use_case_t info(std::string_view func_name, std::string_view object_name) override;
     use_case_t debug(std::string_view func_name, std::string_view object_name) override;
+}; // class_logger_t
+
+class func_logger_t : protected class_logger_t
+{
+protected:
+    std::string func_name_p;
+public:
+    func_logger_t(class_logger_t& class_logger, std::string_view func_name);
+    use_case_t fatal(std::string_view object_name);
+    use_case_t error(std::string_view object_name);
+    use_case_t warning(std::string_view object_name);
+    use_case_t info(std::string_view object_name);
+    use_case_t debug(std::string_view object_name);
 };
 
 #endif // LOG_T_HPP
