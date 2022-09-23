@@ -87,7 +87,7 @@ private:
 	///just allow the processor to open and close
 	
 public:
-    string file_location = "database.sqlite3";
+    string file_location = "/home/florian/projects/claus2/build/database.sqlite3";
 	database_t(sqlite3* sql_handle);
 	database_t(sqlite3* sql_handle, string filename);
 	~database_t();

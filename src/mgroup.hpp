@@ -62,8 +62,25 @@ public:
 		static bool use_olcdb;
 		static bool use_group;
 		static bool use_settings;
+        template<typename M_t>
+        static bool remove_measurement(std::vector<M_t>& measurements, const M_t* measurement)
+        {
+            int idx = measurement_index(measurements,measurement);
+            if (idx>=0)
+            {
+                tools::vec::erase(measurements,{static_cast<unsigned int>(idx)});
+                return true;
+            }
+            return false;
+        }
+        template<typename M_t>
+        static int measurement_index(std::vector<M_t>& measurements, const M_t* measurement)
+        {
+            return tools::vec::get_index_position_by_comparing_pointers(measurements,measurement);
+        }
+        mgroup_t(measurements_::measurement_t& measurement);
 	public:
-		mgroup_t(measurements_::measurement_t& measurement);
+
 		string to_string(const string del=", ");
 		/*const defitions*/
 		///"51087" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
@@ -72,10 +89,9 @@ public:
         string group_id;
         ///given by user, optional
         string name="";
-		/*ctors*/
 
 		/*functions*/
-        void int remove_measurements();
+//        virtual int remove_measurements();
 		/*static functions*/
 		/*operators*/
 		bool operator==( const mgroup_t& obj) const;
@@ -111,27 +127,9 @@ public:
 				const quantity::intensity_t Irel_from_truncated_medians(const measurements_::sims_t* M) const;
 				const quantity::concentration_t Crel_from_sample(const measurements_::sims_t* M) const;
 			}; // Crel_to_Irel_c
-			///interpolates [E_i]/[E_j] = POLYNOM( (E_i)/(E_j) ) for 2 clusters (zaehler and nenner)
-// 			class polynom_fit_Crel_to_Irel_c : public Crel_to_Irel_c
-// 			{
-// 			private:
-// 				static vector<double> fit_start_parameters(const vector<unsigned int> rank);
-// 				///the polynomial fitting routine
-// 				const fit_functions::polynom_t polynom_f(const vector<unsigned int> rank) const;
-// 			public:
-// 				polynom_fit_Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner, calc_t& calc, vector<unsigned int> rank, vector<double> fit_start_parameters);
-// 				const fit_functions::polynom_t polynom;
-// 				///returns Crel using Crel_template from Irel polynomfit; Crel===[E_i]/[E_j];; Irel===(E_i)/(E_j)
-// 				quantity::concentration_t Crel(const measurements_::sims_t* M) const;
-// 				void plot_to_screen(double sleep_sec=0) const;
-// 			};
-			///interpolates [E_i]/[E_j] = POLYNOM( (E_i)/(E_j) ) for all given clusters and all combinations
-// 			const vector<polynom_fit_Crel_to_Irel_c> polynom_fit_Crels_to_Irels(vector<cluster_t> cluster_names, vector<unsigned int> rank, vector<double> fit_start_parameters);
 			
 			sims_t& MG;
 		public:
-			///interpolates [E_i]/[E_j] = k * (E_i)/(E_j)  for all given clusters and all combinations
-// 			const vector<polynom_fit_Crel_to_Irel_c> proportional_fit_Crels_to_Irels(vector<cluster_t> cluster_names);
 			///sputter_rate
 			class SR_c
 			{
@@ -258,7 +256,7 @@ public:
 			calc_t& SR_SF_from_implants_maxima(bool overwrite=false);
 			calc_t& normalize_to_ref_intensity(bool overwrite=false);
 
-			const vector<measurements_::sims_t*> measurements;
+            const vector<measurements_::sims_t*> measurements;
 			
 			SR_c SRs;
 			SD_c SDs;
@@ -348,7 +346,10 @@ public:
 		
 		/*normalize to primary current*/
 		dsims_t normalize_to_Iprimary();
-		
+        ///true: successfully remove
+        bool remove_measurement(const measurements_::dsims_t* measurement);
+        int measurement_index(const measurements_::dsims_t* measurement);
+
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
 	};
@@ -368,6 +369,11 @@ public:
 		vector<measurements_::sims_t*> measurements() final;
 		vector<measurements_::sims_t> measurements_copy() final;
 		string to_string(const string del=", ");
+
+        ///true: successfully remove
+        bool remove_measurement(const measurements_::tofsims_t* measurement);
+        int measurement_index(const measurements_::tofsims_t* measurement);
+
 		bool operator==(const tofsims_t& obj) const;
 		bool operator!=(const tofsims_t& obj) const;
 	};

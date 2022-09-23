@@ -23,7 +23,8 @@ mgroups_::sims_t::calc_t::~calc_t()
 {
 }
 
-mgroups_::sims_t::calc_t::calc_t(sims_t& MG) : MG(MG), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this), measurements(MG.measurements())
+mgroups_::sims_t::calc_t::calc_t(sims_t& MG) :
+    MG(MG), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this), measurements(MG.measurements())
 {
 }
 
@@ -296,6 +297,10 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_dose(boo
 			if (overwrite || !C.SF.is_set())
 			{
 				C.SF = M->calc().SF.from_db_dose(C).change_unit(units::derived::atoms_per_ccm/(units::derived::counts/units::SI::second));
+                if (C.SF.is_set())
+                    logger.info(__func__,M->to_string_short() + "->"+ C.to_string()).value(C.SF.to_string_short());
+                else
+                    logger.debug(__func__,M->to_string_short() + "->"+ C.to_string()).value("SF was not calculatable");
 			}
 		}
 	}

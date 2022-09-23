@@ -128,15 +128,33 @@ protected:
 //                std::string_view message_details=""); // automatically determined
 //                unsigned int verbosity_level=0); // automatically determined
         ///simple signaling message: e.g. "HERE"
+        template<typename A, typename B>
+        void signal(A message_description, unsigned int verbosity_level = 15, B message_details="")
+        {
+            stringstream ss, ssB;
+            ss << message_description;
+            ssB << message_details;
+            log(ss.str(),ssB.str(),verbosity_level);
+        }
         template<typename A>
         void signal(A message_description, unsigned int verbosity_level = 15, std::string_view message_details="")
         {
-            stringstream ss;
+            stringstream ss, ssB;
             ss << message_description;
             log(ss.str(),message_details,verbosity_level);
         }
         ///enter a function
-        void enter(unsigned int verbosity_level = 15, std::string_view message_details="");
+        template<typename A>
+        void enter(unsigned int verbosity_level = 15, A message_details="")
+        {
+            stringstream ss;
+            ss << message_details;
+            log("enter",ss.str(),verbosity_level);
+        }
+        void enter(unsigned int verbosity_level = 15, std::string_view message_details="")
+        {
+            log("enter",message_details,verbosity_level);
+        }
         ///exit a function
         void exit(unsigned int verbosity_level = 15, std::string_view message_details="");
         ///inform about a quantity

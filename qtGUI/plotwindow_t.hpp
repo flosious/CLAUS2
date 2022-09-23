@@ -18,17 +18,17 @@
 
 
 
-#ifndef PLOTWINDOW_H
-#define PLOTWINDOW_H
+#ifndef PLOTWINDOW_T_H
+#define PLOTWINDOW_T_H
 
 #include "qcustomplot.h"
 #include "../src/measurement.hpp"
 
-class plotwindow : public QCustomPlot
+class plotwindow_t : public QCustomPlot
 {
 public:
-    plotwindow(QWidget *parent = nullptr);
+    plotwindow_t(QWidget *parent = nullptr);
     void plot(const measurements_::sims_t& M);
 };
 
-#endif // PLOTWINDOW_H
+#endif // PLOTWINDOW_T_H

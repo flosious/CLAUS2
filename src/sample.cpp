@@ -202,6 +202,7 @@ bool sample_t::db_t::load_from_table()
 		line++;
 		if (i=="" || i=="NULL") continue;
 		isotope_t iso(i);
+        std::string object_str = sample.to_name() + "->" + iso.to_string_short();
 		if (iso.symbol=="") continue;
 		if (implants_s.find(iso)!=implants_s.end())
 		{
@@ -219,14 +220,17 @@ bool sample_t::db_t::load_from_table()
 			C_max = quantity::concentration_t({tools::str::str_to_double(table_entries_s.at("maximum_concentration").at(line))});
 		if (D.is_set())
         {
+            logger.info(__func__,object_str+"->dose").value(D.to_string_short());
             //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() +" DB: dose("+iso.to_string()+")="+D.to_string());
         }
 		if (SD_max.is_set())
         {
+            logger.info(__func__,object_str+"->SD_max").value(SD_max.to_string_short());
             //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: depth_at_maximum_concentration("+iso.to_string()+")="+SD_max.to_string());
         }
 		if (C_max.is_set())
         {
+            logger.info(__func__,object_str+"->C_max").value(C_max.to_string_short());
             //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: maximum_concentration("+iso.to_string()+")="+C_max.to_string());
         }
 		implant_s I{D,C_max,SD_max};

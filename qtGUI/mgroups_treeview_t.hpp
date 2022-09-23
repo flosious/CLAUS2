@@ -46,33 +46,13 @@ private:
     enum columns {col_method, col_sizes, col_olcdb, col_group_id, col_settings, col_LAST};
     static std::map<columns,std::string> column_names;
 
-    /*****************/
-    class selection_t
-    {
-        int measurement_row_p=-1;
-        int mgroup_row_p=-1;
-        int tool_section_row_p=-1;
-    public:
-        selection_t(int tool_section_row=-1, int mgroup_row=-1, int measurement_row=-1);
-        selection_t(const QModelIndex &topLeft);
-        int measurement_row() const;
-        int mgroup_row() const;
-        int tool_section_row() const;
-        bool is_ungrouped_measurement_section() const;
-        //an actual mgroup section row
-        bool is_mgroup() const;
-        ///grouped or ungrouped measurement
-        bool is_measurement() const;
-    };
-
-
     template<typename mgroup_t, typename measurement_t, typename tool_with_files_measurements_groups_t>
     class tool_section_t
     {
     private:
         class_logger_t logger;
     protected:
-
+        ///save measurement* pointer data in item role (Qt::UserRole+ !1! )
         static QStandardItem* item(measurement_t& measurement, columns col)
         {
             class_logger_t logger(global_logger,__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
@@ -87,7 +67,7 @@ private:
                 item->setText(QString(tools::file::extract_filename(measurement.filename_with_path).c_str()));
                 /* new */
                 variant_data.setValue(&measurement);
-                item->setData(variant_data);
+                item->setData(variant_data,Qt::UserRole+1);
                 /******/
                 break;
             case col_sizes:
@@ -111,6 +91,7 @@ private:
 
             return item;
         }
+        ///save mgroup* pointer data in item role (Qt::UserRole+ !2! )
         static QStandardItem* item(mgroup_t& mgroup, columns col)
         {
             class_logger_t logger(global_logger,__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
@@ -130,11 +111,17 @@ private:
                 //adding all measurements in this group here
                 for (auto& M : mgroup.measurements_p)
                 {
-                    item->appendRow(row(M));
+                    QList<QStandardItem*> _row = row(M);
+                    //add mgroup information to measurement item
+                    QVariant variant;
+                    variant.setValue(&mgroup);
+                    _row.at(0)->setData(variant,Qt::UserRole+2);
+                    /*******************************************/
+                    item->appendRow(_row);
                 }
                 /* new */
                 variant_data.setValue(&mgroup);
-                item->setData(variant_data);
+                item->setData(variant_data,Qt::UserRole+2);
                 /******/
                 break;
             case col_sizes:
@@ -236,13 +223,55 @@ private:
         }
         QStandardItemModel* model;
     public:
+        static bool index_has_measurement(const QModelIndex& idx)
+        {
+            if (idx.data(Qt::UserRole+1).isValid())
+                    return true;
+            return false;
+        }
+        static bool index_has_mgroup(const QModelIndex& idx)
+        {
+            if (idx.data(Qt::UserRole+2).isValid())
+                    return true;
+            return false;
+        }
+        static bool is_grouped_measurement(const QModelIndex& idx)
+        {
+            if (index_has_measurement(idx) && index_has_mgroup(idx))
+                    return true;
+            return false;
+        }
+        static bool is_UNgrouped_measurement(const QModelIndex& idx)
+        {
+            if (index_has_measurement(idx) && !index_has_mgroup(idx))
+                    return true;
+            return false;
+        }
+        static bool is_mgroup(const QModelIndex& idx)
+        {
+            if (!index_has_measurement(idx) && index_has_mgroup(idx))
+                return true;
+            return false;
+        }
+        static measurement_t* get_measurement_from_QIndex(const QModelIndex& idx)
+        {
+            if (!index_has_measurement(idx))
+                return nullptr;
+            return idx.data(Qt::UserRole+1).value<measurement_t*>();
+        }
+        static mgroup_t* get_mgroup_from_QIndex(const QModelIndex& idx)
+        {
+            if (!index_has_mgroup(idx))
+                return nullptr;
+            return idx.data(Qt::UserRole+2).value<mgroup_t*>();
+        }
         sections tool_section_id;
         tool_section_t(sections tool_section_id, tool_with_files_measurements_groups_t* tool, QStandardItemModel* model) :
             tool_section_id(tool_section_id),tool(tool), logger(global_logger,__FILE__,"mgroups_treeview_t::tool_section_t"), model(model)
         {
         }
-
-        void ungroup_selection(const QModelIndexList& indexes)
+        ///return true if something was changed
+        bool ungroup_selection(const QModelIndexList& indexes)
         {
             bool go_update=false;
             for (auto& idx : indexes)
@@ -251,22 +280,20 @@ private:
                     continue;
                 if (idx.column()!=0)
                     continue;
-                auto variant_data = idx.data(Qt::UserRole+1);
 
-                if ( (qMetaTypeId<measurement_t*>() == variant_data.userType()) ) // measurement
+                if ( is_grouped_measurement(idx) ) // measurement
                 {
-                    if ((idx.parent().isValid() && idx.parent().data(Qt::UserRole+1).isValid())) // measurement within a mgroup (NOT ungrouped)
-                    {
-                        auto idx_pos = tools::vec::get_index_position_by_comparing_pointers(idx.parent().data(Qt::UserRole+1).value<mgroup_t*>()->measurements_p,variant_data.value<measurement_t*>());
-//                        tools::vec::erase(,);
-//                        tool->
-                    }
+                    int i = tool->ungroup_measurements_from_group({get_measurement_from_QIndex(idx)},get_mgroup_from_QIndex(idx));
+                    if (i>0)
+                        go_update=true;
                 }
-                else if (qMetaTypeId<measurement_t*>() == variant_data.userType()) // mgroup
+                else if (is_mgroup(idx)) // mgroup
                 {
-
+                    if (tool->ungroup(get_mgroup_from_QIndex(idx)))
+                        go_update=true;
                 }
             }
+            return go_update;
         }
         ///returns true, is something was deleted; false if nothing changed
         bool delete_selection(const QModelIndexList& indexes)
@@ -278,57 +305,28 @@ private:
                     continue;
                 if (idx.column()!=0)
                     continue;
-                auto variant_data = idx.data(Qt::UserRole+1);
 
-                if (!variant_data.isValid()  ) //ungrouped measurements or section
+                if ( is_UNgrouped_measurement(idx) ) //ungrouped measurements or section
                 {
-                    if (!idx.data().isValid())
-                        return false;
-
-                    int rows = model->itemFromIndex(idx)->rowCount();
                     std::vector<unsigned int> erase_idx;
-
-                    if (idx.child(0,0).data(Qt::UserRole+1).userType()==qMetaTypeId<measurement_t*>())
-                    {
-                        erase_idx.clear();
-                        for (int r=0;r<rows;r++)
-                        {
-                            variant_data = idx.child(r,0).data(Qt::UserRole+1);
-                            auto idx_pos = tools::vec::get_index_position_by_comparing_pointers(tool->measurements,variant_data.value<measurement_t*>());
-                            if (idx_pos>=0)
-                                erase_idx.push_back(idx_pos);
-                        }
-                        if (erase_idx.size()>0)
-                        {
-                            tools::vec::erase(tool->measurements,erase_idx);
-                            go_update = true;
-                        }
-                    }
-                }
-                else if (qMetaTypeId<measurement_t*>() == variant_data.userType()) // measurement
-                {
-                    auto idx_pos = tools::vec::get_index_position_by_comparing_pointers(tool->measurements,variant_data.value<measurement_t*>());
+                    auto idx_pos = tools::vec::get_index_position_by_comparing_pointers(tool->measurements, get_measurement_from_QIndex(idx));
                     if (idx_pos>=0)
                     {
-                        tools::vec::erase(tool->measurements,{static_cast<unsigned int>(idx_pos)});
+                        tools::vec::erase(tool->measurements,erase_idx);
                         go_update = true;
                     }
-                    else if (idx.parent().isValid() && idx.parent().data(Qt::UserRole+1).isValid()) // measurement within mgroup
+                }
+                else if (is_grouped_measurement(idx)) // measurement
+                {
+                    if (get_mgroup_from_QIndex(idx)->remove_measurement(get_measurement_from_QIndex(idx)))
                     {
-                        idx_pos = tools::vec::get_index_position_by_comparing_pointers((idx.parent().data(Qt::UserRole+1).value<mgroup_t*>())->measurements_p,variant_data.value<measurement_t*>());
-                        if (idx_pos>=0)
-                        {
-                            tools::vec::erase(idx.parent().data(Qt::UserRole+1).value<mgroup_t*>()->measurements_p,{static_cast<unsigned int>(idx_pos)});
-                            go_update = true;
-                        }
+                        go_update = true;
                     }
                 }
-                else if (qMetaTypeId<mgroup_t*>() == variant_data.userType()) // mgroup
+                else if (is_mgroup(idx)) // mgroup
                 {
-                    auto idx_pos = tools::vec::get_index_position_by_comparing_pointers(tool->mgroups,variant_data.value<mgroup_t*>());
-                    if (idx_pos>=0)
+                    if (tool->remove_mgroup(get_mgroup_from_QIndex(idx)))
                     {
-                        tools::vec::erase(tool->mgroups,{static_cast<unsigned int>(idx_pos)});
                         go_update = true;
                     }
                 }
@@ -369,9 +367,8 @@ private:
             logger.debug(__func__,"this").exit();
             return item;
         }
-
     }; // tool_section_t
-    selection_t get_selection() const;
+
     class_logger_t logger;
     QWidget *parent;
     QStandardItemModel* model;
@@ -390,8 +387,7 @@ public:
 
     void keyPressEvent(QKeyEvent *e) override;
     void delete_selection();
-    void ungroup_selected_group(const selection_t& selection);
-    void ungroup_selected_measurement(const selection_t& selection);
+
     void ungroup_selection();
 
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>()) override;

@@ -97,11 +97,13 @@ processor::processor(vector<string> args_p) :   logger(global_logger,__FILE__,"p
 	/*connect to sqlite3 database*/
     if (!database.open())
     {
+        logger.error(__func__,"database").signal("can NOT open",15,database.file_location);
 //		logger::error("processor::processor","could not connect to to database");
     }
 	else // create tables    
 	{
         sample_t::db_t::create_table(database);
+        logger.info(__func__,"database").signal("created tables",15,database.file_location);
 // 		sample_t::db_t::migrate_claus1_db(sql_wrapper,"build/migrate.database.sqlite3");
 	}
     /*****************************/
@@ -215,46 +217,7 @@ processor::processor(vector<string> args_p) :   logger(global_logger,__FILE__,"p
 //		}
 //	}
 	
-    /*tof sims*/
-//    for (auto& MG : tofsims().mgroups())
-//	{
-//		MG.set_reference_isotopes_in_measurements();
-//		MG.set_natural_abundances_in_matrix_clusters();
-//		auto calc = MG.calc();
-//		calc.matrices.median_const_from_reference_isotopes();
-//		calc.SRs.from_crater_depths().SRs.from_implant_max();
-//		if (MG.matrix_clusters().size()>1)
-//		{
-//			calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
-//			auto RSFs = mat.RSFs().add_natural_abundances().remove_RSFs_below_gof_treshold(0.2).symmetrical_RSFs();
-//			RSFs.plot_now(0);
-//			for (auto& M:MG.measurements())
-//			{
-//				calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
-//				const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
-//				///copy the results - this is really ugly
-//				for (auto C : M_with_Cs.clusters)
-//				{
-//					if (!C.concentration.is_set())
-//						continue;
-//					*M->cluster(C) = C;
-//				}
-//			}
-//		}
-//		// SR + SD
-//		calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
-//		// SF + RSF
-//		calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
-//		calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
-//		// C
-//		calc.concentrations.from_SF();
-//		for (auto M : MG.measurements())
-//		{
-//			M->plot_now(0);
-//		}
-		/*exporting*/
-//		MG.export_origin_ascii(config.tofsims_export_location);
-//	}
+
 	
 	/*d sims*/
 //	for (auto& MG : dsims.mgroups())

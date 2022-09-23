@@ -324,6 +324,8 @@ string mgroups_::sims_t::to_string_short() const
 
 void mgroups_::sims_t::export_origin_ascii(string path, const string delimiter)
 {
+    path = tools::file::check_directory_string(path) + std::to_string(olcdb) + PATH_DELIMITER;
+    tools::file::mkpath(path);
 	for (auto& M : measurements())
 	{
 		M->export_origin_ascii(path+to_string_short(),delimiter);

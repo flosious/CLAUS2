@@ -48,6 +48,15 @@ mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurem
 //	}
 }
 
+bool mgroups_::dsims_t::remove_measurement(const measurements_::dsims_t* measurement)
+{
+    return mgroup_t::remove_measurement(measurements_p, measurement);
+}
+int mgroups_::dsims_t::measurement_index(const measurements_::dsims_t* measurement)
+{
+    return mgroup_t::measurement_index(measurements_p,measurement);
+}
+
 bool mgroups_::dsims_t::operator==(const mgroups_::dsims_t& obj) const
 {
 	if (sims_t::operator!=(obj)) return false;

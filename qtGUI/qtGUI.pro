@@ -82,11 +82,12 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     measurements_treeview_t.cpp \
-    measurements_window.cpp \
     mgroups_treeview_t.cpp \
-    plotwindow.cpp \
+    plotwindow_t.cpp \
     qcustomplot.cpp \
-    sims_measurement_plot_treeview_t.cpp \
+    sims_plot_measurement_tree_t.cpp \
+    sims_plot_measurement_widget_t.cpp \
+    sims_plotwindow_t.cpp \
     table_log_t.cpp
 
 HEADERS += \
@@ -122,16 +123,17 @@ HEADERS += \
     files_treeview_t.hpp \
     mainwindow.h \
     measurements_treeview_t.hpp \
-    measurements_window.hpp \
     mgroups_treeview_t.hpp \
-    plotwindow.h \
+    plotwindow_t.hpp \
     qcustomplot.h \
-    sims_measurement_plot_treeview_t.hpp \
+    sims_plot_measurement_tree_t.hpp \
+    sims_plot_measurement_widget_t.hpp \
+    sims_plotwindow_t.hpp \
     table_log_t.hpp
 
 FORMS += \
-    fileSelector.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    sims_plot_measurement_widget_t.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

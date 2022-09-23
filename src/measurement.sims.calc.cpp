@@ -127,7 +127,7 @@ measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SR_c::from_implant
 	return calc;
 }
 
-quantity::SR_t measurements_::sims_t::calc_t::SR_c::from_implant_max(cluster_t& C) const
+quantity::SR_t measurements_::sims_t::calc_t::SR_c::from_implant_max(cluster_t& C)
 {
 	if (!C.intensity.is_set() && !C.concentration.is_set())	return {};
 	if (!M.crater.sputter_time.is_set()) return {};
@@ -142,8 +142,11 @@ quantity::SR_t measurements_::sims_t::calc_t::SR_c::from_implant_max(cluster_t& 
 	quantity::SR_t SR = calc.implant(C).SR_from_max();
 	if (SR.is_set())
     {
+        logger.info(__func__,C.to_string()).value(SR.to_string());
         //logger::debug(11,"measurements_::sims_t::calc_t::SR_c::from_implant_max()","calc.implant(C).SR()=",SR.to_string(),M.to_string_short());
     }
+    else
+        logger.debug(__func__,C.to_string()).value(SR.to_string()); // for debugging
 	
 // 	cout << endl << "from_implant_max SR:" << SR.to_string() << endl;
 	

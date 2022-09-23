@@ -43,7 +43,6 @@ namespace quantity
 	private:
         class_logger_t logger;
 		const std::map<double,double> data_XY_1D();
-		fit_functions::polynom_t polynom(unsigned int polynom_grade) const; 
 		static int get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec);
 	public:
 		class dimension_t
@@ -248,27 +247,30 @@ namespace quantity
 		quantity_t sd()  const;
 		quantity_t mad()  const;
 		quantity_t max()  const;
-		///returns -1, if not set
+        ///returns -1, on error
 		int max_idx()  const;
 		quantity_t min()  const;
+        ///returns -1 on error
 		int min_idx()  const;
 		quantity_t front()  const;
 		quantity_t back()  const;
 		quantity_t x_at_max(const quantity_t& X)  const;
 		
 		quantity_t x_at_min(quantity_t& X)  const;
-		quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index, unsigned int upper_X_index)  const;
-		quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index=0)  const;
+        quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index, unsigned int upper_X_index)  const;
+        quantity_t integrate(const quantity_t& x_data, unsigned int lower_X_index=0)  const;
 		quantity_t integrate(const quantity_t& x_data,const quantity_t& x_data_start,const quantity_t& x_data_stop) const;
 		quantity_t integrate(const quantity_t& x_data,const quantity_t& x_data_start) const;
 		/// point by point integration
-		quantity_t integrate_pbp(const quantity_t& x_data) const;
-		quantity_t round_(const unsigned int decimals=0) const;
+        quantity_t integrate_pbp(const quantity_t& x_data);
+        quantity_t round_(const unsigned int decimals=0) const;
 		quantity_t diff() const;
 		quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
 		quantity_t fit_polynom_by_x_data(const quantity_t& x_data, quantity_t new_x_data, int polynom_grade=17 ) const;
+        fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
 		///polynomial interpolation from idx_start to idx_stop
-		quantity_t polyfit(unsigned int polynom_grade) const;
+        quantity_t polyfit(unsigned int polynom_grade) const;
+        quantity_t polyfit(const fit_functions::polynom_t& polynom) const;
 // 		quantity_t polyfit(fit_functions::polynom_t polynom_s) const;
 		///deviation = 1 -> 1st deviation; 0 no deviation == polyfit
 		quantity_t polyfit_derivative(unsigned int polynom_grade, unsigned int derivative=1) const;

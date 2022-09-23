@@ -18,73 +18,6 @@
 
 #include "mgroups_treeview_t.hpp"
 
-
-/*********************************/
-/*****     selection_t     *******/
-/*********************************/
-
-
-mgroups_treeview_t::selection_t::selection_t(int tool_section_row,
-                                             int mgroup_row,
-                                             int measurement_row) :
-    tool_section_row_p(tool_section_row),
-    mgroup_row_p(mgroup_row),
-    measurement_row_p(measurement_row)
-{
-}
-
-mgroups_treeview_t::selection_t::selection_t(const QModelIndex &idx)
-{
-    if (!idx.isValid())
-        return;
-    if (idx.column()!=0)
-        return;
-    if (idx.parent().parent().isValid()) // measurement item row selected
-    {
-        *this = selection_t(idx.parent().parent().row(),idx.parent().row(),idx.row());
-    }
-    else if (idx.parent().isValid()) // measurement_group / section group item row selected
-    {
-        *this = selection_t(idx.parent().row(),idx.row());
-    }
-    else if (idx.isValid()) // tool section item row selected
-    {
-        *this = selection_t(idx.row());
-    }
-}
-
-int mgroups_treeview_t::selection_t::measurement_row() const
-{
-    return measurement_row_p;
-}
-int mgroups_treeview_t::selection_t::mgroup_row() const
-{
-    return mgroup_row_p;
-}
-int mgroups_treeview_t::selection_t::tool_section_row() const
-{
-    return tool_section_row_p;
-}
-
-bool mgroups_treeview_t::selection_t::is_ungrouped_measurement_section() const
-{
-    if (tool_section_row()>=0 && mgroup_row()==0 && measurement_row()<0)
-        return true;
-    return false;
-}
-bool mgroups_treeview_t::selection_t::is_mgroup() const
-{
-    if (tool_section_row()>=0 && mgroup_row()>0 && measurement_row()<0)
-        return true;
-    return false;
-}
-bool mgroups_treeview_t::selection_t::is_measurement() const
-{
-    if (tool_section_row()>=0 && mgroup_row()>=0 && measurement_row()>=0)
-        return true;
-    return false;
-}
-
 /*********************************/
 
 std::map<mgroups_treeview_t::sections,std::string> mgroups_treeview_t::section_names
@@ -109,23 +42,19 @@ void mgroups_treeview_t::dataChanged(const QModelIndex &topLeft, const QModelInd
     logger.debug(__func__,"this").enter();
     if (topLeft == bottomRight)
     {
-        selection_t selection(topLeft);
-        if (!selection.is_mgroup())
-            return;
-        int row = selection.mgroup_row()-1;
         std::string name = model->itemFromIndex(topLeft)->text().toStdString();
 
-        if (selection.tool_section_row()==tofsims)
+        if (dsims_section.is_mgroup(topLeft))
         {
-            auto& MG = claus->tofsims.mgroups.at(row);
-            MG.name =name;
-            logger.debug(__func__,"MG tofsims name").signal(MG.name);
+            auto* MG = dsims_section.get_mgroup_from_QIndex(topLeft);
+            MG->name =name;
+            logger.debug(__func__,"MG tofsims name").signal(MG->name);
         }
-        else if (selection.tool_section_row()==dsims)
+        else if (tofsims_section.is_mgroup(topLeft))
         {
-            auto& MG = claus->dsims.mgroups.at(row);
-            MG.name =name;
-            logger.debug(__func__,"MG dsims name").signal(MG.name);
+            auto* MG = tofsims_section.get_mgroup_from_QIndex(topLeft);
+            MG->name =name;
+            logger.debug(__func__,"MG tofsims name").signal(MG->name);
         }
     }
 }
@@ -163,31 +92,6 @@ mgroups_treeview_t::mgroups_treeview_t(QWidget *parent ) :
 //    claus->tofsims // tool_with_files_measurements_groups<files_::tofsims_t,measurements_::tofsims_t,mgroups_::tofsims_t>
 }
 
-mgroups_treeview_t::selection_t mgroups_treeview_t::get_selection() const
-{
-    QModelIndexList indexes = this->selectionModel()->selectedIndexes();
-    selection_t selection;
-    for (auto& idx : indexes)
-    {
-        if (!idx.isValid())
-            continue;
-        if (idx.column()!=0)
-            continue;
-        if (idx.parent().parent().isValid()) // measurement item row selected
-        {
-            return selection_t(idx.parent().parent().row(),idx.parent().row(),idx.row());
-        }
-        else if (idx.parent().isValid()) // measurement_group / section group item row selected
-        {
-            return selection_t(idx.parent().row(),idx.row());
-        }
-        else if (idx.isValid()) // tool section item row selected
-        {
-            return selection_t(idx.row());
-        }
-    }
-    return selection;
-}
 
 void mgroups_treeview_t::set_model()
 {
@@ -247,72 +151,27 @@ void mgroups_treeview_t::keyPressEvent(QKeyEvent *e)
         QTreeView::keyPressEvent(e);
 }
 
-
-void mgroups_treeview_t::ungroup_selected_group(const selection_t& selection)
-{
-//    const auto selection = get_selection();
-    if (!selection.is_mgroup())
-        return;
-
-    if (selection.tool_section_row()==tofsims)
-    {
-        auto& MG = claus->tofsims.mgroups.at(selection.mgroup_row()-1);
-        if (MG.measurements_p.size()>0)
-            claus->tofsims.measurements.insert(claus->tofsims.measurements.end(),MG.measurements_p.begin(),MG.measurements_p.end());
-        claus->tofsims.mgroups.erase(claus->tofsims.mgroups.begin()+selection.mgroup_row()-1);
-    }
-
-    if (selection.tool_section_row()==dsims)
-    {
-        auto& MG = claus->dsims.mgroups.at(selection.mgroup_row()-1);
-        if (MG.measurements_p.size()>0)
-            claus->dsims.measurements.insert(claus->dsims.measurements.end(),MG.measurements_p.begin(),MG.measurements_p.end());
-        claus->dsims.mgroups.erase(claus->dsims.mgroups.begin()+selection.mgroup_row()-1);
-    }
-//    delete_selection();
-    update();
-    update_measurements_treeview();
-}
-
-void mgroups_treeview_t::ungroup_selected_measurement(const selection_t& selection)
-{
-    if (!selection.is_measurement())
-        return;
-    if (selection.mgroup_row()==0) // already in "ungrouped measurements"
-        return;
-
-    if (selection.tool_section_row()==tofsims)
-    {
-        auto& MG = claus->tofsims.mgroups.at(selection.mgroup_row()-1);
-        auto& M = MG.measurements_p.at(selection.measurement_row());
-        claus->tofsims.measurements.push_back(M);
-        MG.measurements_p.erase(MG.measurements_p.begin()+selection.measurement_row());
-    }
-
-    if (selection.tool_section_row()==dsims)
-    {
-        auto& MG = claus->dsims.mgroups.at(selection.mgroup_row()-1);
-        auto& M = MG.measurements_p.at(selection.measurement_row());
-        claus->dsims.measurements.push_back(M);
-        MG.measurements_p.erase(MG.measurements_p.begin()+selection.measurement_row());
-    }
-//    delete_selection();
-    update();
-    update_measurements_treeview();
-}
-
 void mgroups_treeview_t::ungroup_selection()
 {
-    const auto selection = get_selection();
+    bool go_update = false;
+    QModelIndexList indexes = this->selectionModel()->selectedIndexes();
 
-    if (selection.is_mgroup())
-        ungroup_selected_group(selection);
-
-    if (selection.is_measurement())
-        ungroup_selected_measurement(selection);
+    if (dsims_section.ungroup_selection(indexes))
+    {
+        go_update = true;
+    }
+    if (tofsims_section.ungroup_selection(indexes))
+    {
+        go_update = true;
+    }
+    if (go_update)
+    {
+        update();
+        update_measurements_treeview();
+    }
 }
 
-///new, using QVariant custom class pointers
+/////new, using QVariant custom class pointers
 void mgroups_treeview_t::delete_selection()
 {
     bool go_update = false;
@@ -320,116 +179,18 @@ void mgroups_treeview_t::delete_selection()
 
     if (dsims_section.delete_selection(indexes))
     {
-        update();
-        update_measurements_treeview();
-        return;
+        go_update = true;
     }
     if (tofsims_section.delete_selection(indexes))
     {
+        go_update = true;
+    }
+    if (go_update)
+    {
         update();
         update_measurements_treeview();
-        return;
     }
-
 }
-
-//void mgroups_treeview_t::delete_selection()
-//{
-////    update();
-////    return;
-//    QModelIndexList indexes = this->selectionModel()->selectedIndexes();
-//    bool go_update=false;
-
-//    for (auto& idx : indexes)
-//    {
-//        if (!idx.isValid())
-//            continue;
-//        if (idx.column()!=0)
-//            continue;
-//        selection_t selection(idx);
-
-//        if (selection.tool_section_row()==tofsims)
-//        {
-//            if (selection.is_ungrouped_measurement_section())
-//            {
-//                logger.debug(__func__,"tofsims").signal("selection.is_ungrouped_measurement_section()");
-//                if (claus->tofsims.measurements.size()>0)
-//                {
-//                    claus->tofsims.measurements.clear();
-//                    go_update=true; // this leads to segmentation fault
-//                }
-////                if (model->itemFromIndex(idx)->hasChildren())
-////                    model->itemFromIndex(idx)->removeRows(0,model->itemFromIndex(idx)->rowCount());
-//            }
-//            else if (selection.is_mgroup())
-//            {
-//                logger.debug(__func__,"tofsims").signal("selection.is_mgroup()");
-//                tools::vec::erase(claus->tofsims.mgroups,{(unsigned int)selection.mgroup_row()-1});
-////                model->itemFromIndex(idx.parent())->removeRow(idx.row());
-//                go_update=true;
-//            }
-//            else if (selection.is_measurement() && selection.mgroup_row()==0)
-//            {
-//                logger.debug(__func__,"tofsims").signal("selection.is_measurement() && selection.mgroup_row()==0");
-//                tools::vec::erase(claus->tofsims.measurements,{(unsigned int)selection.measurement_row()});
-////                model->itemFromIndex(idx.parent())->removeRow(idx.row());
-//                go_update=true;
-//            }
-//            else if (selection.is_measurement() && selection.mgroup_row()>0)
-//            {
-//                logger.debug(__func__,"tofsims").signal("selection.is_measurement() && selection.mgroup_row()>0");
-//                auto& MG = claus->tofsims.mgroups.at(selection.mgroup_row()-1);
-//                tools::vec::erase(MG.measurements_p,{(unsigned int)selection.measurement_row()});
-////                model->itemFromIndex(idx.parent())->removeRow(idx.row());
-//                go_update=true;
-//            }
-//        }
-//        else if (selection.tool_section_row()==dsims)
-//        {
-//            if (selection.is_ungrouped_measurement_section())
-//            {
-//                logger.debug(__func__,"dsims").signal("selection.is_ungrouped_measurement_section()");
-//                if (claus->dsims.measurements.size()>0)
-//                {
-//                    claus->dsims.measurements.clear();
-//                    go_update=true;
-//                }
-////                if (model->itemFromIndex(idx)->hasChildren())
-////                    model->itemFromIndex(idx)->removeRows(0,model->itemFromIndex(idx)->rowCount());
-//            }
-//            else if (selection.is_mgroup())
-//            {
-//                logger.debug(__func__,"dsims").signal("selection.is_mgroup()");
-//                tools::vec::erase(claus->dsims.mgroups,{(unsigned int)selection.mgroup_row()-1});
-////                model->itemFromIndex(idx.parent())->removeRow(idx.row());
-//                go_update=true;
-//            }
-//            else if (selection.is_measurement() && selection.mgroup_row()==0)
-//            {
-//                logger.debug(__func__,"dsims").signal("selection.is_measurement() && selection.mgroup_row()==0");
-//                tools::vec::erase(claus->dsims.measurements,{(unsigned int)selection.measurement_row()});
-////                model->itemFromIndex(idx.parent())->removeRow(idx.row());
-//                go_update=true;
-//            }
-//            else if (selection.is_measurement() && selection.mgroup_row()>0)
-//            {
-//                logger.debug(__func__,"dsims").signal("selection.is_measurement() && selection.mgroup_row()>0");
-//                auto& MG = claus->dsims.mgroups.at(selection.mgroup_row()-1);
-//                tools::vec::erase(MG.measurements_p,{(unsigned int)selection.measurement_row()});
-////                model->itemFromIndex(idx.parent())->removeRow(idx.row());
-//                go_update=true;
-//            }
-//        }
-//    }
-//    if (go_update)
-//    {
-//        logger.debug(__func__,"go_update").signal("before update");
-//        update();
-//        logger.debug(__func__,"go_update").signal("updated");
-//        update_measurements_treeview();
-//        logger.debug(__func__,"go_update").signal("update_measurements_treeview");
-//    }
-//}
 
 /**********************************/
 /*****         slots            ***/

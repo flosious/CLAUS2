@@ -53,6 +53,15 @@ mgroups_::tofsims_t::~tofsims_t()
 	
 }
 
+bool mgroups_::tofsims_t::remove_measurement(const measurements_::tofsims_t* measurement)
+{
+    return mgroup_t::remove_measurement(measurements_p, measurement);
+}
+int mgroups_::tofsims_t::measurement_index(const measurements_::tofsims_t* measurement)
+{
+    return mgroup_t::measurement_index(measurements_p,measurement);
+}
+
 bool mgroups_::tofsims_t::operator==(const mgroups_::tofsims_t& obj) const
 {
 	if (sims_t::operator!=(obj)) return false;

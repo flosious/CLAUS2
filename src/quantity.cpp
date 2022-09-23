@@ -131,11 +131,7 @@ const std::map<double,double> quantity::quantity_t::data_XY_1D()
 	return data_XY;
 }
 
-fit_functions::polynom_t quantity::quantity_t::polynom(unsigned int polynom_grade) const
-{
-	fit_functions::polynom_t poly(polynom_grade,data());
-	return poly;
-}
+
 
 quantity::quantity_t quantity::quantity_t::bspline_smoothing( unsigned int breakpoints, const size_t spline_order) const
 {
@@ -243,11 +239,24 @@ quantity::quantity_t quantity::quantity_t::polyfit_derivative(unsigned int polyn
 	return {*this,polynom(polynom_grade).derivative(derivative).y_data(data_X_1D()),ss.str()};
 }
 
+fit_functions::polynom_t quantity::quantity_t::polynom(unsigned int polynom_grade) const
+{
+    fit_functions::polynom_t poly(polynom_grade,data());
+    return poly;
+}
+
 quantity::quantity_t quantity::quantity_t::polyfit(unsigned int polynom_grade) const
 {
 	stringstream ss;
 	ss << "poly" << polynom_grade << "_fit";
 	return {*this,polynom(polynom_grade).y_data(data_X_1D()),ss.str()};
+}
+
+quantity::quantity_t quantity::quantity_t::polyfit(const fit_functions::polynom_t& polynom) const
+{
+    stringstream ss;
+    ss << "poly" << polynom.degree() << "_fit";
+    return {*this,polynom.y_data(data_X_1D()),ss.str()};
 }
 
 quantity::quantity_t quantity::quantity_t::round_(const unsigned int decimals) const
@@ -277,10 +286,19 @@ quantity::quantity_t quantity::quantity_t::diff() const
 	return {*this,diff_data,"diff"};
 }
 
-quantity::quantity_t quantity::quantity_t::integrate_pbp(const quantity_t& x_data) const
+quantity::quantity_t quantity::quantity_t::integrate_pbp(const quantity_t& x_data)
 {
+    logger.debug(__func__,"this").enter();
+    if (data().size()==0)
+    {
+        logger.error(__func__,to_string()).signal("data().size()==0");
+        return {};
+    }
 	if (data().size()!=x_data.data().size()) 
+    {
+        logger.error(__func__,to_string()).if_statement("data().size()",data().size(),"!=","x_data.data().size()",x_data.data().size());
 		return {};
+    }
 // 	if (data.size()==1) // fall back to simple multiplication, but this will ignore correctness of unit and dimension --> do not use!
 // 		return *this * x_data;
 
@@ -303,7 +321,11 @@ quantity::quantity_t quantity::quantity_t::integrate_pbp(const quantity_t& x_dat
     auto data_c = area_data;
 	auto unit_c = unit_s*x_data.unit_s;
 	auto dimension_c = dimension_s*x_data.dimension_s;
-	return {name(),data_c,unit_c,dimension_c,operations_history(),n.str()};
+    quantity_t integrated (name(),data_c,unit_c,dimension_c,operations_history(),n.str());
+    logger.debug(__func__,"this").value(to_string());
+    logger.debug(__func__,"x_data").value(x_data.to_string());
+    logger.debug(__func__,"integrated").value(integrated.to_string());
+    return integrated;
 }
 
 quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data, unsigned int lower_X_index) const
@@ -323,19 +345,10 @@ quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data, u
 		return {};
 	}
 	return get_data_by_index(lower_X_index,upper_X_index).integrate_pbp(x_data.get_data_by_index(lower_X_index,upper_X_index)).back();
-// 	auto int_pbp = integrate_pbp(x_data);
-// 	double sum=int_pbp.data().at(upper_X_index);
-// 	if (lower_X_index>0)
-// 		sum -= int_pbp.data().at(lower_X_index) ;
-// 	stringstream n,u;
-// 	n << "integral" << "d(" << x_data.name() << ")";
-// 	quantity_t area(name,{sum},unit*x_data.unit,dimension*x_data.dimension,operations_history,n.str());
-// 	return area;
 }
 
 quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data,const quantity_t& x_data_start) const
 {
-	
 	return integrate(x_data,x_data_start,x_data.back());
 }
 
@@ -345,12 +358,13 @@ quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data,co
 	unsigned int upper_X_idx=x_data.data().size();
 	if (!x_data_start.is_scalar() || !x_data_stop.is_scalar())
 	{
+
         //logger::error("quantity::quantity_t::integrate","start/stop quantities no scalars","returning empty");
 		return {};
 	}
 	
 	if (x_data.dimension() != x_data_start.dimension() || x_data.dimension() != x_data_stop.dimension())
-	{
+    {
         //logger::error("quantity::quantity_t::integrate()","x_data.dimension() != x_data_start.dimension() || x_data.dimension() != x_data_stop.dimension()","returning empty");
 		return {};
 	}
@@ -360,14 +374,14 @@ quantity::quantity_t quantity::quantity_t::integrate(const quantity_t& x_data,co
 	
 	lower_X_idx = get_value_index_position_in_strictly_monotonic_increasing_vector(x_data_start_same_unit.data().front(),x_data.data());
 	if (lower_X_idx<0)
-	{
+    {
         //logger::error("quantity::quantity_t::integrate","lower_X_idx<0","returning empty");
 		return {};
 	}
 	
 	upper_X_idx = get_value_index_position_in_strictly_monotonic_increasing_vector(x_data_stop_same_unit.data().front(),x_data.data());
 	if (upper_X_idx<0)
-	{
+    {
         //logger::error("quantity::quantity_t::integrate","upper_X_idx<0","returning empty");
 		return {};
 	}

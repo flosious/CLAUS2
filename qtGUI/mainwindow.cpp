@@ -1,4 +1,4 @@
-/*
+﻿/*
     Copyright (C) 2022 Florian Bärwolf
     floribaer@gmx.de
 
@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->files_treeView, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
     QObject::connect(ui->measurements_treeView, SIGNAL(update_mgroups_treeview()), ui->mgroups_treeview, SLOT(update()));
     QObject::connect(ui->mgroups_treeview, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
+//    QObject::connect(ui->mgroups_treeview, SIGNAL(set_measurement_in_sims_plot_measurement_tree),ui->sims_plot_measurement_widget,SLOT(set_measurement));
 
 //    ui->mgroups_treeview->header()->setStretchLastSection(false);
 
@@ -287,8 +288,15 @@ void MainWindow::on_measurements_treeView_customContextMenuRequested(const QPoin
 
 void MainWindow::on_mgroups_treeview_clicked(const QModelIndex &index)
 {
+    //get selected measurements_::sims_t *
+//    measurements_::sims_t* M = ui->mgroups_treeview->get_selected_sims_measurement();
+
+    //send selected measurement to sims_plot_widget
+//    if (M!=nullptr)
+//        ui->sims_plot_measurement_widget->update(M);
+
     //testing
-//    ui->mgroups_treeview->dsims_section.get_selected_rows();
+//    ui->mgroups_treeview->dsims_section.;
 //    ui->mgroups_treeview->tofsims_section.get_selected_rows();
 }
 
@@ -308,5 +316,91 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     {
         logger.debug(__func__,"this").enter();
         ui->tab_log_table->update(*global_logger);
+    }
+}
+
+void MainWindow::on_MG_tab_measurement_cluster_tree_button_clicked()
+{
+    /*tof sims*/
+    for (auto& MG : claus->tofsims.mgroups)
+    {
+        MG.set_reference_isotopes_in_measurements();
+        MG.set_natural_abundances_in_matrix_clusters();
+        auto calc = MG.calc();
+        calc.matrices.median_const_from_reference_isotopes();
+        calc.SRs.from_crater_depths().SRs.from_implant_max();
+        if (MG.matrix_clusters().size()>1)
+        {
+            calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+            auto RSFs = mat.RSFs().add_natural_abundances().remove_RSFs_below_gof_treshold(0.2).symmetrical_RSFs();
+//            RSFs.plot_now(0);
+            for (auto& M:MG.measurements())
+            {
+                calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
+                const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
+                ///copy the results - this is really ugly
+                for (auto C : M_with_Cs.clusters)
+                {
+                    if (!C.concentration.is_set())
+                        continue;
+                    *M->cluster(C) = C;
+                }
+            }
+        }
+        // SR + SD
+        calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
+        // SF + RSF
+        calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
+        // C
+        calc.concentrations.from_SF();
+        /*exporting*/
+        std::string export_path = ui->tofsims_export_directory_textEdit->toPlainText().toStdString();
+        if (export_path=="")
+            export_path = ui->tofsims_export_directory_textEdit->placeholderText().toStdString();
+        export_path = tools::file::check_directory_string(export_path);
+        MG.export_origin_ascii(export_path);
+    }
+
+
+    /*D sims*/
+    for (auto& MG : claus->dsims.mgroups)
+    {
+        MG.set_reference_isotopes_in_measurements();
+        MG.set_natural_abundances_in_matrix_clusters();
+        auto calc = MG.calc();
+        calc.matrices.median_const_from_reference_isotopes();
+        calc.SRs.from_crater_depths().SRs.from_implant_max();
+        if (MG.matrix_clusters().size()>1)
+        {
+            calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+            auto RSFs = mat.RSFs().add_natural_abundances().remove_RSFs_below_gof_treshold(0.2).symmetrical_RSFs();
+//            RSFs.plot_now(0);
+            for (auto& M:MG.measurements())
+            {
+                calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
+                const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
+                ///copy the results - this is really ugly
+                for (auto C : M_with_Cs.clusters)
+                {
+                    if (!C.concentration.is_set())
+                        continue;
+                    *M->cluster(C) = C;
+                }
+            }
+        }
+        // SR + SD
+        calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
+        // SF + RSF
+        calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
+        // C
+        calc.concentrations.from_SF();
+        /*exporting*/
+        std::string export_path = ui->dsims_export_directory_textEdit->toPlainText().toStdString();
+        if (export_path=="")
+            export_path = ui->dsims_export_directory_textEdit->placeholderText().toStdString();
+        export_path = tools::file::check_directory_string(export_path);
+        MG.export_origin_ascii(export_path);
     }
 }

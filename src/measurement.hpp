@@ -158,7 +158,7 @@ public:
 				///mean from all available clusters; uses max cluster intensity or concentration
 				calc_t& from_implant_max(bool overwrite=false);
 				///from one particular cluster
-				quantity::SR_t from_implant_max(cluster_t& C) const;
+                quantity::SR_t from_implant_max(cluster_t& C);
 				///mean from all available clusters
 				calc_t& from_ref_fit();
 				///from one particular cluster
@@ -302,7 +302,7 @@ public:
 					const quantity::map_t& XY_map() const; 
 					//used as implant profile
 					quantity::map_t XY_map_without_surface(); 
-					quantity::quantity_t background_value(int last_points=20) const;
+                    quantity::quantity_t background_value(int last_points=20);
 					quantity::quantity_t minimum_pos();
 					quantity::quantity_t minimum_value();
 					quantity::quantity_t maximum_pos();
@@ -318,7 +318,7 @@ public:
 					///plot 
 //					void to_screen(float seconds=0) const;
 					///checks if there is sufficient implanted area: implanted_area() >= background_area() * rel_treshold ;; implanted_area() >= abs_treshold
-					bool is_implanted(double abs_treshold = 10,  double rel_treshold=5);
+                    bool has_sufficient_implant_area(double abs_treshold = 10,  double rel_treshold=5);
 				};
 			private:
                 class_logger_t logger;
@@ -355,7 +355,7 @@ public:
 				map_c& I_vs_ST();
 				///ATTENTION NOT WORKING YET will override any values already set in clusters implant_parameters
 				void set_parameters_in_cluster();
-				bool is_implanted();
+                bool has_sufficient_implant_area();
 			}; //implant_c
 		private:
             class_logger_t logger;

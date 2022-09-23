@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>929</width>
+    <width>1060</width>
     <height>557</height>
    </rect>
   </property>
@@ -98,7 +98,7 @@
              <number>4</number>
             </property>
             <widget class="measurements_treeview_t" name="measurements_treeView"/>
-            <widget class="plotwindow" name="measurement_plot_window" native="true"/>
+            <widget class="plotwindow_t" name="measurement_plot_window" native="true"/>
            </widget>
           </item>
          </layout>
@@ -125,72 +125,15 @@
           </widget>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_3">
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QSplitter" name="splitter_3">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <widget class="plotwindow" name="MG_tab_measurement_plotwindow" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>100</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </widget>
-               <widget class="QTreeView" name="MG_tab_measurement_cluster_treeview">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>100</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </widget>
-              </widget>
-             </item>
-            </layout>
+            <layout class="QHBoxLayout" name="horizontalLayout_5"/>
            </widget>
            <widget class="QWidget" name="page_4">
             <layout class="QVBoxLayout" name="verticalLayout_5">
              <item>
-              <widget class="plotwindow" name="widget_2" native="true"/>
+              <widget class="sims_plot_measurement_widget_t" name="sims_plot_measurement_widget" native="true"/>
              </item>
             </layout>
            </widget>
@@ -204,6 +147,11 @@
         <string>samples</string>
        </attribute>
       </widget>
+      <widget class="QWidget" name="tab_calc">
+       <attribute name="title">
+        <string>calc</string>
+       </attribute>
+      </widget>
       <widget class="QWidget" name="tab_tools">
        <attribute name="title">
         <string>tools</string>
@@ -212,11 +160,6 @@
       <widget class="QWidget" name="tab_profiles">
        <attribute name="title">
         <string>profiles</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_database">
-       <attribute name="title">
-        <string>database</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tab_log">
@@ -270,6 +213,36 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_database">
+       <attribute name="title">
+        <string>database</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_config">
+       <attribute name="title">
+        <string>config</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_13">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_12">
+          <item>
+           <widget class="QTextEdit" name="tofsims_export_directory_textEdit">
+            <property name="placeholderText">
+             <string>/tmp/exports/tofsims/</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTextEdit" name="dsims_export_directory_textEdit">
+            <property name="placeholderText">
+             <string>/tmp/exports/dsims/</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab_about">
        <attribute name="title">
         <string>about</string>
@@ -300,13 +273,19 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>929</width>
+     <width>1060</width>
      <height>23</height>
     </rect>
    </property>
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>plotwindow_t</class>
+   <extends>QWidget</extends>
+   <header>plotwindow_t.hpp</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>files_treeview_t</class>
    <extends>QTreeView</extends>
@@ -318,12 +297,6 @@
    <header>measurements_treeview_t.hpp</header>
   </customwidget>
   <customwidget>
-   <class>plotwindow</class>
-   <extends>QWidget</extends>
-   <header>plotwindow.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>mgroups_treeview_t</class>
    <extends>QTreeView</extends>
    <header>mgroups_treeview_t.hpp</header>
@@ -332,6 +305,12 @@
    <class>table_log_t</class>
    <extends>QTableWidget</extends>
    <header>table_log_t.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>sims_plot_measurement_widget_t</class>
+   <extends>QWidget</extends>
+   <header>sims_plot_measurement_widget_t.hpp</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

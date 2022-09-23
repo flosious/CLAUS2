@@ -165,16 +165,18 @@ public:
         std::vector<mgroup_type> mgroups;
 
         filter::items_t<mgroup_type> filter_mgroups();
-        void ungroup(int index)
+        bool ungroup(int index)
         {
             if (index >= 0 && index < mgroups.size())
             {
                 this->measurements.insert(this->measurements.end(),mgroups[index].measurements_p.begin(),mgroups[index].measurements_p.end());
                 mgroups.erase(mgroups.begin()+index);
+                return true;
             }
+            return false;
         }
         ///removes the group; add its measurements back to the vector
-        void ungroup(const mgroup_type* mgroup_pointer)
+        bool ungroup(const mgroup_type* mgroup_pointer)
         {
             int index = tools::vec::get_index_position_by_comparing_pointers(mgroups,mgroup_pointer);
             return ungroup(index);
@@ -281,7 +283,29 @@ public:
             }
             return c;
         }
+        bool is_grouped(const measurement_type* measurement)
+        {
+            if (mgroup_from_measurement(measurement) == nullptr)
+                return false;
+            return true;
+        }
+        mgroup_type* mgroup_from_measurement(const measurement_type* measurement)
+        {
+            if (measurement==nullptr)
+                return nullptr;
+            mgroup_type* g = nullptr;
+            for (auto& mgroup : mgroups)
+            {
+                for (auto& m : mgroup.measurements_p)
+                {
+                    if (&m == measurement)
+                        return &mgroup;
+                }
+            }
+            return nullptr;
+        }
     };
+
 
 private:
     sqlite3* sql = nullptr;

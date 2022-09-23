@@ -206,8 +206,8 @@ public:
         static string check_directory_string(string add_directory, string root_dir);
         static string check_directory_string(string add_directory);
         #ifdef __unix__ 
-        static int do_mkdir(const char *path, mode_t mode);
-        static int mkpath(string pfad, mode_t mode);
+        static int do_mkdir(const char *path, mode_t mode=0750);
+        static int mkpath(string pfad, mode_t mode=0750);
         #else
         static int mkpath(string pfad, int delme);  
         #endif

@@ -17,9 +17,9 @@
 */
 
 
-#include "plotwindow.h"
+#include "plotwindow_t.hpp"
 
-plotwindow::plotwindow(QWidget *parent) : QCustomPlot(parent)
+plotwindow_t::plotwindow_t(QWidget *parent) : QCustomPlot(parent)
 {
     setInteraction(QCP::iRangeDrag,true);
     setInteraction(QCP::iRangeZoom,true);
@@ -27,9 +27,11 @@ plotwindow::plotwindow(QWidget *parent) : QCustomPlot(parent)
     setSelectionRectMode(QCP::srmZoom);
 }
 
-void plotwindow::plot(const measurements_::sims_t &M)
+void plotwindow_t::plot(const measurements_::sims_t &M)
 {
+    /*testing*/
 
+    /****/
     clearGraphs();
     // create graph and assign data to it:
     addGraph();

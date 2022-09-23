@@ -181,10 +181,10 @@ void logger_t::use_case_t::log(std::string_view message_description, std::string
 //{
 //    log(message_description,message_details,verbosity_level);
 //}
-void logger_t::use_case_t::enter(unsigned int verbosity_level, std::string_view message_details)
-{
-    log("enter",message_details,verbosity_level);
-}
+//void logger_t::use_case_t::enter(unsigned int verbosity_level, std::string_view message_details)
+//{
+//    log("enter",message_details,verbosity_level);
+//}
 void logger_t::use_case_t::exit(unsigned int verbosity_level, std::string_view message_details)
 {
     log("exit",message_details,verbosity_level);
