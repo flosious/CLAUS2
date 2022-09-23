@@ -288,6 +288,22 @@ void MainWindow::on_measurements_treeView_customContextMenuRequested(const QPoin
 
 void MainWindow::on_mgroups_treeview_clicked(const QModelIndex &index)
 {
+    measurements_::sims_t* M = nullptr;
+
+    M = ui->mgroups_treeview->dsims_section.get_measurement_from_QIndex(index);
+    if (M!=nullptr)
+    {
+        ui->sims_plot_measurement_widget->update(M);
+        return;
+    }
+
+    M = ui->mgroups_treeview->tofsims_section.get_measurement_from_QIndex(index);
+    if (M!=nullptr)
+    {
+        ui->sims_plot_measurement_widget->update(M);
+        return;
+    }
+
     //get selected measurements_::sims_t *
 //    measurements_::sims_t* M = ui->mgroups_treeview->get_selected_sims_measurement();
 

@@ -225,15 +225,22 @@ private:
     public:
         static bool index_has_measurement(const QModelIndex& idx)
         {
-            if (idx.data(Qt::UserRole+1).isValid())
-                    return true;
-            return false;
+            //idx contains data at the correct position (UserRole+1) ?
+            if (!idx.data(Qt::UserRole+1).isValid())
+                    return false;
+            //idx data is correct type?
+            if (idx.data(Qt::UserRole+1).userType() != qMetaTypeId<measurement_t*>())
+                return false;
+            return true;
         }
         static bool index_has_mgroup(const QModelIndex& idx)
         {
-            if (idx.data(Qt::UserRole+2).isValid())
-                    return true;
-            return false;
+            if (!idx.data(Qt::UserRole+2).isValid())
+                    return false;
+            //idx data is correct type?
+            if (idx.data(Qt::UserRole+2).userType() != qMetaTypeId<mgroup_t*>())
+                return false;
+            return true;
         }
         static bool is_grouped_measurement(const QModelIndex& idx)
         {

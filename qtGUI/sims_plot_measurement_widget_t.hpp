@@ -22,6 +22,7 @@
 #include <QWidget>
 #include "ui_sims_plot_measurement_widget_t.h"
 #include "../src/measurement.hpp"
+#include "../src/log.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -39,6 +40,9 @@ public:
     void update(measurements_::sims_t* new_measurement);
 private:
     Ui::sims_plot_measurement_widget_t *ui;
+    class_logger_t logger;
 };
+
+extern Logger global_logger;
 
 #endif // SIMS_PLOT_MEASUREMENT_WIDGET_T_H
