@@ -22,20 +22,19 @@
 #define DEFINITIONS_T
 
 
-using namespace std;
 
 #include <string>
 // #include "filecontents.hpp"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
-    #define PATH_DELIMITER string("\\")
-    #define LINE_DELIMITER string("\r\n")
+    #define PATH_DELIMITER std::string("\\")
+    #define LINE_DELIMITER std::string("\r\n")
 #elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
-    #define PATH_DELIMITER string("/")
-    #define LINE_DELIMITER string("\n")
+    #define PATH_DELIMITER std::string("/")
+    #define LINE_DELIMITER std::string("\n")
 #endif
 
-#define FILE_TYPE_DELIMITER string(".")
+#define FILE_TYPE_DELIMITER std::string(".")
 
 // namespace 
 // {

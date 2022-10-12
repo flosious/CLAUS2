@@ -31,86 +31,83 @@
 
 
 
-
-using namespace std;
-
 /// this class is essentially just for debugging...
 class print {
 private:
     
 public:
-//     static void measurement(measurement_t* measurement, string prefix="");
-// 	static void id(identifier_t* id,string prefix="");
-// 	static void quantity(quantity::quantity_t* quantity, string prefix="");
-// 	static void cluster(cluster_t* cluster, string prefix="");
+//     static void measurement(measurement_t* measurement, std::string prefix="");
+// 	static void id(identifier_t* id,std::string prefix="");
+// 	static void quantity(quantity::quantity_t* quantity, std::string prefix="");
+// 	static void cluster(cluster_t* cluster, std::string prefix="");
 };
 
 template <typename T>
 void print(T ska) {
-    cout << "\t"<< ska; cout << endl;
+    std::cout << "\t"<< ska; std::cout << std::endl;
 }
 
 template <typename T>
-void print(vector<T> ska) {
+void print(std::vector<T> ska) {
 	for (int i=0; i<ska.size();i++) {
-		cout << "[" << i << "]";
+        std::cout << "[" << i << "]";
 		print(ska[i]);
 	}
 }
 
 template <typename T>
-void print(set<T> ska) {
+void print(std::set<T> ska) {
 	int i=0;
 	for (auto& s:ska)
 	{
-		cout << "[" << i << "]";
+        std::cout << "[" << i << "]";
 		print(s);
 		i++;
 	}
 }
 
 template <typename T>
-void print(vector< vector<T> > mat, string delimiter="\t") {
-	cout << endl;
+void print(std::vector< std::vector<T> > mat, std::string delimiter="\t") {
+    std::cout << std::endl;
 	for (int i=0;i<mat.size();i++) {
 		for (int j=0; j<(mat.at(i)).size();j++) {
-			cout << "[" << i << "]";
-			cout << "[" << j << "]";
-			cout << "\t";
+            std::cout << "[" << i << "]";
+            std::cout << "[" << j << "]";
+            std::cout << "\t";
 			print((mat)[i][j]);
 		}
-		cout << endl;
+        std::cout << std::endl;
 	}
 }
 
 template <typename T>
-void print_not_empty(vector< vector<T> > mat, string delimiter="\t") {
-	cout << endl;
+void print_not_empty(std::vector< std::vector<T> > mat, std::string delimiter="\t") {
+    std::cout << std::endl;
 	for (int i=0;i<mat.size();i++) {
 		for (int j=0; j<(mat.at(i)).size();j++) 
 		{
 			if(mat.at(i)[j]!="") 
 			{
-				cout << "[" << i << "]";
-				cout << "[" << j << "]";
-				cout << "\t";
+                std::cout << "[" << i << "]";
+                std::cout << "[" << j << "]";
+                std::cout << "\t";
 				print((mat)[i][j]);
 			}
 		}
-		cout << endl;
+        std::cout << std::endl;
 	}
 }
 
 template <typename T>
-void print(vector< vector< vector<T> > > ten) {
+void print(std::vector< std::vector< std::vector<T> > > ten) {
 	for (int z=0;z<ten.size();z++) {
 		for (int i=0;i<(ten.at(z)).size();i++) {
 			for (int j=0; j<(ten.at(z)[i]).size();j++) {
 //                 if ((ten)[z][i][j].size()>0) {
-				cout << "[" << z << "]";
-				cout << "[" << i << "]";
-				cout << "[" << j << "]";
-				cout << "\t";
+                std::cout << "[" << z << "]";
+                std::cout << "[" << i << "]";
+                std::cout << "[" << j << "]";
+                std::cout << "\t";
 				print((ten)[z][i][j]);
 //                 }
 			}
@@ -119,33 +116,33 @@ void print(vector< vector< vector<T> > > ten) {
 }
 
 template <typename T>
-void print(map<T, T>  mat) {
+void print(std::map<T, T>  mat) {
 	for (auto& it : mat) {
-		cout << it.first << "\t" << it.second << endl;
+        std::cout << it.first << "\t" << it.second << std::endl;
 //         print(it.second);
     }
 }
 
 // template <typename T>
-// void print(map<T, T>  mat) {
+// void print(std::map<T, T>  mat) {
 // 	for (auto& it : mat) {
-// 		cout << it.first << ":\n";
+// 		std::cout << it.first << ":\n";
 //         print(it.second);
 //     }
 // }
 
 
-// void print(map<string, quantity::quantity_t>  mat) {
+// void print(std::map<std::string, quantity::quantity_t>  mat) {
 // 	for (auto& it : mat) {
-//         if (it.second.data.size()==1) cout << it.first << " = " << it.second.data[0] << "[" << it.second.unit << "]";
+//         if (it.second.data.size()==1) std::cout << it.first << " = " << it.second.data[0] << "[" << it.second.unit << "]";
 // 		
 //         print(it.second);
 //     }
 // }
 
-// void print(map<string, vector<string>>  mat) {
-// 	for (map<string, vector<string>>::iterator it=mat.begin(); it!=mat.end(); ++it) {
-//         cout << it->first << ":\n";
+// void print(std::map<std::string, std::vector<std::string>>  mat) {
+// 	for (std::map<std::string, std::vector<std::string>>::iterator it=mat.begin(); it!=mat.end(); ++it) {
+//         std::cout << it->first << ":\n";
 //         print(it->second);
 //     }
 // }

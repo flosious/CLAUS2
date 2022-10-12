@@ -37,7 +37,7 @@ struct TIdxAndData
 	///The index of the vertex within the Data vector. 
 	int Idx;
 
-	///Vertex data value from the original Data vector sent as an argument to RunPersistence.
+	///Vertex data value from the original Data std::vector sent as an argument to RunPersistence.
 	double Data;
 };
 
@@ -61,13 +61,13 @@ struct TComponent
 	double MinValue; //redundant, but makes life easier
 
 	///Set to true when a component is created. Once components are merged,
-	///the destroyed component Alive value is set to false. 
+	///the destroyed component Alive value is std::set to false. 
 	///Used to verify correctness of algorithm.
 	bool Alive;
 };
 
 
-/** A pair of matched local minimum and local maximum
+/** A std::pair of matched local minimum and local maximum
 	that define a component above a certain persistence threshold.
 	The persistence value is their (absolute) data difference.
 */
@@ -115,11 +115,11 @@ public:
 	}
 			
 	/*!
-		Call this function with a vector of one dimensional data to find extrema features in the data.
+		Call this function with a std::vector of one dimensional data to find extrema features in the data.
 		The function runs once for, results can be retrieved with different persistent thresholds without
 		further data processing.		
 						
-		Input data vector is assumed to be of legal size and legal values.
+		Input data std::vector is assumed to be of legal size and legal values.
 		
 		Use PrintResults, GetPairedExtrema or GetExtremaIndices to get results of the function.
 
@@ -166,7 +166,7 @@ public:
 		Prints the global minimum and all paired extrema whose persistence is greater or equal to threshold. 
 		By default, all pairs are printed. Supports Matlab indexing.
 		
-		@param[in] threshold		Threshold value for pair persistence.
+		@param[in] threshold		Threshold value for std::pair persistence.
 		@param[in] matlabIndexing	Use Matlab indexing for printing.
 	*/	
 	void PrintResults(const double threshold = 0.0, const bool matlabIndexing = false) const
@@ -196,7 +196,7 @@ public:
 		Use this method to get the results of RunPersistence.
 		Returned pairs are sorted according to persistence, from least to most persistent. 
 		
-		@param[out]	pairs			Destination vector for PairedExtrema
+		@param[out]	pairs			Destination std::vector for PairedExtrema
 		@param[in]	threshold		Minimal persistence value of returned features. All PairedExtrema 
 									with persistence equal to or above this value will be returned. 
 									If left to default, all PairedMaxima will be returned.
@@ -355,25 +355,25 @@ protected:
 	/*!
 		Contains the Component assignment for each vertex in Data. 
 		Only edges of destroyed components are updated to the new component color.
-		The Component values in this vector are invalid at the end of the algorithm.
+		The Component values in this std::vector are invalid at the end of the algorithm.
 	*/
 	std::vector<int> Colors;		//need to init to empty
 
 
 	/*!
-		A vector of Components. 
-		The component index within the vector is used as its Colors in the Watershed function.
+		A std::vector of Components. 
+		The component index within the std::vector is used as its Colors in the Watershed function.
 	*/
 	std::vector<TComponent> Components;
 
 
 	/*!
-		A vector of paired extrema features - always a minimum and a maximum.
+		A std::vector of paired extrema features - always a minimum and a maximum.
 	*/
 	std::vector<TPairedExtrema> PairedExtrema;
 	
 		
-	unsigned int TotalComponents;	//keeps track of component vector size and newest component "color"
+	unsigned int TotalComponents;	//keeps track of component std::vector size and newest component "color"
 	bool AliveComponentsVerified;	//Index of global minimum in Data vector. This minimum is never paired.
 	
 	
@@ -497,7 +497,7 @@ protected:
 		comp.MinIndex = minIdx;
 		comp.MinValue = Data[minIdx];
 
-		//place at the end of component vector and get the current size
+		//place at the end of component std::vector and get the current size
 		if (Components.capacity() <= TotalComponents)
 		{	
 			Components.reserve(2 * TotalComponents + 1);
@@ -698,7 +698,7 @@ protected:
 
 	/*!
 		Returns an iterator to the first element in PairedExtrema whose persistence is bigger or equal to threshold. 
-		If threshold is set to 0, returns an iterator to the first object in PairedExtrema.
+		If threshold is std::set to 0, returns an iterator to the first object in PairedExtrema.
 		
 		@param[in]	threshold	Minimum persistence of features to be returned.		
 	*/

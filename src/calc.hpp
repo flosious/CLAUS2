@@ -91,7 +91,7 @@ public:
 			Crel_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner);
 			///from measurement->matrix->sample; always set
 			const quantity::substance_amount_t substance_amount(const isotope_t& iso) const;
-			///from measurement->matrix->sample; always set 
+			///from measurement->matrix->sample; always std::set 
 			const quantity::substance_amount_t substance_amount(const cluster_t& cluster) const;
 			///ratios of the elemental concentrations
 			const quantity::concentration_t from_sample_matrix_elements() const;
@@ -119,7 +119,7 @@ public:
 			const quantity::intensity_t from_clusters_trimmed_mean_ratios(float trim = 0.25) const;
 		}; //Irel_t
 		///all measurements, which should be used for these calculations
-		vector<measurements_::sims_t> measurements;
+		std::vector<measurements_::sims_t> measurements;
 		///the template for the different fit routines; all virtual functions must be overridden
 		class Crel_to_Irel_data_fit_routine_template : public cluster_relations_copies_t
 		{
@@ -131,16 +131,16 @@ public:
 // 			cluster_t nenner_p;
 			
 		public:
-// 			Crel_to_Irel_data_fit_routine_template(const cluster_t& zaehler, const cluster_t& nenner, const pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data);
+// 			Crel_to_Irel_data_fit_routine_template(const cluster_t& zaehler, const cluster_t& nenner, const std::pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data);
 			Crel_to_Irel_data_fit_routine_template(const cluster_t& zaehler, const cluster_t& nenner, const quantity::map_t& Crel_to_Irel_map);
 			virtual ~Crel_to_Irel_data_fit_routine_template();
 			quantity::map_t Crel_to_Irel_map;
-			string to_string() const;
+			std::string to_string() const;
 			///just the isotopes are saved without data
 // 			const cluster_t& zaehler() const;
 			///just the isotopes are saved without data
 // 			const cluster_t& nenner() const;
-// 			const pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
+// 			const std::pair<quantity::concentration_t,quantity::intensity_t> Crel_to_Irel_data;
 // 			const quantity::map_t& Crel_to_Irel_map() const;
 			virtual const quantity::concentration_t Crel(const quantity::intensity_t Irel) const;
 			virtual const quantity::concentration_t Crel(const measurements_::sims_t& measurement) const;
@@ -180,7 +180,7 @@ public:
 // 			const cluster_t& zaehler() const;
 			///just the isotopes are saved without data
 // 			const cluster_t& nenner() const;
-			const Crel_to_Irel_data_polynomial_fit_t polynom(const vector<unsigned int> polynom_rank, const vector<double> polynom_start_parameters) const;
+			const Crel_to_Irel_data_polynomial_fit_t polynom(const std::vector<unsigned int> polynom_rank, const std::vector<double> polynom_start_parameters) const;
 		}; // Crel_to_Irel_data_fits_t
 		
 		///collection of the relative concentrations and intensities of 2 clusters (zeahler & nenner) for all measurements
@@ -194,13 +194,13 @@ public:
 			private:
 // 				cluster_t zaehler;
 // 				cluster_t nenner;
-				static bool add_Crel_Irel_to_pair(pair<quantity::concentration_t,quantity::intensity_t>& Crel_to_Irel_pair, 
+				static bool add_Crel_Irel_to_pair(std::pair<quantity::concentration_t,quantity::intensity_t>& Crel_to_Irel_pair, 
 												  const quantity::concentration_t& Crel, const quantity::intensity_t& Irel);
 			public:
 				collect_Irels_t(const std::map< const quantity::concentration_t, const calc_t::sims_t::Irel_t >& Crel_data_to_Irels, const cluster_t& zaehler, const cluster_t& nenner);
 				const cluster_t& zaehler;
 				const cluster_t& nenner;
-				const map<const quantity::concentration_t, const calc_t::sims_t::Irel_t> Crel_data_to_Irels;
+				const std::map<const quantity::concentration_t, const calc_t::sims_t::Irel_t> Crel_data_to_Irels;
 				const Crel_to_Irel_data_fits_t Irel_from_median() const;
 				const Crel_to_Irel_data_fits_t Irel_from_mean() const;
 				///trim=0.25 discards the first and last 25% of SORTED data; checking all measurements
@@ -213,9 +213,9 @@ public:
 // 			cluster_t zaehler;
 // 			cluster_t nenner;
 		protected:
-			const vector<measurements_::sims_t>& measurements;
+			const std::vector<measurements_::sims_t>& measurements;
 		public:
-			Crel_to_Irel_data_collector_t(const cluster_t& zaehler, const cluster_t& nenner, const vector<measurements_::sims_t>& measurements);
+			Crel_to_Irel_data_collector_t(const cluster_t& zaehler, const cluster_t& nenner, const std::vector<measurements_::sims_t>& measurements);
 			const cluster_t& zaehler;
 			const cluster_t& nenner;
 			const collect_Irels_t elemental_Crel();
@@ -224,7 +224,7 @@ public:
 		
 		
 	public:
-		sims_t(const vector<measurements_::sims_t>& measurements);
+		sims_t(const std::vector<measurements_::sims_t>& measurements);
 		/// calculations following the principal: [E_1] / [E_2] = matrix_RSF * (E_1)/(E_2)
 		class matrix_t
 		{
@@ -236,27 +236,27 @@ public:
 			{
 			private:
                 class_logger_t logger;
-				set<cluster_t> clusters_p;
+				std::set<cluster_t> clusters_p;
 			public:
 				///
-				clusters_t(const set<cluster_t>& matrix_clusters);
-				clusters_t(const vector<cluster_t>& matrix_clusters);
+				clusters_t(const std::set<cluster_t>& matrix_clusters);
+				clusters_t(const std::vector<cluster_t>& matrix_clusters);
 				///checks if there are clusters with different isotopes, like "30Si1 29Si2";
 				///if true, calculation of concentration of unknown isotopes is not possible
 				bool has_mixed_isotopes_in_clusters() const;
 				///checks if there are clusters with different elements, like "30Si1 70Ge"; This is not supported
 				bool has_mixed_elements_in_clusters() const;
-				const set<cluster_t>& clusters() const;
-				const vector<isotope_t> isotopes() const;
+				const std::set<cluster_t>& clusters() const;
+				const std::vector<isotope_t> isotopes() const;
 				///in general there can be multiple clusters per element, e.g. 30Si2 and 28Si2 for Si
 // 				const cluster_t cluster(const element_t& ele) const;
 				const cluster_t cluster(const isotope_t& iso) const;
-				const vector<cluster_t> clusters(const element_t& ele) const;
-				const vector<cluster_t> clusters(const isotope_t& iso) const;
+				const std::vector<cluster_t> clusters(const element_t& ele) const;
+				const std::vector<cluster_t> clusters(const isotope_t& iso) const;
 				///checks if the cluster is a matrix cluster (is in clusters_p)
 				bool contains(const cluster_t& cluster) const;
 				///all elements in the matrix
-				vector<element_t> elements() const;
+				std::vector<element_t> elements() const;
 			}; // clusters_t
 			
 			///physical quantity mRSF (matrix RSF)
@@ -265,11 +265,11 @@ public:
             private:
                 class_logger_t logger;
 			public:
-				string to_string() const;
-// 				RSF_t(const cluster_relations_copies_t& cluster_relation,const vector<double>& data);
+				std::string to_string() const;
+// 				RSF_t(const cluster_relations_copies_t& cluster_relation,const std::vector<double>& data);
 				RSF_t(const cluster_t zaehler,const cluster_t nenner, double data_s, const quantity::abundance_t& abundance_ratio={});
 				///matrix RSFs are always relative!
-				RSF_t(const cluster_t zaehler,const cluster_t nenner, vector<double> data_s={}, const quantity::abundance_t& abundance_ratio={},unit_t unit_s=units::SI::one,dimension_t dim_s=quantity::dimensions::SI::relative);
+				RSF_t(const cluster_t zaehler,const cluster_t nenner, std::vector<double> data_s={}, const quantity::abundance_t& abundance_ratio={},unit_t unit_s=units::SI::one,dimension_t dim_s=quantity::dimensions::SI::relative);
 				///matrix RSFs are always relative!
 				RSF_t(const cluster_t zaehler,const cluster_t nenner, const quantity_t& quantity_s , const quantity::abundance_t& abundance_ratio={});
 				bool operator==(const RSF_t& obj) const;
@@ -288,33 +288,33 @@ public:
             private:
                 class_logger_t logger;
 			protected:
-				static bool sort_rel_chisqr_to_fits_by_chisqr(const pair<double,Crel_to_Irel_data_polynomial_fit_t>& P1, const pair<double,Crel_to_Irel_data_polynomial_fit_t>& P2);
+				static bool sort_rel_chisqr_to_fits_by_chisqr(const std::pair<double,Crel_to_Irel_data_polynomial_fit_t>& P1, const std::pair<double,Crel_to_Irel_data_polynomial_fit_t>& P2);
 				clusters_t matrix_clusters_p;
-				vector<RSF_t> RSFs_manually_set_p;
-				vector<Crel_to_Irel_data_polynomial_fit_t> Crel_to_Irel_lin_fits_p;
+				std::vector<RSF_t> RSFs_manually_set_p;
+				std::vector<Crel_to_Irel_data_polynomial_fit_t> Crel_to_Irel_lin_fits_p;
 			public:
 				///TODO adding 0 for n=0 lin fit
-				RSFs_t(const clusters_t& matrix_clusters, const vector<Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits={}, const vector<RSF_t>& RSFs={});
-				RSFs_t(const clusters_t& matrix_clusters, const vector<Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, const set<RSF_t>& RSFs);
+				RSFs_t(const clusters_t& matrix_clusters, const std::vector<Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits={}, const std::vector<RSF_t>& RSFs={});
+				RSFs_t(const clusters_t& matrix_clusters, const std::vector<Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, const std::set<RSF_t>& RSFs);
 				static RSF_t RSF(const Crel_to_Irel_data_polynomial_fit_t& Crel_to_Irel_lin_fit); 
-				///Prefers manually set RSF over fitted ones from Crel_to_Irel_lin_fits
+				///Prefers manually std::set RSF over fitted ones from Crel_to_Irel_lin_fits
 				RSF_t RSF(const cluster_t& zaehler, const cluster_t& nenner) const;
 				const clusters_t& matrix_clusters() const;
 				///all RSFs where nenner is the nenner
-				const vector<RSF_t> RSFs(const cluster_t& nenner) const;
+				const std::vector<RSF_t> RSFs(const cluster_t& nenner) const;
 // 				const clusters_t& matrix_clusters() const;
-				const vector<Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits() const;
-				const vector<RSF_t>& RSFs_manually_set() const;
-				const vector<RSF_t> RSFs_from_fits() const;
-				///prefers manually set RSFs over RSFs_from_fits
-				const vector<RSF_t> all_available_RSFs() const;
-				const vector<RSF_t> all_possible_RSFs() const;	///TODO ELMENTAL + ISOTOPICAL
-				const vector<RSF_t> unknown_RSFs() const;	///TODO ELMENTAL + ISOTOPICAL
+				const std::vector<Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits() const;
+				const std::vector<RSF_t>& RSFs_manually_set() const;
+				const std::vector<RSF_t> RSFs_from_fits() const;
+				///prefers manually std::set RSFs over RSFs_from_fits
+				const std::vector<RSF_t> all_available_RSFs() const;
+				const std::vector<RSF_t> all_possible_RSFs() const;	///TODO ELMENTAL + ISOTOPICAL
+				const std::vector<RSF_t> unknown_RSFs() const;	///TODO ELMENTAL + ISOTOPICAL
 				///calculates number of RSFs from number of clusters (#clusters^2 - #clusters)
 				unsigned int RSFs_count_from_clusters() const; ///TODO ELMENTAL + ISOTOPICAL
 				///discards RSFs which have no data, etc.
 				RSFs_t valid_RSFs_and_fits() const;
-				///removes Crel_to_Irel_fits, which are already set by (manually given) RSFs
+				///removes Crel_to_Irel_fits, which are already std::set by (manually given) RSFs
 				RSFs_t remove_Crel_to_Irel_fits_by_RSFs() const;
 				///RSF(Z,N) = 1 / RSF(N,Z)
 				RSF_t RSF_from_inverse(const cluster_t& zaehler, const cluster_t& nenner) const;
@@ -323,13 +323,13 @@ public:
 				///returns empty if worst fit can not be found, that means all fits are perfect or none are there
 				const Crel_to_Irel_data_polynomial_fit_t& RSF_with_worst_gof() const;
 				///returns the n worst fits
-				set<RSF_t> RSFs_with_worst_fit(int n=1) const;
+				std::set<RSF_t> RSFs_with_worst_fit(int n=1) const;
 				///removes particulary Crel_to_Irel_lin_fits with relative_chisqr > 0.1
 				RSFs_t remove_RSFs_above_relative_chisqr_treshold(float relativ_chisq=0.1) const;
 				///just returns the polynom fits with gof() >= gof_treshold
 				RSFs_t remove_RSFs_below_gof_treshold(float gof_treshold=0.5) const;
 				///removes the manual setted and fitted RSFs
-				RSFs_t remove_RSFs(const set<RSF_t>& rsfs_s) const;
+				RSFs_t remove_RSFs(const std::set<RSF_t>& rsfs_s) const;
 				RSFs_t remove_RSFs_with_worst_fit(int n=1) const;
 				///TODO:removes all data belonging to a certain measurement
 				RSFs_t remove_measurement(const measurements_::sims_t& measurement) const;
@@ -341,7 +341,7 @@ public:
 				///adds or replaces one RSF in the RSFs table
 				RSFs_t add_or_replace_RSF(const RSF_t& RSF) const;
 				///adds or replaces multiple RSFs in the RSFs table
-				RSFs_t add_or_replace_RSFs(const vector<RSF_t>& RSFs_s) const;
+				RSFs_t add_or_replace_RSFs(const std::vector<RSF_t>& RSFs_s) const;
 				///improves RSFs fits by increasing linearity of Crel_to_Irel_poly_fits, by removing outliners outside of a relative_chisqr;
 				RSFs_t improve_fits_by_removing_outliners(float gof_reshold=0.1) const;
 				///improves RSFs fits by increasing linearity of Crel_to_Irel_poly_fits, by removing outliners outside of a relative_chisqr;
@@ -364,7 +364,7 @@ public:
 				RSFs_t RSFs_p;
 				void set_natural_abundances_in_clusters();
 			public:
-// 				concentration_c(const set<RSF_t>& RSFs);
+// 				concentration_c(const std::set<RSF_t>& RSFs);
 				concentration_c(const RSFs_t& RSFs, const measurements_::sims_t& measurement);
 				///gets clusters from zaehler and nenner from RSFs
 // 				const clusters_t matrix_clusters() const;
@@ -391,36 +391,36 @@ public:
 			};
 		private:
 			static const clusters_t clusters_from_RSF(const RSF_t& RSF);
-			static const clusters_t clusters_from_RSFs(const vector<RSF_t>& RSFs);
-			static const clusters_t clusters_from_RSFs(const set<RSF_t>& RSFs);
-			vector<isotope_t> matrix_isotopes_p;
-			vector<measurements_::sims_t> measurements_p;
+			static const clusters_t clusters_from_RSFs(const std::vector<RSF_t>& RSFs);
+			static const clusters_t clusters_from_RSFs(const std::set<RSF_t>& RSFs);
+			std::vector<isotope_t> matrix_isotopes_p;
+			std::vector<measurements_::sims_t> measurements_p;
 			clusters_t matrix_clusters_p;
 			RSFs_t RSFs_p;
 			///used to populate matrix_clusters_p in ctor list
-			const set<cluster_t> matrix_clusters_from_matrix_isotopes() const;
+			const std::set<cluster_t> matrix_clusters_from_matrix_isotopes() const;
 		protected:
 			///dont use
-			const vector<Crel_to_Irel_data_polynomial_fit_t> elemental_Crel_to_median_Irel_linear_fitted() const;
+			const std::vector<Crel_to_Irel_data_polynomial_fit_t> elemental_Crel_to_median_Irel_linear_fitted() const;
 			///use this, because RSFs are for clusters, and those consist out of isotopes, not elements. So isotopes are the general case
-			const vector<Crel_to_Irel_data_polynomial_fit_t> isotopical_Crel_to_median_Irel_linear_fitted() const; //isotopical_Crel_to_median_Irel_linear_fitted
+			const std::vector<Crel_to_Irel_data_polynomial_fit_t> isotopical_Crel_to_median_Irel_linear_fitted() const; //isotopical_Crel_to_median_Irel_linear_fitted
 		public:
 			///create/get matrix RSFs from measurements and given RSFs; uses elemental_Crel_to_median_Irel_linear_fitted 
-			matrix_t(const vector<isotope_t>& matrix_isotopes, const vector<measurements_::sims_t>& measurements, const vector<RSF_t>& RSFs={});
-			matrix_t(const vector<isotope_t>& matrix_isotopes, const vector<RSF_t>& RSFs);
-			const vector<isotope_t>& matrix_isotopes() const;
+			matrix_t(const std::vector<isotope_t>& matrix_isotopes, const std::vector<measurements_::sims_t>& measurements, const std::vector<RSF_t>& RSFs={});
+			matrix_t(const std::vector<isotope_t>& matrix_isotopes, const std::vector<RSF_t>& RSFs);
+			const std::vector<isotope_t>& matrix_isotopes() const;
 			const clusters_t& matrix_clusters() const;
-			const vector<measurements_::sims_t>& measurements() const;
+			const std::vector<measurements_::sims_t>& measurements() const;
 			
 			///successfull fitted RSFs for all clusters and measurements; aka calibration curves
 			const RSFs_t& RSFs() const;
-// 			const vector<Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
+// 			const std::vector<Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
 			///successfull fitted RSF for all clusters and measurements; aka calibration curves
 // 			const Crel_to_Irel_data_polynomial_fit_t& Crel_to_Irel_poly_fits(const cluster_t& zaehler, const cluster_t& nenner);
 			///returns the concentration (at%) of the cluster within that measurement
 			quantity::concentration_t relative_elemental_concentration(const cluster_t& cluster, const measurements_::sims_t& measurement);
 			///returns a copy of the measurement with the successfull calculated concentrations (at%) of all clusters within that measurement
-			measurements_::sims_t relative_elemental_concentrations(const vector<cluster_t>& clusters, measurements_::sims_t measurement);
+			measurements_::sims_t relative_elemental_concentrations(const std::vector<cluster_t>& clusters, measurements_::sims_t measurement);
 			///returns a copy of the measurement with the successfull calculated concentrations (at%) of all clusters within that measurement
 			measurements_::sims_t relative_elemental_concentrations(measurements_::sims_t measurement);
 		}; //calc_t::sims_t::matrix_t

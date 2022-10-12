@@ -12,7 +12,7 @@ quantity::quantity_t::dimension_t quantity::quantity_t::get_dimension_from_unit(
 					   unit.base_units_exponents.candelas);
 }
 
-int quantity::quantity_t::get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec)
+int quantity::quantity_t::get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const std::vector<double>& monotonic_vec)
 {
 	for (int i=0;i<monotonic_vec.size();i++)
 	{
@@ -24,7 +24,7 @@ int quantity::quantity_t::get_value_index_position_in_strictly_monotonic_increas
 
 /*******************************/
 
-quantity::quantity_t::quantity_t(const quantity_t& quant,const unit_t& unit, string add_to_history) : 
+quantity::quantity_t::quantity_t(const quantity_t& quant,const unit_t& unit, std::string add_to_history) : 
 			quantity_t(quant.name(),quant.data(),unit,quant.dimension(),quant.operations_history(),add_to_history)
 {
 }
@@ -35,7 +35,7 @@ quantity::quantity_t::quantity_t() : name_s(""), data_s({}),dimension_s(dimensio
 {
 }
 
-quantity::quantity_t::quantity_t(const string& name,const vector<double>& data,const unit_t& unit) : 
+quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit) :
                                     name_s(name), data_s(data), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)),
                                     logger(global_logger,__FILE__,"quantity::quantity_t")
 {
@@ -46,7 +46,7 @@ quantity::quantity_t::quantity_t(const quantity::quantity_t& quant, const double
 {
 }
 
-quantity::quantity_t::quantity_t(const quantity::quantity_t& quant, const vector<double>& data, std::string add_to_history) : 
+quantity::quantity_t::quantity_t(const quantity::quantity_t& quant, const std::vector<double>& data, std::string add_to_history) : 
 	quantity_t(quant.name(),data,quant.unit(),quant.dimension(),quant.operations_history(),add_to_history)
 {
 }
@@ -56,19 +56,19 @@ quantity::quantity_t::quantity_t(const quantity::quantity_t& quant, const unit_t
 {
 }
 
-quantity::quantity_t::quantity_t(const string& name,const unit_t& unit, string add_to_history) :
+quantity::quantity_t::quantity_t(const std::string& name,const unit_t& unit, std::string add_to_history) :
     name_s(name), data_s({}), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)), operations_history_s({add_to_history}),
     logger(global_logger,__FILE__,"quantity::quantity_t")
 {
 }
 
-quantity::quantity_t::quantity_t(const string& name,const vector<double>& data,const unit_t& unit, const dimension_t& dimension, const vector<string>& operations_history,string add_to_history) : 
+quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit, const dimension_t& dimension, const std::vector<std::string>& operations_history,std::string add_to_history) :
     name_s(name), data_s(data), unit_s(unit), dimension_s(dimension), operations_history_s(tools::vec::add(operations_history,add_to_history)),
     logger(global_logger,__FILE__,"quantity::quantity_t")
 {
 }
 
-quantity::quantity_t::quantity_t(const string& name,const vector<double>& data,const unit_t& unit, const dimension_t& dimension) : 
+quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit, const dimension_t& dimension) :
     name_s(name), data_s(data), unit_s(unit), dimension_s(dimension),
     logger(global_logger,__FILE__,"quantity::quantity_t")
 {
@@ -79,17 +79,17 @@ bool quantity::quantity_t::is_relative() const
 	return dimension().is_relative();
 }
 
-const vector<double>& quantity::quantity_t::data() const
+const std::vector<double>& quantity::quantity_t::data() const
 {
 	return data_s;
 }
 
-const vector<string>& quantity::quantity_t::operations_history() const
+const std::vector<std::string>& quantity::quantity_t::operations_history() const
 {
 	return operations_history_s;
 }
 
-const string& quantity::quantity_t::name() const
+const std::string& quantity::quantity_t::name() const
 {
 	return name_s;
 }
@@ -104,9 +104,9 @@ const unit_t& quantity::quantity_t::unit() const
 }
 
 
-const vector<double> quantity::quantity_t::data_X_1D() const
+const std::vector<double> quantity::quantity_t::data_X_1D() const
 {
-	vector<double> X(data().size());
+	std::vector<double> X(data().size());
 	for (int x=0;x<X.size();x++)
 		X[x]=x;
 	return X;
@@ -138,7 +138,7 @@ quantity::quantity_t quantity::quantity_t::bspline_smoothing( unsigned int break
 	if (!has_data())
 		return {};
 	
-	stringstream ss;
+	std::stringstream ss;
 	ss << "BSpline" << spline_order<< "_smooth";
 	
 // 	operations_history_s.push_back(ss.str());
@@ -152,7 +152,7 @@ quantity::quantity_t quantity::quantity_t::bspline_smoothing(const quantity_t& X
 	if (!has_data() || !Xdata.has_data())
 		return {};
 	
-	stringstream ss;
+	std::stringstream ss;
 	ss << "BSpline" << spline_order<< "_smooth";
 	
 // 	operations_history_s.push_back(ss.str());
@@ -221,7 +221,7 @@ quantity::quantity_t quantity::quantity_t::fit_polynom_by_x_data(const quantity_
 	std::map<double,double> data_XY;
 	tools::vec::combine_vecs_to_map(&x_data.data_s,&data_s,&data_XY);
 	
-	stringstream ss;
+	std::stringstream ss;
 	ss << "poly" << polynom_grade << "_fit";
 // 	operations_history_s.push_back(ss.str());
 // 	data_s = polynom(polynom_grade).y_data(new_x_data_common_unit.data());
@@ -232,7 +232,7 @@ quantity::quantity_t quantity::quantity_t::fit_polynom_by_x_data(const quantity_
 
 quantity::quantity_t quantity::quantity_t::polyfit_derivative(unsigned int polynom_grade, unsigned int derivative) const
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "poly" << polynom_grade << "_derivative" << derivative<< "_fit";
 // 	operations_history_s.push_back(ss.str());
 // 	data_s = polynom(polynom_grade).derivative(derivative).y_data(data_X_1D());
@@ -247,14 +247,14 @@ fit_functions::polynom_t quantity::quantity_t::polynom(unsigned int polynom_grad
 
 quantity::quantity_t quantity::quantity_t::polyfit(unsigned int polynom_grade) const
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "poly" << polynom_grade << "_fit";
 	return {*this,polynom(polynom_grade).y_data(data_X_1D()),ss.str()};
 }
 
 quantity::quantity_t quantity::quantity_t::polyfit(const fit_functions::polynom_t& polynom) const
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << "poly" << polynom.degree() << "_fit";
     return {*this,polynom.y_data(data_X_1D()),ss.str()};
 }
@@ -276,7 +276,7 @@ quantity::quantity_t quantity::quantity_t::diff() const
 	if (!is_set() || data().size()==1) 
 		return {};
 
-	vector<double> diff_data(data().size());
+	std::vector<double> diff_data(data().size());
 	diff_data.at(0) = data_s.at(0) - 0;
 	for (int i=1;i<diff_data.size();i++)
 		diff_data.at(i)=data_s.at(i)-data_s.at(i-1);
@@ -302,10 +302,10 @@ quantity::quantity_t quantity::quantity_t::integrate_pbp(const quantity_t& x_dat
 // 	if (data.size()==1) // fall back to simple multiplication, but this will ignore correctness of unit and dimension --> do not use!
 // 		return *this * x_data;
 
-	stringstream n;
+	std::stringstream n;
 	n << "integral_pbp_" << "d(" << x_data.name() << ")";
 // 	operations_history_s.push_back(n.str());
-	vector<double> area_data(data().size());
+	std::vector<double> area_data(data().size());
 
 	double sum=0;
 	double dY,dX;
@@ -399,7 +399,7 @@ quantity::quantity_t quantity::quantity_t::x_at_max(const quantity_t& X) const
 	int idx=statistics::get_max_index_from_Y(data_s);
 	if (idx>=X.data().size())
 		return {};
-	stringstream ss;
+	std::stringstream ss;
 	ss << "x_at_max_idx(" << idx << ")";
 	double x_at_max_p = X.data().at(idx);
 // 	data_s = {x_at_max_p};
@@ -411,7 +411,7 @@ quantity::quantity_t quantity::quantity_t::get_data_within_limits(double lower_l
 {
 	if (!is_set())
 		return {};
-	vector<unsigned int> erase_pos;
+	std::vector<unsigned int> erase_pos;
 	for (int i=0;i<data().size();i++)
 	{
 		if (data_s.at(i)<lower_limit || data_s.at(i)>upper_limit)
@@ -430,7 +430,7 @@ quantity::quantity_t quantity::quantity_t::x_at_min(quantity_t& X) const
 	int idx=statistics::get_max_index_from_Y(data_s);
 	if (idx>=X.data().size())
 		return {};
-	stringstream ss;
+	std::stringstream ss;
 	ss << "x_at_min_idx(" << idx << ")";
 	double x_at_min_idx = X.data().at(idx);
 // 	data_s = {x_at_min_idx};
@@ -455,7 +455,7 @@ quantity::quantity_t quantity::quantity_t::quantile(double percentile) const
 	if (percentile>1 || percentile<0)
 		return {};
 	
-	stringstream n;
+	std::stringstream n;
 	n << "percentile" << percentile;
 // 	data_s = {statistics::get_quantile_from_Y(data(),percentile)};
 // 	operations_history_s.push_back(n.str());
@@ -500,7 +500,7 @@ quantity::quantity_t quantity::quantity_t::trimmed_mean(float alpha) const
 {
 	if (!is_set())
 		return {};
-	stringstream n;
+	std::stringstream n;
 	n << "trimmed" << alpha << "_mean"; 
 	return {*this,statistics::get_trimmed_mean_from_Y(data(),alpha),n.str()};
 }
@@ -509,7 +509,7 @@ quantity::quantity_t quantity::quantity_t::trimmed_median(float alpha) const
 {
 	if (!is_set())
 		return {};
-	stringstream n;
+	std::stringstream n;
 	int start = alpha * data().size();
 	int stop = (1-alpha) * data().size();
 	n << "trimmed" << alpha << "_median"; 
@@ -572,7 +572,7 @@ quantity::quantity_t quantity::quantity_t::moving_window_mad(int window_size) co
 	if (window_size==0) 
 		return {};
 
-	stringstream n;
+	std::stringstream n;
 	n << "mw" << window_size <<"_mad";
 // 	data_s = statistics::get_moving_window_MAD_from_Y(data(),window_size);
 // 	operations_history_s.push_back(n.str());
@@ -585,7 +585,7 @@ quantity::quantity_t quantity::quantity_t::reverse() const
 		return {};
 	
 	size_t size = data().size();
-	vector<double> rev_d(size);
+	std::vector<double> rev_d(size);
 	for (int i=0;i<size;i++)
 		rev_d.at(size-1-i) = data_s.at(i);
 // 	data_s = rev_d;
@@ -608,7 +608,7 @@ quantity::quantity_t quantity::quantity_t::moving_window_qqr(int window_size, do
 	if (window_size==0) 
 		return {};
 
-	stringstream n;
+	std::stringstream n;
 	n << "mw" << window_size <<"_qqr" << q;
 // 	data_s = statistics::get_moving_window_qqr_from_Y(data(),window_size,q);
 // 	operations_history_s.push_back(n.str());
@@ -624,7 +624,7 @@ quantity::quantity_t quantity::quantity_t::moving_window_max(int window_size) co
 	if (window_size==0) 
 		return {};
 
-	stringstream n;
+	std::stringstream n;
 	n << "mw" << window_size <<"_max";
 // 	data_s = statistics::get_moving_window_max_from_Y(data(),window_size);
 // 	operations_history_s.push_back(n.str());
@@ -640,7 +640,7 @@ quantity::quantity_t quantity::quantity_t::moving_window_min(int window_size) co
 	if (window_size==0) 
 		return {};
 
-	stringstream n;
+	std::stringstream n;
 	n << "mw" << window_size <<"_min";
 // 	data_s = statistics::get_moving_window_min_from_Y(data(),window_size);
 // 	operations_history_s.push_back(n.str());
@@ -655,7 +655,7 @@ quantity::quantity_t quantity::quantity_t::moving_window_sum(int window_size) co
 		window_size = 0.05*data().size();
 	if (window_size==0) 
 		return {};
-	stringstream n;
+	std::stringstream n;
 	n << "mw" << window_size <<"_sum";
 // 	data_s = statistics::get_moving_window_sum_from_Y(data(),window_size);
 // 	operations_history_s.push_back(n.str());
@@ -671,7 +671,7 @@ quantity::quantity_t quantity::quantity_t::moving_window_mean(int window_size) c
 		window_size = 0.05*data().size();
 	if (window_size==0) 
 		return {};
-	stringstream n;
+	std::stringstream n;
 	n << "mw" << window_size <<"_mean";
 // 	data_s = statistics::get_moving_window_mean_from_Y(data(),window_size);
 // 	operations_history_s.push_back(n.str());
@@ -686,7 +686,7 @@ quantity::quantity_t quantity::quantity_t::moving_window_median(int window_size)
 		window_size = 0.05*data().size();
 	if (window_size==0) 
 		return {};
-	stringstream n;
+	std::stringstream n;
 	n << "mw" << window_size <<"_median";
 // 	data_s = statistics::get_moving_window_median_from_Y(data(),window_size);
 // 	operations_history_s.push_back(n.str());
@@ -701,7 +701,7 @@ quantity::quantity_t quantity::quantity_t::moving_window_sd(int window_size) con
 		window_size = 0.05*data().size();
 	if (window_size==0) 
 		return {};
-	stringstream n;
+	std::stringstream n;
 	n << "mw" << window_size <<"_sd";
 // 	data_s = statistics::get_moving_window_sd_from_Y(data(),window_size);
 // 	operations_history_s.push_back(n.str());
@@ -723,7 +723,7 @@ quantity::quantity_t quantity::quantity_t::log10() const
 {
 	if (!is_set())
 		return {};
-	vector<double> data_log(data().size());
+	std::vector<double> data_log(data().size());
 	for (int i=0;i<data().size();i++)
 		data_log.at(i) = ::log10(data_s.at(i));
 // 	operations_history_s.push_back("log10");
@@ -824,7 +824,7 @@ quantity::quantity_t quantity::quantity_t::filter_impulse(int window_size, float
 	if (window_size==0) 
 		window_size=3;
 	
-	stringstream n;
+	std::stringstream n;
 	n << "impulse_filtered(" << window_size << "," << factor << ")";
 // 	operations_history_s.push_back(n.str());
 // 	data_s = {statistics::impulse_filter(data(),window_size,factor)};
@@ -842,7 +842,7 @@ quantity::quantity_t quantity::quantity_t::filter_gaussian(int window_size, doub
 	if (window_size==0) 
 		window_size=3;
 	
-	stringstream n;
+	std::stringstream n;
 	n << "impulse_filtered(" << window_size << "," << alpha << ")";
 // 	operations_history_s.push_back(n.str());
 // 	data_s = statistics::gaussian_filter(data(),window_size,alpha);
@@ -860,7 +860,7 @@ quantity::quantity_t quantity::quantity_t::filter_recursive_median(int window_si
 	if (window_size==0) 
 		window_size=3;
 	
-	stringstream n;
+	std::stringstream n;
 	n << "recursiveMedian_filtered(" << window_size<< ")";
 // 	operations_history_s.push_back(n.str());
 // 	data_s = statistics::recursive_median_filter(data(),window_size);
@@ -869,7 +869,7 @@ quantity::quantity_t quantity::quantity_t::filter_recursive_median(int window_si
 
 quantity::quantity_t quantity::quantity_t::remove_inf() const
 {
-	vector<unsigned int> remove_idx;
+	std::vector<unsigned int> remove_idx;
 	for (int i=0;i<data_s.size();i++)
 		if (isinf(data_s.at(i)))
 			remove_idx.push_back(i);
@@ -878,7 +878,7 @@ quantity::quantity_t quantity::quantity_t::remove_inf() const
 
 quantity::quantity_t quantity::quantity_t::remove_nan() const
 {
-	vector<unsigned int> remove_idx;
+	std::vector<unsigned int> remove_idx;
 	for (int i=0;i<data_s.size();i++)
 		if (isnan(data_s.at(i)))
 			remove_idx.push_back(i);
@@ -944,7 +944,7 @@ quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
 	double min = statistics::get_min_from_Y(data_s);
 	int new_size = floor((max-min)/new_res)+1;
 	
-	vector<double> new_data(new_size);
+	std::vector<double> new_data(new_size);
 	for (int i=0;i<new_size;i++)
 		new_data.at(i) = i*new_res + min;
 // 	data_s = new_data;
@@ -952,9 +952,9 @@ quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
 	return {*this,new_data,"resolutiion"};;
 }
 
-const string quantity::quantity_t::to_string_short() const
+const std::string quantity::quantity_t::to_string_short() const
 {
-	ostringstream out;
+	std::ostringstream out;
 	if (!is_set())
 		return "not set";
 	if (data().size()>1)
@@ -966,9 +966,9 @@ const string quantity::quantity_t::to_string_short() const
 	return out.str();
 }
 
-const string quantity::quantity_t::to_string() const
+const std::string quantity::quantity_t::to_string() const
 {
-	ostringstream out;
+	std::ostringstream out;
 	if (!is_set())
 		return "not set";
 	if (data().size()>1)
@@ -980,17 +980,17 @@ const string quantity::quantity_t::to_string() const
 	return out.str();
 }
 
-string quantity::quantity_t::operations_history_to_string() const
+std::string quantity::quantity_t::operations_history_to_string() const
 {
-	stringstream ss;
+	std::stringstream ss;
 	for (auto& op : operations_history())
 		ss << "->" << op;
 	return ss.str();
 }
 
-const string quantity::quantity_t::to_string_detailed() const
+const std::string quantity::quantity_t::to_string_detailed() const
 {
-	ostringstream out;
+	std::ostringstream out;
 	
 	if (data().size()>1)
 	{
@@ -1015,7 +1015,7 @@ const string quantity::quantity_t::to_string_detailed() const
 	return out.str();
 }
 
-quantity::quantity_t quantity::quantity_t::change_unit(string target_unit_string) const
+quantity::quantity_t quantity::quantity_t::change_unit(std::string target_unit_string) const
 {
 // 	if (!is_set())
 // 	{
@@ -1041,7 +1041,7 @@ quantity::quantity_t quantity::quantity_t::change_unit(const unit_t& target_unit
 	for (auto& d : data_c)
 		d *= factor ;
     //logger::debug(14,"quantity::quantity_t::change_unit","old: "+unit().to_string(),"new: " + target_unit.to_string(),"changed");
-	stringstream ss;
+	std::stringstream ss;
 	ss << "change_unit(" << target_unit.to_string() << ")";
 	return {name(),data_c,target_unit,dimension(),operations_history(),ss.str()};
 }
@@ -1050,7 +1050,7 @@ quantity::quantity_t quantity::quantity_t::invert() const
 {
 	if (!is_set()) 
 		return {};
-	vector<double> d_inv(data().size());
+	std::vector<double> d_inv(data().size());
 	for (int i=0;i<data().size();i++)
 	{
 		d_inv.at(i) = 1 / data_s.at(i);
@@ -1060,7 +1060,7 @@ quantity::quantity_t quantity::quantity_t::invert() const
 
 quantity::quantity_t quantity::quantity_t::remove_data_from_begin(unsigned int stop) const
 {
-// 	cout << "stop=" << stop << endl;
+// 	std::cout << "stop=" << stop << std::endl;
 	if (stop==0)
 		return *this;
 	if (stop==data().size())
@@ -1076,7 +1076,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_from_begin_rel(float stop
 
 quantity::quantity_t quantity::quantity_t::remove_data_equal_to(const quantity_t& Q) const
 {
-	set<unsigned int> rem_idx;
+	std::set<unsigned int> rem_idx;
 	auto q = Q.change_unit(unit());
 	if (!q.is_set())
 		return {};
@@ -1092,7 +1092,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_equal_to(const quantity_t
 }
 quantity::quantity_t quantity::quantity_t::remove_data_equal_to(double Q) const
 {
-	set<unsigned int> rem_idx;
+	std::set<unsigned int> rem_idx;
 		for (int i = 0; i < data().size(); i++)
 		{
 			if (Q== data().at(i))
@@ -1102,7 +1102,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_equal_to(double Q) const
 }
 quantity::quantity_t quantity::quantity_t::remove_data_bigger_than(double Q) const
 {
-	set<unsigned int> rem_idx;
+	std::set<unsigned int> rem_idx;
 		for (int i = 0; i < data().size(); i++)
 		{
 			if ( data().at(i) > Q)
@@ -1112,7 +1112,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_bigger_than(double Q) con
 }
 quantity::quantity_t quantity::quantity_t::remove_data_smaller_than(double Q) const
 {
-	set<unsigned int> rem_idx;
+	std::set<unsigned int> rem_idx;
 		for (int i = 0; i < data().size(); i++)
 		{
 			if (data().at(i) < Q)
@@ -1123,7 +1123,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_smaller_than(double Q) co
 
 quantity::quantity_t quantity::quantity_t::remove_data_bigger_than(const quantity_t& Q) const
 {
-	set<unsigned int> rem_idx;
+	std::set<unsigned int> rem_idx;
 	auto q = Q.change_unit(unit());
 	if (!q.is_set())
 		return {};
@@ -1139,7 +1139,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_bigger_than(const quantit
 }
 quantity::quantity_t quantity::quantity_t::remove_data_smaller_than(const quantity_t& Q) const
 {
-	set<unsigned int> rem_idx;
+	std::set<unsigned int> rem_idx;
 	auto q = Q.change_unit(unit());
 	if (!q.is_set())
 		return {};
@@ -1158,7 +1158,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_smaller_than(const quanti
 // {
 // // 	if (!remove_stop.is_set())
 // // 		return {};
-// // 	cout << remove_stop.change_unit(unit).to_string() << endl;
+// // 	std::cout << remove_stop.change_unit(unit).to_string() << std::endl;
 // 	return remove_data_from_begin(remove_stop.change_unit(unit()).data().front());
 // }
 
@@ -1169,7 +1169,7 @@ quantity::quantity_t quantity::quantity_t::pop_back() const
 	return remove_data_by_index({pos_last});
 }
 
-quantity::quantity_t quantity::quantity_t::remove_data_by_index(vector<unsigned int> remove_pos) const
+quantity::quantity_t quantity::quantity_t::remove_data_by_index(std::vector<unsigned int> remove_pos) const
 {
 	if (remove_pos.size()==0) 
 		return *this;
@@ -1178,7 +1178,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_by_index(vector<unsigned 
 // 	data_s = tools::vec::erase(data_s,remove_pos);
 // 	operations_history_s.push_back("remove_data_by_index");
     return {*this,tools::vec::erase_copy(data_s,remove_pos),"remove_data_by_index"};
-// 	vector<double> new_data(data().size()-remove_pos.size()); 
+// 	std::vector<double> new_data(data().size()-remove_pos.size()); 
 // 	int new_data_counter=0;
 // 	sort (remove_pos.begin(),remove_pos.end());
 // 	for (int i=0;i<data().size();i++)
@@ -1209,7 +1209,7 @@ quantity::quantity_t quantity::quantity_t::remove_data_by_index(unsigned int sta
 		stop=data().size();
 	}
 
-	vector<double> new_data(data().size() - (stop - start) );
+	std::vector<double> new_data(data().size() - (stop - start) );
 	int new_data_c = 0;
 	
 	for (int i=0;i<start;i++)
@@ -1217,18 +1217,18 @@ quantity::quantity_t quantity::quantity_t::remove_data_by_index(unsigned int sta
 		new_data.at(new_data_c) = data().at(i);
 		new_data_c++;
 	}
-// 	cout << endl << "start= " << start << endl;
-// 	cout << "stop= " << stop << endl;
-// 	cout << "data.size()= " << data().size() << endl;
-// 	cout << "new_data.size()= " << new_data.size() << endl;
-// 	cout << "new_data_c= " << new_data_c << endl;
+// 	std::cout << std::endl << "start= " << start << std::endl;
+// 	std::cout << "stop= " << stop << std::endl;
+// 	std::cout << "data.size()= " << data().size() << std::endl;
+// 	std::cout << "new_data.size()= " << new_data.size() << std::endl;
+// 	std::cout << "new_data_c= " << new_data_c << std::endl;
 	
 	for (int i=stop;i<data().size();i++)
 	{
 		new_data.at(new_data_c) = data().at(i);
 		new_data_c++;
 	}
-	stringstream ss;
+	std::stringstream ss;
 	ss << "remove_data_by_index(" << start << "," << stop << ")";
 // 	operations_history_s.push_back(ss.str());
 // 	data_s = new_data;
@@ -1249,10 +1249,10 @@ quantity::quantity_t quantity::quantity_t::get_data_by_index(unsigned int start,
 	if (stop>data_s.size())
 		stop=data_s.size();
 	
-	vector<double> new_data(data_s.begin()+start,data_s.begin()+stop);
+	std::vector<double> new_data(data_s.begin()+start,data_s.begin()+stop);
 // 	data_s = new_data;
 	
-	stringstream ss;
+	std::stringstream ss;
 	ss << "get_data_by_index(" << start << "," << stop << ")";
 // 	operations_history_s.push_back(ss.str());
 	
@@ -1280,7 +1280,7 @@ quantity::quantity_t quantity::quantity_t::absolute() const
 // 	if (!is_set()) 
 // 		return {};
 // 
-// 	vector<double> summe(0,data().size());
+// 	std::vector<double> summe(0,data().size());
 // 	for (int i=1;i<summe.size();i++)
 // 		summe.at(i) = data_s.at(i);
 // }
@@ -1491,7 +1491,7 @@ quantity::quantity_t quantity::quantity_t::operator* (quantity_t quantity) const
 	{
 		multipier = quantity.data_s.front();
 		quantity::quantity_t Q(*this * multipier,unit_s * quantity.unit_s,dimension_s * quantity.dimension_s);
-// 		cout << "operator* : " << Q.to_string_detailed() << endl;
+// 		std::cout << "operator* : " << Q.to_string_detailed() << std::endl;
 		return Q;
 	}
 	else if (data().size()==1)
@@ -1515,7 +1515,7 @@ quantity::quantity_t quantity::quantity_t::operator* (quantity_t quantity) const
 // 			data_s.at(i) *= quantity.data_s.at(i);
 			quantity.data_s.at(i) *= data_s.at(i);
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << name() << "*" << quantity.name();
 		return {ss.str(),quantity.data_s,unit()*quantity.unit(),dimension()*quantity.dimension(),operations_history()};
 	}
@@ -1550,7 +1550,7 @@ quantity::quantity_t quantity::quantity_t::operator/ (quantity_t quantity_p) con
 // 
 // 	}
 	quantity_t Q(*this * quantity_p.invert());
-// 	cout << "operator/ : " << Q.to_string_detailed() << endl;
+// 	std::cout << "operator/ : " << Q.to_string_detailed() << std::endl;
 	return Q;
 }
 
@@ -1569,13 +1569,13 @@ void quantity::quantity_t::operator+=(quantity_t quantity_p)
 	*this = *this + quantity_p;
 }
 
-vector<int> quantity::quantity_t::bin_data(const int bins_count) const
+std::vector<int> quantity::quantity_t::bin_data(const int bins_count) const
 {
 	if (data().size()==0 || bins_count == 0 || bins_count > data().size())
 		return {};
 	auto MIN = data().at(statistics::get_min_index_from_Y(data()));
 	auto MAX = data().at(statistics::get_max_index_from_Y(data()))*1.01; // make it a little bit bigger, so every data fits in
-	vector<double> bins(bins_count);
+	std::vector<double> bins(bins_count);
 	double bins_size = (MAX-MIN)/bins_count;
 	for (int i=0;i<bins_count;i++)
 	{
@@ -1584,9 +1584,9 @@ vector<int> quantity::quantity_t::bin_data(const int bins_count) const
 	return bin_data(bins);
 }
 
-vector<int> quantity::quantity_t::bin_data(const vector<double>& bins) const
+std::vector<int> quantity::quantity_t::bin_data(const std::vector<double>& bins) const
 {
-	vector<int> count_number_in_bins(bins.size()-1,0);
+	std::vector<int> count_number_in_bins(bins.size()-1,0);
 	for (auto d:data() )
 	{
 		for (int i=0;i<bins.size()-1;i++)
@@ -1599,69 +1599,69 @@ vector<int> quantity::quantity_t::bin_data(const vector<double>& bins) const
 }
 
 /*********************/
-quantity::mass_t::mass_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("mass",data_s,unit_s,dim_s) {}
+quantity::mass_t::mass_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("mass",data_s,unit_s,dim_s) {}
 quantity::mass_t::mass_t(const quantity_t& quantity_s) : mass_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::abundance_t::abundance_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("abundance",data_s,unit_s,dim_s){}
+quantity::abundance_t::abundance_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("abundance",data_s,unit_s,dim_s){}
 quantity::abundance_t::abundance_t(const quantity_t& quantity_s) : abundance_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::energy_t::energy_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("energy",data_s,unit_s,dim_s){}
+quantity::energy_t::energy_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("energy",data_s,unit_s,dim_s){}
 quantity::energy_t::energy_t(const quantity_t& quantity_s) : energy_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::rastersize_t::rastersize_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t( "rastersize",data_s,unit_s,dim_s){}
+quantity::rastersize_t::rastersize_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t( "rastersize",data_s,unit_s,dim_s){}
 quantity::rastersize_t::rastersize_t(const quantity_t& quantity_s) : rastersize_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::depth_t::depth_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("depth",data_s,unit_s,dim_s){}
+quantity::depth_t::depth_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("depth",data_s,unit_s,dim_s){}
 quantity::depth_t::depth_t(const quantity_t& quantity_s) : depth_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::sputter_depth_t::sputter_depth_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_depth",data_s,unit_s,dim_s){}
+quantity::sputter_depth_t::sputter_depth_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_depth",data_s,unit_s,dim_s){}
 quantity::sputter_depth_t::sputter_depth_t(const quantity_t& quantity_s) : sputter_depth_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::total_sputter_depth_t::total_sputter_depth_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("total_sputter_depth",data_s,unit_s,dim_s){}
+quantity::total_sputter_depth_t::total_sputter_depth_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("total_sputter_depth",data_s,unit_s,dim_s){}
 quantity::total_sputter_depth_t::total_sputter_depth_t(const quantity_t& quantity_s) : total_sputter_depth_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::sputter_time_t::sputter_time_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_time",data_s,unit_s,dim_s){}
+quantity::sputter_time_t::sputter_time_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_time",data_s,unit_s,dim_s){}
 quantity::sputter_time_t::sputter_time_t(const quantity_t& quantity_s) : sputter_time_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::total_sputter_time_t::total_sputter_time_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("total_sputter_time",data_s,unit_s,dim_s){}
+quantity::total_sputter_time_t::total_sputter_time_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("total_sputter_time",data_s,unit_s,dim_s){}
 quantity::total_sputter_time_t::total_sputter_time_t(const quantity_t& quantity_s) : total_sputter_time_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::intensity_t::intensity_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("intensity",data_s,unit_s,dim_s){}
+quantity::intensity_t::intensity_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("intensity",data_s,unit_s,dim_s){}
 quantity::intensity_t::intensity_t(const quantity_t& quantity_s) : intensity_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::current_t::current_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("current",data_s,unit_s,dim_s){}
+quantity::current_t::current_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("current",data_s,unit_s,dim_s){}
 quantity::current_t::current_t(const quantity_t& quantity_s) : current_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::sputter_current_t::sputter_current_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_current_t",data_s,unit_s,dim_s){}
+quantity::sputter_current_t::sputter_current_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_current_t",data_s,unit_s,dim_s){}
 quantity::sputter_current_t::sputter_current_t(const quantity_t& quantity_s) : sputter_current_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::analysis_current_t::analysis_current_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("primary_analysis_current",data_s,unit_s,dim_s){}
+quantity::analysis_current_t::analysis_current_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("primary_analysis_current",data_s,unit_s,dim_s){}
 quantity::analysis_current_t::analysis_current_t(const quantity_t& quantity_s) : analysis_current_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::concentration_t::concentration_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("concentration",data_s,unit_s,dim_s){}
+quantity::concentration_t::concentration_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("concentration",data_s,unit_s,dim_s){}
 quantity::concentration_t::concentration_t(const quantity_t& quantity_s) : concentration_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::dose_t::dose_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("dose",data_s,unit_s,dim_s){}
+quantity::dose_t::dose_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("dose",data_s,unit_s,dim_s){}
 quantity::dose_t::dose_t(const quantity_t& quantity_s) : dose_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::SF_t::SF_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sensitivity_factor",data_s,unit_s,dim_s){}
+quantity::SF_t::SF_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sensitivity_factor",data_s,unit_s,dim_s){}
 quantity::SF_t::SF_t(const quantity_t& quantity_s) : SF_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 ///difficult to define: there are at least 2 very different definitions I know of ..
-// quantity::RSF_t::RSF_t(vector<double> data_s,unit_t unit_s) : quantity_t("relative_sensitivity_factor",data_s,unit_s){}
+// quantity::RSF_t::RSF_t(std::vector<double> data_s,unit_t unit_s) : quantity_t("relative_sensitivity_factor",data_s,unit_s){}
 // quantity::RSF_t::RSF_t(quantity_t quantity_s) : RSF_t(quantity_s.data(),quantity_s.unit()) {}
 
-quantity::SR_t::SR_t(vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_rate",data_s,unit_s,dim_s){}
+quantity::SR_t::SR_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_rate",data_s,unit_s,dim_s){}
 quantity::SR_t::SR_t(const quantity_t& quantity_s) : SR_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 ///dim ML2T-3I-1
-quantity::secondary_voltage_t::secondary_voltage_t(vector<double> data_s, unit_t unit_s, dimension_t dim_s) : quantity_t("secondary_voltage",data_s,unit_s,dim_s) {}
+quantity::secondary_voltage_t::secondary_voltage_t(std::vector<double> data_s, unit_t unit_s, dimension_t dim_s) : quantity_t("secondary_voltage",data_s,unit_s,dim_s) {}
 quantity::secondary_voltage_t::secondary_voltage_t(const quantity_t& quantity_s) : secondary_voltage_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::substance_amount_t::substance_amount_t(vector<double> data_s, unit_t unit_s,dimension_t dim_s) : quantity_t("substance_amount",data_s,unit_s,dim_s) {}
+quantity::substance_amount_t::substance_amount_t(std::vector<double> data_s, unit_t unit_s,dimension_t dim_s) : quantity_t("substance_amount",data_s,unit_s,dim_s) {}
 quantity::substance_amount_t::substance_amount_t(const quantity_t& quantity_s) : substance_amount_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::electrical_charge_t::electrical_charge_t(vector<double> data_s, unit_t unit_s, dimension_t dim_s) : quantity_t("electrical_charge",data_s,unit_s,dim_s) {}
+quantity::electrical_charge_t::electrical_charge_t(std::vector<double> data_s, unit_t unit_s, dimension_t dim_s) : quantity_t("electrical_charge",data_s,unit_s,dim_s) {}
 quantity::electrical_charge_t::electrical_charge_t(const quantity_t& quantity_s) : electrical_charge_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 

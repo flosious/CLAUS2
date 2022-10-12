@@ -1,41 +1,41 @@
 #include "tools.hpp"
 
-// static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
+// static size_t WriteCallback(void *contents,std:: size_t size,std:: size_t nmemb,std:: void *userp)
 // {
-//     ((std::string*)userp)->append((char*)contents, size * nmemb);
-//     return size * nmemb;
+// std:: ((std::string*)userp)->append((char*)contents,std:: size * nmemb);
+// std:: return size * nmemb;
 // }
 // 
 // 
-// string tools::web::get_contents(string url) 
+// std::string tools::web::get_contents(std::string url) 
 // {
-// 	string contents;
-//   	const char * site = url.c_str();
-//  	CURL *curl;
+// 	std::string contents;
+// std:: 	const char * site = url.c_str();
+// std:: 	CURL *curl;
 // 	CURLcode res;
-// // 	string buffer;
+// // 	std::string buffer;
 // 	curl = curl_easy_init();
 // 	if (curl) {
 // 		curl_easy_setopt(curl,CURLOPT_URL,site);
 // 		// Tell libcurl what function to call when it has data
-//         	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteCallback); 
-// 		/* example.com is redirected, so we tell libcurl to follow redirection */ 
-//    		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-// 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
+// std:: 	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteCallback); 
+// 		/* example.com is redirected,std:: so we tell libcurl to follow redirection */ 
+// std:: 		curl_easy_setopt(curl,std:: CURLOPT_FOLLOWLOCATION,std:: 1L);
+// 		curl_easy_setopt(curl,std:: CURLOPT_WRITEDATA,std:: &contents);
 // 		
-// 		/* Perform the request, res will get the return code */ 
-//     		res = curl_easy_perform(curl);
+// 		/* Perform the request,std:: res will get the return code */ 
+// std:: 		res = curl_easy_perform(curl);
 // 		/* always cleanup */ 
-//     		curl_easy_cleanup(curl);
-//     		/* Check for errors */ 
-//     		if(res != CURLE_OK)	{
-// 			cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << endl; // 
-// 			cout << "Curl not OK" << endl;
+// std:: 		curl_easy_cleanup(curl);
+// std:: 		/* Check for errors */ 
+// std:: 		if(res != CURLE_OK)	{
+// 			cerr std::<std::< "curl_easy_perform() failed: " std::<std::< curl_easy_strerror(res) std::<std::< std::endl; // 
+// 			cout std::<std::< "Curl not OK" std::<std::< std::endl;
 // 			return "";
 // 		}
 // 	}
 // 	else {
-// 	  	cout << "curl_easy_init() failed\n" << endl;
+// 	std:: 	cout std::<std::< "curl_easy_init() failed\n" std::<std::< std::endl;
 // 		return "";
 // 	}
 // 	return contents; 

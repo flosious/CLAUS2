@@ -25,7 +25,7 @@
 // 	 */
 // }
 // 
-// // mgroups_::pbp_t::pbp_t(vector<measurements_::sims_t>& Ms)
+// // mgroups_::pbp_t::pbp_t(std::vector<measurements_::sims_t>& Ms)
 // // {
 // // 	measurements_s = Ms; // save a copy
 // // 	/*do not apply any calculation here.
@@ -33,11 +33,11 @@
 // // 	 */
 // // }
 // 
-// vector<measurements_::sims_t*> mgroups_::sims_t::pbp_t::measurements()
+// std::vector<measurements_::sims_t*> mgroups_::sims_t::pbp_t::measurements()
 // {
 // 	if (measurements_s.size()==0)
 // 		return {};
-// 	vector<measurements_::sims_t*> Ms(measurements_s.size());
+// 	std::vector<measurements_::sims_t*> Ms(measurements_s.size());
 // 	for (int i=0;i<Ms.size();i++)
 // 		Ms.at(i)=&measurements_s.at(i);
 // 	return Ms;

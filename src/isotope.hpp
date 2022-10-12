@@ -30,9 +30,6 @@
 
 
 
-using namespace std;
-
-
 
 class isotope_t
 {
@@ -41,18 +38,18 @@ private:
 public:
 	isotope_t();
 	///nucleons_s=-1 -> isotope with highest natural abundance
-	isotope_t(string symbol_s, int nucleons_s, double abundance_s=-1, double amount_s=1);
-	isotope_t(string str, double abundance_s=-1, double amount_s=1);
+    isotope_t(std::string symbol_s, int nucleons_s, double abundance_s=-1, double amount_s=1);
+	isotope_t(std::string str, double abundance_s=-1, double amount_s=1);
 	const quantity::mass_t mass() const;
-	const string symbol_alternative() const;
+	const std::string symbol_alternative() const;
 	///isotopical signature; isotopenverhältnis; Häufigkeit eines Isotopes eines Elements
 	quantity::abundance_t abundance;
 	quantity::substance_amount_t substance_amount;
-	void set_natural_abundance_from_PSE();
+    void set_natural_abundance_from_PSE();
 	int nucleons;
-	string symbol;
-	const string to_string(const string del=" ") const;
-	const string to_string_short() const;
+	std::string symbol;
+	const std::string to_string(const std::string del=" ") const;
+	const std::string to_string_short() const;
 	bool is_set() const;
 	///NOT checking abundance or substance_amount
 	const bool operator==(const isotope_t& obj) const;

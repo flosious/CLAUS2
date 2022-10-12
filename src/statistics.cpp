@@ -57,7 +57,7 @@ void statistics::test()
 // 		i=0;
 // 	for (double xi = 0.0; xi <= 15.0; xi += 0.1)
     {
-// 		cout << "A" << endl;
+// 		std::cout << "A" << std::endl;
       double sigma;
 //       double xi = (15.0 / (N - 1)) * i;
 	  double xi = TT*i;
@@ -75,7 +75,7 @@ void statistics::test()
       printf("%f %f\n", xi, yi);
     }
     /************************/
-	vector<double> Xin, Yin;
+	std::vector<double> Xin, Yin;
 	Xin = get_gsl_vec(x);
 	Yin = get_gsl_vec(y);
 	/************************/
@@ -87,7 +87,7 @@ void statistics::test()
   for (i = 0; i < n; ++i)
     {
       double xi = gsl_vector_get(x, i);
-// 		cout << i << endl;
+// 		std::cout << i << std::endl;
       /* compute B_j(xi) for all j */
       gsl_bspline_eval(xi, B, bw);
 
@@ -98,10 +98,10 @@ void statistics::test()
           gsl_matrix_set(X, i, j, Bj);
         }
     }
-// 	cout << "fit inc" << endl;
+// 	std::cout << "fit inc" << std::endl;
   /* do the fit */
   gsl_multifit_wlinear(X, w, y, c, cov, &chisq, mw);
-// 	cout << "fit done" << endl;
+// 	std::cout << "fit done" << std::endl;
   dof = n - ncoeffs;
   tss = gsl_stats_wtss(w->data, 1, y->data, 1, y->size);
   Rsq = 1.0 - chisq / tss;
@@ -114,8 +114,8 @@ void statistics::test()
   
   
   /* output the smoothed curve */
-  vector<double> Yfitted;
-  vector<double> Xfitted;
+  std::vector<double> Yfitted;
+  std::vector<double> Xfitted;
     double xi, yi, yerr;
 
 //     for (xi = 0.0; xi < 15.0; xi += 0.1)
@@ -134,7 +134,7 @@ void statistics::test()
 // 	plot.Y2.range(-1.2,1.2,false);
 // 	plot.Y1.add_curve(Xin,Yin);
 // 	plot.Y2.add_curve(Xfitted,Yfitted);
-// 	cout << "Yin.size()=" << Yin.size() << "\t" << "Yfitted.size()=" << Yfitted.size() << endl;
+// 	std::cout << "Yin.size()=" << Yin.size() << "\t" << "Yfitted.size()=" << Yfitted.size() << std::endl;
 // 	plot.to_screen("",0);
 	
   gsl_rng_free(r);
@@ -150,11 +150,11 @@ void statistics::test()
 
 }
 
-bool statistics::get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx, const vector<double>& Y, double treshold)
+bool statistics::get_extrema_indices(std::vector<int>& maxIdx, std::vector<int>& minIdx, const std::vector<double>& Y, double treshold)
 {
-	vector<int> local_extrema;
+	std::vector<int> local_extrema;
 	
-// 	vector<float> data(Y.size());
+// 	std::vector<float> data(Y.size());
 // 	for (int i=0;i<Y.size();i++)
 // 		Y[i]=Y[i];
 	
@@ -163,7 +163,7 @@ bool statistics::get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx, c
     p.RunPersistence(Y);
 	
 	//Get all extrema with a persistence larger than 10.
-    vector< p1d::TPairedExtrema > Extrema;
+    std::vector< p1d::TPairedExtrema > Extrema;
     if (treshold < 0) treshold =  get_mad_from_Y(Y);
 	if (!p.GetPairedExtrema(Extrema, treshold)) return false;
 	
@@ -177,7 +177,7 @@ bool statistics::get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx, c
 	
 	int i=0;
 	int s = minIdx.size();
-	for(vector< p1d::TPairedExtrema >::iterator it = Extrema.begin(); it != Extrema.end(); it++)
+	for(std::vector< p1d::TPairedExtrema >::iterator it = Extrema.begin(); it != Extrema.end(); it++)
 	{
 		i++;
 		minIdx[s-i]=(*it).MinIndex;
@@ -185,24 +185,24 @@ bool statistics::get_extrema_indices(vector<int>& maxIdx, vector<int>& minIdx, c
 	}
 	
 	 //Print all found pairs - pairs are sorted ascending wrt. persistence.
-//     for(vector< p1d::TPairedExtrema >::iterator it = Extrema.begin(); it != Extrema.end(); it++)
+//     for(std::vector< p1d::TPairedExtrema >::iterator it = Extrema.begin(); it != Extrema.end(); it++)
 //     {
-//         cout << "Persistence: " << (*it).Persistence
-// 			 << endl
+//         std::cout << "Persistence: " << (*it).Persistence
+// 			 << std::endl
 //              << " minimum index: " << (*it).MinIndex << "\tvalue = " << Y[(*it).MinIndex]
-//              << endl 
+//              << std::endl 
 //              << " maximum index: " << (*it).MaxIndex << "\tvalue = " << Y[(*it).MaxIndex]
 //              << std::endl;
 //     }
 	
     //Also, print the global minimum.
-//     cout << "Global minimum index: " << p.GetGlobalMinimumIndex()
-//          << " Global minimum value: " << p.GetGlobalMinimumValue() << endl;
+//     std::cout << "Global minimum index: " << p.GetGlobalMinimumIndex()
+//          << " Global minimum value: " << p.GetGlobalMinimumValue() << std::endl;
 		 
 	return true;
 }
 
-int statistics::get_index_for_next_value_within_treshold(vector<double> Y, double treshold_bottom, double treshold_top, int start, int ende)
+int statistics::get_index_for_next_value_within_treshold(std::vector<double> Y, double treshold_bottom, double treshold_top, int start, int ende)
 {
 	if (ende==0) ende=Y.size();
 	int index=0;
@@ -216,7 +216,7 @@ int statistics::get_index_for_next_value_within_treshold(vector<double> Y, doubl
 }
 
 
-int statistics::get_index_for_next_value_lower_than_treshold(vector<double> Y,double treshold, int start, int ende)
+int statistics::get_index_for_next_value_lower_than_treshold(std::vector<double> Y,double treshold, int start, int ende)
 {
 	if (ende==0) ende=Y.size();
 	int index=0;
@@ -228,7 +228,7 @@ int statistics::get_index_for_next_value_lower_than_treshold(vector<double> Y,do
 	return index;
 }
 
-int statistics::get_index_for_next_value_higher_than_treshold(vector<double> Y,double treshold, int start, int ende)
+int statistics::get_index_for_next_value_higher_than_treshold(std::vector<double> Y,double treshold, int start, int ende)
 {
 	if (ende==0) ende=Y.size();
 	int index=0;
@@ -240,11 +240,11 @@ int statistics::get_index_for_next_value_higher_than_treshold(vector<double> Y,d
 	return index;
 }
 
-vector<int> statistics::get_local_maxima_indices_by_triangulation(vector<double> Y, double treshold, int stepsize)
+std::vector<int> statistics::get_local_maxima_indices_by_triangulation(std::vector<double> Y, double treshold, int stepsize)
 {
 	if (Y.size()<3*stepsize) return {};
-	vector<int> local_max_indices;
-    vector<double> Y_max;
+	std::vector<int> local_max_indices;
+    std::vector<double> Y_max;
 	for (int x=2*stepsize;x<Y.size();x=x+stepsize)
 	{
 		if (Y[x-stepsize]>Y[x-2*stepsize]+treshold && Y[x-stepsize]>Y[x]+treshold) local_max_indices.push_back(x-stepsize);
@@ -252,11 +252,11 @@ vector<int> statistics::get_local_maxima_indices_by_triangulation(vector<double>
 	return local_max_indices;
 }
 
-vector<int> statistics::get_local_minima_indices_by_triangulation(vector<double> Y, double treshold, int stepsize)
+std::vector<int> statistics::get_local_minima_indices_by_triangulation(std::vector<double> Y, double treshold, int stepsize)
 {
 	if (Y.size()<3*stepsize) return {};
-	vector<int> local_min_indices;
-    vector<double> Y_max;
+	std::vector<int> local_min_indices;
+    std::vector<double> Y_max;
 	for (int x=3*stepsize;x<Y.size();x=x+stepsize)
 	{
 		if (Y[x-stepsize]<Y[x-2*stepsize]-treshold && Y[x-stepsize]<Y[x]-treshold) local_min_indices.push_back(x-stepsize);
@@ -264,9 +264,9 @@ vector<int> statistics::get_local_minima_indices_by_triangulation(vector<double>
 	return local_min_indices;
 }
 
-vector<int> statistics::get_local_maxima_indices(vector<double> Y, double treshold, int stepsize) {
-    vector<int> local_max_indices;
-    vector<double> Y_max;
+std::vector<int> statistics::get_local_maxima_indices(std::vector<double> Y, double treshold, int stepsize) {
+    std::vector<int> local_max_indices;
+    std::vector<double> Y_max;
     int Y_max_start_i;
     
     if (treshold==-1) treshold=statistics::get_median_from_Y(Y)+1.5*statistics::get_mad_from_Y(Y);
@@ -286,9 +286,9 @@ vector<int> statistics::get_local_maxima_indices(vector<double> Y, double tresho
     return local_max_indices;
 }
 
-vector<int> statistics::get_local_minima_indices_new(vector<double> Y, double Y_tolerance, int x_stepsize)
+std::vector<int> statistics::get_local_minima_indices_new(std::vector<double> Y, double Y_tolerance, int x_stepsize)
 {
-	vector<int> local_minima_indices;
+	std::vector<int> local_minima_indices;
 	if (Y.size()==0) return local_minima_indices;
 	
 // 	bool last_max=false;
@@ -310,9 +310,9 @@ vector<int> statistics::get_local_minima_indices_new(vector<double> Y, double Y_
 	return local_minima_indices;
 }
 
-vector<int> statistics::get_local_minima_indices(vector<double> Y, double treshold, int stepsize) {
-    vector<int> local_min_indices;
-    vector<double> Y_min;
+std::vector<int> statistics::get_local_minima_indices(std::vector<double> Y, double treshold, int stepsize) {
+    std::vector<int> local_min_indices;
+    std::vector<double> Y_min;
     int Y_min_start_i;
     
     if (treshold==-1) treshold=statistics::get_median_from_Y(Y)-1.5*statistics::get_mad_from_Y(Y);
@@ -332,16 +332,16 @@ vector<int> statistics::get_local_minima_indices(vector<double> Y, double tresho
     return local_min_indices;
 }
 
-vector<double> statistics::get_elements_higher_than_threshold(vector<double> Y, double treshold) {
-    vector<double> Y_res;
+std::vector<double> statistics::get_elements_higher_than_threshold(std::vector<double> Y, double treshold) {
+    std::vector<double> Y_res;
     for (int i=0;i<Y.size();i++) { 
         if (Y[i]>treshold) Y_res.push_back(Y[i]);
     }
     return Y_res;
 }
 
-vector<int> statistics::get_elements_higher_than_threshold(vector<int> Y, int treshold) {
-    vector<int> Y_res;
+std::vector<int> statistics::get_elements_higher_than_threshold(std::vector<int> Y, int treshold) {
+    std::vector<int> Y_res;
     for (int i=0;i<Y.size();i++) { 
         if (Y[i]>treshold) Y_res.push_back(Y[i]);
     }
@@ -349,46 +349,46 @@ vector<int> statistics::get_elements_higher_than_threshold(vector<int> Y, int tr
 }
 
 
-vector<double> statistics::get_elements_lower_than_threshold(vector<double> Y, double treshold) {
-    vector<double> Y_res;
+std::vector<double> statistics::get_elements_lower_than_threshold(std::vector<double> Y, double treshold) {
+    std::vector<double> Y_res;
     for (int i=0;i<Y.size();i++) {
         if (Y[i]<treshold) Y_res.push_back(Y[i]);
     }
     return Y_res;
 }
-vector<int> statistics::get_elements_lower_than_threshold(vector<int> Y, int treshold) {
-    vector<int> Y_res;
+std::vector<int> statistics::get_elements_lower_than_threshold(std::vector<int> Y, int treshold) {
+    std::vector<int> Y_res;
     for (int i=0;i<Y.size();i++) {
         if (Y[i]<treshold) Y_res.push_back(Y[i]);
     }
     return Y_res;
 }
 
-vector<double> statistics::normalize_to_max(vector<double> Y) {
+std::vector<double> statistics::normalize_to_max(std::vector<double> Y) {
     double max_index = get_max_index_from_Y(Y);
     for (int i=0;i<Y.size();i++) Y[i]=Y[i]/Y[max_index];
     return Y;
 }
 
-vector<double> statistics::normalize_to_median(vector<double> Y) {
+std::vector<double> statistics::normalize_to_median(std::vector<double> Y) {
     double median = get_median_from_Y(Y);
     for (int i=0;i<Y.size();i++) Y[i]=Y[i]/median;
     return Y;
 }
 
-vector<double> statistics::normalize_to_mean(vector<double> Y) {
+std::vector<double> statistics::normalize_to_mean(std::vector<double> Y) {
     double mean = get_mean_from_Y(Y);
     for (int i=0;i<Y.size();i++) Y[i]=Y[i]/mean;
     return Y;
 }
 
-vector<double> statistics::recursive_median_filter(vector<double> Y, int window_size) {
-    vector<double> Y_filtered;
+std::vector<double> statistics::recursive_median_filter(std::vector<double> Y, int window_size) {
+    std::vector<double> Y_filtered;
     
     const size_t N = Y.size();                        /* length of time series */
     const size_t K = window_size;                         /* window size */
-    gsl_vector *x = gsl_vector_alloc(N);         /* input vector */
-    gsl_vector *y = gsl_vector_alloc(N);        /* filtered output vector for alpha1 */
+    gsl_vector *x = gsl_vector_alloc(N);         /* input std::vector */
+    gsl_vector *y = gsl_vector_alloc(N);        /* filtered output std::vector for alpha1 */
     gsl_filter_rmedian_workspace  *w = gsl_filter_rmedian_alloc(K);
 
 //     statistics::std_vec_to_gsl_vec(&Y,&x);
@@ -405,13 +405,13 @@ vector<double> statistics::recursive_median_filter(vector<double> Y, int window_
     return Y_filtered;
 }
 
-vector<double> statistics::impulse_filter(vector<double> Y, int window_size, float scale_factor) {
-    vector<double> Y_filtered;                                   /* result vector */
+std::vector<double> statistics::impulse_filter(std::vector<double> Y, int window_size, float scale_factor) {
+    std::vector<double> Y_filtered;                                   /* result std::vector */
     const size_t N = Y.size();                               /* length of time series */
     const size_t K = window_size;                                 /* window size */
     const double t = scale_factor;                                /* number of scale factors for outlier detection */
-    gsl_vector *x = gsl_vector_alloc(N);                 /* input vector */
-    gsl_vector *y = gsl_vector_alloc(N);                 /* output (filtered) vector */
+    gsl_vector *x = gsl_vector_alloc(N);                 /* input std::vector */
+    gsl_vector *y = gsl_vector_alloc(N);                 /* output (filtered) std::vector */
     gsl_vector *xmedian = gsl_vector_alloc(N);           /* window medians */
     gsl_vector *xsigma = gsl_vector_alloc(N);            /* window scale estimates */
     gsl_vector_int *ioutlier = gsl_vector_int_alloc(N);  /* outlier detected? */
@@ -439,13 +439,13 @@ vector<double> statistics::impulse_filter(vector<double> Y, int window_size, flo
     return Y_filtered;
 }
 
-vector<double> statistics::gaussian_filter(vector<double> Y, int window_size, double alpha) {
-    vector<double> Y_filtered;
+std::vector<double> statistics::gaussian_filter(std::vector<double> Y, int window_size, double alpha) {
+    std::vector<double> Y_filtered;
     
     const size_t N = Y.size();                        /* length of time series */
     const size_t K = window_size;                         /* window size */
-    gsl_vector *x = gsl_vector_alloc(N);         /* input vector */
-    gsl_vector *y = gsl_vector_alloc(N);        /* filtered output vector for alpha1 */
+    gsl_vector *x = gsl_vector_alloc(N);         /* input std::vector */
+    gsl_vector *y = gsl_vector_alloc(N);        /* filtered output std::vector for alpha1 */
     gsl_vector *k1 = gsl_vector_alloc(K);        /* Gaussian kernel for alpha1 */
     gsl_rng *r = gsl_rng_alloc(gsl_rng_default);
     gsl_filter_gaussian_workspace *gauss_p = gsl_filter_gaussian_alloc(K);
@@ -468,7 +468,7 @@ vector<double> statistics::gaussian_filter(vector<double> Y, int window_size, do
     return Y_filtered;
 }
 
-int statistics::get_next_min_index(vector<double> Y, int skip_points) {
+int statistics::get_next_min_index(std::vector<double> Y, int skip_points) {
     int index=0;
     double min=Y[index];
     for (int i=skip_points;i<Y.size();i=i+1+skip_points) {
@@ -479,7 +479,7 @@ int statistics::get_next_min_index(vector<double> Y, int skip_points) {
     return index;
 }
 
-int statistics::get_next_max_index(vector<double> Y, int skip_points) {
+int statistics::get_next_max_index(std::vector<double> Y, int skip_points) {
     int index=0;
     double max=Y[index];
     for (int i=skip_points;i<Y.size();i=i+1+skip_points) {
@@ -490,7 +490,7 @@ int statistics::get_next_max_index(vector<double> Y, int skip_points) {
     return index;
 }
 
-double statistics::get_next_min(vector<double> Y, int skip_points) {
+double statistics::get_next_min(std::vector<double> Y, int skip_points) {
     double min=Y[0];
     for (int i=1;i<Y.size();i=i+1+skip_points) {
         if (Y[i] < min) min=Y[i];
@@ -499,7 +499,7 @@ double statistics::get_next_min(vector<double> Y, int skip_points) {
     return min;
 }
 
-double statistics::get_next_max(vector<double> Y,int skip_points) {
+double statistics::get_next_max(std::vector<double> Y,int skip_points) {
     double max=Y[0];
     for (int i=1;i<Y.size();i=i+1+skip_points) {
         if (Y[i] > max) max=Y[i];
@@ -509,14 +509,14 @@ double statistics::get_next_max(vector<double> Y,int skip_points) {
 }
 
 /*
-vector<vector<double>> statistics::get_local_minima_XY(vector<double> X, vector<double> Y) {
+std::vector<std::vector<double>> statistics::get_local_minima_XY(std::vector<double> X, std::vector<double> Y) {
     
-    vector<vector<double>> minima;
+    std::vector<std::vector<double>> minima;
 	return minima;
 }
 */
 
-bool statistics::std_mat_to_gsl_vec(vector<vector<double>> *std_mat, gsl_vector ** vec, int col) {
+bool statistics::std_mat_to_gsl_vec(std::vector<std::vector<double>> *std_mat, gsl_vector ** vec, int col) {
     *vec = gsl_vector_alloc(std_mat->size());
     for (size_t i=0;i<std_mat->size();i++) {
         if (col>=std_mat->at(i).size()) {
@@ -527,28 +527,28 @@ bool statistics::std_mat_to_gsl_vec(vector<vector<double>> *std_mat, gsl_vector 
     return true;
 }
 
-bool statistics::std_vec_to_gsl_vec(vector<double> *std_vec, gsl_vector ** vec) {
+bool statistics::std_vec_to_gsl_vec(std::vector<double> *std_vec, gsl_vector ** vec) {
     *vec = gsl_vector_alloc(std_vec->size());
     for (size_t i=0;i<std_vec->size();i++)gsl_vector_set (*vec, i, std_vec->at(i));
     return true;
 }
-bool statistics::std_vec_to_gsl_vec(const vector<double>& std_vec, gsl_vector ** vec) {
+bool statistics::std_vec_to_gsl_vec(const std::vector<double>& std_vec, gsl_vector ** vec) {
     *vec = gsl_vector_alloc(std_vec.size());
     for (size_t i=0;i<std_vec.size();i++)gsl_vector_set (*vec, i, std_vec.at(i));
     return true;
 }
 
 
-vector<double> statistics::gsl_vec_to_std_vec(gsl_vector ** vec) {
-    vector<double> Y;
+std::vector<double> statistics::gsl_vec_to_std_vec(gsl_vector ** vec) {
+    std::vector<double> Y;
     for (int i=0;i<(*vec)->size;i++) Y.push_back((*vec)->data[i]);
 //     gsl_vector_free(vec);
     return Y;
 }
 
 
-vector<double> statistics::interpolate_dataXY_to_X(vector<vector<double>>& data_XY, vector<double>& X) {
-    vector<double> Y;
+std::vector<double> statistics::interpolate_dataXY_to_X(std::vector<std::vector<double>>& data_XY, std::vector<double>& X) {
+    std::vector<double> Y;
     int N = data_XY.size();
     gsl_interp_accel *acc = gsl_interp_accel_alloc ();
     const gsl_interp_type *t = gsl_interp_cspline_periodic;
@@ -571,15 +571,15 @@ vector<double> statistics::interpolate_dataXY_to_X(vector<vector<double>>& data_
 /*
  * 1st derivative (numerical)
  */
-vector<double> statistics::derive_vec(vector<double> X, vector<double> Y) {
-    vector<double> d_Y(Y.size());
+std::vector<double> statistics::derive_vec(std::vector<double> X, std::vector<double> Y) {
+    std::vector<double> d_Y(Y.size());
     for (int i=1;i<X.size();i++) {
         d_Y[i]=(Y[i]-Y[i-1])/(X[i]-X[i-1]);
     }
     return d_Y;
 }
 
-int statistics::get_index_from_upper_limit_in_vec(vector<double> vec, double upper_limit) {
+int statistics::get_index_from_upper_limit_in_vec(std::vector<double> vec, double upper_limit) {
     int erg=0;
     for (int i=0;i<vec.size();i++) {
         if (vec[i]>upper_limit) {
@@ -590,18 +590,18 @@ int statistics::get_index_from_upper_limit_in_vec(vector<double> vec, double upp
     return erg;
 }
 
-vector<vector<double>> statistics::truncate_mat_by_limit_in_col(vector<vector<double>> *data_XY, double limit, int col) {
-    vector<vector<double>> result_XY;
+std::vector<std::vector<double>> statistics::truncate_mat_by_limit_in_col(std::vector<std::vector<double>> *data_XY, double limit, int col) {
+    std::vector<std::vector<double>> result_XY;
     //1st sort matrix by col?
     for (int i=0;i<data_XY->size();i++) {
         if (data_XY->at(i)[col] > limit) result_XY.push_back(data_XY->at(i));
     }
-//     cout << "limit = " << limit << "\tresult_XY.size()" << result_XY.size() << endl;
+//     std::cout << "limit = " << limit << "\tresult_XY.size()" << result_XY.size() << std::endl;
     return result_XY;
 }
 
-vector<vector<double>> statistics::get_moving_window_statistics_on_dataX_YY(vector<vector<double>> *data_X_YY, int window_size, int column) {
-    vector<vector<double>> mat_results;
+std::vector<std::vector<double>> statistics::get_moving_window_statistics_on_dataX_YY(std::vector<std::vector<double>> *data_X_YY, int window_size, int column) {
+    std::vector<std::vector<double>> mat_results;
     if (window_size<2) window_size=10;
     if (column>=data_X_YY->at(0).size()) return mat_results;
     
@@ -662,9 +662,9 @@ vector<vector<double>> statistics::get_moving_window_statistics_on_dataX_YY(vect
     return mat_results;
 }
 
-vector<vector<double>> statistics::get_moving_window_statistics_from_Y(vector<double> *Y, int window_size) {
+std::vector<std::vector<double>> statistics::get_moving_window_statistics_from_Y(std::vector<double> *Y, int window_size) {
     
-    vector<vector<double>> mat_results;
+    std::vector<std::vector<double>> mat_results;
     if (window_size<2) window_size=10;
     mat_results=tools::mat::transpose_matrix_double({*Y});
     int N=Y->size();
@@ -726,7 +726,7 @@ vector<vector<double>> statistics::get_moving_window_statistics_from_Y(vector<do
     return mat_results;
 }
 
-vector<double> statistics::get_moving_window_function(const vector<double>& Y, int window_size, statistics::functiontype function, const gsl_movstat_end_t gsl_movstat_end)
+std::vector<double> statistics::get_moving_window_function(const std::vector<double>& Y, int window_size, statistics::functiontype function, const gsl_movstat_end_t gsl_movstat_end)
 {
 	if (window_size<2) window_size=10;
     
@@ -736,7 +736,7 @@ vector<double> statistics::get_moving_window_function(const vector<double>& Y, i
     gsl_vector *results = gsl_vector_alloc(N);
     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
     function(gsl_movstat_end, x, results, w);
-	vector<double> results_vec(N);
+	std::vector<double> results_vec(N);
     for (int j=0;j<N;j++) {
         results_vec.at(j)=(results->data[j]);   
     }
@@ -747,7 +747,7 @@ vector<double> statistics::get_moving_window_function(const vector<double>& Y, i
 }
 
 
-vector<double> statistics::get_moving_window_qqr_from_Y(const vector<double>& Y, int window_size, double q)
+std::vector<double> statistics::get_moving_window_qqr_from_Y(const std::vector<double>& Y, int window_size, double q)
 {
 	if (window_size<2) window_size=10;
     
@@ -758,7 +758,7 @@ vector<double> statistics::get_moving_window_qqr_from_Y(const vector<double>& Y,
     gsl_vector *results = gsl_vector_alloc(N);
     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
     gsl_movstat_qqr(GSL_MOVSTAT_END_TRUNCATE, x, q , results, w);
-	vector<double> sum(N);
+	std::vector<double> sum(N);
     for (int j=0;j<N;j++) {
         sum.at(j)=(results->data[j]);   
     }
@@ -768,7 +768,7 @@ vector<double> statistics::get_moving_window_qqr_from_Y(const vector<double>& Y,
     return sum;
 }
 
-vector<double> statistics::get_moving_window_min_from_Y(const vector<double>& Y, int window_size)
+std::vector<double> statistics::get_moving_window_min_from_Y(const std::vector<double>& Y, int window_size)
 {
 // 	if (window_size<2) window_size=10;
 //     
@@ -778,7 +778,7 @@ vector<double> statistics::get_moving_window_min_from_Y(const vector<double>& Y,
 //     gsl_vector *results = gsl_vector_alloc(N);
 //     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
 //     gsl_movstat_min(GSL_MOVSTAT_END_TRUNCATE, x, results, w);
-// 	vector<double> sum(N);
+// 	std::vector<double> sum(N);
 //     for (int j=0;j<N;j++) {
 //         sum.at(j)=(results->data[j]);   
 //     }
@@ -789,7 +789,7 @@ vector<double> statistics::get_moving_window_min_from_Y(const vector<double>& Y,
 	return get_moving_window_function(Y,window_size,gsl_movstat_min);
 }
 
-vector<double> statistics::get_moving_window_max_from_Y(const vector<double>& Y, int window_size)
+std::vector<double> statistics::get_moving_window_max_from_Y(const std::vector<double>& Y, int window_size)
 {
 // 	if (window_size<2) window_size=10;
 //     
@@ -799,7 +799,7 @@ vector<double> statistics::get_moving_window_max_from_Y(const vector<double>& Y,
 //     gsl_vector *results = gsl_vector_alloc(N);
 //     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
 //     gsl_movstat_max(GSL_MOVSTAT_END_TRUNCATE, x, results, w);
-// 	vector<double> sum(N);
+// 	std::vector<double> sum(N);
 //     for (int j=0;j<N;j++) {
 //         sum.at(j)=(results->data[j]);   
 //     }
@@ -810,7 +810,7 @@ vector<double> statistics::get_moving_window_max_from_Y(const vector<double>& Y,
 	return get_moving_window_function(Y,window_size,gsl_movstat_max);
 }
 
-vector<double> statistics::get_moving_window_sum_from_Y(const vector<double>& Y, int window_size)
+std::vector<double> statistics::get_moving_window_sum_from_Y(const std::vector<double>& Y, int window_size)
 {
 // 	if (window_size<2) window_size=10;
 //     
@@ -820,7 +820,7 @@ vector<double> statistics::get_moving_window_sum_from_Y(const vector<double>& Y,
 //     gsl_vector *results = gsl_vector_alloc(N);
 //     gsl_movstat_workspace * w = gsl_movstat_alloc(window_size);
 //     gsl_movstat_sum(GSL_MOVSTAT_END_TRUNCATE, x, results, w);
-// 	vector<double> sum(N);
+// 	std::vector<double> sum(N);
 //     for (int j=0;j<N;j++) {
 //         sum.at(j)=(results->data[j]);   
 //     }
@@ -833,9 +833,9 @@ vector<double> statistics::get_moving_window_sum_from_Y(const vector<double>& Y,
 
 
 
-vector<double> statistics::get_moving_window_mean_from_Y(const vector<double>& Y, int window_size) {
+std::vector<double> statistics::get_moving_window_mean_from_Y(const std::vector<double>& Y, int window_size) {
 //     if (window_size<2) window_size=10;
-//     vector<double> sd;
+//     std::vector<double> sd;
 //     int N=Y.size();
 //     gsl_vector *x = gsl_vector_alloc(N);
 //     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
@@ -852,9 +852,9 @@ vector<double> statistics::get_moving_window_mean_from_Y(const vector<double>& Y
 	return get_moving_window_function(Y,window_size,gsl_movstat_mean);
 }
 
-vector<double> statistics::get_moving_window_median_from_Y(const vector<double>& Y, int window_size) {
+std::vector<double> statistics::get_moving_window_median_from_Y(const std::vector<double>& Y, int window_size) {
 //     if (window_size<2) window_size=10;
-//     vector<double> sd;
+//     std::vector<double> sd;
 //     int N=Y.size();
 //     gsl_vector *x = gsl_vector_alloc(N);
 //     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
@@ -871,9 +871,9 @@ vector<double> statistics::get_moving_window_median_from_Y(const vector<double>&
 	return get_moving_window_function(Y,window_size,gsl_movstat_median);
 }
 
-vector<double> statistics::get_moving_window_MAD_from_Y(const vector<double>& Y, int window_size) {
+std::vector<double> statistics::get_moving_window_MAD_from_Y(const std::vector<double>& Y, int window_size) {
     if (window_size<2) window_size=10;
-    vector<double> sd;
+    std::vector<double> sd;
     int N=Y.size();
     gsl_vector *x = gsl_vector_alloc(N);
     for (size_t i=0;i<Y.size();i++) gsl_vector_set (x, i, Y.at(i));
@@ -891,9 +891,9 @@ vector<double> statistics::get_moving_window_MAD_from_Y(const vector<double>& Y,
     return sd;
 }
 
-vector<double> statistics::get_moving_window_sd_from_Y(const vector<double>& Y, int window_size) {
+std::vector<double> statistics::get_moving_window_sd_from_Y(const std::vector<double>& Y, int window_size) {
 //     if (window_size<2) window_size=10;
-//     vector<double> sd;
+//     std::vector<double> sd;
 //     int N=Y.size();
 //     gsl_vector *x = gsl_vector_alloc(N);
 // //     statistics::std_vec_to_gsl_vec(&Y,&x);
@@ -911,7 +911,7 @@ vector<double> statistics::get_moving_window_sd_from_Y(const vector<double>& Y, 
 	return get_moving_window_function(Y,window_size,gsl_movstat_sd);
 }
 
-// int statistics::get_moving_window_max_index_from_Y(vector<double> Y, int window_size) {
+// int statistics::get_moving_window_max_index_from_Y(std::vector<double> Y, int window_size) {
 //     int max_pos;
 //     int N=Y.size();
 //     gsl_vector *x = gsl_vector_alloc(N);
@@ -924,7 +924,7 @@ vector<double> statistics::get_moving_window_sd_from_Y(const vector<double>& Y, 
 //     return max_pos;
 // }
 
-double statistics::get_correlation_from_dataXY(vector<vector<double>> *data_XY1, vector<vector<double>> *data_XY2) {
+double statistics::get_correlation_from_dataXY(std::vector<std::vector<double>> *data_XY1, std::vector<std::vector<double>> *data_XY2) {
     gsl_vector *vec1, *vec2;
     statistics::std_mat_to_gsl_vec(data_XY1,&vec1,1);
     statistics::std_mat_to_gsl_vec(data_XY2,&vec2,1);    
@@ -934,7 +934,7 @@ double statistics::get_correlation_from_dataXY(vector<vector<double>> *data_XY1,
     return corr;
 }
 
-double statistics::get_correlation_Y1_Y2(const vector<double>& Y1, const vector<double>& Y2) 
+double statistics::get_correlation_Y1_Y2(const std::vector<double>& Y1, const std::vector<double>& Y2) 
 {
     gsl_vector *vec1, *vec2;
 	statistics::std_vec_to_gsl_vec(Y1,&vec1);
@@ -945,9 +945,9 @@ double statistics::get_correlation_Y1_Y2(const vector<double>& Y1, const vector<
     return corr;
 }
 
-vector<double> statistics::get_minmax_from_dataXY_tensor(vector<vector<vector<double>>> dataXY_tensor) {
-    vector<double> max_values_of_all_colls;
-    vector<vector<double>> mat, mat_transposed;
+std::vector<double> statistics::get_minmax_from_dataXY_tensor(std::vector<std::vector<std::vector<double>>> dataXY_tensor) {
+    std::vector<double> max_values_of_all_colls;
+    std::vector<std::vector<double>> mat, mat_transposed;
     mat=dataXY_tensor.at(0);
     for (int i=1;i<dataXY_tensor.size();i++) {
         mat.insert(mat.end(),dataXY_tensor.at(i).begin(),dataXY_tensor.at(i).end());
@@ -965,7 +965,7 @@ vector<double> statistics::get_minmax_from_dataXY_tensor(vector<vector<vector<do
     return max_values_of_all_colls;
 }
 
-int statistics::get_max_index_from_Y(vector<double> Y) {
+int statistics::get_max_index_from_Y(std::vector<double> Y) {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
 //     statistics::std_vec_to_gsl_vec(&Y,&vec);
     for (size_t i=0;i<Y.size();i++)gsl_vector_set (vec, i, Y.at(i));
@@ -974,7 +974,7 @@ int statistics::get_max_index_from_Y(vector<double> Y) {
     return max;
 }
 
-double statistics::get_gastwirth_estimator_from_Y ( vector<double> Y )
+double statistics::get_gastwirth_estimator_from_Y ( std::vector<double> Y )
 {
 	gsl_vector * vec = gsl_vector_alloc(Y.size());
     for (size_t i=0;i<Y.size();i++)
@@ -986,7 +986,7 @@ double statistics::get_gastwirth_estimator_from_Y ( vector<double> Y )
 }
 
 
-double statistics::get_trimmed_mean_from_Y(vector<double> Y, float alpha)
+double statistics::get_trimmed_mean_from_Y(std::vector<double> Y, float alpha)
 {
 	gsl_vector * vec = gsl_vector_alloc(Y.size());
     for (size_t i=0;i<Y.size();i++)
@@ -998,7 +998,7 @@ double statistics::get_trimmed_mean_from_Y(vector<double> Y, float alpha)
 }
 
 
-double statistics::get_mean_from_Y(vector<double> Y) {
+double statistics::get_mean_from_Y(std::vector<double> Y) {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
     for (size_t i=0;i<Y.size();i++) gsl_vector_set (vec, i, Y.at(i));
     double max = gsl_stats_mean(vec->data,1,Y.size());
@@ -1006,7 +1006,7 @@ double statistics::get_mean_from_Y(vector<double> Y) {
     return max;
 }
 
-double statistics::get_quantile_from_Y(vector<double> Y, double percentile) 
+double statistics::get_quantile_from_Y(std::vector<double> Y, double percentile) 
 {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
     for (size_t i=0;i<Y.size();i++)
@@ -1017,7 +1017,7 @@ double statistics::get_quantile_from_Y(vector<double> Y, double percentile)
     return quantile;
 }
 
-double statistics::get_median_from_Y(vector<double> Y) {
+double statistics::get_median_from_Y(std::vector<double> Y) {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
     for (size_t i=0;i<Y.size();i++)gsl_vector_set (vec, i, Y.at(i));
     double median = gsl_stats_median(vec->data,1,Y.size());
@@ -1025,7 +1025,7 @@ double statistics::get_median_from_Y(vector<double> Y) {
     return median;
 }
 
-double statistics::get_mad_from_Y(vector<double> Y) {
+double statistics::get_mad_from_Y(std::vector<double> Y) {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
     for (size_t i=0;i<Y.size();i++)gsl_vector_set (vec, i, Y.at(i));
     int c = Y.size();
@@ -1035,7 +1035,7 @@ double statistics::get_mad_from_Y(vector<double> Y) {
     return mad;
 }
 
-double statistics::get_sd_from_Y(vector<double> Y) {
+double statistics::get_sd_from_Y(std::vector<double> Y) {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
     for (size_t i=0;i<Y.size();i++)gsl_vector_set (vec, i, Y.at(i));
     int c = Y.size();
@@ -1045,7 +1045,7 @@ double statistics::get_sd_from_Y(vector<double> Y) {
     return sd;
 }
 
-int statistics::get_min_index_from_Y(vector<double> Y) {
+int statistics::get_min_index_from_Y(std::vector<double> Y) {
     gsl_vector * vec = gsl_vector_alloc(Y.size());
 //     statistics::std_vec_to_gsl_vec(&Y,&vec);
     for (size_t i=0;i<Y.size();i++)gsl_vector_set (vec, i, Y.at(i));
@@ -1054,17 +1054,17 @@ int statistics::get_min_index_from_Y(vector<double> Y) {
     return min;
 }
 
-double statistics::get_min_from_Y(vector<double> Y) 
+double statistics::get_min_from_Y(std::vector<double> Y) 
 {
     return Y[get_min_index_from_Y(Y)];
 }
-double statistics::get_max_from_Y(vector<double> Y) 
+double statistics::get_max_from_Y(std::vector<double> Y) 
 {
     return Y[get_max_index_from_Y(Y)];
 }
 
 
-// statis statistics::get_statistics_from_dataXY_transposed(vector<vector<double>> *data_XY_transposed) {
+// statis statistics::get_statistics_from_dataXY_transposed(std::vector<std::vector<double>> *data_XY_transposed) {
 //     int c=data_XY_transposed->at(0).size(); // anzahl der zeilen
 //     statis stats;
 //     if (c<3) return stats;
@@ -1104,7 +1104,7 @@ double statistics::get_max_from_Y(vector<double> Y)
 //     return stats;
 // }
 
-// double statistics::get_mad(vector<double> Y) {
+// double statistics::get_mad(std::vector<double> Y) {
 //     double mad;
 //     int c=Y.size();
 //     double w[c];
@@ -1113,7 +1113,7 @@ double statistics::get_max_from_Y(vector<double> Y)
 //     
 // }
 
-// statis statistics::get_statistics(vector<double> Y) {
+// statis statistics::get_statistics(std::vector<double> Y) {
 //     statis stats;
 //     int c=Y.size();
 //     double w[c];
@@ -1145,9 +1145,9 @@ double statistics::get_max_from_Y(vector<double> Y)
 //     return stats;
 // }
 
-vector<double> statistics::common_vector(vector<vector<double>> data_vectors)
+std::vector<double> statistics::common_vector(std::vector<std::vector<double>> data_vectors)
 {
-	vector<double> D_mins, D_maxs;
+	std::vector<double> D_mins, D_maxs;
 	double D_res=0;
 	for (auto& vec:data_vectors)
 	{
@@ -1162,7 +1162,7 @@ vector<double> statistics::common_vector(vector<vector<double>> data_vectors)
 	if (D_res <= 0) return {};
 	const int cdv_size = floor(abs(D_max-D_min)/D_res) + 1;
 	if (cdv_size < 1) return {};
-	vector<double> common_data_vec(cdv_size);
+	std::vector<double> common_data_vec(cdv_size);
 	for (int i=0;i<cdv_size;i++)
 		common_data_vec[i] = i * D_res + D_min;
 	return common_data_vec;
@@ -1170,7 +1170,7 @@ vector<double> statistics::common_vector(vector<vector<double>> data_vectors)
 
 double statistics::polynom_integrator (double x, void * params) {
     double sum=0;
-    vector<double> *poly_params=(vector<double>*) params;
+    std::vector<double> *poly_params=(std::vector<double>*) params;
     for (int i=0;i<poly_params->size();i++) {
         sum=sum+poly_params->at(i)*pow(x,i);
     }
@@ -1179,15 +1179,15 @@ double statistics::polynom_integrator (double x, void * params) {
 
 
 /* numerical integration*/
-double statistics::get_area_under_dataXY_transposed(vector<vector<double>> data_XY_transposed,double lower_X, double upper_X) {
-    vector<vector<double>> data_XY = tools::mat::transpose_matrix_double(data_XY_transposed);
+double statistics::get_area_under_dataXY_transposed(std::vector<std::vector<double>> data_XY_transposed,double lower_X, double upper_X) {
+    std::vector<std::vector<double>> data_XY = tools::mat::transpose_matrix_double(data_XY_transposed);
     return statistics::get_area_under_dataXY(data_XY,lower_X,upper_X);
 }
 
 
 
 /* numerical integration*/
-double statistics::get_area_under_dataXY(vector<vector<double>> data_XY,double lower_X, double upper_X) {
+double statistics::get_area_under_dataXY(std::vector<std::vector<double>> data_XY,double lower_X, double upper_X) {
     if (upper_X<0 || lower_X <0) return -1;
     if (upper_X==lower_X) return 0;
     if (upper_X<lower_X) {
@@ -1207,7 +1207,7 @@ double statistics::get_area_under_dataXY(vector<vector<double>> data_XY,double l
 }
 
 /*analytical integration using polynoms*/
-double statistics::get_area_under_polynom(vector<double> polynom_parameters, double lower_X, double upper_X) {
+double statistics::get_area_under_polynom(std::vector<double> polynom_parameters, double lower_X, double upper_X) {
     if (upper_X<0 || lower_X <0) return -1;
     if (upper_X==lower_X) return 0;
     if (upper_X<lower_X) {
@@ -1223,7 +1223,7 @@ double statistics::get_area_under_polynom(vector<double> polynom_parameters, dou
     return sum;
 }
 
-// bool statistics::gsl_vec_to_std_vec(gsl_vector * vec, vector<double> *std_vec) {
+// bool statistics::gsl_vec_to_std_vec(gsl_vector * vec, std::vector<double> *std_vec) {
 //     std_vec->clear();
 //     for (size_t i=0;i<vec->size;i++) {
 //         std_vec->push_back(gsl_vector_get (vec, i));
@@ -1231,8 +1231,8 @@ double statistics::get_area_under_polynom(vector<double> polynom_parameters, dou
 //     return true;
 // }
 
-vector<int> statistics::get_positions_of_zero_values(vector<vector<double>> matrix, double treshold) {
-    vector<int> positions;
+std::vector<int> statistics::get_positions_of_zero_values(std::vector<std::vector<double>> matrix, double treshold) {
+    std::vector<int> positions;
     for (int i=0;i<matrix.size();i++) {
         if (matrix[i].size()<2) return positions;
         if (abs(matrix[i][1]<treshold)) positions.push_back(i);
@@ -1240,14 +1240,14 @@ vector<int> statistics::get_positions_of_zero_values(vector<vector<double>> matr
     return positions;
 }
 
-vector<double> statistics::fit_poly_XY_transposed(vector<vector<double>> XY, int poly_grad) {
-    vector<double> Y_fit;
+std::vector<double> statistics::fit_poly_XY_transposed(std::vector<std::vector<double>> XY, int poly_grad) {
+    std::vector<double> Y_fit;
     int i, n;
   double chisq;
   gsl_matrix *X, *cov;
   gsl_vector *y, *w, *c;
   const int p = poly_grad;
-  vector<double> fit_parameters(p);
+  std::vector<double> fit_parameters(p);
 //     if (p>9) return false;
     
   n = XY[0].size();
@@ -1291,9 +1291,9 @@ vector<double> statistics::fit_poly_XY_transposed(vector<vector<double>> XY, int
 
 }
 
-vector<double> statistics::get_poly_Y(vector<double> parameters, vector<double> X) {
+std::vector<double> statistics::get_poly_Y(std::vector<double> parameters, std::vector<double> X) {
     int p = parameters.size();
-    vector<double> data_Y(X.size());
+    std::vector<double> data_Y(X.size());
     double yi,xi;
     for (int x=0;x<X.size();x++) {
         yi=0;
@@ -1306,9 +1306,9 @@ vector<double> statistics::get_poly_Y(vector<double> parameters, vector<double> 
     return data_Y;
 }
 
-// vector<double> statistics::get_polynom_Y(vector<double> parameters, vector<double> *data_X) {
+// std::vector<double> statistics::get_polynom_Y(std::vector<double> parameters, std::vector<double> *data_X) {
 //     int p = parameters.size();
-//     vector<double> data_Y(data_X->size());
+//     std::vector<double> data_Y(data_X->size());
 //     double yi,xi;
 //     for (int x=0;x<data_X->size();x++) {
 //         yi=0;
@@ -1321,8 +1321,8 @@ vector<double> statistics::get_poly_Y(vector<double> parameters, vector<double> 
 //     return data_Y;
 // }
 
-vector<double> statistics::derive_poly(vector<double> parameters) {
-    vector<double> derived_parameters;
+std::vector<double> statistics::derive_poly(std::vector<double> parameters) {
+    std::vector<double> derived_parameters;
     int p = parameters.size();
     for (int i=1;i<p;i++) {
         derived_parameters.push_back(i*parameters[i]);
@@ -1330,8 +1330,8 @@ vector<double> statistics::derive_poly(vector<double> parameters) {
     return derived_parameters;
 }
 
-vector<double> statistics::integrate_poly(vector<double> parameters) {
-    vector<double> integrated_parameters;
+std::vector<double> statistics::integrate_poly(std::vector<double> parameters) {
+    std::vector<double> integrated_parameters;
     int p = parameters.size();
     integrated_parameters.push_back(0); // assuming integration with boarders 
     for (int i=1;i<p;i++) {
@@ -1340,7 +1340,7 @@ vector<double> statistics::integrate_poly(vector<double> parameters) {
     return integrated_parameters;
 }
 
-bool statistics::first_derivative_poly(vector<double> *parameters, vector<vector<double>> *data_XY_dY) {
+bool statistics::first_derivative_poly(std::vector<double> *parameters, std::vector<std::vector<double>> *data_XY_dY) {
     int p = parameters->size();
     double xi;
     double yi;
@@ -1355,7 +1355,7 @@ bool statistics::first_derivative_poly(vector<double> *parameters, vector<vector
     return false;
 }
 
-bool statistics::second_derivative_poly(vector<double> *parameters, vector<vector<double>> *data_XY_ddY) {
+bool statistics::second_derivative_poly(std::vector<double> *parameters, std::vector<std::vector<double>> *data_XY_ddY) {
     int p = parameters->size();
     double xi;
     for (int x=0;x<data_XY_ddY->size();x++) {
@@ -1369,9 +1369,9 @@ bool statistics::second_derivative_poly(vector<double> *parameters, vector<vecto
 
 
 
-vector<double> statistics::get_polynom_Y(vector<double> parameters, vector<double> *data_X) {
+std::vector<double> statistics::get_polynom_Y(std::vector<double> parameters, std::vector<double> *data_X) {
     int p = parameters.size();
-    vector<double> data_Y(data_X->size());
+    std::vector<double> data_Y(data_X->size());
     double yi,xi;
     for (int x=0;x<data_X->size();x++) {
         yi=0;
@@ -1384,7 +1384,7 @@ vector<double> statistics::get_polynom_Y(vector<double> parameters, vector<doubl
     return data_Y;
 }
 
-double statistics::fit_poly (vector<vector<double>> *data_matrix, vector<double> *fit_parameters)  {
+double statistics::fit_poly (std::vector<std::vector<double>> *data_matrix, std::vector<double> *fit_parameters)  {
   int i, n;
   double chisq;
   gsl_matrix *X, *cov;
@@ -1433,20 +1433,20 @@ double statistics::fit_poly (vector<vector<double>> *data_matrix, vector<double>
 }
 
 /*
-bool statistics::polynomfit_XY(vector<vector<double>> data_XY,data *fitted_data, int polynom_grad, double interp_res) {
+bool statistics::polynomfit_XY(std::vector<std::vector<double>> data_XY,data *fitted_data, int polynom_grad, double interp_res) {
     if (polynom_grad<1) return false;
     // data_XY_XY contains 2 columns from ONE implanted element Y(X)
     double chisq_best,chisq;
-    vector<double> fit_parameters(polynom_grad);
-    vector<double> fit_parameters_best(polynom_grad);
+    std::vector<double> fit_parameters(polynom_grad);
+    std::vector<double> fit_parameters_best(polynom_grad);
     chisq_best=statistics::fit_poly(&data_XY,&fit_parameters);
-//     if (chisq_best==-1) cout << "error\n";
+//     if (chisq_best==-1) std::cout << "error\n";
     fit_parameters_best=fit_parameters;
     if (polynom_grad==1) {
         for (int i=1;i<15;i++) {
             fit_parameters.resize(i);
             chisq=statistics::fit_poly(&data_XY,&fit_parameters);
-//             if (chisq==-1) cout << "error\n";
+//             if (chisq==-1) std::cout << "error\n";
             if (chisq<chisq_best)  { 
                 fit_parameters_best=fit_parameters;
                 chisq_best=chisq;
@@ -1456,7 +1456,7 @@ bool statistics::polynomfit_XY(vector<vector<double>> data_XY,data *fitted_data,
     fit_parameters=fit_parameters_best;
     fitted_data->fit_info.chisq_abs = round(chisq_best);
     fitted_data->fit_info.fit_parameters=fit_parameters;
-    vector<double> X, Y;
+    std::vector<double> X, Y;
     if (interp_res>0) {
         int points = data_XY.back()[0]/interp_res;
         X.resize(points);
@@ -1465,13 +1465,13 @@ bool statistics::polynomfit_XY(vector<vector<double>> data_XY,data *fitted_data,
         }
         Y=statistics::get_polynom_Y(fit_parameters,&X);
     } else {
-        vector<vector<double>> temp = Tools::transpose_matrix_double(data_XY);
+        std::vector<std::vector<double>> temp = Tools::transpose_matrix_double(data_XY);
         X=temp[0];
         Y=statistics::get_polynom_Y(fit_parameters,&X);
     }
     fitted_data->data_XY_transposed.push_back(X);
     fitted_data->data_XY_transposed.push_back(Y);
-    vector<double> xx = Tools::transpose_matrix_double(data_XY).at(0);
+    std::vector<double> xx = Tools::transpose_matrix_double(data_XY).at(0);
     Y=statistics::get_polynom_Y(fit_parameters,&xx);
     double mean = statistics::get_mean_from_Y(Y);
     fitted_data->fit_info.chisq_rel = chisq_best/mean;
@@ -1481,11 +1481,11 @@ bool statistics::polynomfit_XY(vector<vector<double>> data_XY,data *fitted_data,
 */
 
 
-vector<double> statistics::interpolate_data_XY_transposed(vector<vector<double>> data_XY_transposed, vector<double> X) {
-    vector<double> Y,xv,yv;
+std::vector<double> statistics::interpolate_data_XY_transposed(std::vector<std::vector<double>> data_XY_transposed, std::vector<double> X) {
+    std::vector<double> Y,xv,yv;
     double yi;
     double *x,*y;
-//     vector<vector<double>> data_XY_XY_transposed=data_XY_transposed;
+//     std::vector<std::vector<double>> data_XY_XY_transposed=data_XY_transposed;
     
     const size_t c=data_XY_transposed[0].size();
     gsl_interp_accel *acc = gsl_interp_accel_alloc ();
@@ -1497,18 +1497,18 @@ vector<double> statistics::interpolate_data_XY_transposed(vector<vector<double>>
     x=&xv[0];
     y=&yv[0];
     gsl_spline_init (spline_akima, x, y, c);
-// 	cout << "init done\n";
+// 	std::cout << "init done\n";
 //     for (size_t i = 0; i < c; ++i)
 //     printf("%g %g\n", x[i], y[i]);
         
     for (int i=0; i < X.size(); i++) {
-//         cout << X->at(i) << endl;
+//         std::cout << X->at(i) << std::endl;
         yi = gsl_spline_eval (spline_akima, X.at(i), acc);
-// 		cout << "A";
+// 		std::cout << "A";
         
         Y.push_back(yi);
       }
-//       cout << endl;
+//       std::cout << std::endl;
     gsl_spline_free (spline_akima);
     gsl_interp_accel_free (acc);
     return Y;
@@ -1523,7 +1523,7 @@ vector<double> statistics::interpolate_data_XY_transposed(vector<vector<double>>
 /********* NEW *************/
 
 //from file:///tmp/mozilla_florian0/Example-programs-for-B_002dsplines.html  ???
-vector<double> statistics::interpolate_bspline(map<double, double>& data_XY,vector<double> X_new, int bspline_degree)
+std::vector<double> statistics::interpolate_bspline(std::map<double, double>& data_XY,std::vector<double> X_new, int bspline_degree)
 {
 	const size_t k = bspline_degree +1;
 	const size_t n = data_XY.size();
@@ -1559,7 +1559,7 @@ vector<double> statistics::interpolate_bspline(map<double, double>& data_XY,vect
 	mw = gsl_multifit_linear_alloc(n, ncoeffs);
 
 	/* this is the data to be fitted */  
-	vector<double> Xdata,Ydata;
+	std::vector<double> Xdata,Ydata;
 	tools::vec::split_map_to_vecs(data_XY,&Xdata,&Ydata);
 	for (i = 0; i < n; ++i)
     {
@@ -1601,8 +1601,8 @@ vector<double> statistics::interpolate_bspline(map<double, double>& data_XY,vect
 	
   /* output the smoothed curve */
 	if (X_new.size()==0) X_new = Xdata;
-	vector<double> Y_new(X_new.size());
-    vector<double> Y_err(X_new.size());
+	std::vector<double> Y_new(X_new.size());
+    std::vector<double> Y_err(X_new.size());
 	
 	for (int i = 0; i<X_new.size(); i++)
 	{
@@ -1625,16 +1625,16 @@ vector<double> statistics::interpolate_bspline(map<double, double>& data_XY,vect
 	return Y_new;
 }
 
-vector<double> statistics::get_gsl_vec(gsl_vector* Y)
+std::vector<double> statistics::get_gsl_vec(gsl_vector* Y)
 {
-	vector<double> Yout(Y->size);
+	std::vector<double> Yout(Y->size);
 	
 	for (int i = 0; i < Y->size; ++i)
 		Yout.at(i) = gsl_vector_get(Y, i);
 	return Yout;
 }
 
-gsl_vector * statistics::get_gsl_vec(const vector<double>& Y)
+gsl_vector * statistics::get_gsl_vec(const std::vector<double>& Y)
 {
 	gsl_vector *y;
 	int n = Y.size();
@@ -1642,12 +1642,12 @@ gsl_vector * statistics::get_gsl_vec(const vector<double>& Y)
 	for (int i = 0; i < n; ++i)
 	{
 		gsl_vector_set (y, i, Y[i]);
-// 		cout << "y=" << *(y->data) << endl;
+// 		std::cout << "y=" << *(y->data) << std::endl;
 	}
 	return y;
 }
 
-vector<double> statistics::bspline_smooth(const vector<double>& Ydata, vector<double> Xdata, unsigned int breakpoints, const size_t spline_order)
+std::vector<double> statistics::bspline_smooth(const std::vector<double>& Ydata, std::vector<double> Xdata, unsigned int breakpoints, const size_t spline_order)
 {
 // 	breakpoints=100;
 	if (breakpoints==0)
@@ -1664,7 +1664,7 @@ vector<double> statistics::bspline_smooth(const vector<double>& Ydata, vector<do
 	}
 	if (Xdata.size() != Ydata.size())
 		return {};
-// 	cout << "Xdata.size()=" << Xdata.size() << "\tYdata.size()=" << Ydata.size() << endl;
+// 	std::cout << "Xdata.size()=" << Xdata.size() << "\tYdata.size()=" << Ydata.size() << std::endl;
 // 	print(Xdata);
 	const size_t n = Ydata.size();
 	const size_t nbreak = breakpoints;
@@ -1752,8 +1752,8 @@ vector<double> statistics::bspline_smooth(const vector<double>& Ydata, vector<do
 // 	printf("\n\n");
 
 	/* output the smoothed curve */
-	vector<double> Y_fitted(n);
-	vector<double> Y_fitted_err(n);
+	std::vector<double> Y_fitted(n);
+	std::vector<double> Y_fitted_err(n);
 	
 	for (int i=0;i<Xdata.size();i++)
 	{
@@ -1787,21 +1787,21 @@ vector<double> statistics::bspline_smooth(const vector<double>& Ydata, vector<do
 }
 
 
-vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY, const vector<double>& X) 
+std::vector<double> statistics::interpolate_data_XY(const std::map<double,double>& data_XY, const std::vector<double>& X) 
 {
 
-    vector<double> Y,xv,yv;
+    std::vector<double> Y,xv,yv;
     double yi;
     double *x,*y;
     const size_t c=data_XY.size();
 	
 // 	for (auto& d : data_XY)
-// 		cout << d.first << "\t" << d.second << endl;
+// 		std::cout << d.first << "\t" << d.second << std::endl;
 	
 // 	for (auto& x : X)
-// 		cout << x << endl;
-// 	cout << "data_XY.size()=" << data_XY.size() << endl;
-// 	cout << "X.size()=" << X.size() << endl;
+// 		std::cout << x << std::endl;
+// 	std::cout << "data_XY.size()=" << data_XY.size() << std::endl;
+// 	std::cout << "X.size()=" << X.size() << std::endl;
 	
 	if (c<10) return {};
     gsl_interp_accel *acc = gsl_interp_accel_alloc ();
@@ -1820,18 +1820,18 @@ vector<double> statistics::interpolate_data_XY(const map<double,double>& data_XY
         yi = gsl_spline_eval (spline_akima, X.at(i), acc);
         Y.push_back(yi);
       }
-// 	cout << "data_XY.size()=" << data_XY.size() << endl;
-// 	cout << "X.size()=" << X.size() << endl;
+// 	std::cout << "data_XY.size()=" << data_XY.size() << std::endl;
+// 	std::cout << "X.size()=" << X.size() << std::endl;
     gsl_spline_free (spline_akima);
     gsl_interp_accel_free (acc);
     return Y;
 }
 
 
-double statistics::integrate(map<double,double>& data_XY, unsigned int start_idx, unsigned int stop_idx) 
+double statistics::integrate(std::map<double,double>& data_XY, unsigned int start_idx, unsigned int stop_idx) 
 {
     double sum=0;
-	map<double,double>::iterator it,it_prev;
+	std::map<double,double>::iterator it,it_prev;
 	double dY,dX;
 	it = data_XY.begin();
 	int i=0;
@@ -1849,15 +1849,15 @@ double statistics::integrate(map<double,double>& data_XY, unsigned int start_idx
 }
 
 
-map<double, double> change_X_resolution(const map<double, double>& data_XY,const double new_resolution)
+std::map<double, double> change_X_resolution(const std::map<double, double>& data_XY,const double new_resolution)
 {
 	if (new_resolution<=0) return {};
 	const int size = floor((data_XY.rbegin()->first - data_XY.begin()->first)/new_resolution)+1;
-	vector<double> new_X(size);
+	std::vector<double> new_X(size);
 	for (int i=0;i<size;i++)
 		new_X[i]=i*new_resolution + data_XY.begin()->first;
-	vector<double> new_Y = statistics::interpolate_data_XY(data_XY,new_X);
-	map<double,double> new_data_XY_map;
+	std::vector<double> new_Y = statistics::interpolate_data_XY(data_XY,new_X);
+	std::map<double,double> new_data_XY_map;
 	tools::vec::combine_vecs_to_map(&new_X,&new_Y,&new_data_XY_map);
 	return new_data_XY_map;
 }
@@ -1871,14 +1871,14 @@ unsigned int statistics::factorial(const unsigned int& fac)
 	return result;
 }
 
-vector<double> statistics::absolute(vector<double> data)
+std::vector<double> statistics::absolute(std::vector<double> data)
 {
 	for (auto& d:data)
 		d = abs(d);
 	return data;
 }
 
-vector<double> statistics::round(vector<double> data_s ,unsigned int decimals)
+std::vector<double> statistics::round(std::vector<double> data_s ,unsigned int decimals)
 {
 	const double multiplier = pow(10,decimals);
 	for (auto& d : data_s)
@@ -1896,23 +1896,23 @@ double statistics::round(double data_s ,unsigned int decimals)
 /***   			    statistics::histogram_t 			  ****/
 /*************************************************************/
 
-statistics::histogram_t::histogram_t(const vector<double>& data, unsigned int number_of_bins) : 
+statistics::histogram_t::histogram_t(const std::vector<double>& data, unsigned int number_of_bins) : 
 			data(data), number_of_bins(number_of_bins), range(data,number_of_bins)
 {
 }
 
-vector<unsigned int> statistics::histogram_t::linear_bins() const
+std::vector<unsigned int> statistics::histogram_t::linear_bins() const
 {
 	return fill_bins(range.equal_distributed_linear());
 }
-vector<unsigned int> statistics::histogram_t::log10_bins() const
+std::vector<unsigned int> statistics::histogram_t::log10_bins() const
 {
 	return fill_bins(range.equal_distributed_log10());
 }
 
-vector<unsigned int> statistics::histogram_t::fill_bins(const vector<double>& range) const
+std::vector<unsigned int> statistics::histogram_t::fill_bins(const std::vector<double>& range) const
 {
-	vector<unsigned int> histogram(number_of_bins);
+	std::vector<unsigned int> histogram(number_of_bins);
 	gsl_histogram * h = gsl_histogram_alloc (number_of_bins);
 	gsl_histogram_set_ranges(h,&range[0],range.size());
 	for (const auto& d : data)
@@ -1923,7 +1923,7 @@ vector<unsigned int> statistics::histogram_t::fill_bins(const vector<double>& ra
 // 		double b=0;
 // 		double t=0;
 // 		gsl_histogram_get_range(h,i,&b,&t);
-// 		cout << "range[" << i << "]=(" << b << "," << t << ")" << endl;
+// 		std::cout << "range[" << i << "]=(" << b << "," << t << ")" << std::endl;
 	}
 	gsl_histogram_free(h);
 	return histogram;
@@ -1937,13 +1937,13 @@ vector<unsigned int> statistics::histogram_t::fill_bins(const vector<double>& ra
 // {
 // }
 
-statistics::histogram_t::range_t::range_t(const vector<double>& data, const unsigned int& number_of_bins) : data(data), number_of_bins(number_of_bins)
+statistics::histogram_t::range_t::range_t(const std::vector<double>& data, const unsigned int& number_of_bins) : data(data), number_of_bins(number_of_bins)
 {
 }
 
-const vector<double> statistics::histogram_t::range_t::equal_distributed_linear() const
+const std::vector<double> statistics::histogram_t::range_t::equal_distributed_linear() const
 {
-	vector<double> r(number_of_bins+1);
+	std::vector<double> r(number_of_bins+1);
 	auto min = get_min_from_Y(data);
 	auto delta = (get_max_from_Y(data)-min)/number_of_bins;
 	for (int i=0;i<number_of_bins+1;i++)
@@ -1953,10 +1953,10 @@ const vector<double> statistics::histogram_t::range_t::equal_distributed_linear(
 	return r;
 }
 
-const vector<double> statistics::histogram_t::range_t::equal_distributed_log10() const
+const std::vector<double> statistics::histogram_t::range_t::equal_distributed_log10() const
 {
 	auto data_abs = absolute(data);
-	vector<double> r(number_of_bins+1);
+	std::vector<double> r(number_of_bins+1);
 	double min=1, max=1;
 	std::sort(data_abs.begin(),data_abs.end());
 	for (auto& d : data_abs)

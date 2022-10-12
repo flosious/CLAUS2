@@ -53,21 +53,21 @@ bool msettings::sims_t::is_set() const
 	return true;
 }
 
-const string msettings::sims_t::to_string(const string del) const
+const std::string msettings::sims_t::to_string(const std::string del) const
 {
-	stringstream ss;
+	std::stringstream ss;
     ss << sputter_energy.to_string_short() << del;
     ss << sputter_ion.to_string() << del;
 	ss << "secondary_polarity: " << secondary_polarity;
 	return ss.str();
 }
 
-const string msettings::sims_t::to_string_short() const
+const std::string msettings::sims_t::to_string_short() const
 {
 	if (!sputter_energy.is_scalar() || !sputter_ion.is_set()) 
 		return "";
 	quantity::energy_t SE;
-	stringstream ss;
+	std::stringstream ss;
 	if (sputter_energy.data().at(0)>=1000)
 		SE =sputter_energy.change_unit(units::prefixes::kilo * sputter_energy.unit());
 	else

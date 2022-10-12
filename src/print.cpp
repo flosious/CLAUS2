@@ -1,31 +1,31 @@
 #include "print.hpp"
 
 
-// void print::measurement(measurement_t* measurement, string prefix) 
+// void print::measurement(measurement_t* measurement, std::string prefix) 
 // {
-// 	cout << "ID: " << endl;
+// 	std::cout << "ID: " << std::endl;
 // 	
 // }
 // 	
 // 	
-// void print::id(identifier_t* id,string prefix)
+// void print::id(identifier_t* id,std::string prefix)
 // {
-// 	cout << prefix << "olcdb: " << id->olcdb << endl;
-// 	cout << prefix << "lot: " << id->lot << endl;
-// 	cout << prefix << "wafer: " << id->wafer << endl;
-// 	cout << prefix << "chip: " << id->chip << endl;
-// 	cout << prefix << "monitor: " << id->monitor<< endl;
-// 	cout << prefix << "methode: " << id->methode << endl;
-// 	cout << prefix << "date_time: " << id->date_time << endl;
-// 	cout << prefix << "others: " << id->others << endl;
+// 	std::cout << prefix << "olcdb: " << id->olcdb << std::endl;
+// 	std::cout << prefix << "lot: " << id->lot << std::endl;
+// 	std::cout << prefix << "wafer: " << id->wafer << std::endl;
+// 	std::cout << prefix << "chip: " << id->chip << std::endl;
+// 	std::cout << prefix << "monitor: " << id->monitor<< std::endl;
+// 	std::cout << prefix << "methode: " << id->methode << std::endl;
+// 	std::cout << prefix << "date_time: " << id->date_time << std::endl;
+// 	std::cout << prefix << "others: " << id->others << std::endl;
 // }
 // 
-// void print::quantity(quantity::quantity_t* quantity, string prefix)
+// void print::quantity(quantity::quantity_t* quantity, std::string prefix)
 // {
 // 	return;
 // }
 // 
-// void print::cluster(cluster_t* cluster, string prefix)
+// void print::cluster(cluster_t* cluster, std::string prefix)
 // {
 // 	return;
 // }

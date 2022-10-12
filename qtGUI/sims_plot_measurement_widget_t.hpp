@@ -38,6 +38,10 @@ public:
     ~sims_plot_measurement_widget_t();
 //    void set_measurement(measurements_::sims_t* new_measurement);
     void update(measurements_::sims_t* new_measurement);
+public slots:
+    void on_clusters_button_clicked();
+signals:
+    void auto_calc();
 private:
     Ui::sims_plot_measurement_widget_t *ui;
     class_logger_t logger;

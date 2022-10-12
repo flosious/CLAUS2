@@ -40,9 +40,6 @@
 /************************/
 // class plot_t;
 
-using namespace std;
-
-
 /************************/
 // FORWARD DECLARATIONS //
 
@@ -69,21 +66,21 @@ public:
 		static bool use_sample;
         database_t* database=nullptr;
 	public:
-        measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, string method,database_t& database);
-        measurement_t(files_::file_t::name_t& filename, string method,database_t& database);
+        measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, std::string method,database_t& database);
+        measurement_t(files_::file_t::name_t& filename, std::string method,database_t& database);
         virtual ~measurement_t() = default;
 		long long unsigned int memory_address() const;
-		string filename_with_path;
-        string to_string(const string del = ", ") const;
-        const string to_string_short(const string del = ", ") const;
+		std::string filename_with_path;
+        std::string to_string(const std::string del = ", ") const;
+        const std::string to_string_short(const std::string del = ", ") const;
 		bool is_set() const;
-        string group_id;
-		string repetition;
+        std::string group_id;
+		std::string repetition;
 		int olcdb;
 //		sample_t* sample=nullptr;
         sample_t sample;
 		/// dsims, tofsims, xps, profiler, ...
-		string method;
+		std::string method;
 		bool operator==(const measurement_t& obj) const;
 		bool operator!=(const measurement_t& obj) const;
 		bool operator<(const measurement_t& obj) const;
@@ -98,7 +95,7 @@ public:
         private:
             class_logger_t logger;
 		protected:
-            profiler_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, const crater_t::linescan_t& linescan_s, string method,database_t& database);
+            profiler_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, const crater_t::linescan_t& linescan_s, std::string method,database_t& database);
 			crater_t::linescan_t linescan_p;
             virtual ~profiler_t() = default;
 		public:
@@ -207,7 +204,7 @@ public:
 				calc_t& from_RSF_pbp_ref(bool overwrite=false);
 				quantity::SF_t from_RSF_pbp_ref(cluster_t& cluster);
 				
-				///reference_intensity could be mean, median, trimmed_mean, a vector (pbp), ...
+				///reference_intensity could be mean, median, trimmed_mean, a std::vector (pbp), ...
 				calc_t& from_RSF(const quantity::intensity_t& reference_intensity);
 				quantity::SF_t from_RSF(cluster_t& cluster, const quantity::intensity_t& reference_intensity);
 			};
@@ -236,7 +233,7 @@ public:
 				calc_t& from_SF_percentile_ref(double percentile, bool overwrite=false);
 				cluster_t::RSF_t from_SF_percentile_ref(const cluster_t& cluster, double percentile);
 				
-				///reference_intensity could be percentile, mean, median, trimmed_mean, a vector (pbp), or anything other ...
+				///reference_intensity could be percentile, mean, median, trimmed_mean, a std::vector (pbp), or anything other ...
 				calc_t& from_SF_ref(const quantity::intensity_t& reference_intensity, bool overwrite=false);
 				cluster_t::RSF_t from_SF_ref(const cluster_t& cluster, const quantity::intensity_t& reference_intensity, bool overwrite=false);
 			};
@@ -298,7 +295,7 @@ public:
 					map_c();
 					map_c(const quantity::map_t& XY_map);
 					map_c(const quantity::map_t& XY_map, unsigned int minimum_index_position_p, unsigned int maximum_index_position_p);
-					//unmodified map (raw data)
+					//unmodified std::map (raw data)
 					const quantity::map_t& XY_map() const; 
 					//used as implant profile
 					quantity::map_t XY_map_without_surface(); 
@@ -353,13 +350,13 @@ public:
 				map_c& C_vs_ST();
 				map_c& I_vs_SD();
 				map_c& I_vs_ST();
-				///ATTENTION NOT WORKING YET will override any values already set in clusters implant_parameters
+				///ATTENTION NOT WORKING YET will override any values already std::set in clusters implant_parameters
 				void set_parameters_in_cluster();
                 bool has_sufficient_implant_area();
 			}; //implant_c
 		private:
             class_logger_t logger;
-			map<cluster_t* const, implant_c> implants_s;
+			std::map<cluster_t* const, implant_c> implants_s;
 		public:
 			implant_c& implant(cluster_t& cluster, double X_resolution_factor=10);
 			///calculates SR and SF in one step from implant
@@ -374,28 +371,28 @@ public:
 		};
 	private:
 		///adds more cluster to this measurement
-		void add_clusters(vector<cluster_t>& clusters_s);
+		void add_clusters(std::vector<cluster_t>& clusters_s);
 		cluster_t matrix_cluster_s;
 	public: 
-        sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, string method, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+        sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, std::string method, database_t& database, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
         virtual ~sims_t() = default;
-		bool are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const;
+		bool are_clusters_in_measurement(const std::vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
-		bool are_intensities_of_clusters_set(const vector<cluster_t>& clusters_s) const;
+		bool are_intensities_of_clusters_set(const std::vector<cluster_t>& clusters_s) const;
 		bool are_intensities_of_clusters_set(const cluster_t& cluster_s) const;
 		
 		calc_t calc(bool overwrite=false);
 		
-		string to_string(const string del = ", ");
-		const string to_string_short(const string del = ", ") const;
+		std::string to_string(const std::string del = ", ");
+		const std::string to_string_short(const std::string del = ", ") const;
 		///returns the measurement without surface artefacts
 		filter_t filter() const;
 
 		///e.g. isotope(31P) --> cluster(74Ge 31P) & cluster(31P) & ...
-		set<cluster_t*> clusters_corresponding_to_isotope(const isotope_t& isotope);
+		std::set<cluster_t*> clusters_corresponding_to_isotope(const isotope_t& isotope);
 		isotope_t isotope_corresponding_to_cluster(const cluster_t& cluster);
 		///isotopes in matrix and references, e.g. in cluster 70Ge 11B, 70Ge is a ref isotope, but not included in sample matrix ; might be overwritten by mgroup
-		vector<isotope_t> reference_isotopes;
+		std::vector<isotope_t> reference_isotopes;
 		/*
 		 * matrix cluster should contain only unique isotope for its cluster;
 		 * that means e.g. SiGe matrix there can never be a SiGe cluster, just Si clusters and Ge clusters seperate
@@ -406,7 +403,7 @@ public:
 		//creates instantly a plot
 //		void plot_now(double sleep_sec=1);
 		///origin ready for import
-		void export_origin_ascii(string path="/tmp/", const string delimiter="\t");
+		void export_origin_ascii(std::string path="/tmp/", const std::string delimiter="\t");
 
 		bool add(sims_t& measurement);
 		
@@ -415,7 +412,7 @@ public:
 		sims_t change_resolution(quantity::sputter_depth_t sputter_depth_res);
 		
 		crater_t crater;
-		vector<cluster_t> clusters;
+		std::vector<cluster_t> clusters;
 		///returns pointer to the matching cluster within this measurement
 		cluster_t* cluster(const cluster_t& cluster_s);
 		///returns pointer to the matching cluster with the corresponding_isotope within this measurement
@@ -445,18 +442,18 @@ public:
 		private:
             class_logger_t logger;
 			///loads all filenames counting as reference for this measurement M
-			static vector<string> ref_filenames();
+			static std::vector<std::string> ref_filenames();
 			///make this measurement M a reference
 			static bool insert_into_table();
 		public:
 			static bool create_table();
 			static dsims_t reference_measurement();
-			static vector<dsims_t> reference_measurements();
+			static std::vector<dsims_t> reference_measurements();
 		};
-// 		vector<cluster_t> clusters;
+// 		std::vector<cluster_t> clusters;
 	public:
 		msettings::dsims_t settings;
-        dsims_t(files_::dsims_t& dsims_file, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+        dsims_t(files_::dsims_t& dsims_file, database_t& database, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 		bool operator==(const dsims_t& obj) const;
 		bool operator!=(const dsims_t& obj) const;
 	}; // dsims_t
@@ -467,8 +464,8 @@ public:
         class_logger_t logger;
 	public:
 		msettings::tofsims_t settings;
-        tofsims_t(files_::tofsims_t& tofsims_file, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
-//        tofsims_t(files_::tofsims_t& tofsims_file, std::vector<sample_t>* samples_list, database_t& database, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+        tofsims_t(files_::tofsims_t& tofsims_file, database_t& database, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
+//        tofsims_t(files_::tofsims_t& tofsims_file, std::vector<sample_t>* samples_list, database_t& database, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
 
 		bool operator==(const tofsims_t& obj) const;
 		bool operator!=(const tofsims_t& obj) const;

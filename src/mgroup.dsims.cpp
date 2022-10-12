@@ -69,36 +69,36 @@ bool mgroups_::dsims_t::operator!=(const mgroups_::dsims_t& obj) const
 	return !operator==(obj);
 }
 
-string mgroups_::dsims_t::to_string(const string del)
+std::string mgroups_::dsims_t::to_string(const std::string del)
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << mgroup_t::to_string(del) << del;
 	if (use_settings) ss << settings_p.to_string(del) << del;
-	ss << "measurements: <" << measurements_p.size() << ">" << endl;
-	ss << "{" << endl;
+	ss << "measurements: <" << measurements_p.size() << ">" << std::endl;
+	ss << "{" << std::endl;
 	int counter = 0;
 	for (auto& M : measurements_p)
 	{
-		ss << "\t" << "[" << counter << "] " << M.to_string(del) << endl;
+		ss << "\t" << "[" << counter << "] " << M.to_string(del) << std::endl;
 		counter++;
 	}
-	ss << "}" << endl;
-	string out = ss.str();
+	ss << "}" << std::endl;
+	std::string out = ss.str();
 // 	out.erase(out.end()-del.length(),out.end()); // remove the las del
 	return out;
 }
 
-vector<measurements_::sims_t*> mgroups_::dsims_t::measurements()
+std::vector<measurements_::sims_t*> mgroups_::dsims_t::measurements()
 {
-	vector<measurements_::sims_t*> Ms(measurements_p.size());
+	std::vector<measurements_::sims_t*> Ms(measurements_p.size());
 	for (int i=0;i<measurements_p.size();i++)
 		Ms.at(i)=&measurements_p.at(i);
 	return Ms;
 }
 
-vector<measurements_::sims_t> mgroups_::dsims_t::measurements_copy()
+std::vector<measurements_::sims_t> mgroups_::dsims_t::measurements_copy()
 {
-	vector<measurements_::sims_t> Ms;
+	std::vector<measurements_::sims_t> Ms;
 	for (int i=0;i<measurements_p.size();i++)
 		Ms.push_back(measurements_p.at(i));
 	return Ms;

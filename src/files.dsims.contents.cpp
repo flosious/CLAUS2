@@ -28,53 +28,53 @@
 /*****  files_::dsims_t::contents_t  ****/
 /***************************************/
 
-files_::dsims_t::contents_t::contents_t(string& filename_with_path, const std::string& contents_string)
+files_::dsims_t::contents_t::contents_t(std::string& filename_with_path, const std::string& contents_string)
     : files_::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"},contents_string), logger(global_logger,__FILE__,"files_::dsims_t::contents_t")
 
 {
 }
 
-void files_::dsims_t::contents_t::to_screen(string prefix)
+void files_::dsims_t::contents_t::to_screen(std::string prefix)
 {
 
-	cout << prefix << "contents:" << endl;
-	cout << prefix << "\tdelimiter:\t'" << delimiter <<"'" << endl;
-	if (identifiers.size()==1) cout << prefix << "\tidentifiers:\t" << *identifiers.begin() << endl;
-	else cout << prefix << "\tidentifiers:\t<" << identifiers.size() << ">" << endl;
-	cout << prefix << "\t"<<"creation_date_time:\t" << tools::time::tm_struct_to_string_time(creation_date_time()) << endl;
-	cout << prefix << "\t"<<"start_date_time:\t" << tools::time::tm_struct_to_string_time(start_date_time()) << endl;
-	cout << prefix << "\t"<<"clusters:" << endl;
+	std::cout << prefix << "contents:" << std::endl;
+	std::cout << prefix << "\tdelimiter:\t'" << delimiter <<"'" << std::endl;
+	if (identifiers.size()==1) std::cout << prefix << "\tidentifiers:\t" << *identifiers.begin() << std::endl;
+	else std::cout << prefix << "\tidentifiers:\t<" << identifiers.size() << ">" << std::endl;
+	std::cout << prefix << "\t"<<"creation_date_time:\t" << tools::time::tm_struct_to_string_time(creation_date_time()) << std::endl;
+	std::cout << prefix << "\t"<<"start_date_time:\t" << tools::time::tm_struct_to_string_time(start_date_time()) << std::endl;
+	std::cout << prefix << "\t"<<"clusters:" << std::endl;
 	for (auto c:clusters())
-		cout << prefix << "\t\t" << c.to_string() << endl;
-	cout << prefix << "\t"<<"Ipr:\t" << Ipr().to_string() << endl;
+		std::cout << prefix << "\t\t" << c.to_string() << std::endl;
+	std::cout << prefix << "\t"<<"Ipr:\t" << Ipr().to_string() << std::endl;
 	
-	cout << prefix << "\t"<<"chamber_pressure:\t" << chamber_pressure().to_string() << endl;
-	cout << prefix << "\t"<<"field_aperture:\t" << field_aperture().to_string() << endl;
-	cout << prefix << "\t"<<"contrast_aperture:\t" << contrast_aperture().to_string() << endl;
-	cout << prefix << "\t"<<"entrance_slit:\t" << entrance_slit().to_string() << endl;
-	cout << prefix << "\t"<<"exit_slit:\t" << exit_slit().to_string() << endl;
-	cout << prefix << "\t"<<"mass_resolution:\t" << mass_resolution().to_string() << endl;
-	cout << prefix << "\t"<<"energy_window:\t" << energy_window().to_string() << endl;
-	cout << prefix << "\t"<<"egate:\t" << egate().to_string() << endl;
+	std::cout << prefix << "\t"<<"chamber_pressure:\t" << chamber_pressure().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"field_aperture:\t" << field_aperture().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"contrast_aperture:\t" << contrast_aperture().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"entrance_slit:\t" << entrance_slit().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"exit_slit:\t" << exit_slit().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"mass_resolution:\t" << mass_resolution().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"energy_window:\t" << energy_window().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"egate:\t" << egate().to_string() << std::endl;
 	
-	cout << prefix << "\t"<<"secondary_polarity:\t" << secondary_polarity() << endl;
-	cout << prefix << "\t"<<"secondary_voltage:\t" << secondary_voltage().to_string() << endl;
+	std::cout << prefix << "\t"<<"secondary_polarity:\t" << secondary_polarity() << std::endl;
+	std::cout << prefix << "\t"<<"secondary_voltage:\t" << secondary_voltage().to_string() << std::endl;
 	
-	cout << prefix << "\t"<<"em_voltage:\t" << em_voltage().to_string() << endl;
-	cout << prefix << "\t"<<"em_yield:\t" << em_yield().to_string() << endl;
+	std::cout << prefix << "\t"<<"em_voltage:\t" << em_voltage().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"em_yield:\t" << em_yield().to_string() << std::endl;
 	
-	cout << prefix << "\t"<<"sputter_element:\t" << sputter_element().to_string() << endl;
-	cout << prefix << "\t"<<"sputter_energy:\t" << sputter_energy().to_string() << endl;
-	cout << prefix << "\t"<<"sputter_rastersize:\t" << sputter_rastersize().to_string() << endl;
-	cout << prefix << "\t"<<"analysis_rastersize:\t" << analyzed_area().to_string() << endl;
-	cout << prefix << "\t"<< "matrix\t" << matrix() << endl;
+	std::cout << prefix << "\t"<<"sputter_element:\t" << sputter_element().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"sputter_energy:\t" << sputter_energy().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"sputter_rastersize:\t" << sputter_rastersize().to_string() << std::endl;
+	std::cout << prefix << "\t"<<"analysis_rastersize:\t" << analyzed_area().to_string() << std::endl;
+	std::cout << prefix << "\t"<< "matrix\t" << matrix() << std::endl;
 }
 
-vector<cluster_t> files_::dsims_t::contents_t::clusters()
+std::vector<cluster_t> files_::dsims_t::contents_t::clusters()
 {
 	if (columns().size()==0)
 		return {};
-	vector<cluster_t> collected_clusters;
+	std::vector<cluster_t> collected_clusters;
 	for (auto& clustername : cluster_names())
 	{
 		
@@ -107,7 +107,7 @@ vector<cluster_t> files_::dsims_t::contents_t::clusters()
 	return collected_clusters;
 }
 
-const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t::columns()
+const std::vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t::columns()
 {
 	if (columns_s.size()>0)
 		return columns_s;
@@ -124,8 +124,8 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 		return {};
 	}
 	
-// 	vector<files_::sims_t::contents_t::column_t> cols;
-	vector<vector<string>> data_cols_lines = tools::mat::transpose_matrix(raw_data_tensor()[0]);
+// 	std::vector<files_::sims_t::contents_t::column_t> cols;
+	std::vector<std::vector<std::string>> data_cols_lines = tools::mat::transpose_matrix(raw_data_tensor()[0]);
 	const int cols_per_element = dimensions().size()/cluster_names().size();
 	
 	for (int i=0;i<dimensions().size() && i<data_cols_lines.size() ;i++)
@@ -135,7 +135,7 @@ const vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::contents_t:
 		col.dimension=dimensions()[i];
 		col.unit=units()[i];
 		
-		vector<string> col_data_string = data_cols_lines[i];
+		std::vector<std::string> col_data_string = data_cols_lines[i];
 		col.data=tools::mat::str_vec_to_double_vec(col_data_string);
 		if (col.data.size()==0) continue;
 		columns_s.push_back(col);
@@ -174,19 +174,19 @@ const crater_t::sputter_beam_t files_::dsims_t::contents_t::Ipr()
 	return {sputter_current_s,sputter_time,sputter_depth_s};
 }
 
-const vector<string>& files_::dsims_t::contents_t::dimensions()
+const std::vector<std::string>& files_::dsims_t::contents_t::dimensions()
 {
 	if (dimensions_p.size()>0) return dimensions_p;
 	parse_units_dimensions_clusternames();
 	return dimensions_p;
 }
-const vector<string>& files_::dsims_t::contents_t::units()
+const std::vector<std::string>& files_::dsims_t::contents_t::units()
 {
 	if (units_p.size()>0) return units_p;
 	parse_units_dimensions_clusternames();
 	return units_p;
 }
-const vector<string>& files_::dsims_t::contents_t::cluster_names()
+const std::vector<std::string>& files_::dsims_t::contents_t::cluster_names()
 {
 	if (cluster_names_p.size()>0) return cluster_names_p;
 	parse_units_dimensions_clusternames();
@@ -207,16 +207,16 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 	const int dimensions_units_line_number=(raw_header_tensor().at(c)).size()-1;
 	
 	
-	vector<string> samples;
+	std::vector<std::string> samples;
 	for (int i=0;i<((raw_header_tensor().at(c))[sample_names_line_number]).size();i++) 
 	{
 		
 		if (( (raw_header_tensor().at(c))[sample_names_line_number][i]).size()>0 ) 
 		{
 			
-			string result = ((raw_header_tensor().at(c))[sample_names_line_number][i]);
+			std::string result = ((raw_header_tensor().at(c))[sample_names_line_number][i]);
 			samples.push_back(result);
-// 			cout << "samples.size()="<< samples.size() << endl;
+// 			std::cout << "samples.size()="<< samples.size() << std::endl;
 		}
 	}
 	if (samples.size()!=1) 
@@ -225,7 +225,7 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 		return false;
 	}
 	for (int i=0;i<((raw_header_tensor().at(c))[elements_line_number]).size();i++) {
-        string result = ((raw_header_tensor().at(c))[elements_line_number][i]);
+        std::string result = ((raw_header_tensor().at(c))[elements_line_number][i]);
 
 		if (result.size()>0 ) {
 			cluster_names_p.push_back(result);
@@ -276,11 +276,11 @@ bool files_::dsims_t::contents_t::check_Ipr()
 	return is_Ipr;
 }
 
-set<int> files_::dsims_t::contents_t::corrupted_lines()
+std::set<int> files_::dsims_t::contents_t::corrupted_lines()
 {
-	set<int> corrupted_lines_p;
-	vector<vector<string>> cols_lines = tools::mat::transpose_matrix(raw_data_tensor().at(0));
-	vector<double> col;
+	std::set<int> corrupted_lines_p;
+	std::vector<std::vector<std::string>> cols_lines = tools::mat::transpose_matrix(raw_data_tensor().at(0));
+	std::vector<double> col;
 	
 	int colssize=cols_lines.size();
 	int max_size=-1;
@@ -311,9 +311,9 @@ set<int> files_::dsims_t::contents_t::corrupted_lines()
 
 void files_::dsims_t::contents_t::remove_corrupted_lines()
 {
-	set<int> corrupted_lines_p=corrupted_lines();
+	std::set<int> corrupted_lines_p=corrupted_lines();
 	if (raw_data_tensor().size()==0) return;
-	for (set<int>::reverse_iterator it=corrupted_lines_p.rbegin();it!=corrupted_lines_p.rend();++it)
+	for (std::set<int>::reverse_iterator it=corrupted_lines_p.rbegin();it!=corrupted_lines_p.rend();++it)
 	{
         //logger::info(1,"files_::dsims_t::contents_t::remove_corrupted_lines()","line="+ std::to_string(*it), filename_with_path,"erasing line");
 		raw_data_tensor_p.at(0).erase(raw_data_tensor_p.at(0).begin()+*it);
@@ -326,7 +326,7 @@ void files_::dsims_t::contents_t::remove_corrupted_lines()
 bool files_::dsims_t::contents_t::ipr_shift_correction() 
 {
 	raw_data_tensor();
-	vector<vector<string>>* mat = &raw_data_tensor_p.at(0);
+	std::vector<std::vector<std::string>>* mat = &raw_data_tensor_p.at(0);
     if (mat->size()==0) 
 	{
         //logger::error("files_::dsims_t::contents_t::ipr_shift_correction()","raw_data_tensor_p.at(0).size()==0",to_string(),"returning false");
@@ -348,7 +348,7 @@ bool files_::dsims_t::contents_t::ipr_shift_correction()
 	{
 		if (mat->at(Ipr_offset_line)[cols_per_element-1]=="") break; // die 3. spalte enthaelt immer daten (intensität des 1. isotops)
 	}
-	vector<vector<string>> Ipr_mat;
+	std::vector<std::vector<std::string>> Ipr_mat;
 	// cut off Ipr from data mat
 	Ipr_mat.insert(Ipr_mat.begin(),mat->begin()+Ipr_offset_line,mat->end());	
 	// delete first columns within the matrix
@@ -361,10 +361,10 @@ bool files_::dsims_t::contents_t::ipr_shift_correction()
     return true;
 }
 
-const map<string,string>& files_::dsims_t::contents_t::infos_and_settings()
+const std::map<std::string,std::string>& files_::dsims_t::contents_t::infos_and_settings()
 {
 	if (infos_and_settings_p.size()>0) return infos_and_settings_p;
-	string key, value;
+	std::string key, value;
 	for (auto header_mat:raw_header_tensor())
 	{
 // 		tools::mat::remove_empty_cols_from_matrix(&header_mat);
@@ -380,13 +380,13 @@ const map<string,string>& files_::dsims_t::contents_t::infos_and_settings()
 				else if (value=="") value=word;
 				else break;
 			}
-			infos_and_settings_p.insert(pair<string,string>(key,value));
+			infos_and_settings_p.insert(std::pair<std::string,std::string>(key,value));
 		}
 	}
 	return infos_and_settings_p;
 }
 
-const vector<double> files_::dsims_t::contents_t::infos_and_settings_data(const string find_this)
+const std::vector<double> files_::dsims_t::contents_t::infos_and_settings_data(const std::string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	return {tools::str::str_to_double(infos_and_settings().at(find_this))};
@@ -397,7 +397,7 @@ const tm files_::dsims_t::contents_t::start_date_time()
 	// Analysis date   03/06/2020    
 	// Analysis time   10:43
 	// "03/06/2020 10:43"
-	stringstream time;
+	std::stringstream time;
 	time << infos_and_settings().at("Analysis date") << " " << infos_and_settings().at("Analysis time") << ":00"; 
 	return tools::time::string_time_to_tm_structure(time.str(),"%m/%d/%Y %H:%M:%S");
 }
@@ -407,105 +407,105 @@ const tm files_::dsims_t::contents_t::creation_date_time()
 	// Creation date   03/06/2020    
 	// Creation time   10:43
 	// "03/06/2020 10:43"
-	stringstream time;
+	std::stringstream time;
 	time << infos_and_settings().at("Creation date") << " " << infos_and_settings().at("Creation time") <<":00"; 
 	return tools::time::string_time_to_tm_structure(time.str(),"%m/%d/%Y %H:%M:%S");
 }
 
-const string files_::dsims_t::contents_t::secondary_polarity(const string find_this)
+const std::string files_::dsims_t::contents_t::secondary_polarity(const std::string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	return infos_and_settings().at(find_this);
 }
 
-const quantity::energy_t files_::dsims_t::contents_t::sputter_energy(const string find_this)
+const quantity::energy_t files_::dsims_t::contents_t::sputter_energy(const std::string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
 	double data = tools::str::str_to_double(infos_and_settings().at(find_this));
 	return quantity::energy_t(infos_and_settings_data(find_this),{"eV"});
 }
 
-const element_t files_::dsims_t::contents_t::sputter_element(const string find_this)
+const element_t files_::dsims_t::contents_t::sputter_element(const std::string find_this)
 {
 	if (infos_and_settings().find(find_this)==infos_and_settings().end()) return {};
-	string ele = infos_and_settings().at(find_this);
+	std::string ele = infos_and_settings().at(find_this);
 	ele.erase(remove(ele.begin(), ele.end(), '+'), ele.end());
 	ele.erase(remove(ele.begin(), ele.end(), '-'), ele.end());
 	ele.erase(remove(ele.begin(), ele.end(), '2'), ele.end());
 	return element_t({ele});
 }
 
-const quantity::secondary_voltage_t files_::dsims_t::contents_t::secondary_voltage(const string find_this)
+const quantity::secondary_voltage_t files_::dsims_t::contents_t::secondary_voltage(const std::string find_this)
 {
 	return quantity::secondary_voltage_t(infos_and_settings_data(find_this),{"V"});
 }
 
-const quantity::rastersize_t files_::dsims_t::contents_t::sputter_rastersize(const string find_this)
+const quantity::rastersize_t files_::dsims_t::contents_t::sputter_rastersize(const std::string find_this)
 {
 	return quantity::rastersize_t(infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity::rastersize_t files_::dsims_t::contents_t::analyzed_area(const string find_this)
+const quantity::rastersize_t files_::dsims_t::contents_t::analyzed_area(const std::string find_this)
 {
 	return quantity::rastersize_t(infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::chamber_pressure(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::chamber_pressure(const std::string find_this)
 {	
 	return quantity::quantity_t("chamber_pressure",infos_and_settings_data(find_this),{"mbar"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::contrast_aperture(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::contrast_aperture(const std::string find_this)
 {
 	return quantity::quantity_t("contrast_aperture",infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::egate(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::egate(const std::string find_this)
 {
 	return quantity::quantity_t("egate",infos_and_settings_data(find_this),{"%"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::em_voltage(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::em_voltage(const std::string find_this)
 {
 	return quantity::quantity_t("em_voltage",infos_and_settings_data(find_this),{"V"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::em_yield(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::em_yield(const std::string find_this)
 {
 	return quantity::quantity_t("em_yield",infos_and_settings_data(find_this),{"%"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::entrance_slit(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::entrance_slit(const std::string find_this)
 {
 	return quantity::quantity_t("entrance_slit",infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::energy_window(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::energy_window(const std::string find_this)
 {
 	return quantity::quantity_t("energy_window",infos_and_settings_data(find_this),{"eV"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::exit_slit(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::exit_slit(const std::string find_this)
 {
 	return quantity::quantity_t("exit_slit",infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::field_aperture(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::field_aperture(const std::string find_this)
 {
 	return quantity::quantity_t("field_aperture",infos_and_settings_data(find_this),{"um"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::mass_resolution(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::mass_resolution(const std::string find_this)
 {
 	return quantity::quantity_t("mass_resolution",infos_and_settings_data(find_this),{""});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::total_acquisition_time(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::total_acquisition_time(const std::string find_this)
 {
 	return quantity::quantity_t("total_acquisition_time",infos_and_settings_data(find_this),{"s"});
 }
 
-const quantity::quantity_t files_::dsims_t::contents_t::total_sputtering_time(const string find_this)
+const quantity::quantity_t files_::dsims_t::contents_t::total_sputtering_time(const std::string find_this)
 {
 	return quantity::quantity_t("total_sputtering_time",infos_and_settings_data(find_this),{"s"});
 }

@@ -91,16 +91,16 @@ private:
         class_logger_t logger;
     protected:
         ///all available filenames
-        std::vector<string>* filenames_list = nullptr;
+        std::vector<std::string>* filenames_list = nullptr;
         ///all samples measured by any method
         std::vector<sample_t>* samples_list = nullptr;
         database_t* database = nullptr;
         config_t* config = nullptr;
     public:
-        tool_with_files(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database,config_t& config) :
+        tool_with_files(std::vector<std::string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database,config_t& config) :
             filenames_list(&filenames_list), samples_list(&samples_list), database(&database), config(&config),logger(global_logger,__FILE__,"processor::tool_with_files")
         {}
-//        tool_with_files(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
+//        tool_with_files(std::vector<std::string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
         std::vector<file_type> files;
 
         filter::items_t<file_type> filter_files();
@@ -115,10 +115,10 @@ private:
         class_logger_t logger;
     public:
         tool_with_files_measurements(
-                        std::vector<string>& filenames_list,std::vector<sample_t>& samples_list,database_t& database,config_t& config) :
+                        std::vector<std::string>& filenames_list,std::vector<sample_t>& samples_list,database_t& database,config_t& config) :
             tool_with_files<file_type>(filenames_list,samples_list,database,config),logger(global_logger,__FILE__,"processor::tool_with_files_measurements")
         {}
-//        tool_with_files_measurements(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
+//        tool_with_files_measurements(std::vector<std::string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
         std::vector<measurement_type> measurements;
         void add_all_files_to_measurements()
         {
@@ -158,10 +158,10 @@ public:
     private:
         class_logger_t logger;
     public:
-        tool_with_files_measurements_groups(std::vector<string>& filenames_list,std::vector<sample_t>& samples_list,database_t& database,config_t& config) :
+        tool_with_files_measurements_groups(std::vector<std::string>& filenames_list,std::vector<sample_t>& samples_list,database_t& database,config_t& config) :
             tool_with_files_measurements<file_type, measurement_type>(filenames_list,samples_list,database,config),logger(global_logger,__FILE__,"processor::tool_with_files_measurements_groups")
         {}
-//        tool_with_files_measurements_groups(std::vector<string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
+//        tool_with_files_measurements_groups(std::vector<std::string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
         std::vector<mgroup_type> mgroups;
 
         filter::items_t<mgroup_type> filter_mgroups();
@@ -208,17 +208,17 @@ public:
                 {
                     if (!ignore_olcdb && (M.olcdb != MG.olcdb))
                     {
-                        logger.debug(__func__,MG.to_string_short()).if_statement("M.olcdb",M.settings.to_string_short(),"!=","MG.olcdb",MG.settings_p.to_string_short());
+                        logger.debug(__func__,MG.to_string_short()).if_statement("M.olcdb("+M.to_string_short()+")",M.olcdb,"!=","MG.olcdb",MG.olcdb);
                         continue;
                     }
                     if (M.group_id != MG.group_id)
                     {
-                        logger.debug(__func__,MG.to_string_short()).if_statement("M.group_id",M.settings.to_string_short(),"!=","MG.group_id",MG.settings_p.to_string_short());
+                        logger.debug(__func__,MG.to_string_short()).if_statement("M.group_id("+M.to_string_short()+")",M.group_id,"!=","MG.group_id",MG.group_id);
                         continue;
                     }
                     if (M.settings != MG.settings_p)
                     {
-                        logger.debug(__func__,MG.to_string_short()).if_statement("M.settings",M.settings.to_string_short(),"!=","MG.settings_p",MG.settings_p.to_string_short());
+                        logger.debug(__func__,MG.to_string_short()).if_statement("M.settings("+M.to_string_short()+")",M.settings.to_string_short(),"!=","MG.settings_p",MG.settings_p.to_string_short());
                         continue;
                     }
                     found_group = true;
@@ -313,7 +313,7 @@ private:
     class_logger_t logger;
     config_t config_p;
 public:
-    processor(std::vector<string> args_p);
+    processor(std::vector<std::string> args_p);
     ~processor();
     database_t database;
     const config_t& config() const;

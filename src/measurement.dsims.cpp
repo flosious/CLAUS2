@@ -18,14 +18,16 @@
 
 #include "measurement.hpp"
 
-measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
+measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, database_t& sql_wrapper, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
         sims_t(dsims_file.name,dsims_file.contents,"dsims",sql_wrapper,total_sputter_dephs),
                 settings(dsims_file.name,dsims_file.contents), logger(global_logger,__FILE__,"measurements_::dsims_t")
 {
 	crater.sputter_beam = dsims_file.contents.Ipr();
 	
 	if (dsims_file.contents.total_sputtering_time().is_set())
-		crater.total_sputter_time_s = quantity::sputter_time_t(dsims_file.contents.total_sputtering_time());
+        ///dsims_file.contents.total_sputtering_time() is buggy, as it waits for the user to end the measurement, despite there is no sputtering anymore...
+//		crater.total_sputter_time_s = quantity::sputter_time_t(dsims_file.contents.total_sputtering_time());
+        crater.total_sputter_time_s = quantity::sputter_time_t(dsims_file.contents.total_acquisition_time());
 	else if (crater.sputter_beam.sputter_time.is_set())
 		crater.total_sputter_time_s = quantity::sputter_time_t(crater.sputter_beam.sputter_time.max());
 	else
@@ -40,7 +42,7 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, database_t& sql_wra
 	{
 		if (c.sputter_depth.is_set() || c.sputter_time.is_set()) 
 			continue;
-        //logger::error("measurements_::dsims_t::dsims_t","neither sputer_depth or sputter_time is set in cluster",c.to_string(),"aboarting");
+        //logger::error("measurements_::dsims_t::dsims_t","neither sputer_depth or sputter_time is std::set in cluster",c.to_string(),"aboarting");
 		return;
 	}
 	

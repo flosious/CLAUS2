@@ -44,6 +44,7 @@ void plotwindow_t::plot(const measurements_::sims_t &M)
     if (!X.is_set())
         return;
     int g=0;
+
     for (auto& C : M.clusters)
     {
         if (!C.intensity.is_set()) continue;

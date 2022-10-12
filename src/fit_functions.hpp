@@ -34,12 +34,10 @@
 #include <gsl/gsl_fit.h>
 #include "log.hpp"
 
-using namespace std;
-
 class fit_functions
 {
 public:
-	static const map<double,double> data_1D_to_2D(vector<double> data_1D);
+	static const std::map<double,double> data_1D_to_2D(std::vector<double> data_1D);
 	/// like origin -> peak functions -> asym2sig
 	class asym2sig_t
 	{
@@ -67,15 +65,15 @@ public:
 		double w1;
 		double w2,w3;
 		/// y(x) values
-		vector<double> fitted_y_data(vector<double> x);
+		std::vector<double> fitted_y_data(std::vector<double> x);
 		/// calculation of fit parameters
-		bool fit(map<double, double> data_XY, double y0_s=NAN, double xc_s=NAN, double m_s=NAN, double A_s=NAN, double w1_s=NAN, double w2_s=NAN, double w3_s=NAN);
+		bool fit(std::map<double, double> data_XY, double y0_s=NAN, double xc_s=NAN, double m_s=NAN, double A_s=NAN, double w1_s=NAN, double w2_s=NAN, double w3_s=NAN);
 		bool fitted() const;
 		void print_parameters();
 		double chisq() const;
 		double chisq0() const;
 		double gof() const;
-		string to_string(string prefix="") const;
+		std::string to_string(std::string prefix="") const;
 	};
 	/*
 	 * Y = SUM_i ( c_j * x_j * rank_j )
@@ -87,38 +85,38 @@ public:
 		bool successfully_fitted_p=false;
 		double chisq_p=-1;
 		double chisq_relative_p=-1;
-		vector<double> fit_parameters_p;
+		std::vector<double> fit_parameters_p;
 		///perform the actual fit
-		bool fit(map<double,double> data_XY);
-		vector<unsigned int> rank_p;
+		bool fit(std::map<double,double> data_XY);
+		std::vector<unsigned int> rank_p;
 		double gof_p;
-// 		const vector<double> x_data_p;
+// 		const std::vector<double> x_data_p;
 	public:
 		///degree means rank; 2D data
-		polynom_t(int degree, const map<double,double>& data_XY);
+		polynom_t(int degree, const std::map<double,double>& data_XY);
 		///degree means rank; 1D data
-		polynom_t(int degree, const vector<double>& data);
+		polynom_t(int degree, const std::vector<double>& data);
 		///fitting 2D data
-		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, const map<double,double>& data_XY);
+		polynom_t(const std::vector<unsigned int> rank, const std::vector<double>& fit_parameters, const std::map<double,double>& data_XY);
 		///fitting 1D data
-		polynom_t(const vector<unsigned int> rank, const vector<double>& fit_parameters, const vector<double>& data);
+		polynom_t(const std::vector<unsigned int> rank, const std::vector<double>& fit_parameters, const std::vector<double>& data);
 		///no fit is done; use "fit_parameters" directly 
-		polynom_t(const vector<double>& fit_parameters);
+		polynom_t(const std::vector<double>& fit_parameters);
 		///rank of polynom: 0 means discard, and non-0 means use
-		const vector<unsigned int>& rank() const;
+		const std::vector<unsigned int>& rank() const;
 		const double chisq() const;
 		///
 		double chisq_relative() const;
-		const vector<double>& fit_parameters() const;
+		const std::vector<double>& fit_parameters() const;
 		///the minimum / necessary rank
 		int degree() const;
 		const polynom_t derivative(unsigned int derive=1) const;
-		string to_string(string prefix="") const;
+		std::string to_string(std::string prefix="") const;
 		bool successfully_fitted() const;
 		double gof() const;
 		///returns the fitted Y_data using X_data and the successfully interpolated fit_parameters;
 		///returns empty if interpolation was not successfully
-		vector<double> y_data(const vector<double>& x_data) const;
+		std::vector<double> y_data(const std::vector<double>& x_data) const;
 	};
 	
 	/// y = m*x
@@ -133,16 +131,16 @@ public:
 		double chisq_relative_p=-1;
 		double slope_p;
 		double gof_p;
-		bool fit(map<double,double> data_XY);
+		bool fit(std::map<double,double> data_XY);
 	public:
-		linear_t(const double slope,const map<double,double>& data_XY);
+		linear_t(const double slope,const std::map<double,double>& data_XY);
 		double chisq_relative() const;
 		const double cov() const;
 		double slope() const;
 		double chisq() const;
 		bool successfully_fitted() const;
 		double gof() const;
-		vector<double> y_data(vector<double> x_data);
+		std::vector<double> y_data(std::vector<double> x_data);
 	};
 };
 extern Logger global_logger;

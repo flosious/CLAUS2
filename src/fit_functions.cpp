@@ -18,10 +18,10 @@
 #include "fit_functions.hpp"
 
 
-const map<double, double> fit_functions::data_1D_to_2D(vector<double> data_1D)
+const std::map<double, double> fit_functions::data_1D_to_2D(std::vector<double> data_1D)
 {
-	map<double,double> data_XY;
-	vector<double> X_d(data_1D.size());
+	std::map<double,double> data_XY;
+	std::vector<double> X_d(data_1D.size());
 	
 	for (int x=0;x<X_d.size();x++)
 		X_d.at(x)=x;
@@ -58,7 +58,7 @@ double fit_functions::asym2sig_t::chisq0() const
 
 int fit_functions::asym2sig_t::function(const gsl_vector * x, void *data, gsl_vector * f)
 {
-  map<double, double> *data_XY = ((map<double, double> *)data);
+  std::map<double, double> *data_XY = ((std::map<double, double> *)data);
 
   // y0,m,A,xc,w1,w2,w3
 	double y0 = gsl_vector_get (x, 0);
@@ -71,7 +71,7 @@ int fit_functions::asym2sig_t::function(const gsl_vector * x, void *data, gsl_ve
 
   size_t i=0;
 
-	for (map<double,double>::iterator XY=data_XY->begin();XY!=data_XY->end();++XY)
+	for (std::map<double,double>::iterator XY=data_XY->begin();XY!=data_XY->end();++XY)
     {
       /* Model Yi = A * exp(-lambda * t_i) + b */
 //       double Yi = A * exp (-lambda * t[i]) + b;
@@ -102,7 +102,7 @@ void fit_functions::asym2sig_t::callback(const size_t iter, void *params, const 
 }
 
 
-bool fit_functions::asym2sig_t::fit(map<double, double> data_XY, double y0_s, double xc_s, double m_s, double A_s, double w1_s, double w2_s, double w3_s)
+bool fit_functions::asym2sig_t::fit(std::map<double, double> data_XY, double y0_s, double xc_s, double m_s, double A_s, double w1_s, double w2_s, double w3_s)
 {
 	// maximum time for calculation?
 
@@ -122,7 +122,7 @@ bool fit_functions::asym2sig_t::fit(map<double, double> data_XY, double y0_s, do
 	double /* t[N], y[N],*/ weights[N];
 // 	struct data d = { n, t, y };
 	
-	vector<double> x_,y_;
+	std::vector<double> x_,y_;
 	tools::vec::split_map_to_vecs(data_XY,&x_,&y_);
 	
 	/* starting values */
@@ -150,7 +150,7 @@ bool fit_functions::asym2sig_t::fit(map<double, double> data_XY, double y0_s, do
 
 	/* define the function to be minimized */
 	fdf.f = function;
-	fdf.df = NULL;   /* set to NULL for finite-difference Jacobian */
+	fdf.df = NULL;   /* std::set to NULL for finite-difference Jacobian */
 	fdf.fvv = NULL;     /* not using geodesic acceleration */
 	fdf.n = n;
 	fdf.p = p;
@@ -215,19 +215,19 @@ bool fit_functions::asym2sig_t::fit(map<double, double> data_XY, double y0_s, do
 
 void fit_functions::asym2sig_t::print_parameters()
 {
-	cout << "y0 =" << y0 << endl;
-	cout << "m =" << m << endl;
-	cout << "A =" << A << endl;
-	cout << "xc =" << xc << endl;
-	cout << "w1 =" << w1 << endl;
-	cout << "w2 =" << w2 << endl;
-	cout << "w3 =" << w3 << endl;
+	std::cout << "y0 =" << y0 << std::endl;
+	std::cout << "m =" << m << std::endl;
+	std::cout << "A =" << A << std::endl;
+	std::cout << "xc =" << xc << std::endl;
+	std::cout << "w1 =" << w1 << std::endl;
+	std::cout << "w2 =" << w2 << std::endl;
+	std::cout << "w3 =" << w3 << std::endl;
 }
 
-vector<double> fit_functions::asym2sig_t::fitted_y_data(vector<double> x)
+std::vector<double> fit_functions::asym2sig_t::fitted_y_data(std::vector<double> x)
 {
 	if (!fitted_p) return {};
-	vector<double> y_data(x.size());
+	std::vector<double> y_data(x.size());
 	for (int i=0;i<x.size();i++)
 		y_data[i] = y0 + m*x[i] + A / (1+exp(-((x[i]-xc+w1/2)/w2)))*( 1-1/(1+exp(-((x[i]-xc-w1/2)/w3))) );
 	return y_data;
@@ -238,10 +238,10 @@ bool fit_functions::asym2sig_t::fitted() const
 	return fitted_p;
 }
 
-string fit_functions::asym2sig_t::to_string(string prefix) const
+std::string fit_functions::asym2sig_t::to_string(std::string prefix) const
 {
 	if (!fitted()) return "";
-	stringstream ss;
+	std::stringstream ss;
 	ss << prefix;
 	ss <<"gof = " << gof() << "; chisq = " << chisq() << "; y0 = " << y0 << "; m = " << m << "; A = " << A << "; xc = " << xc << "; w1 = " << w1 << "; w2 = " << w2 << "; w3 = " << w3;
 	return ss.str();
@@ -252,34 +252,34 @@ string fit_functions::asym2sig_t::to_string(string prefix) const
  **POLYNOM***
  ************/
 
-fit_functions::polynom_t::polynom_t(const vector<double>& fit_parameters) : fit_parameters_p(fit_parameters), logger(global_logger,__FILE__,"fit_functions::polynom_t")
+fit_functions::polynom_t::polynom_t(const std::vector<double>& fit_parameters) : fit_parameters_p(fit_parameters), logger(global_logger,__FILE__,"fit_functions::polynom_t")
 {
 	successfully_fitted_p= true;
 	rank_p.resize(fit_parameters.size(),0);
 }
 
-fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, 
-									const vector<double>& fit_parameters, 
-									const map<double, double>& data_XY) : 
+fit_functions::polynom_t::polynom_t(const std::vector<unsigned int> rank, 
+									const std::vector<double>& fit_parameters, 
+									const std::map<double, double>& data_XY) : 
                                     fit_parameters_p(fit_parameters), rank_p(rank),
                                     logger(global_logger,__FILE__,"fit_functions::polynom_t")
 {
 	successfully_fitted_p = fit(data_XY); //fit the data only once
 }
 
-fit_functions::polynom_t::polynom_t(const vector<unsigned int> rank, 
-									const vector<double>& fit_parameters, 
-									const vector<double>& data) :
+fit_functions::polynom_t::polynom_t(const std::vector<unsigned int> rank, 
+									const std::vector<double>& fit_parameters, 
+									const std::vector<double>& data) :
 									polynom_t(rank,fit_parameters,fit_functions::data_1D_to_2D(data))
 {
 }
 
-fit_functions::polynom_t::polynom_t(int degree, const map<double, double>& data_XY) : 
-									polynom_t(vector<unsigned int>(degree+1,1),vector<double>(degree+1,1),data_XY)
+fit_functions::polynom_t::polynom_t(int degree, const std::map<double, double>& data_XY) : 
+									polynom_t(std::vector<unsigned int>(degree+1,1),std::vector<double>(degree+1,1),data_XY)
 {
 }
 
-fit_functions::polynom_t::polynom_t(int degree, const vector<double>& data) : 
+fit_functions::polynom_t::polynom_t(int degree, const std::vector<double>& data) : 
 									polynom_t(degree+1, fit_functions::data_1D_to_2D(data))
 {
 }
@@ -300,7 +300,7 @@ int fit_functions::polynom_t::degree() const
 
 
 
-const vector<unsigned int>& fit_functions::polynom_t::rank() const
+const std::vector<unsigned int>& fit_functions::polynom_t::rank() const
 {
 	return rank_p;
 }
@@ -318,7 +318,7 @@ const fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int
 	for (int j=0;j<derive;j++)
 	{
 		int p = deriv.fit_parameters().size();
-		vector<double> derived_parameters(p-1);
+		std::vector<double> derived_parameters(p-1);
 		for (int i=1;i<p;i++) {
 			derived_parameters.at(i-1) = (i*deriv.fit_parameters()[i]);
 		}
@@ -328,11 +328,11 @@ const fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int
 	return deriv;
 }
 
-vector<double> fit_functions::polynom_t::y_data(const vector<double>& x_data) const
+std::vector<double> fit_functions::polynom_t::y_data(const std::vector<double>& x_data) const
 {
 // 	if (!successfully_fitted()) 
 // 		return {};
-	vector<double> Y(x_data.size());
+	std::vector<double> Y(x_data.size());
 	for (int i=0;i<x_data.size();i++)
 	{
 		Y[i]=fit_parameters()[0];
@@ -351,7 +351,7 @@ bool fit_functions::polynom_t::successfully_fitted() const
 
 std::string fit_functions::polynom_t::to_string(std::string prefix) const
 {
-	stringstream out;
+	std::stringstream out;
 	if (!successfully_fitted())
 		return "unsecesfull fit";
 	out << "gof: " << gof();
@@ -377,16 +377,16 @@ double fit_functions::polynom_t::chisq_relative() const
 	return chisq_relative_p;
 }
 
-const vector<double>& fit_functions::polynom_t::fit_parameters() const
+const std::vector<double>& fit_functions::polynom_t::fit_parameters() const
 {
 	return fit_parameters_p;
 }
 
 
-bool fit_functions::polynom_t::fit(map<double,double> data_XY)
+bool fit_functions::polynom_t::fit(std::map<double,double> data_XY)
 {
-// 	cout << "rank.size(): " << rank.size() << endl;
-// 	cout << "data_XY.size(): " << data_XY.size() << endl;
+// 	std::cout << "rank.size(): " << rank.size() << std::endl;
+// 	std::cout << "data_XY.size(): " << data_XY.size() << std::endl;
 // 	print(data_XY);
 	if (rank().size()==0) 
 		return false;
@@ -425,11 +425,11 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 	for (int i=0;i<fit_parameters_p.size();i++)
 	{
 		gsl_vector_set (c, i, fit_parameters_p.at(i));
-// 		cout << "i="<<i<<"\tc=" << *c->data << endl;
+// 		std::cout << "i="<<i<<"\tc=" << *c->data << std::endl;
 	}
     
-	vector<double> Ydata;
-	vector<double> Xdata;
+	std::vector<double> Ydata;
+	std::vector<double> Xdata;
 	tools::vec::split_map_to_vecs(data_XY,&Xdata,&Ydata);
 	
 	chisq_p=-1;
@@ -463,12 +463,12 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
     gsl_vector_free (c);
     gsl_matrix_free (cov);
 	
-	vector<double> YY = y_data(Xdata);
+	std::vector<double> YY = y_data(Xdata);
 	gof_p = statistics::round(pow(statistics::get_correlation_Y1_Y2(Ydata,YY),10),1);
 	
 	chisq_relative_p = 0;
 	
-// 	cout << endl << "chisq_relative_p: " << chisq_relative_p << endl;
+// 	std::cout << std::endl << "chisq_relative_p: " << chisq_relative_p << std::endl;
 	for (int i=0;i<YY.size();i++)
 	{
 		chisq_relative_p +=  (abs(YY.at(i)-Ydata.at(i)))/Ydata.at(i);
@@ -484,7 +484,7 @@ bool fit_functions::polynom_t::fit(map<double,double> data_XY)
 /****  linear_t  ******/
 /**********************/
 
-fit_functions::linear_t::linear_t(const double slope,const map<double,double>& data_XY) : slope_p(slope), logger(global_logger,__FILE__,"fit_functions::linear_t")
+fit_functions::linear_t::linear_t(const double slope,const std::map<double,double>& data_XY) : slope_p(slope), logger(global_logger,__FILE__,"fit_functions::linear_t")
 {	
 	successfully_fitted_p = fit(data_XY);
 }
@@ -519,9 +519,9 @@ bool fit_functions::linear_t::successfully_fitted() const
 	return successfully_fitted_p;
 }
 
-vector<double> fit_functions::linear_t::y_data(vector<double> x_data)
+std::vector<double> fit_functions::linear_t::y_data(std::vector<double> x_data)
 {
-	vector<double> Y(x_data.size());
+	std::vector<double> Y(x_data.size());
 	for (int i=0;i<x_data.size();i++)
 	{
 		Y[i] = x_data[i] * slope();
@@ -529,7 +529,7 @@ vector<double> fit_functions::linear_t::y_data(vector<double> x_data)
 	return Y;
 }
 
-bool fit_functions::linear_t::fit(map<double, double> data_XY)
+bool fit_functions::linear_t::fit(std::map<double, double> data_XY)
 {
 // 	double cov01, cov11;
 	size_t n = data_XY.size();
@@ -547,10 +547,10 @@ bool fit_functions::linear_t::fit(map<double, double> data_XY)
 	gsl_fit_mul(x,1,y,1,n,&slope_p,&cov_p,&chisq_p);
 	successfully_fitted_p = true;
 	
-	vector<double> Ydata;
-	vector<double> Xdata;
+	std::vector<double> Ydata;
+	std::vector<double> Xdata;
 	tools::vec::split_map_to_vecs(data_XY,&Xdata,&Ydata);
-	vector<double> YY = y_data(Xdata);
+	std::vector<double> YY = y_data(Xdata);
 	gof_p = statistics::round(pow(statistics::get_correlation_Y1_Y2(Ydata,YY),10),1);
 	chisq_relative_p = 0;
 	

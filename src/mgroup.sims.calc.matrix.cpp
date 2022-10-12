@@ -84,7 +84,7 @@ bool mgroups_::sims_t::calc_t::matrix_c::intensities_are_set() const
 			}
 			if (!CC->intensity.is_set())
 			{
-                //logger::error("mgroups_::sims_t::calc_t::matrix_c::intensities_are_set()","intensity is not set in cluster " + C.to_string() + " in measurement " + M->to_string(),"returning false");
+                //logger::error("mgroups_::sims_t::calc_t::matrix_c::intensities_are_set()","intensity is not std::set in cluster " + C.to_string() + " in measurement " + M->to_string(),"returning false");
 				result = false;
 				continue;
 			}
@@ -97,7 +97,7 @@ bool mgroups_::sims_t::calc_t::matrix_c::intensities_are_set() const
  * this function interpolates each matrix cluster from given matrix isotopes from reference samples (database)
  * rank = {0,1,0} means linear RSFs without offset (0*c0*x^0 + 1*c1*x^1 + 0*c2*x^2)
  */ 
-mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::interpolate(const vector<unsigned int> polynom_rank, bool overwrite)
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::matrix_c::interpolate(const std::vector<unsigned int> polynom_rank, bool overwrite)
 {
 	/*
 	 * MG.matrix_clusters() contains all clusters for all matrices of all measurements

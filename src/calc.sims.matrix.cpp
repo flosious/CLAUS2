@@ -18,9 +18,9 @@
 
 #include "calc.hpp"
 
-calc_t::sims_t::matrix_t::matrix_t(const vector<isotope_t>& matrix_isotopes, 
-								   const vector<measurements_::sims_t>& measurements, 
-								   const vector<RSF_t>& RSFs) : 
+calc_t::sims_t::matrix_t::matrix_t(const std::vector<isotope_t>& matrix_isotopes, 
+								   const std::vector<measurements_::sims_t>& measurements, 
+								   const std::vector<RSF_t>& RSFs) : 
 								   
 								   matrix_isotopes_p(matrix_isotopes),
 								   measurements_p(measurements),
@@ -31,7 +31,7 @@ calc_t::sims_t::matrix_t::matrix_t(const vector<isotope_t>& matrix_isotopes,
 {
 // 	for (auto& M:measurements)
 // 		for (auto& i : M.sample->matrix().isotopes())
-// 			cout << i.substance_amount.to_string_detailed() << endl;
+// 			std::cout << i.substance_amount.to_string_detailed() << std::endl;
 	
 }
 
@@ -40,27 +40,27 @@ const calc_t::sims_t::matrix_t::RSFs_t& calc_t::sims_t::matrix_t::RSFs() const
 	return RSFs_p;
 }
 
-const vector<isotope_t>& calc_t::sims_t::matrix_t::matrix_isotopes() const
+const std::vector<isotope_t>& calc_t::sims_t::matrix_t::matrix_isotopes() const
 {
 	return matrix_isotopes_p;
 }
 
 
-const vector<measurements_::sims_t>& calc_t::sims_t::matrix_t::measurements() const
+const std::vector<measurements_::sims_t>& calc_t::sims_t::matrix_t::measurements() const
 {
 	return measurements_p;
 }
 
-const set<cluster_t> calc_t::sims_t::matrix_t::matrix_clusters_from_matrix_isotopes() const
+const std::set<cluster_t> calc_t::sims_t::matrix_t::matrix_clusters_from_matrix_isotopes() const
 {
 	
-	set<cluster_t> matrix_clusters;
-	set<cluster_t> clusters;
+	std::set<cluster_t> matrix_clusters;
+	std::set<cluster_t> clusters;
 	
-// 	cout << "measurements().size()=" << measurements().size() << endl;
+// 	std::cout << "measurements().size()=" << measurements().size() << std::endl;
 	for (const auto& M : measurements())
 	{
-// 		cout << "M.clusters.size()=" << M.clusters.size() << endl;
+// 		std::cout << "M.clusters.size()=" << M.clusters.size() << std::endl;
 		for (const auto& C : M.clusters)
 		{
 			clusters.insert(C);
@@ -79,10 +79,10 @@ const set<cluster_t> calc_t::sims_t::matrix_t::matrix_clusters_from_matrix_isoto
 	return matrix_clusters;
 }
 
-const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted() const
+const std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted() const
 {
     //logger::debug(13,"calc_t::sims_t::matrix_t::elemental_Crel_to_median_Irel_linear_fitted()","entering");
-	vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
+	std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
 	for (const auto& Z : matrix_clusters().clusters())
 	{
 		for (const auto& N : matrix_clusters().clusters())
@@ -103,10 +103,10 @@ const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t:
 	return Crels_to_Irels;
 }
 
-const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted() const
+const std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted() const
 {
     //logger::debug(13,"calc_t::sims_t::matrix_t::isotopical_Crel_to_median_Irel_linear_fitted()","entering");
-	vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
+	std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t> Crels_to_Irels;
 	for (const auto& Z : matrix_clusters().clusters())
 	{
 		for (const auto& N : matrix_clusters().clusters())
@@ -155,7 +155,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::relative_elemental_concentra
 	return quantity::concentration_t(nenner.invert().change_unit(units::derived::atom_percent));
 }
 
-measurements_::sims_t calc_t::sims_t::matrix_t::relative_elemental_concentrations(const vector<cluster_t>& clusters, measurements_::sims_t measurement)
+measurements_::sims_t calc_t::sims_t::matrix_t::relative_elemental_concentrations(const std::vector<cluster_t>& clusters, measurements_::sims_t measurement)
 {
 	for (const auto& c : clusters)
 	{
@@ -171,7 +171,7 @@ measurements_::sims_t calc_t::sims_t::matrix_t::relative_elemental_concentration
 measurements_::sims_t calc_t::sims_t::matrix_t::relative_elemental_concentrations(measurements_::sims_t measurement)
 {
 	const auto mcs = matrix_clusters().clusters();
-	return relative_elemental_concentrations(vector<cluster_t>(mcs.begin(),mcs.end()),measurement);
+	return relative_elemental_concentrations(std::vector<cluster_t>(mcs.begin(),mcs.end()),measurement);
 }
 
 const calc_t::sims_t::matrix_t::clusters_t& calc_t::sims_t::matrix_t::matrix_clusters() const
@@ -186,14 +186,14 @@ const calc_t::sims_t::matrix_t::clusters_t& calc_t::sims_t::matrix_t::matrix_clu
 
 const calc_t::sims_t::matrix_t::clusters_t clusters_from_RSF(const calc_t::sims_t::matrix_t::RSF_t& RSF)
 {
-	set<cluster_t> clusters;
+	std::set<cluster_t> clusters;
 	clusters.insert(RSF.nenner());
 	clusters.insert(RSF.zaehler());
 	return calc_t::sims_t::matrix_t::clusters_t(clusters);
 }
-const calc_t::sims_t::matrix_t::clusters_t clusters_from_RSFs(const set<calc_t::sims_t::matrix_t::RSF_t>& RSFs)
+const calc_t::sims_t::matrix_t::clusters_t clusters_from_RSFs(const std::set<calc_t::sims_t::matrix_t::RSF_t>& RSFs)
 {
-	set<cluster_t> clusters;
+	std::set<cluster_t> clusters;
 	for (auto& RSF : RSFs)
 	{
 		clusters.insert(RSF.nenner());
@@ -201,9 +201,9 @@ const calc_t::sims_t::matrix_t::clusters_t clusters_from_RSFs(const set<calc_t::
 	}
 	return calc_t::sims_t::matrix_t::clusters_t(clusters);
 }
-const calc_t::sims_t::matrix_t::clusters_t clusters_from_RSFs(const vector<calc_t::sims_t::matrix_t::RSF_t>& RSFs)
+const calc_t::sims_t::matrix_t::clusters_t clusters_from_RSFs(const std::vector<calc_t::sims_t::matrix_t::RSF_t>& RSFs)
 {
-	return clusters_from_RSFs(set<calc_t::sims_t::matrix_t::RSF_t>{RSFs.begin(),RSFs.end()});
+	return clusters_from_RSFs(std::set<calc_t::sims_t::matrix_t::RSF_t>{RSFs.begin(),RSFs.end()});
 }
 
 
@@ -223,13 +223,13 @@ calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler,
 calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler, 
 									   const cluster_t nenner, 
 									   double data_s, 
-									   const quantity::abundance_t& abundance_ratio) : RSF_t(zaehler,nenner,vector<double>{data_s}, abundance_ratio)
+									   const quantity::abundance_t& abundance_ratio) : RSF_t(zaehler,nenner,std::vector<double>{data_s}, abundance_ratio)
 {
 }
 
 calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler, 
 									   const cluster_t nenner, 
-									   vector<double> data_s,
+									   std::vector<double> data_s,
 									   const quantity::abundance_t& abundance_ratio,
 									   unit_t unit_s, 
 									   quantity::quantity_t::dimension_t dim_s) :
@@ -258,9 +258,9 @@ calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler,
 // 	return nenner_p;
 // }
 
-string calc_t::sims_t::matrix_t::RSF_t::to_string() const
+std::string calc_t::sims_t::matrix_t::RSF_t::to_string() const
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "Z=" << zaehler().to_string();
 	ss << ", N=" << nenner().to_string();
 	ss << ", " << quantity::quantity_t::to_string();
@@ -314,7 +314,7 @@ calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSF_t::invert() const
 /*********     clusters_t    ************/
 /****************************************/
 
-calc_t::sims_t::matrix_t::clusters_t::clusters_t(const set<cluster_t>& matrix_clusters) : logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::clusters_t")
+calc_t::sims_t::matrix_t::clusters_t::clusters_t(const std::set<cluster_t>& matrix_clusters) : logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::clusters_t")
 {
 	for (auto& C : matrix_clusters)
 	{
@@ -322,19 +322,19 @@ calc_t::sims_t::matrix_t::clusters_t::clusters_t(const set<cluster_t>& matrix_cl
 	}
 }
 
-calc_t::sims_t::matrix_t::clusters_t::clusters_t(const vector<cluster_t>& matrix_clusters) : 
-								clusters_t(set<cluster_t>{matrix_clusters.begin(),matrix_clusters.end()})
+calc_t::sims_t::matrix_t::clusters_t::clusters_t(const std::vector<cluster_t>& matrix_clusters) : 
+								clusters_t(std::set<cluster_t>{matrix_clusters.begin(),matrix_clusters.end()})
 {
 }
 
-const set<cluster_t>& calc_t::sims_t::matrix_t::clusters_t::clusters() const
+const std::set<cluster_t>& calc_t::sims_t::matrix_t::clusters_t::clusters() const
 {
 	return clusters_p;
 }
 
-const vector<isotope_t> calc_t::sims_t::matrix_t::clusters_t::isotopes() const
+const std::vector<isotope_t> calc_t::sims_t::matrix_t::clusters_t::isotopes() const
 {
-	vector<isotope_t> isos;
+	std::vector<isotope_t> isos;
 	isos.reserve(clusters().size());
 	for (const auto& c : clusters())
 	{
@@ -361,9 +361,9 @@ const cluster_t calc_t::sims_t::matrix_t::clusters_t::cluster(const isotope_t& i
 // 	return {};
 // }
 
-const vector<cluster_t> calc_t::sims_t::matrix_t::clusters_t::clusters(const element_t& ele) const
+const std::vector<cluster_t> calc_t::sims_t::matrix_t::clusters_t::clusters(const element_t& ele) const
 {
-	set<cluster_t> clusters;
+	std::set<cluster_t> clusters;
 	for (const auto& c : clusters_p)
 	{
 		if (c.isotopes.front().symbol == ele.symbol)
@@ -372,9 +372,9 @@ const vector<cluster_t> calc_t::sims_t::matrix_t::clusters_t::clusters(const ele
 	return {clusters.begin(),clusters.end()};
 }
 
-const vector<cluster_t> calc_t::sims_t::matrix_t::clusters_t::clusters(const isotope_t& iso) const
+const std::vector<cluster_t> calc_t::sims_t::matrix_t::clusters_t::clusters(const isotope_t& iso) const
 {
-	set<cluster_t> clusters;
+	std::set<cluster_t> clusters;
 	for (const auto& c : clusters_p)
 	{
 		if (c.isotopes.front() == iso)
@@ -430,9 +430,9 @@ bool calc_t::sims_t::matrix_t::clusters_t::has_mixed_elements_in_clusters() cons
 	return false;
 }
 
-vector<element_t> calc_t::sims_t::matrix_t::clusters_t::elements() const
+std::vector<element_t> calc_t::sims_t::matrix_t::clusters_t::elements() const
 {
-	set<element_t> eles;
+	std::set<element_t> eles;
 	sample_t::matrix_t s_mat(isotopes());
 	for (const auto iso : isotopes())
 		eles.insert(iso);
@@ -444,29 +444,29 @@ vector<element_t> calc_t::sims_t::matrix_t::clusters_t::elements() const
 /****************************************/
 
 calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters, 
-										 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
-										 const vector<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
+										 const std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
+										 const std::vector<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
                                          matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs),
                                          logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::RSFs_t")
 {
     //logger::debug(11,"calc_t::sims_t::matrix_t::RSFs_t::RSFs_t","entering");
-// 	cout << "RSFs" << endl;
+// 	std::cout << "RSFs" << std::endl;
 // 	for (auto& rsf : RSFs)
-// 		cout << rsf.to_string() << endl;
-// 	cout << "STOP" << endl;
-// 	cout << "RSFs_manually_set_p" << endl;
+// 		std::cout << rsf.to_string() << std::endl;
+// 	std::cout << "STOP" << std::endl;
+// 	std::cout << "RSFs_manually_set_p" << std::endl;
 // 	for (auto& rsf : RSFs_manually_set_p)
-// 		cout << rsf.to_string() << endl;
-// 	cout << "STOP" << endl;
-// 	cout << "RSFs_manually_set()" << endl;
+// 		std::cout << rsf.to_string() << std::endl;
+// 	std::cout << "STOP" << std::endl;
+// 	std::cout << "RSFs_manually_set()" << std::endl;
 // 	for (auto& rsf : RSFs_manually_set())
-// 		cout << rsf.to_string() << endl;
-// 	cout << "STOP" << endl;
+// 		std::cout << rsf.to_string() << std::endl;
+// 	std::cout << "STOP" << std::endl;
 }
 
 calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters, 
-										 const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
-										 const set<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
+										 const std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
+										 const std::set<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
                                          matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs.begin(),RSFs.end()),
                                          logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::RSFs_t")
 {
@@ -477,11 +477,11 @@ const calc_t::sims_t::matrix_t::clusters_t& calc_t::sims_t::matrix_t::RSFs_t::ma
 {
 	return matrix_clusters_p;
 }
-const vector<calc_t::sims_t::matrix_t::RSF_t>& calc_t::sims_t::matrix_t::RSFs_t::RSFs_manually_set() const
+const std::vector<calc_t::sims_t::matrix_t::RSF_t>& calc_t::sims_t::matrix_t::RSFs_t::RSFs_manually_set() const
 {
 	return RSFs_manually_set_p;
 }
-const vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& calc_t::sims_t::matrix_t::RSFs_t::Crel_to_Irel_lin_fits() const
+const std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& calc_t::sims_t::matrix_t::RSFs_t::Crel_to_Irel_lin_fits() const
 {
 	return Crel_to_Irel_lin_fits_p;
 }
@@ -502,9 +502,9 @@ unsigned int calc_t::sims_t::matrix_t::RSFs_t::RSFs_count_from_clusters() const
 	return (matrix_clusters_p.clusters().size()*matrix_clusters_p.clusters().size()-matrix_clusters_p.clusters().size());
 }
 
-const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs_from_fits() const
+const std::vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs_from_fits() const
 {
-	vector<RSF_t> RSFs_set;
+	std::vector<RSF_t> RSFs_set;
 	for (auto& F : Crel_to_Irel_lin_fits())
 	{
 		const auto RSF_F = RSF(F);
@@ -520,14 +520,14 @@ const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::valid_RSFs_and_fits() const
 {
-	vector<RSF_t> valid_RSFs_s;
+	std::vector<RSF_t> valid_RSFs_s;
 	for (auto& RSF : RSFs_manually_set())
 	{
 		if (!RSF.is_set() || RSF.is_nan() || RSF.is_inf())
 			continue;
 		valid_RSFs_s.push_back(RSF);
 	}
-	vector<Crel_to_Irel_data_polynomial_fit_t> valid_fits;
+	std::vector<Crel_to_Irel_data_polynomial_fit_t> valid_fits;
 	for (auto& fit : valid_fits)
 	{
 		if (!fit.polynom().successfully_fitted())
@@ -541,7 +541,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 {
 	if (all_available_RSFs().size() == RSFs_count_from_clusters())
 		return *this;
-	vector<RSF_t> RSFs_copy = RSFs_manually_set();
+	std::vector<RSF_t> RSFs_copy = RSFs_manually_set();
 	for (auto& Z : matrix_clusters().clusters())
 	{
 		for (auto& N : matrix_clusters().clusters())
@@ -561,7 +561,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_Crel_to_Irel_fits_by_RSFs() const
 {
-	vector<Crel_to_Irel_data_polynomial_fit_t> residual_fits;
+	std::vector<Crel_to_Irel_data_polynomial_fit_t> residual_fits;
 	for (auto& F : Crel_to_Irel_lin_fits())
 	{
 	if (tools::vec::find_in_vec(RSF(F),RSFs_manually_set())==nullptr)
@@ -573,7 +573,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_Crel_t
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_biggest_Irels(float relative_chisqr) const
 {
 	//Irel is X coordinate
-	vector<Crel_to_Irel_data_polynomial_fit_t> new_fits;
+	std::vector<Crel_to_Irel_data_polynomial_fit_t> new_fits;
 	new_fits.reserve(Crel_to_Irel_lin_fits().size());
 	for (auto& F : Crel_to_Irel_lin_fits())
 	{
@@ -592,7 +592,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fits_
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners(float gof_reshold) const
 {
-	vector<Crel_to_Irel_data_polynomial_fit_t> new_fits;
+	std::vector<Crel_to_Irel_data_polynomial_fit_t> new_fits;
 	new_fits.reserve(Crel_to_Irel_lin_fits().size());
 	for (auto& F : Crel_to_Irel_lin_fits())
 	{
@@ -608,8 +608,8 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::improve_fits_
 			const fit_functions::polynom_t new_polynom = new_map.polynom(F.polynom().rank(),F.polynom().fit_parameters());
             //logger::info(4,"calc_t::sims_t::matrix_t::RSFs_t::improve_fits_by_removing_outliners()","new_polynom: "+ new_polynom.to_string());
 			new_fits.push_back(Crel_to_Irel_data_polynomial_fit_t(F.zaehler(),F.nenner(),new_map,new_polynom));
-// 			cout  << "F.Crel_to_Irel_map().Y()=" << F.Crel_to_Irel_map().Y().to_string_detailed() << endl;
-// 			cout << "new_map.Y()=" << new_map.Y().to_string_detailed() << endl;
+// 			cout  << "F.Crel_to_Irel_map().Y()=" << F.Crel_to_Irel_map().Y().to_string_detailed() << std::endl;
+// 			std::cout << "new_map.Y()=" << new_map.Y().to_string_detailed() << std::endl;
 // 			exit(1);
 		}
 	}
@@ -621,9 +621,9 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 	return add_missing_RSFs_from_inverse().add_missing_RSFs_from_virtual_cluster();
 }
 
-const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs(const cluster_t& nenner) const
+const std::vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs(const cluster_t& nenner) const
 {
-	vector<calc_t::sims_t::matrix_t::RSF_t> rsfs;
+	std::vector<calc_t::sims_t::matrix_t::RSF_t> rsfs;
 	for (auto& mc : matrix_clusters().clusters())
 	{
 		if (mc == nenner)
@@ -687,7 +687,7 @@ const calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t& calc_t::sims_t::matrix
 	return *result;
 }
 
-calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs(const set<RSF_t>& rsfs_s) const
+calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs(const std::set<RSF_t>& rsfs_s) const
 {
 	auto new_RSFs = RSFs_manually_set();
 	for (auto& rsf : rsfs_s)
@@ -695,7 +695,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs(c
 		remove(new_RSFs.begin(),new_RSFs.end(),rsf);
 // 		new_RSFs.erase(rsf);
 	}
-	vector<Crel_to_Irel_data_polynomial_fit_t> new_Crel_to_Irels_lin_fits;
+	std::vector<Crel_to_Irel_data_polynomial_fit_t> new_Crel_to_Irels_lin_fits;
 	new_Crel_to_Irels_lin_fits.reserve(Crel_to_Irel_lin_fits().size());
 	for (auto& Crel_to_Irel : Crel_to_Irel_lin_fits())
 	{
@@ -714,23 +714,23 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs(c
 	return RSFs_t(matrix_clusters(),new_Crel_to_Irels_lin_fits,new_RSFs);
 }
 
-bool calc_t::sims_t::matrix_t::RSFs_t::sort_rel_chisqr_to_fits_by_chisqr(const pair<double,Crel_to_Irel_data_polynomial_fit_t>& P1, const pair<double,Crel_to_Irel_data_polynomial_fit_t>& P2)
+bool calc_t::sims_t::matrix_t::RSFs_t::sort_rel_chisqr_to_fits_by_chisqr(const std::pair<double,Crel_to_Irel_data_polynomial_fit_t>& P1, const std::pair<double,Crel_to_Irel_data_polynomial_fit_t>& P2)
 {
 	return (P1.first > P2.first);
 }
 
-set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs_with_worst_fit(int n) const
+std::set<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::RSFs_with_worst_fit(int n) const
 {
 	if (n>=Crel_to_Irel_lin_fits().size())
 		return {};
-	vector<pair<double,Crel_to_Irel_data_polynomial_fit_t>> rel_chisqr_to_fits;
+	std::vector<std::pair<double,Crel_to_Irel_data_polynomial_fit_t>> rel_chisqr_to_fits;
 	rel_chisqr_to_fits.reserve(Crel_to_Irel_lin_fits().size());
 	for (Crel_to_Irel_data_polynomial_fit_t F : Crel_to_Irel_lin_fits())
 	{
-		rel_chisqr_to_fits.push_back(pair<double,Crel_to_Irel_data_polynomial_fit_t>(F.polynom().chisq_relative(),F));
+		rel_chisqr_to_fits.push_back(std::pair<double,Crel_to_Irel_data_polynomial_fit_t>(F.polynom().chisq_relative(),F));
 	}
 	sort(rel_chisqr_to_fits.begin(),rel_chisqr_to_fits.end(),sort_rel_chisqr_to_fits_by_chisqr);
-	set<calc_t::sims_t::matrix_t::RSF_t> RSFs;
+	std::set<calc_t::sims_t::matrix_t::RSF_t> RSFs;
 	for (int i=0;i<n;i++)
 	{
 		RSFs.insert(RSF(rel_chisqr_to_fits.at(i).second));
@@ -745,7 +745,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs_w
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs_above_relative_chisqr_treshold(float relativ_chisq) const
 {
-	vector<Crel_to_Irel_data_polynomial_fit_t> new_Crel_to_Irels_lin_fits;
+	std::vector<Crel_to_Irel_data_polynomial_fit_t> new_Crel_to_Irels_lin_fits;
 	new_Crel_to_Irels_lin_fits.reserve(Crel_to_Irel_lin_fits().size());
 	for (const auto& Crel_to_Irel : Crel_to_Irel_lin_fits())
 	{
@@ -757,7 +757,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs_a
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs_below_gof_treshold(float gof_treshold) const
 {
-	vector<Crel_to_Irel_data_polynomial_fit_t> new_Crel_to_Irels_lin_fits;
+	std::vector<Crel_to_Irel_data_polynomial_fit_t> new_Crel_to_Irels_lin_fits;
 	new_Crel_to_Irels_lin_fits.reserve(Crel_to_Irel_lin_fits().size());
 	for (const auto& Crel_to_Irel : Crel_to_Irel_lin_fits())
 	{
@@ -769,7 +769,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::remove_RSFs_b
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replace_RSF(const RSF_t& RSF) const
 {
-	vector<RSF_t> new_RSFs = RSFs_manually_set();
+	std::vector<RSF_t> new_RSFs = RSFs_manually_set();
 	if (tools::find_in_V(RSF,new_RSFs) == nullptr)
 		new_RSFs.push_back(RSF);
 	else
@@ -779,7 +779,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replac
 	return RSFs_t(matrix_clusters(),Crel_to_Irel_lin_fits(),new_RSFs);
 }
 
-calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replace_RSFs(const vector<RSF_t>& RSFs_s) const
+calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replace_RSFs(const std::vector<RSF_t>& RSFs_s) const
 {
 	auto new_RSFs = RSFs_manually_set();
 	for (auto& RSF : RSFs_s)
@@ -794,7 +794,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_or_replac
 
 calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs() const
 {
-	vector<RSF_t> new_RSFs;
+	std::vector<RSF_t> new_RSFs;
 	new_RSFs.reserve(all_possible_RSFs().size()); // reserve theorethical maximum
 	for (auto rsf : all_available_RSFs())
 	{
@@ -813,10 +813,10 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::symmetrical_R
 		new_RSFs.push_back(RSF_t(rsf.nenner(), rsf.zaehler(), rsf.mean().invert(), rsf.abundance_ratio.invert()));
         //logger::info(3,"calc_t::sims_t::matrix_t::RSFs_t::symmetrical_RSFs()",new_RSFs.back().to_string());
 	}
-// 	cout << endl << "new_RSFs: " << endl;
+// 	std::cout << std::endl << "new_RSFs: " << std::endl;
 // 	for (auto& rsf : new_RSFs)
-// 		cout << rsf.to_string() << endl;
-// 	cout << "ENDE" << endl;
+// 		std::cout << rsf.to_string() << std::endl;
+// 	std::cout << "ENDE" << std::endl;
 	return RSFs_t(matrix_clusters(),Crel_to_Irel_lin_fits(),new_RSFs);
 }
 
@@ -867,27 +867,27 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_natural_a
 	return new_RSFs;
 }
 
-const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_available_RSFs() const
+const std::vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_available_RSFs() const
 {
 	auto fitted_RSFs = RSFs_from_fits();
 // 	for (auto& r : fitted_RSFs)
-// 		cout << "r_fitted: " << r.to_string() << endl;
+// 		std::cout << "r_fitted: " << r.to_string() << std::endl;
 	auto manual_RSFs = RSFs_manually_set();
 // 	for (auto& r : manual_RSFs)
-// 		cout << "r_man: " << r.to_string() << endl;
-	set<calc_t::sims_t::matrix_t::RSF_t> all_RSFs; 
+// 		std::cout << "r_man: " << r.to_string() << std::endl;
+	std::set<calc_t::sims_t::matrix_t::RSF_t> all_RSFs; 
 	
 	if (manual_RSFs.size()>0)
 		all_RSFs.insert(manual_RSFs.begin(),manual_RSFs.end());
 	if (fitted_RSFs.size()>0)
 		all_RSFs.insert(fitted_RSFs.begin(),fitted_RSFs.end());
 // 	for (auto& r : all_RSFs)
-// 		cout << "r_all: " << r.to_string() << endl;
+// 		std::cout << "r_all: " << r.to_string() << std::endl;
 	return {all_RSFs.begin(),all_RSFs.end()};
 } 
-const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_possible_RSFs() const
+const std::vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::all_possible_RSFs() const
 {
-	vector<RSF_t> all_possible_RFS;
+	std::vector<RSF_t> all_possible_RFS;
 	int N = matrix_clusters().clusters().size();
 	all_possible_RFS.reserve(N*N-N);
 	for (auto& Z : matrix_clusters().clusters())
@@ -902,9 +902,9 @@ const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::
 	}
 	return {all_possible_RFS.begin(),all_possible_RFS.end()};
 }
-const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::unknown_RSFs() const
+const std::vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::unknown_RSFs() const
 {
-	vector<RSF_t> all_possible_RFS = all_possible_RSFs();
+	std::vector<RSF_t> all_possible_RFS = all_possible_RSFs();
 	//now substract the known
 	for (auto& rsf : RSFs_manually_set())
 		all_possible_RFS.erase(find(all_possible_RFS.begin(),all_possible_RFS.end(),rsf));
@@ -918,13 +918,13 @@ const vector<calc_t::sims_t::matrix_t::RSF_t> calc_t::sims_t::matrix_t::RSFs_t::
 //void calc_t::sims_t::matrix_t::RSFs_t::plot_now(double sleep_sec) const
 //{
 //	plot_t plot;
-//// 	cout << endl << "Crel_to_Irel_lin_fits:" << Crel_to_Irel_lin_fits().size() << endl;
+//// 	std::cout << std::endl << "Crel_to_Irel_lin_fits:" << Crel_to_Irel_lin_fits().size() << std::endl;
 //	for (auto& RSF_fits : Crel_to_Irel_lin_fits())
 //	{
 //// 		RSF_fits.plot_to_screen(0);
 //// 		continue;
 //		plot_t::window_t w;
-//		stringstream plot_title;
+//		std::stringstream plot_title;
 		
 //		w.Y1.log10_scale=false;
 //		auto Crel_to_Irel_map_withot_infs = RSF_fits.Crel_to_Irel_map.remove_inf();
@@ -963,7 +963,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 /*****     concentration_c    ***********/
 /****************************************/
 
-// calc_t::sims_t::matrix_t::concentration_c::concentration_c(const set<RSF_t>& RSFs) : RSFs_p(RSFs)
+// calc_t::sims_t::matrix_t::concentration_c::concentration_c(const std::set<RSF_t>& RSFs) : RSFs_p(RSFs)
 // {
 // }
 
@@ -987,7 +987,7 @@ calc_t::sims_t::matrix_t::concentration_c::concentration_c(const RSFs_t& RSFs, c
 calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentration_c::concentrations_by_filling_up_all_concentrations_to_1()
 {
 	quantity::concentration_t residual_concentration({100},units::derived::atom_percent,quantity::dimensions::SI::relative);
-	set<cluster_t> clusters_with_unknown_concentrations;
+	std::set<cluster_t> clusters_with_unknown_concentrations;
 	for (const auto& C : matrix_clusters.clusters)
 	{
 // 		auto C = measurement_p.cluster(mc);
@@ -1133,7 +1133,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::element(con
 	const auto rsfs = RSFs().RSFs(*clusters.front());
 	for (const auto& rsf : rsfs)
 	{
-// 		cout << endl << rsf.to_string() << endl;	
+// 		std::cout << std::endl << rsf.to_string() << std::endl;	
 		if (!rsf.is_set())
 		{
             //logger::warning(2,"calc_t::sims_t::matrix_t::concentration_c::element()","!rsf.is_set()",rsf.to_string(), "returning empty");
@@ -1147,10 +1147,10 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::element(con
 		}
 		quantity::concentration_t relativ_concentration((rsf/rsf.abundance_ratio)*irel.from_clusters_pbp());
 		cluster_conc += relativ_concentration;
-// 		cout << endl << cluster_conc.to_string() << endl;
-// 		cout << rsf.to_string() << endl;
-// 		cout << rsf.abundance_ratio.to_string() << endl;
-// 		cout << irel.from_clusters_pbp().to_string() << endl;
+// 		std::cout << std::endl << cluster_conc.to_string() << std::endl;
+// 		std::cout << rsf.to_string() << std::endl;
+// 		std::cout << rsf.abundance_ratio.to_string() << std::endl;
+// 		std::cout << irel.from_clusters_pbp().to_string() << std::endl;
 	}
 	quantity::concentration_t resulting_cluster_conc(cluster_conc.invert().change_unit(units::derived::atom_percent));
     //logger::info(2,"calc_t::sims_t::matrix_t::concentration_c::element()",element.to_string() + ": " + resulting_cluster_conc.to_string());

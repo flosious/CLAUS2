@@ -67,7 +67,7 @@ processor::filter::files_t<T> processor::filter::files_t<T>::by_wafer(int wafer)
 /**************************************/
 
 
-processor::processor(vector<string> args_p) :   logger(global_logger,__FILE__,"processor"),
+processor::processor(std::vector<std::string> args_p) :   logger(global_logger,__FILE__,"processor"),
                                                 database(sql),
                                                 tofsims(unknown_filenames,samples_list_p,database,config_p),
                                                 dsims(unknown_filenames,samples_list_p,database,config_p),
@@ -129,55 +129,55 @@ processor::processor(vector<string> args_p) :   logger(global_logger,__FILE__,"p
 //    tofsims_t tofsims(filenames_p,samples_list,sql_wrapper);
 //    dsims_t dsims(filenames_p,samples_list,sql_wrapper);
 	
-//	cout << "tofsims files: <" << tofsims.files().size() << ">" << endl;
+//	std::cout << "tofsims files: <" << tofsims.files().size() << ">" << std::endl;
 //	for (auto& d : tofsims.files())
 //	{
-//		cout << "\t" << d.name.filename_with_path << endl;
+//		std::cout << "\t" << d.name.filename_with_path << std::endl;
 //	}
-//	cout << endl;
+//	std::cout << std::endl;
 	
-//	cout << "dsims files: <" << dsims.files().size() << ">" << endl;
+//	std::cout << "dsims files: <" << dsims.files().size() << ">" << std::endl;
 //	for (auto& d : dsims.files())
 //	{
-//		cout << "\t" << d.name.filename_with_path << endl;
+//		std::cout << "\t" << d.name.filename_with_path << std::endl;
 //	}
-//	cout << endl;
+//	std::cout << std::endl;
 	
 	
-//	cout << "dektak6m files: <" << dektak6m.files().size() << ">" << endl;
+//	std::cout << "dektak6m files: <" << dektak6m.files().size() << ">" << std::endl;
 //	for (auto& d : dektak6m.files())
 //	{
-//		cout << "\t" << d.name.filename_with_path << endl;
-//// 		cout << d.contents.linescan().xy.to_string_detailed() << endl;
+//		std::cout << "\t" << d.name.filename_with_path << std::endl;
+//// 		std::cout << d.contents.linescan().xy.to_string_detailed() << std::endl;
 //// 		d.contents.linescan().plot_now(0);
 //	}
-//	cout << endl;
+//	std::cout << std::endl;
 
-//    cout << "not recognized: <" << filenames_p.size() << ">" << endl;
+//    std::cout << "not recognized: <" << filenames_p.size() << ">" << std::endl;
 //    for (auto& f : filenames_p)
-//        cout << "\t" << f << endl;
-//	cout << endl;
+//        std::cout << "\t" << f << std::endl;
+//	std::cout << std::endl;
 	
-//	cout << "dektak6m measurements: <" << dektak6m.measurements().size() << ">" << endl;
+//	std::cout << "dektak6m measurements: <" << dektak6m.measurements().size() << ">" << std::endl;
 //	for (auto& d : dektak6m.measurements())
-//		cout << "\t" << d.to_string() << endl;
-//	cout << endl;
-//	cout << "tofsims measurements: <" << tofsims.measurements().size() << ">" << endl;
+//		std::cout << "\t" << d.to_string() << std::endl;
+//	std::cout << std::endl;
+//	std::cout << "tofsims measurements: <" << tofsims.measurements().size() << ">" << std::endl;
 //	for (auto& d : tofsims.measurements())
-//		cout << "\t" << d.to_string() << endl;
-//	cout << endl;
-//	cout << "dsims measurements: <" << dsims.measurements().size() << ">" << endl;
+//		std::cout << "\t" << d.to_string() << std::endl;
+//	std::cout << std::endl;
+//	std::cout << "dsims measurements: <" << dsims.measurements().size() << ">" << std::endl;
 //	for (auto& d : dsims.measurements())
-//		cout << "\t" << d.to_string() << endl;
-//	cout << endl;
-//	cout << "samples: <" << samples_list.size() << ">" << endl;
+//		std::cout << "\t" << d.to_string() << std::endl;
+//	std::cout << std::endl;
+//	std::cout << "samples: <" << samples_list.size() << ">" << std::endl;
 //	for (auto& S : samples_list)
 //	{
-//		cout <<  "\t"  << S.to_string() << "; implants: " << endl;
+//		std::cout <<  "\t"  << S.to_string() << "; implants: " << std::endl;
 //		for (auto& imp : S.implants())
-//			cout << "\t\t" << imp.first.to_string() << ": " << imp.second.to_string() << endl;
+//			std::cout << "\t\t" << imp.first.to_string() << ": " << imp.second.to_string() << std::endl;
 //	}
-//	cout << endl;
+//	std::cout << std::endl;
 //	/*copy linescans to sims measurements*/
 //// 	for (auto iter=dektak6m.measurements().begin();iter!=dektak6m.measurements().end();iter++)
 //	for (measurements_::profilers_t::dektak6m_t&  pm : dektak6m.measurements())
@@ -288,17 +288,16 @@ void processor::parse_filenames(const std::vector<std::string>& filenames)
 		parse_filename(f);
 }
 
-void processor::parse_filename(string filename)
+void processor::parse_filename(std::string filename)
 {
-	// this is not efficient as for each try the file is closed and loaded;
-	// it would be better to implement a general file.contents, 
-	// which his loaded once and then tried for all method
     files_::tofsims_t TF(filename);
     if (TF.name.is_correct_type() && TF.contents.is_correct_type())
     {
         tofsims.files.push_back(TF);
         return;
     }
+    else
+        logger.debug(__func__,filename).value("no tofsims");
 
     files_::dsims_t DF(filename, TF.contents.contents_string());
     if (DF.name.is_correct_type() && DF.contents.is_correct_type())
@@ -306,6 +305,8 @@ void processor::parse_filename(string filename)
         dsims.files.push_back(DF);
         return;
     }
+    else
+        logger.debug(__func__,filename).value("no dsims");
 
     files_::profilers_t::dektak6m_t DeF(filename,DF.contents.contents_string());
     if (DeF.name.is_correct_type() && DeF.contents.is_correct_type())
@@ -313,6 +314,8 @@ void processor::parse_filename(string filename)
         dektak6m.files.push_back(DeF);
         return;
     }
+    else
+        logger.debug(__func__,filename).value("no dektak6m");
 
     files_::jpg_t JF(filename);
     if (JF.name.is_correct_type())
@@ -320,6 +323,8 @@ void processor::parse_filename(string filename)
         jpg.files.push_back(JF);
         return;
     }
+    else
+        logger.debug(__func__,filename).value("no jpg");
 
     files_::aishu_t AF(filename, DeF.contents.contents_string());
     if (AF.name.is_correct_type() && AF.contents.is_correct_type())

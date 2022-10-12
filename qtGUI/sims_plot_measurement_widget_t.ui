@@ -37,16 +37,16 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="plotwindow_t" name="sims_plot_window" native="true">
+     <widget class="sims_plotwindow_t" name="sims_plot_window" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="minimumSize">
        <size>
-        <width>100</width>
+        <width>0</width>
         <height>0</height>
        </size>
       </property>
@@ -55,15 +55,28 @@
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
         <widget class="sims_plot_measurement_tree_t" name="clusters_tree">
-         <column>
-          <property name="text">
-           <string notr="true">1</string>
-          </property>
-         </column>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="clusters_button">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
           <string>CALC</string>
          </property>
@@ -77,14 +90,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>plotwindow_t</class>
+   <class>sims_plotwindow_t</class>
    <extends>QWidget</extends>
-   <header>plotwindow_t.hpp</header>
+   <header>sims_plotwindow_t.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>sims_plot_measurement_tree_t</class>
-   <extends>QTreeWidget</extends>
+   <extends>QTreeView</extends>
    <header>sims_plot_measurement_tree_t.hpp</header>
   </customwidget>
  </customwidgets>

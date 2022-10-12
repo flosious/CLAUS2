@@ -19,9 +19,9 @@
 
 #include "files.hpp"
 
-files_::file_t::contents_t::contents_t(string& filename_with_path,
-                                       const string& delimiter,
-                                       const set<string>& identifiers,
+files_::file_t::contents_t::contents_t(std::string& filename_with_path,
+                                       const std::string& delimiter,
+                                       const std::set<std::string>& identifiers,
                                        std::vector<unsigned int> delete_cols_before_parsing,
                                        const std::string& contents_s) :
     filename_with_path(filename_with_path), delimiter(delimiter),
@@ -32,7 +32,7 @@ files_::file_t::contents_t::contents_t(string& filename_with_path,
 {
 }
 
-const string files_::file_t::contents_t::creation_date_time() const
+const std::string files_::file_t::contents_t::creation_date_time() const
 {
 	time_t cdt = tools::file::creation_date(filename_with_path);
 	return tools::time::time_t_to_string(cdt);
@@ -54,15 +54,15 @@ bool files_::file_t::contents_t::operator==(const files_::file_t::contents_t& ob
 	return false;
 }
 
-string files_::file_t::contents_t::value_by_key(string key)
+std::string files_::file_t::contents_t::value_by_key(std::string key)
 {
 	if (raw_header_tensor().size()==0) return "";
 	if (raw_header_tensor()[0].size()==0) return "";
 	for (auto& line: raw_header_tensor()[0])
 	{
 		if (line.size()==0) continue;
-		if (line.at(0).find(key)==string::npos) continue;
-		string value_string = tools::vec::combine_vec_to_string(line,delimiter);
+        if (line.at(0).find(key)==std::string::npos) continue;
+		std::string value_string = tools::vec::combine_vec_to_string(line,delimiter);
 		tools::str::remove_substring_from_mainstring(&value_string,"=");
 		tools::str::remove_substring_from_mainstring(&value_string,key);
 		tools::str::remove_spaces_from_string_start(&value_string);
@@ -71,18 +71,19 @@ string files_::file_t::contents_t::value_by_key(string key)
 	return "";
 }
 
-string files_::file_t::contents_t::matrix()
+std::string files_::file_t::contents_t::matrix()
 {
 	return value_by_key("matrix");
 }
 
-const string& files_::file_t::contents_t::contents_string()
+const std::string& files_::file_t::contents_t::contents_string()
 {
 	if (contents_p.size()==0)
 	{
 		
 		if (!tools::file::file_exists(filename_with_path)) 
 		{
+            logger.error(__func__,filename_with_path).signal("does not exist");
             //logger::error("files_::file_t::contents_t::contents_string()", "!tools::file::file_exists(filename_with_path)", filename_with_path,"skipping file");
 			return contents_p;
 		}
@@ -96,7 +97,7 @@ bool files_::file_t::contents_t::is_correct_type()
 	if (contents_string()=="") return false;
 	for (auto& fci : identifiers)
 	{
-		if (contents_string().find(fci)==string::npos)
+        if (contents_string().find(fci)==std::string::npos)
 		{
 			return false;
 		}
@@ -104,11 +105,11 @@ bool files_::file_t::contents_t::is_correct_type()
 	return true;
 }
 
-bool files_::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vector<string> > >* raw_header_tensor, vector<vector<vector<string> > >* raw_data_tensor) 
+bool files_::file_t::contents_t::parse_data_and_header_tensors(std::vector<std::vector<std::vector<std::string> > >* raw_header_tensor, std::vector<std::vector<std::vector<std::string> > >* raw_data_tensor) 
 {
 	raw_data_tensor->clear();
 	raw_header_tensor->clear();
-	vector<vector<string>> raw_mat = tools::mat::format_string_to_matrix(contents_string(),LINE_DELIMITER,delimiter);
+	std::vector<std::vector<std::string>> raw_mat = tools::mat::format_string_to_matrix(contents_string(),LINE_DELIMITER,delimiter);
     if (delete_cols_before_parsing.size()>0)
     {
         auto raw_mat_transposed = tools::mat::transpose_matrix(raw_mat);
@@ -118,7 +119,7 @@ bool files_::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vec
     }
 
 	tools::mat::remove_empty_lines_from_matrix(&raw_mat);
-	vector<vector<string> > header_temp, data_temp;
+	std::vector<std::vector<std::string> > header_temp, data_temp;
 	bool data_scanned=false;
 	bool header_scanned=false;
 	if (raw_mat.size()<1) return false;
@@ -161,7 +162,7 @@ bool files_::file_t::contents_t::parse_data_and_header_tensors(vector<vector<vec
 	contents_p.clear();
 	return true;
 }
-vector<vector<vector<string> > >& files_::file_t::contents_t::raw_header_tensor()
+std::vector<std::vector<std::vector<std::string> > >& files_::file_t::contents_t::raw_header_tensor()
 {
 	if (raw_header_tensor_p.size()>0) return raw_header_tensor_p;
 	
@@ -171,7 +172,7 @@ vector<vector<vector<string> > >& files_::file_t::contents_t::raw_header_tensor(
 	}
 	return raw_header_tensor_p;
 }
-vector<vector<vector<string> > >& files_::file_t::contents_t::raw_data_tensor()
+std::vector<std::vector<std::vector<std::string> > >& files_::file_t::contents_t::raw_data_tensor()
 {
 	if (raw_data_tensor_p.size()>0) return raw_data_tensor_p;
 	if (!parse_data_and_header_tensors(&raw_header_tensor_p, &raw_data_tensor_p))
@@ -183,16 +184,16 @@ vector<vector<vector<string> > >& files_::file_t::contents_t::raw_data_tensor()
 	return raw_data_tensor_p;
 }
 
-void files_::file_t::contents_t::to_screen(string prefix)
+void files_::file_t::contents_t::to_screen(std::string prefix)
 {
-	cout << prefix << "delimiter:\t'" << delimiter <<"'" << endl;
-	if (identifiers.size()==1) cout << prefix << "identifiers:\t" << *identifiers.begin() << endl;
-	else cout << prefix << "identifiers:\t<" << identifiers.size() << ">" << endl;
+	std::cout << prefix << "delimiter:\t'" << delimiter <<"'" << std::endl;
+	if (identifiers.size()==1) std::cout << prefix << "identifiers:\t" << *identifiers.begin() << std::endl;
+	else std::cout << prefix << "identifiers:\t<" << identifiers.size() << ">" << std::endl;
 }
 
-string files_::file_t::contents_t::to_string(const string del)
+std::string files_::file_t::contents_t::to_string(const std::string del)
 {
-	stringstream out;
+	std::stringstream out;
 	out << "contents_string().size()="<< contents_string().size() << del;
 	out << "creation_date_time(): " << creation_date_time();
 	return out.str();

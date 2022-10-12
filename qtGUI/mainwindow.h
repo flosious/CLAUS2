@@ -70,8 +70,6 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
-    void on_MG_tab_measurement_cluster_tree_button_clicked();
-
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
@@ -79,7 +77,8 @@ public:
     Ui::MainWindow *ui;
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+public slots:
+    void auto_calc();
 
 };
 

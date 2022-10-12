@@ -50,7 +50,7 @@ protected:
 #ifdef QT_DEBUG
     bool print_debug_p=true;
 #else
-    bool print_debug=false;
+    bool print_debug_p=false;
 #endif
     bool print_warning_p=true;
     bool print_info_p=true;

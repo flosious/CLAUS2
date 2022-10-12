@@ -23,7 +23,7 @@ bool measurements_::measurement_t::use_sample=true;
 bool measurements_::measurement_t::use_olcdb=true;
 bool measurements_::measurement_t::use_group=true;
 
-measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, string method, database_t& database) :
+measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, std::string method, database_t& database) :
                                                 repetition(filename.repetition()), olcdb(filename.olcdb()),group_id(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
                                                 sample(filename,database), logger(global_logger,__FILE__,"measurements_::measurement_t")
 {
@@ -41,7 +41,7 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, fi
 //	}
 }
 
-measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, string method, database_t& database) :
+measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, std::string method, database_t& database) :
             repetition(filename.repetition()), olcdb(filename.olcdb()), group_id(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
             sample(filename,database), logger(global_logger,__FILE__,"measurements_::measurement_t")
 {
@@ -55,13 +55,13 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, st
 //			sample = &samples_list.back();
 //		}
 //	}
-//    stringstream ss;
+//    std::stringstream ss;
 //    ss.str();
 }
 
 long long unsigned int measurements_::measurement_t::memory_address() const
 {
-	stringstream out;
+	std::stringstream out;
 	out << this;
 	const auto address = tools::math::hexTOint(out.str());
 	return address;
@@ -92,9 +92,9 @@ bool measurements_::measurement_t::operator==(const measurements_::measurement_t
 	return true;	
 }
 
-string measurements_::measurement_t::to_string(const string del) const
+std::string measurements_::measurement_t::to_string(const std::string del) const
 {
-	stringstream ss;
+	std::stringstream ss;
     ss << "olcdb: " << olcdb;
     ss << del << sample.to_name(del);
 //    ss << del << sample;
@@ -104,10 +104,10 @@ string measurements_::measurement_t::to_string(const string del) const
 }
 
 
-const string measurements_::measurement_t::to_string_short(const string del) const
+const std::string measurements_::measurement_t::to_string_short(const std::string del) const
 {
     //logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
-    stringstream ss;
+    std::stringstream ss;
     ss << measurement_t::to_string();
     return ss.str();
 }

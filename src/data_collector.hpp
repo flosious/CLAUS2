@@ -33,10 +33,10 @@ public:
         class_logger_t logger;
 		///Ms are unique, so it is effectively a set
 		///sort data using measurement as reference column to sort lines   	/*************************/
-		vector<const measurements_::sims_t*> measurements;							// M1* // Q1 // Q2 // .. //
+		std::vector<const measurements_::sims_t*> measurements;							// M1* // Q1 // Q2 // .. //
 	public:
 // 		cluster_t::RSF_t& RSFs(const measurements_::sims_t* M, ) const;
-		sims_t(const vector<measurements_::sims_t*>& Ms_s);
+		sims_t(const std::vector<measurements_::sims_t*>& Ms_s);
 		///scalars
 		quantity::table_t::column_t get_column_concentrations_from_sample_matrix(const isotope_t& iso);
 		quantity::table_t::column_t get_column_concentrations_from_sample_matrix(const element_t& ele);

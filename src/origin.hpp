@@ -26,7 +26,6 @@
 #include "quantity.hpp"
 #include "cluster.hpp"
 
-using namespace std;
 
 
 
@@ -40,20 +39,20 @@ public:
     private:
         class_logger_t logger;
 	public:
-		string longname="";
-		string unit="";
-		string comment="";
-		vector<string> data;
-		vector<string> vec();
-		column_t(const vector<double>& data_s, string longname="",string unit="", string comment="");
-		column_t(const quantity::quantity_t& quantity, string prefix="", string suffix="");
+		std::string longname="";
+		std::string unit="";
+		std::string comment="";
+		std::vector<std::string> data;
+		std::vector<std::string> vec();
+		column_t(const std::vector<double>& data_s, std::string longname="",std::string unit="", std::string comment="");
+		column_t(const quantity::quantity_t& quantity, std::string prefix="", std::string suffix="");
 		/// superscript "^30Si" --> "\+(30)Si"
 		/// subscript "Si_2" --> "Si\-(2)"
-		void apply_origin_conform_replacements(string& in_here);
+        void apply_origin_conform_replacements(std::string& in_here);
 	};
 	origin_t(column_t cols);
-	origin_t(vector<cluster_t>& clusters);
-	string to_string();
+	origin_t(std::vector<cluster_t>& clusters);
+	std::string to_string();
 };
 extern Logger global_logger;
 #endif // ORIGIN_T_HPP

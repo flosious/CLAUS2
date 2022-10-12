@@ -20,7 +20,7 @@
 #include "element.hpp"
 
 /*PSE singleton*/
-pse_t PSE;
+pse_t PSE(global_logger);
 
 /************************************/
 /*********     element_t       ******/
@@ -30,7 +30,7 @@ element_t::element_t() : logger(global_logger,__FILE__,"element_t")
 {
 }
 
-element_t::element_t(string symbol_s, double abs_amount, bool use_natural_abundance) :symbol(symbol_s),substance_amount({abs_amount}), logger(global_logger,__FILE__,"element_t")
+element_t::element_t(std::string symbol_s, double abs_amount, bool use_natural_abundance) :symbol(symbol_s),substance_amount({abs_amount}), logger(global_logger,__FILE__,"element_t")
 {
 	if (PSE.element(symbol_s)==nullptr)
 	{
@@ -50,7 +50,7 @@ element_t::element_t(string symbol_s, double abs_amount, bool use_natural_abunda
 	set_elemental_substance_amount();
 }
 
-element_t::element_t(isotope_t isotope_s) : element_t(vector<isotope_t>{isotope_s})
+element_t::element_t(isotope_t isotope_s) : element_t(std::vector<isotope_t>{isotope_s})
 {
 }
 
@@ -183,9 +183,9 @@ bool element_t::operator<(const element_t& obj) const
 	return symbol<obj.symbol;
 }
 
-const string element_t::to_string() const
+const std::string element_t::to_string() const
 {
-	stringstream out;
+	std::stringstream out;
 	const int size = isotopes.size();
 	if (substance_amount.is_set())
 		out << substance_amount.to_string() << "\t";

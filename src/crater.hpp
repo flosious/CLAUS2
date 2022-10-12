@@ -54,7 +54,7 @@ public:
 		quantity::quantity_t roughness();
 		/// origin -> peak-functions -> Asym2Sig
 		quantity::quantity_t fit();
-		string to_string(string prefix="");
+		std::string to_string(std::string prefix="");
 		bool is_set() const;
 //		void plot_now(double sleep_sec);
 	};
@@ -65,7 +65,7 @@ public:
 		quantity::sputter_time_t sputter_time;
 		quantity::sputter_depth_t sputter_depth;
 		sputter_beam_t(quantity::current_t sputter_current_s={}, quantity::sputter_time_t sputter_time={}, quantity::sputter_depth_t sputter_depth_s={});
-		const string to_string(const string del=", ") const;
+		const std::string to_string(const std::string del=", ") const;
 	};
 /***********/	
 	friend class processor;
@@ -74,12 +74,12 @@ private:
 	quantity::sputter_time_t total_sputter_time_s;
 	///calculates common X points from all clusters and sets sputter_depth_s and/or sputter_time
 	quantity::sputter_depth_t total_sputter_depths;
-	vector<linescan_t> linescans;
+	std::vector<linescan_t> linescans;
 	///called by common_sputter_depth or common_sputter_time
-	quantity::quantity_t common_X_quantity(const vector<quantity::quantity_t>& X_quantities);
+	quantity::quantity_t common_X_quantity(const std::vector<quantity::quantity_t>& X_quantities);
 	
 public:
-	const string to_string(const string del=", ") const;
+	const std::string to_string(const std::string del=", ") const;
 	crater_t();
 	crater_t(const quantity::sputter_depth_t& sputter_depth);
 	crater_t(const quantity::sputter_time_t& sputter_time);
@@ -91,9 +91,9 @@ public:
 	quantity::sputter_depth_t sputter_depth;
 	quantity::sputter_time_t sputter_time;
 	///resolution is 1s
-	quantity::sputter_time_t unix_sputter_time(string date_time_start);
+	quantity::sputter_time_t unix_sputter_time(std::string date_time_start);
 	quantity::current_t& sputter_current();
-	quantity::sputter_time_t& total_sputter_time(vector<cluster_t>* clusters=nullptr);
+	quantity::sputter_time_t& total_sputter_time(std::vector<cluster_t>* clusters=nullptr);
 	quantity::sputter_depth_t total_sputter_depth();
 	quantity::SR_t SR;
 	
@@ -101,9 +101,9 @@ public:
 	crater_t change_resolution(quantity::sputter_depth_t sputter_depth_res);
 	
 	///finds a common minimal sputter_depth
-	quantity::sputter_depth_t common_sputter_depth(vector<cluster_t>& clusters);
+	quantity::sputter_depth_t common_sputter_depth(std::vector<cluster_t>& clusters);
 	///finds a common minimal sputter_time
-	quantity::sputter_time_t common_sputter_time(vector<cluster_t>& clusters);
+	quantity::sputter_time_t common_sputter_time(std::vector<cluster_t>& clusters);
 };
 extern Logger global_logger;
 

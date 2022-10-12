@@ -24,10 +24,10 @@
 /****   sims_t   *****/
 /*********************/
 
-files_::sims_t::name_t::name_t(string& filename_with_path_s, 
-						  const string delimiter_s, 
-						  const std::set< string > OR_identifiers_s, 
-						  const std::set< string > AND_identifiers_s) :
+files_::sims_t::name_t::name_t(std::string& filename_with_path_s,
+						  const std::string delimiter_s, 
+						  const std::set< std::string > OR_identifiers_s, 
+						  const std::set< std::string > AND_identifiers_s) :
 						  
 							files_::file_t::crater_in_name_t(filename_with_path_s,
 													delimiter_s,
@@ -43,14 +43,14 @@ files_::sims_t::name_t::name_t(string& filename_with_path_s,
 // 	if (total_sputter_depths_p.size()==0)
 // 	{
 // // 		for (auto& filename_part : not_parseable_filename_parts())
-// 		for (vector<string>::iterator FNp=not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
+// 		for (std::vector<std::string>::iterator FNp=not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
 // 		{
-// 			smatch match;
-// 			regex reg ("^([0-9]{2,})(nm|A)$"); 
+// 			std::smatch match;
+// 			std::regex reg ("^([0-9]{2,})(nm|A)$"); 
 // 			if (regex_search(*FNp,match,reg)) 
 // 			{
-// 				string value = match[1];
-// 				string unit = match[2];
+// 				std::string value = match[1];
+// 				std::string unit = match[2];
 // 				total_sputter_depths_p.push_back({{tools::str::str_to_double(value)},unit});
 // 				not_parseable_filename_parts_p.erase(FNp);
 // 				FNp--;
@@ -65,7 +65,7 @@ files_::sims_t::name_t::name_t(string& filename_with_path_s,
 // 	return tspd;
 // }
 // 
-// const string files_::sims_t::name_t::filename_without_crater_depths()
+// const std::string files_::sims_t::name_t::filename_without_crater_depths()
 // {
 // 	if (filename_without_crater_depths_s=="") 
 // 		total_sputter_depths();
@@ -74,10 +74,10 @@ files_::sims_t::name_t::name_t(string& filename_with_path_s,
 
 bool files_::sims_t::name_t::parse_sputter_energy_element_polarity()
 {
-	smatch match;
-	regex reg;
+	std::smatch match;
+	std::regex reg;
 // 	for (auto& filename_part : not_parseable_filename_parts())
-	for (vector<string>::iterator FNp = not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
+	for (std::vector<std::string>::iterator FNp = not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
 	{
 		reg = ("^([0-9]{1,2})(kV|keV)(O|Cs)(\\+|-)$"); 
 		if (regex_search(*FNp,match,reg)) 
@@ -120,14 +120,14 @@ element_t files_::sims_t::name_t::sputter_element()
 	return sputter_element_p;
 }
 
-const string files_::sims_t::name_t::secondary_polarity()
+const std::string files_::sims_t::name_t::secondary_polarity()
 {
 	if (secondary_polarity_p=="") 
 		parse_sputter_energy_element_polarity();
 	return secondary_polarity_p;
 }
 
-const vector<string>& files_::sims_t::name_t::not_parseable_filename_parts()
+const std::vector<std::string>& files_::sims_t::name_t::not_parseable_filename_parts()
 {
 	files_::file_t::name_t::not_parseable_filename_parts();
 	sputter_energy(); // parse_sputter_energy_element_polarity();
@@ -135,9 +135,9 @@ const vector<string>& files_::sims_t::name_t::not_parseable_filename_parts()
 	return not_parseable_filename_parts_p;
 }
 
-const string files_::sims_t::name_t::simple_name()
+const std::string files_::sims_t::name_t::simple_name()
 {
-	string simple_name_p;
+	std::string simple_name_p;
 	if ((lot()=="") && not_parseable_filename_parts().size()>0) 
 		simple_name_p=tools::vec::combine_vec_to_string(not_parseable_filename_parts(), delimiter);
 	else if ((wafer()<0)) 
@@ -163,9 +163,9 @@ bool files_::sims_t::name_t::operator!=(name_t& obj)
 	return !operator==(obj);
 }
 
-string files_::sims_t::name_t::to_string()
+std::string files_::sims_t::name_t::to_string()
 {
-	stringstream out;
+	std::stringstream out;
 	
 	out << file_t::name_t::to_string(";");
 	out << total_sputter_depths().to_string() <<";";

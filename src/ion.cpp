@@ -26,7 +26,7 @@ ion_t::ion_t() : logger(global_logger,__FILE__,"ion_t")
 {
 }
 
-ion_t::ion_t(vector<element_t> elements_s,  quantity::electrical_charge_t electric_charge_s) : elements(elements_s), electric_charge(electric_charge_s), logger(global_logger,__FILE__,"ion_t")
+ion_t::ion_t(std::vector<element_t> elements_s,  quantity::electrical_charge_t electric_charge_s) : elements(elements_s), electric_charge(electric_charge_s), logger(global_logger,__FILE__,"ion_t")
 {
 }
 
@@ -72,10 +72,10 @@ bool ion_t::is_set() const
 }
 
 
-string ion_t::to_string(const string del) const
+std::string ion_t::to_string(const std::string del) const
 {
 	if (!is_set()) return "";
-	stringstream out;
+	std::stringstream out;
 	out << "(" ;
 	const int size=elements.size(); 
 	for (int i=0;i<size;i++)

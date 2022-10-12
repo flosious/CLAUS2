@@ -37,9 +37,9 @@ int plot_t::Draw(mglGraph* gr)
 	{
 		int x_n = ceil((double)sqrt(windows.size()));
 		int y_n = ceil((double)windows.size() / x_n );
-// 		cout << endl << "windows.size: " << windows.size() << endl;
-// 		cout << "x_n: " << x_n << endl;
-// 		cout << "y_n: " << y_n << endl;
+// 		std::cout << std::endl << "windows.size: " << windows.size() << std::endl;
+// 		std::cout << "x_n: " << x_n << std::endl;
+// 		std::cout << "y_n: " << y_n << std::endl;
 		// create sub-plots
 		for (int i=0; i < windows.size(); i++)
 		{
@@ -54,7 +54,7 @@ int plot_t::Draw(mglGraph* gr)
 	tools::str::filter_t filter;
     //logger::debug(15,"plot_t::Draw()","entering");
 	/*x axis*/
-	vector<const quantity::quantity_t*> Xs;
+	std::vector<const quantity::quantity_t*> Xs;
 	for (auto& c:Y1.curves)
 		Xs.push_back(&c.XY.X());
 	for (auto& c:Y2.curves)
@@ -82,7 +82,7 @@ int plot_t::Draw(mglGraph* gr)
 	gr->SetOrigin(0,-1);
 	gr->Axis("x");
 
-	stringstream x_l;
+	std::stringstream x_l;
 	if (Xs.front()->is_relative())
 		x_l << "rel. ";
 	x_l << Xs.front()->name() << " [" << Xs.front()->unit().to_string() << "]";
@@ -120,20 +120,20 @@ int plot_t::Draw(mglGraph* gr)
 	return 0;
 }
 
-void plot_t::axis_t::add_line(double x_start, double y_start, double x_stop, double y_stop, string color, string text)
+void plot_t::axis_t::add_line(double x_start, double y_start, double x_stop, double y_stop, std::string color, std::string text)
 {
 	lines.push_back({x_start,y_start,x_stop,y_stop,color,text});
 }
 
-void plot_t::axis_t::add_arrow(double x_start, double y_start, double x_stop, double y_stop, string color, string text)
+void plot_t::axis_t::add_arrow(double x_start, double y_start, double x_stop, double y_stop, std::string color, std::string text)
 {
 	lines.push_back({x_start,y_start,x_stop,y_stop,color,text});
 }
 
 
-void plot_t::to_screen(const string window_title, double sleep_sec)
+void plot_t::to_screen(const std::string window_title, double sleep_sec)
 {
-// 	cout << "window_title\t" << window_title << endl;
+// 	std::cout << "window_title\t" << window_title << std::endl;
 	mglFLTK gr(this,window_title.c_str());
 // 	gr.Run();
 	if (sleep_sec==0)
@@ -149,7 +149,7 @@ void plot_t::to_screen(const string window_title, double sleep_sec)
 	}
 }
 
-void plot_t::to_file(const string filename)
+void plot_t::to_file(const std::string filename)
 {
 	mglFLTK gr(this);
 // 	gr.SetQuality(6);
@@ -171,7 +171,7 @@ void plot_t::to_file(const string filename)
 /*******************       plot_t::line_t              *****************************/
 /************************************************************************************/
 
-plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, double y_stop, string color, string text) :
+plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, double y_stop, std::string color, std::string text) :
                         x_start(x_start), y_start(y_star),x_stop(x_stop),y_stop(y_stop), color(color), text(text),
                         logger(global_logger,__FILE__,"plot_t::axis_t::line_t")
 {
@@ -187,7 +187,7 @@ void plot_t::axis_t::add_curve(const quantity::map_t& XY, const std::string lege
 	add_curve(XY.X(),XY.Y(),legend);
 }
 
-void plot_t::axis_t::add_polynom(const quantity::map_t& XY, const fit_functions::polynom_t& polynom_s, const string legend, const string color, const unsigned int  points)
+void plot_t::axis_t::add_polynom(const quantity::map_t& XY, const fit_functions::polynom_t& polynom_s, const std::string legend, const std::string color, const unsigned int  points)
 {
 	const quantity::quantity_t new_X=XY.X().change_resolution(points) ;
 	add_points(XY.polyfit(polynom_s,new_X),legend, color);
@@ -199,21 +199,21 @@ void plot_t::axis_t::add_points(const quantity::map_t& XY, const std::string leg
 		points.push_back({XY,legend,color});
 // 	add_points(XY.X(),XY.Y(),legend,color);
 }
-void plot_t::axis_t::add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend, const string color)
+void plot_t::axis_t::add_points(const quantity::quantity_t& X, const quantity::quantity_t& Y, const std::string legend, const std::string color)
 {
     //logger::debug(15,"plot_t::axis_t::add_points()","entering");
 	if (Y.is_set() && X.is_set())
 		points.push_back({quantity::map_t(X,Y),legend,color});
 }
 
-void plot_t::axis_t::add_curve(const vector<double>& X, const vector<double>& Y, const string legend)
+void plot_t::axis_t::add_curve(const std::vector<double>& X, const std::vector<double>& Y, const std::string legend)
 {
 	quantity::quantity_t Xq ("X",X,0);
 	quantity::quantity_t Yq ("Y",Y,0);
 	add_curve(Xq,Yq,legend);
 }
 
-void plot_t::axis_t::add_curve(const quantity::quantity_t& X, const quantity::quantity_t& Y, const string legend)
+void plot_t::axis_t::add_curve(const quantity::quantity_t& X, const quantity::quantity_t& Y, const std::string legend)
 {
     //logger::debug(15,"plot_t::axis_t::add_curve()","entering");
 	if (Y.is_set() && X.is_set())
@@ -259,22 +259,22 @@ bool plot_t::axis_t::check()
 
 
 
-// string plot_t::axis_t::unit_string(const unit_t& unit)
+// std::string plot_t::axis_t::unit_string(const unit_t& unit)
 // {
-// 	const vector<string> units = {"at%","at/ccm","nm","s"};
+// 	const std::vector<std::string> units = {"at%","at/ccm","nm","s"};
 // 	for (auto& u : units)
 // 		if (unit == unit_t(u))
 // 			return u;
-// 	return unit.to_string(); //any fitting unit string will do
+// 	return unit.to_string(); //any fitting unit std::string will do
 // }
 // 
-// string plot_t::axis_t::unit_string(quantity::quantity_t& quantity)
+// std::string plot_t::axis_t::unit_string(quantity::quantity_t& quantity)
 // {
-// 	const vector<string> units = {"at%","at/ccm","nm","s"};
+// 	const std::vector<std::string> units = {"at%","at/ccm","nm","s"};
 // 	for (auto& u : units)
 // 		if (unit == unit_t(u))
 // 			return u;
-// 	return quantity.unit().to_string(); //any fitting unit string will do
+// 	return quantity.unit().to_string(); //any fitting unit std::string will do
 // }
 
 void plot_t::axis_t::draw(mglGraph* gr, double x_origin) 
@@ -289,7 +289,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	if (curves.size() == 0 && points.size() == 0)
 		return;
 	gr->SetRange('y',range().start,range().stop);
-// 	cout << range().to_string() << endl;
+// 	std::cout << range().to_string() << std::endl;
 	gr->SetOrigin(x_origin,-1);
 
 	if (log10_scale) gr->SetFunc("","lg(y)");
@@ -297,9 +297,9 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 	if (log10_scale) gr->Axis("!Ey");
 	else gr->Axis("y",color.c_str());
 	
-	stringstream y_l;
+	std::stringstream y_l;
 	y_l.str("");;
-	string y_name="", y_unit="", y_rel="";
+	std::string y_name="", y_unit="", y_rel="";
 	if (curves.size()>0)
 	{
 		y_name =curves.front().XY.Y().name();
@@ -323,7 +323,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 		mglData x(c.XY.X().data());
 		mglData y(c.XY.Y().data());
 		gr->Plot(x,y,c.color.c_str(),filter.escape_special_characters("legend '"+ c.legende +"'").c_str()); 
-// 		cout << endl << filter.escape_special_characters("legend '"+ c.legende +"'").c_str() << endl;
+// 		std::cout << std::endl << filter.escape_special_characters("legend '"+ c.legende +"'").c_str() << std::endl;
 // 		gr->Plot(x,y,c.color.c_str()); 
 	}
 	int legends_above_curves = 0;
@@ -368,7 +368,7 @@ void plot_t::axis_t::draw(mglGraph* gr, double x_origin)
 // 		if (!polynom.successfully_fitted())
 // 			continue;
 // 		unsigned int number_of_points = 100;
-// 		vector<double> x_data(number_of_points);
+// 		std::vector<double> x_data(number_of_points);
 // 		double res = (range().stop - range().start) / (number_of_points-1); // X achse nicht Y!!
 // 		for (int i=0;i<x_data.size();i++)
 // 			x_data.at(i) = i * res + range().start;
@@ -387,7 +387,7 @@ plot_t::axis_t::range_t plot_t::axis_t::range()
 		return R;
 	}
 	
-	vector<const quantity::quantity_t*> Ys;
+	std::vector<const quantity::quantity_t*> Ys;
 	for (auto& c: curves)
 		Ys.push_back(&c.XY.Y());
 	for (auto& c: points)
@@ -406,7 +406,7 @@ void plot_t::axis_t::range(double start_s, double stop_s, bool log10_scale_s)
 	log10_scale = log10_scale_s;
 }
 
-void plot_t::axis_t::add_curve(const quantity::quantity_t& Y, const string legend)
+void plot_t::axis_t::add_curve(const quantity::quantity_t& Y, const std::string legend)
 {
 	quantity::quantity_t X("idx", Y.data_X_1D(),units::SI::one);
 	add_curve(X,Y,legend);
@@ -416,10 +416,10 @@ void plot_t::axis_t::add_curve(const quantity::quantity_t& Y, const string legen
 /*******    plot_t::axis_t::range_t    *********/
 /***********************************************/
 
-string plot_t::axis_t::range_t::to_string() const
+std::string plot_t::axis_t::range_t::to_string() const
 {
-	stringstream out;
-	out << "start= " << start << "\tstop= " << stop << endl;
+	std::stringstream out;
+	out << "start= " << start << "\tstop= " << stop << std::endl;
 	return out.str();
 }
 
@@ -449,11 +449,11 @@ plot_t::axis_t::range_t::range_t(double start, double stop) : start(start), stop
 
 plot_t::axis_t::range_t::range_t(const quantity::quantity_t* Ys) : logger(global_logger,__FILE__,"plot_t::axis_t::range_t")
 {
-	vector<const quantity::quantity_t*> X {Ys};
+	std::vector<const quantity::quantity_t*> X {Ys};
 	*this = range_t(X);
 }
 
-plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys) : backgound_minimum_p(backgound_minimum_c(Ys)), logger(global_logger,__FILE__,"plot_t::axis_t::range_t")
+plot_t::axis_t::range_t::range_t(const std::vector<const quantity::quantity_t *> Ys) : backgound_minimum_p(backgound_minimum_c(Ys)), logger(global_logger,__FILE__,"plot_t::axis_t::range_t")
 {
     //logger::debug(15,"plot_t::axis_t::range_t::range_t()","entering");
 
@@ -510,7 +510,7 @@ plot_t::axis_t::range_t::range_t(const vector<const quantity::quantity_t *> Ys) 
     //logger::debug(15,"plot_t::axis_t::range_t::range_t()","exiting");
 }
 
-double plot_t::axis_t::range_t::range_t::backgound_minimum_c(const vector<const quantity::quantity_t*> Ys) const
+double plot_t::axis_t::range_t::range_t::backgound_minimum_c(const std::vector<const quantity::quantity_t*> Ys) const
 {
 	quantity::quantity_t QB;
 	for (auto& Q : Ys)
@@ -530,7 +530,7 @@ double plot_t::axis_t::range_t::range_t::background_minimum() const
 /***********************************************/
 /*******    plot_t::axis_t::points_t    ********/
 /***********************************************/
-// plot_t::axis_t::points_t::points_t(const quantity::quantity_t* X, const quantity::quantity_t* Y, const string legende, const string color) : X(*X),Y(*Y),legende(legende), color(color)
+// plot_t::axis_t::points_t::points_t(const quantity::quantity_t* X, const quantity::quantity_t* Y, const std::string legende, const std::string color) : X(*X),Y(*Y),legende(legende), color(color)
 // {
 // }
 
@@ -552,7 +552,7 @@ void plot_t::window_t::draw(mglGraph* gr)
 	tools::str::filter_t filter;
     //logger::debug(15,"plot_t::Draw()","entering");
 	/*x axis*/
-	vector<const quantity::quantity_t*> Xs;
+	std::vector<const quantity::quantity_t*> Xs;
 	for (auto& c:Y1.curves)
 		Xs.push_back(&c.XY.X());
 	for (auto& c:Y2.curves)
@@ -581,7 +581,7 @@ void plot_t::window_t::draw(mglGraph* gr)
 	gr->SetOrigin(0,-1);
 	gr->Axis("x");
 
-	stringstream x_l;
+	std::stringstream x_l;
 	x_l.str("");
 	if (Xs.front()->is_relative())
 		x_l << "rel. ";

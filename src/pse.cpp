@@ -26,7 +26,7 @@
 pse_t::pse_isotope_t::pse_isotope_t(const double abundance_s, 
 									const int nucleons_s, 
 									const double mass_s, 
-									const string symbol_alternative_s) : 
+									const std::string symbol_alternative_s) : 
 									abundance(abundance_s), 
 									nucleons(nucleons_s), 
 									mass(mass_s), 
@@ -35,17 +35,17 @@ pse_t::pse_isotope_t::pse_isotope_t(const double abundance_s,
 {}
 
 
-const pse_t::pse_isotope_t * pse_t::isotope(string symbol, int nucleons)
+const pse_t::pse_isotope_t * pse_t::isotope(std::string symbol, int nucleons)
 {
 	auto const isos = isotopes(symbol);
 	if (isos==nullptr) return nullptr;
-// 	cout << endl << "PSE " << isotopes(symbol)->size() << endl;
+// 	std::cout << std::endl << "PSE " << isotopes(symbol)->size() << std::endl;
 	for (int i=0;i<isos->size();i++)
 	{
-// 		cout << isotopes(symbol)->at(i).nucleons << endl;
+// 		std::cout << isotopes(symbol)->at(i).nucleons << std::endl;
 		if (isos->at(i).nucleons==nucleons)
 		{
-// 			cout << "PSE IN1" << endl;
+// 			std::cout << "PSE IN1" << std::endl;
 			return &isos->at(i);
 		}
 	}
@@ -54,7 +54,7 @@ const pse_t::pse_isotope_t * pse_t::isotope(string symbol, int nucleons)
 
 
 
-const vector<pse_t::pse_isotope_t> * pse_t::isotopes(string symbol)
+const std::vector<pse_t::pse_isotope_t> * pse_t::isotopes(std::string symbol)
 {
 	if (element(symbol)==nullptr) return nullptr;
 	return &element(symbol)->isotopes;
@@ -77,21 +77,22 @@ const bool pse_t::pse_isotope_t::operator<(const pse_isotope_t& obj) const
 /*****  pse_t::element_t   **********/
 /************************************/
 
-pse_t::pse_element_t::pse_element_t(string symbol_s, int protons_s, vector<pse_t::pse_isotope_t>& isotopes_s)
+pse_t::pse_element_t::pse_element_t(std::string symbol_s, int protons_s, std::vector<pse_t::pse_isotope_t>& isotopes_s)
     : isotopes(isotopes_s), symbol(symbol_s), protons(protons_s), logger(global_logger,__FILE__,"pse_t::pse_element_t")
 {
 }
 
-pse_t::pse_element_t::pse_element_t(string symbol_s, int protons_s, pse_t::pse_isotope_t& isotopes_s)
+pse_t::pse_element_t::pse_element_t(std::string symbol_s, int protons_s, pse_t::pse_isotope_t& isotopes_s)
     : isotopes({isotopes_s}), symbol(symbol_s), protons(protons_s),
       logger(global_logger,__FILE__,"pse_t::pse_element_t")
 {
 }
 
 
-const pse_t::pse_element_t * pse_t::element(string symbol)
+const pse_t::pse_element_t * pse_t::element(std::string symbol)
 {
-	if (elements().size()==0) return nullptr;
+    if (elements().size()==0)
+        return nullptr;
 	for (int i=0;i<elements().size();i++)
 	{
 		if (elements().at(i).symbol==symbol)
@@ -102,15 +103,17 @@ const pse_t::pse_element_t * pse_t::element(string symbol)
 	return nullptr;
 }
 
-const vector<pse_t::pse_element_t>& pse_t::elements()
+const std::vector<pse_t::pse_element_t>& pse_t::elements()
 {
 	if (elements_p.size()==0)
-		load_file();
+    {
+        load_file();
+    }
 	return elements_p;
 }
 
 
-// pse_t::element_t::element_t(const vector<isotope_t>& isotopes_s) : isotopes(isotopes_s) {}
+// pse_t::element_t::element_t(const std::vector<isotope_t>& isotopes_s) : isotopes(isotopes_s) {}
 // 
 const double pse_t::pse_element_t::mass() const
 {
@@ -179,14 +182,16 @@ const bool pse_t::pse_element_t::operator<(const pse_t::pse_element_t& obj) cons
 /*********    pse_t    	   **********/
 /************************************/
 
-pse_t::pse_t() : logger(global_logger,__FILE__,"pse_t")
-{
+class_logger_t pse_t::logger(global_logger,__FILE__,"pse_t");
 
+pse_t::pse_t(std::shared_ptr<logger_t> logger_s) /*: logger(logger_s,__FILE__,"pse_t")*/
+{
+//    logger.info(__func__,"PSE").enter();
 }
 
-// const std::vector< string > pse_t::get_all_isotopes_with_highest_abundance()
+// const std::vector< std::string > pse_t::get_all_isotopes_with_highest_abundance()
 // {
-// 	vector<string> isotopes_with_highest_abundance;
+// 	std::vector<std::string> isotopes_with_highest_abundance;
 // 	for (auto const& element:get_all_elements())
 // 	{
 // 		isotopes_with_highest_abundance.push_back(get_isotope_with_highest_abundance(element));
@@ -195,9 +200,9 @@ pse_t::pse_t() : logger(global_logger,__FILE__,"pse_t")
 // }
 
 
-// vector<pse_t::element_t>& pse_t::elements()
+// std::vector<pse_t::element_t>& pse_t::elements()
 // {
-// 	vector<pse_t::element_t> elements_p;
+// 	std::vector<pse_t::element_t> elements_p;
 // 	for ()
 // }
 
@@ -207,30 +212,35 @@ void pse_t::to_screen()
 {
 	for (auto& element : elements())
 	{
-		cout << element.protons << ":";
+		std::cout << element.protons << ":";
 		for (auto& isotope : element.isotopes)
 		{
 // 			const pse_isotope_t iso = it->isotopes()->at(i);
-			cout << "\t" << isotope.nucleons <<  element.symbol;  
-			if (isotope.symbol_alternative!="") cout << "," << isotope.symbol_alternative;
-			if (isotope.abundance>0) cout << isotope.abundance;
+			std::cout << "\t" << isotope.nucleons <<  element.symbol;  
+			if (isotope.symbol_alternative!="") std::cout << "," << isotope.symbol_alternative;
+			if (isotope.abundance>0) std::cout << isotope.abundance;
 		}
-		cout << endl;
+		std::cout << std::endl;
 	}
 }
 
 
 bool pse_t::load_file() 
 {
-	vector<vector<string>> contents = tools::file::load(filename,delimiter);
+	std::vector<std::vector<std::string>> contents = tools::file::load(filename,delimiter);
 	if (contents.size()==0)
 	{
         //logger::fatal("pse_t::load_file()",filename,"lot loadable", "dying...");
+        logger.fatal(__func__,"PSE").signal("could not load PSE from file");
 		exit (EXIT_FAILURE);
 		return false;
 	}
-	string symbol, nuclide, mass, abundance, symbol_alternative, protons;
-	map<string,vector<pse_element_t>> symbols_to_eles; //a list where each element contains just 1 isotop
+    else
+    {
+//        logger.info(__func__,"PSE file loaded").signal(contents.size());
+    }
+	std::string symbol, nuclide, mass, abundance, symbol_alternative, protons;
+	std::map<std::string,std::vector<pse_element_t>> symbols_to_eles; //a list where each element contains just 1 isotop
 	for (int i=0;i<contents.size();i++) 
 	{
 		if (contents[i].size()>4)
@@ -260,7 +270,7 @@ bool pse_t::load_file()
 								 symbol_alternative);
 			 pse_element_t ele(symbol,tools::str::str_to_int(protons),iso);
 			if (symbols_to_eles.find(symbol)==symbols_to_eles.end())
-				symbols_to_eles.insert(pair<string,vector<pse_element_t>> (symbol,{ele}));
+				symbols_to_eles.insert(std::pair<std::string,std::vector<pse_element_t>> (symbol,{ele}));
 			else 
 				symbols_to_eles.at(symbol).push_back(ele);
 		}
@@ -270,15 +280,15 @@ bool pse_t::load_file()
         }
 // 			logger::error("pse_t::load_file() could not read line (to less entries): ", i+1);
 	}
-	set<pse_element_t> elements_s;
+	std::set<pse_element_t> elements_s;
 	for (auto& symbol_to_eles : symbols_to_eles)
 	{
-		set<pse_isotope_t> isotopes_s;
+		std::set<pse_isotope_t> isotopes_s;
 		for (auto& isotopes_in_ele : symbol_to_eles.second)
 		{
 			isotopes_s.insert(isotopes_in_ele.isotopes.begin(),isotopes_in_ele.isotopes.end());
 		}
-		vector<pse_isotope_t> iso_vec(isotopes_s.begin(),isotopes_s.end());
+		std::vector<pse_isotope_t> iso_vec(isotopes_s.begin(),isotopes_s.end());
 		pse_element_t element(symbol_to_eles.second.begin()->symbol, symbol_to_eles.second.begin()->protons,iso_vec);
 		elements_s.insert(element);
 	}

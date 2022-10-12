@@ -31,25 +31,23 @@
 
 
 
-using namespace std;
-
 
 class ion_t
 {
 private:
     class_logger_t logger;
-// 	const vector<element_t> elements_p;
+// 	const std::vector<element_t> elements_p;
 // 	const quantity::electrical_charge_t electric_charge_p;
-// 	vector< element_t > elements_p;
+// 	std::vector< element_t > elements_p;
 public:
 	ion_t();
-	ion_t(vector<element_t> elements_s, quantity::electrical_charge_t electric_charge_s);
+	ion_t(std::vector<element_t> elements_s, quantity::electrical_charge_t electric_charge_s);
 	ion_t(element_t element_s, quantity::electrical_charge_t electric_charge_s);
-	vector< element_t > elements;
+	std::vector< element_t > elements;
 	quantity::electrical_charge_t electric_charge;
 	bool operator==(const ion_t& obj) const;
 	bool operator!=(const ion_t& obj) const;
-	string to_string(const string del="+") const;
+	std::string to_string(const std::string del="+") const;
 	bool is_set() const;
 };
 extern Logger global_logger;

@@ -8,7 +8,7 @@
 
 
 
-const map<std::string,unit_t> unit_t::symbol_to_base_unit
+const std::map<std::string,unit_t> unit_t::symbol_to_base_unit
 {
 	{"m",{units::SI::meter}},
 	{"kg",{units::SI::kilogram}},
@@ -44,7 +44,7 @@ const std::unordered_map<std::string, unit_t> unit_t::symbol_prefix_unit
 	{"Y",{units::prefixes::yotta}}
 };
 
-const map<std::string, unit_t> unit_t::symbol_to_unit 
+const std::map<std::string, unit_t> unit_t::symbol_to_unit
 {
 	{"%",{units::suffixes::percent}},
 	{"bar",{units::derived::bar}},
@@ -141,10 +141,10 @@ bool unit_t::base_exponents_t::is_set() const
 	return false;
 }
 
-const string unit_t::base_exponents_t::to_string() const
+const std::string unit_t::base_exponents_t::to_string() const
 {
-	stringstream out;
-// 	vector<string> counter_, denominator;
+    std::stringstream out;
+// 	std::vector<std::string> counter_, denominator;
 	
 	if (meters!=0)
 	{
@@ -216,7 +216,7 @@ const string unit_t::base_exponents_t::to_string() const
 		else 
 			out << " ";
 	}
-	string out_ = out.str();
+	std::string out_ = out.str();
 // 	tools::str::remove_spaces_from_string_end(&out_);
 	return out_.substr(0,out_.size()-1);
 }
@@ -242,12 +242,12 @@ const string unit_t::base_exponents_t::to_string() const
 /***********************/
 
 
-// unit_t::unit_t(unit_t unit_, string prefered_string) : unit_t(unit_)
+// unit_t::unit_t(unit_t unit_, std::string prefered_string) : unit_t(unit_)
 // {
 // 	prefered_output_string = prefered_string;
 // }
 
-unit_t::unit_t(string symbols, string prefered_string) : prefered_output_string(prefered_string), logger(global_logger,__FILE__,"unit_t")
+unit_t::unit_t(std::string symbols, std::string prefered_string) : prefered_output_string(prefered_string), logger(global_logger,__FILE__,"unit_t")
 {
 	tools::str::remove_spaces(&symbols);
 	
@@ -305,7 +305,7 @@ unit_t::unit_t(string symbols, string prefered_string) : prefered_output_string(
     //logger::error("unit_t::unit_t: symbols unknown","'"+symbols+"'");
 }
 
-// const string unit_t::to_string(string symbol) const
+// const std::string unit_t::to_string(std::string symbol) const
 // {
 // 	if (symbol=="")
 // 		return to_string();
@@ -316,7 +316,7 @@ unit_t::unit_t(string symbols, string prefered_string) : prefered_output_string(
 // 	return to_string();
 // }
 
-// const string unit_t::to_string(const string output) const
+// const std::string unit_t::to_string(const std::string output) const
 // {
 // 	if (is_set())
 // 	{
@@ -326,12 +326,12 @@ unit_t::unit_t(string symbols, string prefered_string) : prefered_output_string(
 // 	return "";
 // }
 
-const string unit_t::to_string() const
+const std::string unit_t::to_string() const
 {
 	if (!is_set()) return "";
 	if (prefered_output_string!="") 
 	{
-// 		cout << endl << endl << "PREFERED STRING '" << prefered_output_string << "'" << endl;
+// 		std::cout << std::endl << std::endl << "PREFERED STRING '" << prefered_output_string << "'" << std::endl;
 		return prefered_output_string;
 	}
 	if (!base_units_exponents.is_set() )
@@ -393,7 +393,7 @@ const string unit_t::to_string() const
 	for (auto const& prefix : symbol_prefix_unit)
 	{
 		if (prefix.second != multiplier) continue;
-		stringstream out;
+		std::stringstream out;
 		out << prefix.first << " ";
 		out << base_units_exponents.to_string();
 // 		logger::debug(21,"unit_t::to_string()","prefix+derived",prefix.first + it->first);
@@ -402,7 +402,7 @@ const string unit_t::to_string() const
 	}
 	
 	
-// 	vector<string> counter, denominator;
+// 	std::vector<std::string> counter, denominator;
 // 	if (base_units_exponents.Ampere==1)			counter.push_back(units::SI::Ampere.to_string());
 // 	else if (base_units_exponents.Ampere>0) 	counter.push_back(units::SI::Ampere.to_string() + string("^") + base_units_exponents.Ampere);
 // 	else if (base_units_exponents.Ampere<0) 	denominator << units::SI::Ampere.to_string() << "^" << base_units_exponents.Ampere << " ";
@@ -413,7 +413,7 @@ const string unit_t::to_string() const
 // 	logger::debug(5,"unit_t::to_string()","not found","");
 
     //logger::debug(17,"unit_t::to_string()","unknown SI unit: base=" + base_units_exponents.to_string()+ "\tmultiplier=" + tools::to_string(multiplier));
-	stringstream out;
+	std::stringstream out;
 	out  << tools::to_string(multiplier) << " * "<< base_units_exponents.to_string();
 	return out.str();
 // 	exit (EXIT_FAILURE);

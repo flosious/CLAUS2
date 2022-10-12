@@ -21,31 +21,31 @@
 /**************/
 /*** sims_t ***/
 /**************/
-files_::sims_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers, const std::string& contents_string) :
+files_::sims_t::contents_t::contents_t(std::string& filename_with_path,const std::string& delimiter,const std::set<std::string>& identifiers, const std::string& contents_string) :
     files_::file_t::contents_t(filename_with_path,delimiter,identifiers,{},contents_string), logger(global_logger,__FILE__,"files_::sims_t::contents_t")
 {
 }
 
-vector<cluster_t> files_::sims_t::contents_t::clusters()
+std::vector<cluster_t> files_::sims_t::contents_t::clusters()
 {
-    //logger::fatal("you should never be able to read this","virtual const vector<cluster_t> filecontents::sims_t::clusters()");
+    //logger::fatal("you should never be able to read this","virtual const std::vector<cluster_t> filecontents::sims_t::clusters()");
 	return {};
 }
 void files_::sims_t::contents_t::column_t::to_screen()
 {
-	cout << "unit="<<unit<<"\tcluster_name="<<cluster_name<<"\tdimension="<<dimension<<"\tdata.size()="<<data.size()<<endl;
+    std::cout << "unit="<<unit<<"\tcluster_name="<<cluster_name<<"\tdimension="<<dimension<<"\tdata.size()="<<data.size()<<std::endl;
 }
 
-string files_::sims_t::contents_t::column_t::to_string() const
+std::string files_::sims_t::contents_t::column_t::to_string() const
 {
-	stringstream out;
+	std::stringstream out;
 	out <<"cluster_name="<<cluster_name<<"\tdimension="<<dimension<<"\tdata.size()="<<data.size() << "\tunit="<<unit;
 	return out.str();
 }
 
-string files_::sims_t::contents_t::to_string(const string del)
+std::string files_::sims_t::contents_t::to_string(const std::string del)
 {
-	stringstream out;
+	std::stringstream out;
 	out << files_::file_t::contents_t::to_string(del) << del;
 	out << "clusters().size()=" << clusters().size();
 	return out.str();

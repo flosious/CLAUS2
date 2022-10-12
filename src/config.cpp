@@ -16,14 +16,14 @@ config_t::config_t() {
     return;
 }
 
-unordered_set<string> config_t::filter_files(unordered_set<string>& file_list) 
+std::unordered_set<std::string> config_t::filter_files(std::unordered_set<std::string>& file_list) 
 {
     return tools::file::filter_files_from_types(file_list, file_endings,false);
 }
 
-int config_t::load_file(string filename_with_path) 
+int config_t::load_file(std::string filename_with_path) 
 {
-    vector<string> config_lines = tools::file::load_file_to_vector_string(filename_with_path);
+    std::vector<std::string> config_lines = tools::file::load_file_to_vector_string(filename_with_path);
     if (config_lines.size()==0) return 0;
     if (parse(config_lines)>0) 
 	{
@@ -37,12 +37,12 @@ int config_t::load()
     return load_file(default_file);
 }
 
-int config_t::load(string filename_with_path) {
+int config_t::load(std::string filename_with_path) {
     if (filename_with_path.length()==0) files.insert(default_file);
     files.insert(filename_with_path);
     return load(files);
 }
-int config_t::load(unordered_set<string> filenames_with_path) 
+int config_t::load(std::unordered_set<std::string> filenames_with_path) 
 {
     // get just the config files
     files = filter_files(filenames_with_path);
@@ -56,10 +56,10 @@ int config_t::load(unordered_set<string> filenames_with_path)
     return files_loaded.size();
 }
 
-int config_t::parse(vector<string> config_lines) {
+int config_t::parse(std::vector<std::string> config_lines) {
 	int parsed_lines=0;
     for (int i=0; i<config_lines.size();i++) {
-        vector<string> string_parts = tools::str::get_strings_between_delimiter(config_lines[i],"=");
+        std::vector<std::string> string_parts = tools::str::get_strings_between_delimiter(config_lines[i],"=");
         if (string_parts.size()<2) continue; // no "=" in line, skip
         tools::str::remove_spaces(&string_parts);
 //         tools::str::remove_spaces_from_string_start(&string_parts[0]);
@@ -67,12 +67,12 @@ int config_t::parse(vector<string> config_lines) {
 //         tools::str::remove_spaces_from_string_start(&string_parts[1]);
 //         tools::str::remove_spaces_from_string_end(&string_parts[1]);
         tools::str::replace_chars(&string_parts,"\"","");
-        string key = string_parts[0];
-        string value = string_parts[1];
+        std::string key = string_parts[0];
+        std::string value = string_parts[1];
 		key = tools::str::remove_linebreakers_from_string(key);
 		value = tools::str::remove_linebreakers_from_string(value);
         parsed_lines++;
-// 		cout << "key=" << key << "|value=" << value << endl;
+// 		std::cout << "key=" << key << "|value=" << value << std::endl;
         if ((key.compare(0,1,"#")==0) || (key.compare(0,2,"//")==0) || (key.compare(0,1,";")==0) ) 
 		{
 			parsed_lines--;
@@ -123,11 +123,11 @@ int config_t::parse(vector<string> config_lines) {
 //         else if (key=="use_impulse_filter_on_data") { if (value.find("0")!=string::npos) 			parser_methods::use_impulse_filter_on_data=false;}
         else 
 		{
-// 			cout << "config_t::\tCould not parse: " << config_lines[i] << endl;
+// 			std::cout << "config_t::\tCould not parse: " << config_lines[i] << std::endl;
             //logger::error("config_t::parse","could not parse",config_lines[i], key);
 			parsed_lines--;
 		}
-// 		cout << "KEY=" << key << "\tvalue=" << value << endl;
+// 		std::cout << "KEY=" << key << "\tvalue=" << value << std::endl;
         
     }
     
@@ -136,23 +136,23 @@ int config_t::parse(vector<string> config_lines) {
 }
 
 
-void config_t::save_test(string value) 
+void config_t::save_test(std::string value) 
 {
-    cout << "save_test(): '" << value << "'" << endl;
+    std::cout << "save_test(): '" << value << "'" << std::endl;
 }
 
 
-// void config_t::save_export_column_names(string value)
+// void config_t::save_export_column_names(std::string value)
 // {
 // 	tools::str::remove_spaces(&value);
 // 	export2_t::export_column_names = tools::str::get_strings_between_delimiter(value,"+");
 // 	tools::str::remove_spaces(&export2_t::export_column_names);
 // }
 // 
-// void config_t::save_measurement_group_definition(string value)
+// void config_t::save_measurement_group_definition(std::string value)
 // {
 // 	tools::str::remove_spaces(&value);
-// 	vector<string> definitions = tools::str::get_strings_between_delimiter(value,"+");
+// 	std::vector<std::string> definitions = tools::str::get_strings_between_delimiter(value,"+");
 // 	tools::str::remove_spaces(&definitions);
 // 	
 // 	measurement_group_t::defined_directory=false;
@@ -172,10 +172,10 @@ void config_t::save_test(string value)
 // }
 
 /// sample_definition = lot + wafer + monitor + chip + simple_name
-// void config_t::save_sample_definition(string value)
+// void config_t::save_sample_definition(std::string value)
 // {
 // 	tools::str::remove_spaces(&value);
-// 	vector<string> definitions = tools::str::get_strings_between_delimiter(value,"+");
+// 	std::vector<std::string> definitions = tools::str::get_strings_between_delimiter(value,"+");
 // 	tools::str::remove_spaces(&definitions);
 // 	sample_t::use_lot=false;
 // 	sample_t::use_wafer=false;
@@ -184,7 +184,7 @@ void config_t::save_test(string value)
 // 	sample_t::use_chip = false;
 // 	sample_t::use_simple_name = false;
 // 	
-// 	stringstream new_definition;
+// 	std::stringstream new_definition;
 // 	for (auto& definition:definitions)
 // 	{
 // 		if (definition=="lot") 
@@ -222,10 +222,10 @@ void config_t::save_test(string value)
 // }
 
 
-// void config_t::save_measurement_definition(string value)
+// void config_t::save_measurement_definition(std::string value)
 // {
 // 	tools::str::remove_spaces(&value);
-// 	vector<string> definitions = tools::str::get_strings_between_delimiter(value,"+");
+// 	std::vector<std::string> definitions = tools::str::get_strings_between_delimiter(value,"+");
 // 	tools::str::remove_spaces(&definitions);
 // 	
 // 	measurement_t::defined_olcdbid				=false;

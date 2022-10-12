@@ -29,16 +29,16 @@ sample_t::matrix_t::matrix_t() : logger(global_logger,__FILE__,"sample_t::matrix
 {
 }
 
-sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes) : logger(global_logger,__FILE__,"sample_t::matrix_t")
+sample_t::matrix_t::matrix_t(std::vector<isotope_t> isotopes) : logger(global_logger,__FILE__,"sample_t::matrix_t")
 {
-// 	cout << endl << "IN-matrix::isotopes.size()=" << isotopes.size() << endl;
+// 	std::cout << std::endl << "IN-matrix::isotopes.size()=" << isotopes.size() << std::endl;
 // 	for (auto& i : isotopes)
-// 		cout << "iso=" << i.substance_amount.to_string_detailed() << endl;
+// 		std::cout << "iso=" << i.substance_amount.to_string_detailed() << std::endl;
 	///filter elements from isos and save in matrix
 	while (isotopes.size()>0)
 	{
-		vector<unsigned int> vec_positions_to_erase;
-		vector<isotope_t> isos_in_ele;
+		std::vector<unsigned int> vec_positions_to_erase;
+		std::vector<isotope_t> isos_in_ele;
 		for (int i=0;i<isotopes.size();i++)
 		{
 			isotope_t& I = isotopes.at(i);
@@ -55,18 +55,18 @@ sample_t::matrix_t::matrix_t(vector<isotope_t> isotopes) : logger(global_logger,
 //        isotopes = tools::vec::erase(isotopes,vec_positions_to_erase);
         tools::vec::erase(isotopes,vec_positions_to_erase);
 	}
-// 	cout << endl << "OUT-matrix::isotopes.size()=" << isotopes.size() << endl;
+// 	std::cout << std::endl << "OUT-matrix::isotopes.size()=" << isotopes.size() << std::endl;
 // 	for (auto& e : elements)
 // 		for (auto& i : e.isotopes)
-// 			cout << "iso=" << i.substance_amount.to_string() << endl;
+// 			std::cout << "iso=" << i.substance_amount.to_string() << std::endl;
 }
 
-sample_t::matrix_t::matrix_t(const string matrix_elements_s) : logger(global_logger,__FILE__,"sample_t::matrix_t")
+sample_t::matrix_t::matrix_t(const std::string matrix_elements_s) : logger(global_logger,__FILE__,"sample_t::matrix_t")
 {
 	*this = matrix_t{tools::str::get_strings_between_delimiter(matrix_elements_s," ")};
 }
 
-sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s) : logger(global_logger,__FILE__,"sample_t::matrix_t")
+sample_t::matrix_t::matrix_t(const std::vector<std::string> elements_or_isotopes_s) : logger(global_logger,__FILE__,"sample_t::matrix_t")
 {
 	/* 
 	 * mole/abundance/concentration/atoms input values are asumed as absolutes, which are iternally normalized to 100at%: 
@@ -77,18 +77,18 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s) : logg
 	 * indistinguishable isotopes like "29Si30 Si50 Ge10 Sn10" --> will lead to an error and aborting
 	 * not recognized isotopes --> will lead to an error an aborting
 	 */
-	vector<isotope_t> isotopes;
+	std::vector<isotope_t> isotopes;
 	/*parsing*/
-	smatch match;
+	std::smatch match;
 	int nucleons;
 	double amount;
-	string symbol;
+	std::string symbol;
 	double total_amount{0};
 	int unknown_amounts{0};
 	for (auto& ele_or_iso:elements_or_isotopes_s)
 	{
 		if (ele_or_iso=="") continue;
-		if (regex_search(ele_or_iso,match,regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9\\.]*)"))) 
+        if (regex_search(ele_or_iso,match,std::regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9\\.]*)")))
 		{
 			/*records*/
 			if (match[1]!="")
@@ -110,7 +110,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s) : logg
 				else
 					amount = -1;
 			}
-// 			cout << "amount="<< amount << endl;
+// 			std::cout << "amount="<< amount << std::endl;
 			/*******/
 			
 			/*catch error*/
@@ -134,7 +134,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s) : logg
 			}
 			/*************/
 			
-			vector<isotope_t> new_isotopes_to_add;
+			std::vector<isotope_t> new_isotopes_to_add;
 			if (nucleons==-1)
 			{
 				//add all isotopes of the symbols element with natural abundance
@@ -204,7 +204,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s) : logg
 	}
 	
 	/*calculate total substance_amount for each element/symbol*/
-	map<string,double> symbol_to_total_amount;
+	std::map<std::string,double> symbol_to_total_amount;
 	for (auto& iso : isotopes)
 	{
 		if (iso.abundance.data().at(0)<0)
@@ -216,7 +216,7 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s) : logg
 				return;
 			}
 			if (symbol_to_total_amount.find(iso.symbol)==symbol_to_total_amount.end())
-				symbol_to_total_amount.insert(pair<string,double> (iso.symbol,iso.substance_amount.data().at(0)));
+				symbol_to_total_amount.insert(std::pair<std::string,double> (iso.symbol,iso.substance_amount.data().at(0)));
 			else
 				symbol_to_total_amount.find(iso.symbol)->second+=iso.substance_amount.data().at(0);
 		}
@@ -244,11 +244,11 @@ sample_t::matrix_t::matrix_t(const vector<string> elements_or_isotopes_s) : logg
 // 	{
 // 		sum += iso.substance_amount.data.at(0);
 // 		sum1 += iso.abundance.data.at(0);
-// 		cout << iso.to_string() << iso.abundance.to_string() << "\tsum=" << sum<< "\tsum1=" << sum1 <<  endl;
+// 		std::cout << iso.to_string() << iso.abundance.to_string() << "\tsum=" << sum<< "\tsum1=" << sum1 <<  std::endl;
 // 	}
 }
 
-void sample_t::matrix_t::substance_amount_to_relative(vector<isotope_t>& isotopes)
+void sample_t::matrix_t::substance_amount_to_relative(std::vector<isotope_t>& isotopes)
 {
 	quantity::quantity_t sum;
 	for (auto& iso : isotopes)
@@ -256,20 +256,20 @@ void sample_t::matrix_t::substance_amount_to_relative(vector<isotope_t>& isotope
 	sum = sum.sum();
 	for (auto& iso : isotopes)
 	{
-// 		cout << "iso.substance_amount=" << iso.substance_amount.to_string_detailed() << endl;
-// 		cout << "sum.substance_amount=" << sum.to_string_detailed() << endl;
+// 		std::cout << "iso.substance_amount=" << iso.substance_amount.to_string_detailed() << std::endl;
+// 		std::cout << "sum.substance_amount=" << sum.to_string_detailed() << std::endl;
 // 		quantity::quantity_t Q = (iso.substance_amount/sum);
-// 		cout << "Q.substance_amount=" << Q.to_string_detailed() << endl;
+// 		std::cout << "Q.substance_amount=" << Q.to_string_detailed() << std::endl;
 		auto Q = (iso.substance_amount/sum);
-// 		cout << "Q.substance_amount=" << Q.to_string_detailed() << endl;
+// 		std::cout << "Q.substance_amount=" << Q.to_string_detailed() << std::endl;
 		iso.substance_amount = Q.change_unit("at%");
-// 		cout << "AFTER - iso.substance_amount=" << iso.substance_amount.to_string_detailed() << endl;
+// 		std::cout << "AFTER - iso.substance_amount=" << iso.substance_amount.to_string_detailed() << std::endl;
 // 		iso.substance_amount = quantity::substance_amount_t( quantity::quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent));
 // 		iso.substance_amount = quantity::quantity_t(iso.substance_amount/sum*100,units::derived::atom_percent) ;
 	}
-// 	cout << endl << "substance_amount_to_relative: sum:" << sum.to_string_detailed() << endl;
+// 	std::cout << std::endl << "substance_amount_to_relative: sum:" << sum.to_string_detailed() << std::endl;
 // 	for (auto& iso : isotopes)
-// 		cout << iso.substance_amount.to_string_detailed() << endl;
+// 		std::cout << iso.substance_amount.to_string_detailed() << std::endl;
 }
 
 bool sample_t::matrix_t::is_in(const isotope_t& iso) const
@@ -331,15 +331,15 @@ const element_t* sample_t::matrix_t::element(const element_t& ele) const
 	return nullptr;
 }
 
-const vector<isotope_t> sample_t::matrix_t::isotopes() const
+const std::vector<isotope_t> sample_t::matrix_t::isotopes() const
 {
-	vector<isotope_t> isotopes;
-// 	cout << endl << "elements.size()="<< elements.size() << endl;
+	std::vector<isotope_t> isotopes;
+// 	std::cout << std::endl << "elements.size()="<< elements.size() << std::endl;
 	for (auto& E : elements)
 	{
-// 		cout <<endl<< E.symbol << endl;
+// 		cout <<endl<< E.symbol << std::endl;
 // 		for (auto& i : E.isotopes)
-// 			cout << "iso=" << i.substance_amount.to_string_detailed() << endl;
+// 			std::cout << "iso=" << i.substance_amount.to_string_detailed() << std::endl;
 		isotopes.insert(isotopes.end(), E.isotopes.begin(),E.isotopes.end());
 	}
 	return isotopes;
@@ -442,14 +442,14 @@ bool sample_t::matrix_t::operator<(const matrix_t& obj) const
 	
 	if (operator==(obj))
 		return false;
-// 	set<isotope_t> iso(isotopes.begin(),isotopes.end());
-// 	set<isotope_t> obj_iso(obj.isotopes.begin(),obj.isotopes.end());
+// 	std::set<isotope_t> iso(isotopes.begin(),isotopes.end());
+// 	std::set<isotope_t> obj_iso(obj.isotopes.begin(),obj.isotopes.end());
 	return true;
 }
 
-const string sample_t::matrix_t::to_string() const
+const std::string sample_t::matrix_t::to_string() const
 {
-	stringstream out;
+	std::stringstream out;
 	if (!is_set()) 
 		return "matrix not set";
 	for (int i=0;i<isotopes().size();i++)

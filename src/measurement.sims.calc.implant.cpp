@@ -84,7 +84,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 {
 	
 	
-	vector<int> maxIdx, minIdx;
+	std::vector<int> maxIdx, minIdx;
 	int window_size= 0.01 * Y.data().size(); // 1%
 	if (window_size==0)
 		window_size = 1;
@@ -104,7 +104,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 	sort(maxIdx.begin(),maxIdx.end());
 	sort(minIdx.begin(),minIdx.end());
 
-	map<double,int> area_to_min_pos;
+	std::map<double,int> area_to_min_pos;
 	
 	int min_pos = YY.data().size()-1;
 	int max_pos = -1;
@@ -119,7 +119,7 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 				min_pos=  minIdx.at(j);
 				max_pos = maxIdx.at(i);
 				double area = YY.sum(min_pos,max_pos).data().at(0);
-				area_to_min_pos.insert(pair<double,int> (area,min_pos));
+				area_to_min_pos.insert(std::pair<double,int> (area,min_pos));
 				break;
 			}
 		}
@@ -279,11 +279,11 @@ quantity::quantity_t measurements_::sims_t::calc_t::implant_c::map_c::area()
 
 quantity::quantity_t measurements_::sims_t::calc_t::implant_c::map_c::implanted_area()
 {
-// 	cout << endl << "area(): " << area().to_string() << endl;
-// 	cout << "background_area: " << background_area().to_string() << endl;
+// 	std::cout << std::endl << "area(): " << area().to_string() << std::endl;
+// 	std::cout << "background_area: " << background_area().to_string() << std::endl;
 	auto Q = area() - background_area();
 
-// 	cout <<  "implanted_area: " << Q.to_string() << endl;
+// 	std::cout <<  "implanted_area: " << Q.to_string() << std::endl;
 	return Q;
 }
 
@@ -507,14 +507,14 @@ measurements_::sims_t::calc_t::implant_c::map_c& measurements_::sims_t::calc_t::
 	if (!I_vs_SD_p.XY_map().is_set())
 	{
 		auto mapper = M.intensity_vs_sputter_depth(cluster);
-// 		cout << endl << "mapper: " << mapper.to_string() << endl;
-// 		cout << "mapper.res: " << mapper.X().resolution().to_string() << endl;
-// 		cout <<"X_resolution_factor: " << X_resolution_factor << endl;
-// 		cout << "mapper.X().resolution()/X_resolution_factor: " << (mapper.X().resolution()/X_resolution_factor).to_string() << endl;
+// 		std::cout << std::endl << "mapper: " << mapper.to_string() << std::endl;
+// 		std::cout << "mapper.res: " << mapper.X().resolution().to_string() << std::endl;
+// 		cout <<"X_resolution_factor: " << X_resolution_factor << std::endl;
+// 		std::cout << "mapper.X().resolution()/X_resolution_factor: " << (mapper.X().resolution()/X_resolution_factor).to_string() << std::endl;
 		if (mapper.is_set())
 			I_vs_SD_p = map_c (mapper.change_resolution(mapper.X().resolution()/X_resolution_factor));
-// 		cout << "I_vs_SD_p: " << I_vs_SD_p.XY_map().to_string() << endl;
-// 		cout << "I_vs_SD_p.res: " << I_vs_SD_p.XY_map().X().resolution().to_string() << endl;
+// 		std::cout << "I_vs_SD_p: " << I_vs_SD_p.XY_map().to_string() << std::endl;
+// 		std::cout << "I_vs_SD_p.res: " << I_vs_SD_p.XY_map().X().resolution().to_string() << std::endl;
 	}
 	
 	return I_vs_SD_p;

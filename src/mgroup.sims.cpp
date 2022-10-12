@@ -23,10 +23,10 @@ mgroups_::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurem
 {	
 }
 
-const vector<const measurements_::sims_t*> mgroups_::sims_t::sims_t::measurements_const()
+const std::vector<const measurements_::sims_t*> mgroups_::sims_t::sims_t::measurements_const()
 {
 	const auto Ms = measurements();
-	vector<const measurements_::sims_t*> Ms_const(Ms.size());
+	std::vector<const measurements_::sims_t*> Ms_const(Ms.size());
 	for (int i=0;i<Ms.size();i++)
 	{
 		Ms_const.at(i)=Ms.at(i);
@@ -35,13 +35,13 @@ const vector<const measurements_::sims_t*> mgroups_::sims_t::sims_t::measurement
 }
 
 ///will be overwritten by dsims/tofsims
-vector<measurements_::sims_t *> mgroups_::sims_t::measurements()
+std::vector<measurements_::sims_t *> mgroups_::sims_t::measurements()
 {
     //logger::error("mgroups_::sims_t::measurements()","called base virtual function","tell florian");
 	return {};
 }
 
-vector<measurements_::sims_t> mgroups_::sims_t::measurements_copy()
+std::vector<measurements_::sims_t> mgroups_::sims_t::measurements_copy()
 {
     //logger::error("mgroups_::sims_t::measurements_copy()","called base virtual function","tell florian");
 	return {};
@@ -93,9 +93,9 @@ void mgroups_::sims_t::check()
 	}
 }
 
-const map<sample_t::matrix_t, cluster_t::RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluster_t& cluster)
+const std::map<sample_t::matrix_t, cluster_t::RSF_t> mgroups_::sims_t::matrix_to_RSF(const cluster_t& cluster)
 {
-	map<sample_t::matrix_t,cluster_t::RSF_t> mat_to_RSF;
+	std::map<sample_t::matrix_t,cluster_t::RSF_t> mat_to_RSF;
 	for (auto& M : measurements())
 	{
         sample_t::matrix_t mat = M->sample.matrix();
@@ -125,7 +125,7 @@ const map<sample_t::matrix_t, cluster_t::RSF_t> mgroups_::sims_t::matrix_to_RSF(
 
 const std::map< sample_t::matrix_t, quantity::SR_t > mgroups_::sims_t::matrix_to_SRs()
 {
-	map<sample_t::matrix_t,quantity::SR_t> mat_to_SRs;
+	std::map<sample_t::matrix_t,quantity::SR_t> mat_to_SRs;
 	for (auto& M : measurements())
 	{
         sample_t::matrix_t mat = M->sample.matrix();
@@ -140,7 +140,7 @@ const std::map< sample_t::matrix_t, quantity::SR_t > mgroups_::sims_t::matrix_to
 			SR = SR.median();
 		}
 		if (mat_to_SRs.find(mat)==mat_to_SRs.end())
-			mat_to_SRs.insert(pair<sample_t::matrix_t, quantity::SR_t> (mat,SR));
+			mat_to_SRs.insert(std::pair<sample_t::matrix_t, quantity::SR_t> (mat,SR));
 		else
 		{
 			mat_to_SRs.at(mat) << SR;
@@ -154,7 +154,7 @@ const std::map< sample_t::matrix_t, quantity::SR_t > mgroups_::sims_t::matrix_to
 
 // const std::map< sample_t::matrix_t, quantity::intensity_t > mgroups_::sims_t::matrix_to_intensity_sum()
 // {
-// 	map<sample_t::matrix_t,quantity::intensity_t> mat_to_I;
+// 	std::map<sample_t::matrix_t,quantity::intensity_t> mat_to_I;
 // 	for (auto& M : measurements())
 // 	{
 // 		sample_t::matrix_t mat = M->sample.matrix();
@@ -162,21 +162,21 @@ const std::map< sample_t::matrix_t, quantity::SR_t > mgroups_::sims_t::matrix_to
 // 		quantity::intensity_t I = M->matrix_clusters().intensity_sum();
 // 		if (!I.is_set()) continue;
 // 		if (mat_to_I.find(mat)==mat_to_I.end())
-// 			mat_to_I.insert(pair<sample_t::matrix_t, quantity::intensity_t> (mat,I.quantile(0.10)));
+// 			mat_to_I.insert(std::pair<sample_t::matrix_t, quantity::intensity_t> (mat,I.quantile(0.10)));
 // 		else
 // 			mat_to_I.at(mat) << I.quantile(0.10);
 // 	}
 // 	return mat_to_I;
 // }
 
-// const vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> mgroups_::sims_t::sample_mats_to_mat_clusters()
+// const std::vector< std::pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> mgroups_::sims_t::sample_mats_to_mat_clusters()
 // {
-// 	vector< pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> Smat_to_Cmat;
+// 	std::vector< std::pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c>> Smat_to_Cmat;
 // 	for (auto& M : measurements())
 // 	{
 // 		if (!M->sample.matrix().is_set()) continue;
 // 		if (M->matrix_clusters().clusters.size()==0) continue;
-// 		Smat_to_Cmat.push_back(pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c&> (M->sample.matrix(),M->matrix_clusters()));
+// 		Smat_to_Cmat.push_back(std::pair<const sample_t::matrix_t&, const measurements_::sims_t::matrix_clusters_c&> (M->sample.matrix(),M->matrix_clusters()));
 // 	}
 // 	return Smat_to_Cmat;
 // }
@@ -191,24 +191,24 @@ measurements_::sims_t* mgroups_::sims_t::measurement ( const measurements_::sims
 
 
 
-const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
+const std::vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 {
 // 	if (matrix_isotopes_p.size()>0)
 // 		return matrix_isotopes_p;
-	set<isotope_t> isos;
-// 	cout << "F1" << endl;
+	std::set<isotope_t> isos;
+// 	std::cout << "F1" << std::endl;
 	for (auto& M : measurements())
 	{
-// 		cout << "F7" << endl;
+// 		std::cout << "F7" << std::endl;
         if (!M->sample.matrix().is_set()) continue;
-// 		cout << "F4" << endl;
-        vector<isotope_t> mat_isos=M->sample.matrix().isotopes();
-// 		cout << "F5" << endl;
+// 		std::cout << "F4" << std::endl;
+        std::vector<isotope_t> mat_isos=M->sample.matrix().isotopes();
+// 		std::cout << "F5" << std::endl;
 		isos.insert(mat_isos.begin(),mat_isos.end());
-// 		cout << "F6" << endl;
+// 		std::cout << "F6" << std::endl;
 	}
-// 	cout << "F2" << endl;
-	vector<isotope_t> isos_vec = {isos.begin(),isos.end()};
+// 	std::cout << "F2" << std::endl;
+	std::vector<isotope_t> isos_vec = {isos.begin(),isos.end()};
 	
 	// keep abundance and/or substance_amount if there is only 1 known matrix from all reference samples within this group
 	if (matrices().size()==1) 
@@ -216,7 +216,7 @@ const vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
         //logger::info(3,"mgroups_::sims_t::matrix_isotopes()","found just 1 matrix, using its substance_amount for all matrix isotopes in this group",matrices().begin()->to_string());
 		return isos_vec;
 	}
-// 	cout << "F3" << endl;
+// 	std::cout << "F3" << std::endl;
 	// delete abundance and substance_amount because there are different ones in the group. calculate later
 	for (auto& I : isos_vec)
 	{
@@ -247,19 +247,19 @@ void mgroups_::sims_t::set_reference_isotopes_in_measurements()
 	}
 }
 
-const vector<isotope_t> mgroups_::sims_t::isotopes_corresponding_to_matrix_clusters()
+const std::vector<isotope_t> mgroups_::sims_t::isotopes_corresponding_to_matrix_clusters()
 {
 	const auto matrix_isos = matrix_isotopes();
 	
-	set<isotope_t> isos;
+	std::set<isotope_t> isos;
 	for (auto& MC : matrix_clusters())
 		isos.insert(MC.corresponding_isotope(matrix_isos));
 	return {isos.begin(),isos.end()};
 }
 
-const vector<cluster_t> mgroups_::sims_t::matrix_clusters()
+const std::vector<cluster_t> mgroups_::sims_t::matrix_clusters()
 {
-	set<cluster_t> clusters;
+	std::set<cluster_t> clusters;
 	for (auto& M : measurements())
 	{
 		for (auto& C : M->matrix_clusters().clusters)
@@ -272,7 +272,7 @@ const vector<cluster_t> mgroups_::sims_t::matrix_clusters()
 
 bool mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()
 {
-	const vector<isotope_t> mat_isos = matrix_isotopes();
+	const std::vector<isotope_t> mat_isos = matrix_isotopes();
 	if (mat_isos.size()==0)
 	{
         //logger::error("mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()","matrix_isotopes()==0 unknown matrices","please include atleast 1 tabulated reference sample; check database","returning false");
@@ -288,21 +288,21 @@ bool mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()
 	return true;
 }
 
-set<sample_t::matrix_t> mgroups_::sims_t::matrices()
+std::set<sample_t::matrix_t> mgroups_::sims_t::matrices()
 {
-	set<sample_t::matrix_t> mats;
+	std::set<sample_t::matrix_t> mats;
 	for (auto& M : measurements())
         if (M->sample.matrix().is_set())
             mats.insert(M->sample.matrix());
-// 	cout << endl << "mats.size()=" << mats.size() << endl;
+// 	std::cout << std::endl << "mats.size()=" << mats.size() << std::endl;
 // 	for (auto& m : mats)
-// 		cout << m.to_string() << endl;
+// 		std::cout << m.to_string() << std::endl;
 	return mats;
 }
 
-set<cluster_t> mgroups_::sims_t::clusters()
+std::set<cluster_t> mgroups_::sims_t::clusters()
 {
-	set<cluster_t> cs;
+	std::set<cluster_t> cs;
 	
 	for (auto& M : measurements())
 	{
@@ -315,17 +315,18 @@ set<cluster_t> mgroups_::sims_t::clusters()
 	return cs;
 }
 
-string mgroups_::sims_t::to_string_short() const
+std::string mgroups_::sims_t::to_string_short() const
 {
-	stringstream out;
+	std::stringstream out;
     out << olcdb << "_g"<<group_id << "_" << settings()->to_string_short();
 	return out.str();
 }
 
-void mgroups_::sims_t::export_origin_ascii(string path, const string delimiter)
+void mgroups_::sims_t::export_origin_ascii(std::string path, const std::string delimiter)
 {
     path = tools::file::check_directory_string(path) + std::to_string(olcdb) + PATH_DELIMITER;
     tools::file::mkpath(path);
+    logger.debug(__func__,path).signal("created");
 	for (auto& M : measurements())
 	{
 		M->export_origin_ascii(path+to_string_short(),delimiter);
@@ -386,9 +387,9 @@ void mgroups_::sims_t::set_natural_abundances_in_matrix_clusters()
 		M->matrix_clusters().set_natural_abundances();
 }
 
-const map<cluster_t*,quantity::substance_amount_t> mgroups_::sims_t::matrix_cluster_to_matrix_iso_substance_amount()
+const std::map<cluster_t*,quantity::substance_amount_t> mgroups_::sims_t::matrix_cluster_to_matrix_iso_substance_amount()
 {
-	map<cluster_t*,quantity::substance_amount_t> matrix_C_to_I;
+	std::map<cluster_t*,quantity::substance_amount_t> matrix_C_to_I;
 	const auto MCs = matrix_clusters();
 	const auto MIs = matrix_isotopes();
 	for (auto& M : measurements())
@@ -407,7 +408,7 @@ const map<cluster_t*,quantity::substance_amount_t> mgroups_::sims_t::matrix_clus
 				amount = quantity::substance_amount_t({0});
 			else
                 amount = M->sample.matrix().isotope(corresponding_isotope)->substance_amount;
-			matrix_C_to_I.insert(pair<cluster_t*,quantity::substance_amount_t> (M->cluster(MC),amount) );
+			matrix_C_to_I.insert(std::pair<cluster_t*,quantity::substance_amount_t> (M->cluster(MC),amount) );
 // 			logger::debug(9,"mgroups_::sims_t::matrix_cluster_to_matrix_iso_substance_amount()","MC="+MC.to_string()+" " + tools::to_string(M->cluster(MC)),"isotope="+corresponding_isotope.to_string() + " abu="+abu.to_string(),M->to_string());
 		}
 	}

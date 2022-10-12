@@ -28,7 +28,6 @@
 #include "log.hpp"
 #include "ion.hpp"
 
-using namespace std;
 
 class msettings
 {
@@ -40,9 +39,9 @@ public:
 	public:
 		sims_t();
 		sims_t(files_::sims_t::name_t& filename);
-		const string to_string(const string del = ", ") const;
-		const string to_string_short() const;
-		string secondary_polarity;
+		const std::string to_string(const std::string del = ", ") const;
+		const std::string to_string_short() const;
+		std::string secondary_polarity;
 		quantity::energy_t sputter_energy;
 		ion_t sputter_ion;
 		bool operator==(const sims_t& obj) const;
@@ -58,7 +57,7 @@ public:
 		dsims_t();
 		dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents);
 		dsims_t(files_::dsims_t& file);
-        const string to_string(const string del=", ") const;
+        const std::string to_string(const std::string del=", ") const;
 		
 		quantity::sputter_time_t total_sputter_time;
 		quantity::sputter_time_t total_acquisition_time;

@@ -23,7 +23,7 @@ measurements_::profilers_t::profiler_t::profiler_t(files_::file_t::name_t& filen
 												   files_::file_t::contents_t& filecontents, 
 												   const crater_t::linescan_t& linescan_s,
 
-												   string method,
+												   std::string method,
 												   database_t& sql_wrapper) :
                                                    measurement_t(filename,filecontents,method,sql_wrapper),
                                                    linescan_p(linescan_s),

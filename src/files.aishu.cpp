@@ -18,7 +18,7 @@
 
 #include "files.hpp"
 
-files_::aishu_t::aishu_t(string& filename, const std::string& contents_string)
+files_::aishu_t::aishu_t(std::string& filename, const std::string& contents_string)
     : logger(global_logger,__FILE__,"files_::aishu_t"), name(filename), contents(filename, contents_string)
 {
 }
@@ -29,9 +29,9 @@ bool files_::aishu_t::operator<(const aishu_t& obj) const
     return false;
 }
 
-void files_::aishu_t::export_to_aishu_format(string export_filename_w_path)
+void files_::aishu_t::export_to_aishu_format(std::string export_filename_w_path)
 {
-    vector<vector<string>> lines;
+    std::vector<std::vector<std::string>> lines;
     std::vector<std::string> line1, line2;
     std::vector<std::string> header,headerQs;
     auto blocks = contents.blocks();
@@ -70,7 +70,7 @@ void files_::aishu_t::export_to_aishu_format(string export_filename_w_path)
     header.insert(header.end(),headerQs.begin(),headerQs.end());
     lines.insert(lines.begin(),header);
 //    matrix = tools::mat::transpose_matrix(matrix);
-    string out = tools::mat::format_matrix_to_string(&lines);
+    std::string out = tools::mat::format_matrix_to_string(&lines);
     if (export_filename_w_path=="")
     {
         export_filename_w_path = name.filename_with_path+"-summary.txt";
@@ -83,7 +83,7 @@ files_::aishu_t::name_t::name_t(std::string filename) : file_t::name_t(filename,
 
 }
 
-files_::aishu_t::contents_t::contents_t(string& filename_with_path, const std::string& contents_string)
+files_::aishu_t::contents_t::contents_t(std::string& filename_with_path, const std::string& contents_string)
     : file_t::contents_t(filename_with_path,",",{"Circuit"},{0,1},contents_string),
       logger(global_logger,__FILE__,"files_::aishu_t::contents_t")
 {
@@ -115,7 +115,7 @@ files_::aishu_t::contents_t::block_t::block_t(const std::vector<std::vector<std:
 
 const std::string files_::aishu_t::contents_t::block_t::header_to_string() const
 {
-    stringstream out;
+    std::stringstream out;
     for (auto l : header)
     {
         for (auto c : l)
@@ -128,10 +128,10 @@ const std::string files_::aishu_t::contents_t::block_t::header_to_string() const
 
 quantity::quantity_t files_::aishu_t::contents_t::block_t::temperature()
 {
-    smatch match;
+    std::smatch match;
     //Temp: 25°C
     std::string h = header_to_string();
-    regex reg ("Temp: ([0-9]{1,3})");
+    std::regex reg ("Temp: ([0-9]{1,3})");
     if (regex_search(h,match,reg))
     {
         double out = tools::str::str_to_double(match[1]);
@@ -145,8 +145,8 @@ quantity::quantity_t files_::aishu_t::contents_t::block_t::temperature()
 files_::aishu_t::contents_t::block_t::chip_t files_::aishu_t::contents_t::block_t::chip(int chip_number)
 {
     files_::aishu_t::contents_t::block_t::chip_t C;
-    smatch match;
-    regex reg ("Chip"+ std::to_string(chip_number)  +" x=([0-9]{1,2})y=([0-9]{1,2})");
+    std::smatch match;
+    std::regex reg ("Chip"+ std::to_string(chip_number)  +" x=([0-9]{1,2})y=([0-9]{1,2})");
     //Chip1 x=4y=2 Chip2 x=4y=4
     std::string h = header_to_string();
     if (regex_search(h,match,reg))
@@ -158,7 +158,7 @@ files_::aishu_t::contents_t::block_t::chip_t files_::aishu_t::contents_t::block_
     }
     else
         logger.debug(__func__,"reg").signal("not found");
-    regex reg_col (std::to_string(chip_number));
+    std::regex reg_col (std::to_string(chip_number));
     std::vector<int> chip_cols;
     for (int col=0; col<header.back().size();col++)
     {

@@ -34,9 +34,9 @@ mgroups_::mgroup_t::mgroup_t(measurements_::measurement_t& measurement) :
 }
 
 
-string mgroups_::mgroup_t::to_string(const string del)
+std::string mgroups_::mgroup_t::to_string(const std::string del)
 {
-	stringstream ss;
+	std::stringstream ss;
 	if (use_olcdb) ss << "olcdb: " << olcdb << del;
     if (use_group) ss << "group: " << group_id;
 	return ss.str();

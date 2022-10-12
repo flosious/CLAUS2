@@ -30,29 +30,26 @@
 #include "isotope.hpp"
 
 
-using namespace std;
-
-
 class element_t
 {
 // 	friend class matrix_t;
 private:
     class_logger_t logger;
-// 	vector<isotope_t> isotopes_p;
+// 	std::vector<isotope_t> isotopes_p;
 	void set_elemental_substance_amount();
 // 	quantity::substance_amount_t substance_amount_p;
 public:
 	element_t();
-	element_t(string symbol_s, double abs_amount=1, bool use_naturale_abundance=true);
-	element_t(vector<isotope_t> isotopes_s);
+	element_t(std::string symbol_s, double abs_amount=1, bool use_naturale_abundance=true);
+	element_t(std::vector<isotope_t> isotopes_s);
 	element_t(isotope_t isotope_s);
 
-	vector<isotope_t> isotopes;
+	std::vector<isotope_t> isotopes;
 	quantity::substance_amount_t substance_amount;
 	
 	const quantity::mass_t mass();
-	string symbol;
-	const string to_string() const;
+	std::string symbol;
+	const std::string to_string() const;
 	const int protons();
 	///some abosulte value: atoms, mole, particles, ...
 	

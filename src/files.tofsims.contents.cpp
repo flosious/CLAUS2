@@ -23,41 +23,46 @@
 /***********************/
 
 
-files_::tofsims_t::contents_t::contents_t(string& filename_with_path, const std::string& contents_string)
+files_::tofsims_t::contents_t::contents_t(std::string& filename_with_path, const std::string& contents_string)
     : files_::sims_t::contents_t(filename_with_path,"\t",{"# Profile Smoothing","# Profile Compression"},contents_string),
       logger(global_logger,__FILE__,"files_::tofsims_t::contents_t")
 {
 }
 
 
-vector<isotope_t> files_::tofsims_t::contents_t::parse_isotopes(string isotopes) const
+std::vector<isotope_t> files_::tofsims_t::contents_t::parse_isotopes(std::string isotopes)
 {
-	vector<isotope_t> isotope_list;
+	std::vector<isotope_t> isotope_list;
 	isotopes = tools::str::remove_chars_from_string(isotopes,"-+");
-	smatch match;
-	regex reg ("^\\^?([0-9]{0,3})([A-Z]{1}[a-z]{0,1})([0-9]{0,3})(.*?)$"); 
+	std::smatch match;
+	std::regex reg ("^\\^?([0-9]{0,3})([A-Z]{1}[a-z]{0,1})([0-9]{0,3})(.*?)$"); 
 	while (regex_search(isotopes,match,reg)) 
 	{
 		// order is important, because it will be cleared on access
-		string nucleons = match[1];
-		string symbol = match[2];
-		string atoms = match[3];
+		std::string nucleons = match[1];
+		std::string symbol = match[2];
+		std::string atoms = match[3];
 		isotopes = match[4];
 
 		isotope_t isotope;
 		isotope.symbol=symbol;
+        if (PSE.element(symbol)==nullptr)
+        {
+//            logger.error(__func__,"element not found in PSE").signal(symbol);
+            return {};
+        }
 		if (nucleons!="") isotope.nucleons = tools::str::str_to_int(nucleons);
 		else isotope.nucleons = PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
 		if (atoms!="") isotope.substance_amount = quantity::substance_amount_t({tools::str::str_to_double(atoms)});
 // 		else isotope.substance_amount=1;
-// 		cout << "nucleons="<<nucleons<<"\tsymbol="<<symbol<<"\tatoms="<<atoms<<"\tisotopes="<<isotopes<<endl;
+// 		std::cout << "nucleons="<<nucleons<<"\tsymbol="<<symbol<<"\tatoms="<<atoms<<"\tisotopes="<<isotopes<<endl;
 // 		isotope.to_screen("");
 		isotope_list.push_back(isotope);
 	}
 	return isotope_list;
 }
 
-const vector<files_::sims_t::contents_t::column_t> files_::tofsims_t::contents_t::columns()
+const std::vector<files_::sims_t::contents_t::column_t> files_::tofsims_t::contents_t::columns()
 {
 	if (cols_p.size()>0)
 	{
@@ -71,7 +76,7 @@ const vector<files_::sims_t::contents_t::column_t> files_::tofsims_t::contents_t
 	tools::str::replace_chars(&header,"#","");
 // 	print(data);
 // 	print(header);
-// 	cout << header.size() << endl;
+// 	std::cout << header.size() << std::endl;
 	const int cluster_names_line=(header).size()-3;
 	const int masses_line=(header).size()-2;
 	const int dimensions_units_line=(header).size()-1;
@@ -92,7 +97,7 @@ const vector<files_::sims_t::contents_t::column_t> files_::tofsims_t::contents_t
 quantity::sputter_time_t files_::tofsims_t::contents_t::sputter_time()
 {
 	auto col = columns().at(0);
-	if (col.dimension.find("Sputter Time")!=string::npos)
+    if (col.dimension.find("Sputter Time")!=std::string::npos)
 	{
 		return quantity::sputter_time_t(col.data,tools::str::get_string_between_string_A_and_next_B(&col.dimension,"(",")"));
 	}
@@ -102,17 +107,17 @@ quantity::sputter_time_t files_::tofsims_t::contents_t::sputter_time()
 quantity::sputter_depth_t files_::tofsims_t::contents_t::sputter_depth()
 {
 	auto col = columns().at(0);
-	if (col.dimension.find("Depth")!=string::npos)
+    if (col.dimension.find("Depth")!=std::string::npos)
 	{
 		return quantity::sputter_depth_t(col.data,tools::str::get_string_between_string_A_and_next_B(&col.dimension,"(",")"));
 	}
 	return {};
 }
 
-vector<cluster_t> files_::tofsims_t::contents_t::clusters()
+std::vector<cluster_t> files_::tofsims_t::contents_t::clusters()
 {
 	const auto cols = columns();
-	vector<cluster_t> clusters_p;
+	std::vector<cluster_t> clusters_p;
 	clusters_p.reserve((cols.size()));
 	for (int i=1; i < cols.size() ; i++)
 	{
@@ -121,13 +126,13 @@ vector<cluster_t> files_::tofsims_t::contents_t::clusters()
 		{
 			clusters_p.push_back(parse_isotopes(col.cluster_name));
 		}
-		if (col.dimension.find("Intensity")!=string::npos)
+        if (col.dimension.find("Intensity")!=std::string::npos)
 		{
 			clusters_p.back().intensity = quantity::intensity_t(col.data);
 		}
-		if (col.dimension.find("Concentration")!=string::npos)
+        if (col.dimension.find("Concentration")!=std::string::npos)
 		{
-			if (col.dimension.find("%")!=string::npos)
+            if (col.dimension.find("%")!=std::string::npos)
 				clusters_p.back().concentration = quantity::concentration_t(col.data, units::derived::atom_percent, quantity::dimensions::SI::relative);
 			clusters_p.back().concentration = quantity::concentration_t(col.data);
 		}

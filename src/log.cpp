@@ -1,8 +1,8 @@
 #include "log.hpp"
 
-/********************/
+/***************************/
 /*** logger_message_t ******/
-/********************/
+/***************************/
 
 logger_message_t::logger_message_t(unsigned int verbosity_level,
                                mtype_t mtype_s,
@@ -26,7 +26,7 @@ logger_message_t::logger_message_t(unsigned int verbosity_level,
 {
 }
 
-const map<logger_message_t::mtype_t,string> logger_message_t::type_to_string
+const std::map<logger_message_t::mtype_t,std::string> logger_message_t::type_to_string
 {
     {fatal,"FATAL"},
     {error,"ERROR"},
@@ -41,9 +41,9 @@ std::string logger_message_t::type_string() const
     return type_to_string.at(mtype);
 }
 
-string logger_message_t::to_string(const string delimiter) const
+std::string logger_message_t::to_string(const std::string delimiter) const
 {
-	stringstream out;
+	std::stringstream out;
     out << type_to_string.at(mtype);
     out << delimiter << source_file_name;
     out << delimiter << class_name;
@@ -102,7 +102,7 @@ logger_t::filter_t logger_t::filter_t::type(logger_message_t::mtype_t mtype) con
     return filter_t(new_messages);
 }
 
-logger_t::filter_t logger_t::filter_t::source_file_name(const string source_file_name_s) const
+logger_t::filter_t logger_t::filter_t::source_file_name(const std::string source_file_name_s) const
 {
     std::vector<logger_message_t> new_messages;
     for (const auto& m : messages())
@@ -113,7 +113,7 @@ logger_t::filter_t logger_t::filter_t::source_file_name(const string source_file
     return filter_t(new_messages);
 }
 
-logger_t::filter_t logger_t::filter_t::class_name(const string class_name_s) const
+logger_t::filter_t logger_t::filter_t::class_name(const std::string class_name_s) const
 {
     std::vector<logger_message_t> new_messages;
     for (const auto& m : messages())
@@ -124,7 +124,7 @@ logger_t::filter_t logger_t::filter_t::class_name(const string class_name_s) con
     return filter_t(new_messages);
 }
 
-logger_t::filter_t logger_t::filter_t::func_name(const string func_name_s) const
+logger_t::filter_t logger_t::filter_t::func_name(const std::string func_name_s) const
 {
     std::vector<logger_message_t> new_messages;
     for (const auto& m : messages())
@@ -135,7 +135,7 @@ logger_t::filter_t logger_t::filter_t::func_name(const string func_name_s) const
     return filter_t(new_messages);
 }
 
-logger_t::filter_t logger_t::filter_t::object_name(const string object_name_s) const
+logger_t::filter_t logger_t::filter_t::object_name(const std::string object_name_s) const
 {
     std::vector<logger_message_t> new_messages;
     for (const auto& m : messages())
@@ -202,7 +202,7 @@ void logger_t::use_case_t::quantity(std::string_view quantity_to_string_short, u
 
 void logger_t::use_case_t::is_statement(std::string_view concerning_object_name, bool value, std::string_view consequence ,unsigned int verbosity_level)
 {
-    stringstream message_description, message_details;
+    std::stringstream message_description, message_details;
     if (value)
     {
         message_description << concerning_object_name << " is TRUE";
@@ -217,7 +217,7 @@ void logger_t::use_case_t::is_statement(std::string_view concerning_object_name,
 
 //void logger_t::use_case_t::if_statement(std::string_view concerning_object_A_name, std::string_view concerning_object_A_value, std::string_view comparator, std::string_view concerning_object_B_name, std::string_view concerning_object_B_value, unsigned int verbosity_level)
 //{
-//    stringstream message_description, message_details;
+//    std::stringstream message_description, message_details;
 //    message_description << concerning_object_A_name << comparator << concerning_object_B_name;
 //    message_details << concerning_object_A_value << comparator << concerning_object_B_value;
 //    log(message_description.str(),message_details.str(),verbosity_level);
@@ -271,7 +271,9 @@ void logger_t::log(unsigned int verbosity_level,
     print_last();
 }
 
-void logger_t::add_message(const logger_message_t& message)
+std::vector<logger_message_t> logger_t::messages_p;
+
+void logger_t::add_message(const logger_message_t& message) const
 {
     messages_p.push_back(message);
 }
@@ -286,24 +288,24 @@ const std::vector<logger_message_t>& logger_t::messages() const
     return messages_p;
 }
 
-std::vector<logger_message_t>& logger_t::messages()
-{
-    return messages_p;
-}
+//std::vector<logger_message_t>& logger_t::messages()
+//{
+//    return messages_p;
+//}
 
 void logger_t::clear_messages()
 {
-    messages().clear();
+    messages_p.clear();
 }
 
 void logger_t::clear_messages(std::vector<unsigned long> ids)
 {
-    std::remove_if(messages().begin(),messages().end(), [ids](logger_message_t& M) {if (std::find(ids.begin(),ids.end(),M.sequence_id)==ids.end()) return false; return true; } );
+    std::remove_if(messages_p.begin(),messages_p.end(), [ids](logger_message_t& M) {if (std::find(ids.begin(),ids.end(),M.sequence_id)==ids.end()) return false; return true; } );
 }
 
 logger_t::filter_t logger_t::filter() const
 {
-    return filter_t(messages());
+    return filter_t(messages_p);
 }
 
 void logger_t::to_screen()
@@ -313,17 +315,17 @@ void logger_t::to_screen()
         std::cout << M.to_string() << std::endl;
 }
 
-string logger_t::to_string(const string line_delimiter)
+std::string logger_t::to_string(const std::string line_delimiter)
 {
-	stringstream out;
+	std::stringstream out;
     for (auto& M : messages_p)
 		out << M.to_string() << line_delimiter;
 	return out.str();
 }
 
-void logger_t::to_file(string path_with_filename)
+void logger_t::to_file(std::string path_with_filename)
 {
-	string contents = to_string("\n");
+	std::string contents = to_string("\n");
 	tools::file::write_to_file_and_create_folders(path_with_filename,&contents,false);
 }
 
@@ -412,9 +414,12 @@ logger_t::use_case_t logger_t::debug(std::string_view source_file_name,
 //    return logger->window_p;
 //}
 
-void class_logger_t::add_message(const logger_message_t& message)
+void class_logger_t::add_message(const logger_message_t& message) const
 {
-    logger->add_message(message);
+    if (logger==nullptr)
+        std::cout << message.to_string() << std::endl;
+    else
+        logger->add_message(message);
 }
 
 class_logger_t::class_logger_t(Logger& logger_s,
@@ -427,14 +432,14 @@ class_logger_t::class_logger_t(Logger& logger_s,
 
 //table_log* class_logger_t::window()
 //{
-////    cout << "class_logger_t::window()" << endl;
+////    std::cout << "class_logger_t::window()" << std::endl;
 //    return logger->window();
 //}
 
-vector<logger_message_t>& class_logger_t::messages()
-{
-    return logger->messages();
-}
+//std::vector<logger_message_t>& class_logger_t::messages()
+//{
+//    return logger->messages();
+//}
 
 //bool class_logger_t::print_debug() const
 //{

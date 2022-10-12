@@ -40,7 +40,8 @@ std::vector<std::string> filenames_collector_t::folders_in_path(std::string path
 
 bool filenames_collector_t::is_folder(std::string file_or_path)
 {
-    if (tools::file::is_file_or_folder(file_or_path)==2)
+    int file_path_state = tools::file::is_file_or_folder(file_or_path);
+    if (file_path_state==2)
         return true;
     return false;
 }
@@ -56,6 +57,7 @@ bool filenames_collector_t::is_file(std::string file_or_path)
 void filenames_collector_t::add_file(std::string filename_with_path)
 {
     filenames_with_path_p.insert(filename_with_path);
+    logger.debug(__func__,filename_with_path).signal("added");
 }
 
 
@@ -67,23 +69,51 @@ void filenames_collector_t::add_files(std::vector<std::string> filenames_with_pa
 
 void filenames_collector_t::add_file_or_folder(std::string file_or_folder, bool include_sub_folders)
 {
-    if (is_file(file_or_folder))
+    int file_path_state = tools::file::is_file_or_folder(file_or_folder);
+    switch (file_path_state)
     {
-//        cout << "FILE: " << file_or_folder << endl;
-        add_file(file_or_folder);
+    case -1:
+    {
+        logger.error(__func__,file_or_folder).signal("system returns error");
+        break;
     }
-    else if (is_folder(file_or_folder))
+    case 0:
     {
-//        cout << "FOLDER: " << file_or_folder << endl;
+        logger.error(__func__,file_or_folder).signal("neither file or folder");
+        break;
+    }
+    case 1:
+    {
+        add_file(file_or_folder);
+        break;
+    }
+    case 2:
+    {
         if (include_sub_folders)
             add_files_or_folders(files_and_folders_in_path(file_or_folder),include_sub_folders);
         else
             add_files(files_in_path(file_or_folder));
+        break;
     }
-    else
-    {
-        //logger::error("filenames_collector_t::add_file_or_folder","neither file nor folder", file_or_folder);
     }
+//    if (is_file(file_or_folder))
+//    {
+////        std::cout << "FILE: " << file_or_folder << std::endl;
+//        add_file(file_or_folder);
+//    }
+//    else if (is_folder(file_or_folder))
+//    {
+////        std::cout << "FOLDER: " << file_or_folder << std::endl;
+//        if (include_sub_folders)
+//            add_files_or_folders(files_and_folders_in_path(file_or_folder),include_sub_folders);
+//        else
+//            add_files(files_in_path(file_or_folder));
+//    }
+//    else
+//    {
+//        //logger::error("filenames_collector_t::add_file_or_folder","neither file nor folder", file_or_folder);
+//        logger.error(__func__,file_or_folder).signal("neither file or folder");
+//    }
 }
 
 void filenames_collector_t::add_files_or_folders(std::vector<std::string> files_or_folders, bool include_sub_folders)

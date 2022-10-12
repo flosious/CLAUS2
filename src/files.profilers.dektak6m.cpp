@@ -22,7 +22,7 @@
 /*********    dektak6m_t  	**************/
 /*****************************************/
 
-files_::profilers_t::dektak6m_t::dektak6m_t(string& filename, const std::string& contents_string) :
+files_::profilers_t::dektak6m_t::dektak6m_t(std::string& filename, const std::string& contents_string) :
     name(filename,"_",{".TXT",".txt",".profile"},{}), contents(filename, contents_string),
     logger(global_logger,__FILE__,"files_::profilers_t::dektak6m_t")
 {
@@ -33,7 +33,7 @@ files_::profilers_t::dektak6m_t::dektak6m_t(string& filename, const std::string&
 /*********  dektak6m_t::contents_t  **************/
 /*************************************************/
 
-files_::profilers_t::dektak6m_t::contents_t::contents_t(string& filename_with_path, const std::string& contents_string) :
+files_::profilers_t::dektak6m_t::contents_t::contents_t(std::string& filename_with_path, const std::string& contents_string) :
     profiler_t::contents_t(filename_with_path,",",{"Scan Type","Stylus Type"},contents_string),
     logger(global_logger,__FILE__,"files_::profilers_t::dektak6m_t::contents_t")
 {
@@ -49,7 +49,7 @@ crater_t::linescan_t files_::profilers_t::dektak6m_t::contents_t::linescan()
 	if (raw_data_tensor()[0][0].size()==0) 
 		return {};
 
-	vector<vector<double>> data_cols_lines = tools::mat::transpose_matrix(tools::mat::str_matrix_to_double_matrix(raw_data_tensor()[0]));
+	std::vector<std::vector<double>> data_cols_lines = tools::mat::transpose_matrix(tools::mat::str_matrix_to_double_matrix(raw_data_tensor()[0]));
 	
 	
 	

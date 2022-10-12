@@ -10,9 +10,9 @@ class filenames_collector_t
 private:
     class_logger_t logger;
     std::set<std::string> filenames_with_path_p;
-    static vector<string> files_and_folders_in_path(std::string path) ;
-    static vector<string> files_in_path(std::string path) ;
-    static vector<string> folders_in_path(std::string path) ;
+    static std::vector<std::string> files_and_folders_in_path(std::string path) ;
+    static std::vector<std::string> files_in_path(std::string path) ;
+    static std::vector<std::string> folders_in_path(std::string path) ;
     static bool is_folder(std::string file_or_path);
     static bool is_file(std::string file_or_path);
     void add_file(std::string filename_with_path);

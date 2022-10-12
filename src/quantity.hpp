@@ -31,8 +31,6 @@
 #include "fit_functions.hpp"
 #include "tools.hpp"
 
-using namespace std;
-
 ///physical quantities
 namespace quantity
 {
@@ -43,13 +41,13 @@ namespace quantity
 	private:
         class_logger_t logger;
 		const std::map<double,double> data_XY_1D();
-		static int get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const vector<double>& monotonic_vec);
+		static int get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const std::vector<double>& monotonic_vec);
 	public:
 		class dimension_t
 		{
 		private:
 
-			static string string_builder(const string base,int exponent);
+			static std::string string_builder(const std::string base,int exponent);
 		public:
 			constexpr dimension_t(
 				int length=0,
@@ -76,7 +74,7 @@ namespace quantity
 			int luminous_intensity;
 			bool is_relative() const;
 			///order: T=time L=length M=mass I=current Th=abs. temperature N=substance amount J=luminous intensity
-			string to_string() const;
+			std::string to_string() const;
 			dimension_t(const dimension_t& dim);
 			bool operator==(const dimension_t& obj) const;
 			bool operator!=(const dimension_t& obj) const;
@@ -89,24 +87,24 @@ namespace quantity
 		static dimension_t get_dimension_from_unit(const unit_t& unit);
 	protected:
 		///the actual data
-		vector<double> data_s;
+		std::vector<double> data_s;
 		///contains all the operations already applied to this quantity before
-		vector<string> operations_history_s;
+		std::vector<std::string> operations_history_s;
 		///name is changed by operation, e.g. "max(name)"
-		string name_s;
+		std::string name_s;
 		dimension_t dimension_s;
 		unit_t unit_s;
 	public:
 		///{1,2,3,4,5,...data.size()}
-		const vector<double> data_X_1D() const;
+		const std::vector<double> data_X_1D() const;
 		bool is_relative() const;
 		///the actual data
-		const vector<double>& data() const;
+		const std::vector<double>& data() const;
 		///contains all the operations already applied to this quantity before
-		const vector<string>& operations_history() const;
-		string operations_history_to_string() const;
+		const std::vector<std::string>& operations_history() const;
+		std::string operations_history_to_string() const;
 		///name is changed by operation, e.g. "max(name)"
-		const string& name() const;
+        const std::string& name() const;
 		const dimension_t& dimension() const;
 		const unit_t& unit() const;
 		
@@ -122,19 +120,19 @@ namespace quantity
 		quantity_t();
 // 		quantity_t(const quantity_t& Q);
 		
-		quantity_t(const quantity_t& quant,const unit_t& unit, string add_to_history="");
-		quantity_t(const quantity_t& quant,const unit_t& unit, const dimension_t& dimension, string add_to_history="");
+		quantity_t(const quantity_t& quant,const unit_t& unit, std::string add_to_history="");
+		quantity_t(const quantity_t& quant,const unit_t& unit, const dimension_t& dimension, std::string add_to_history="");
 		
-		quantity_t(const quantity_t& quant,const double& data, 			string add_to_history="");
-		quantity_t(const quantity_t& quant,const vector<double>& data,	string add_to_history="");
+		quantity_t(const quantity_t& quant,const double& data, 			std::string add_to_history="");
+		quantity_t(const quantity_t& quant,const std::vector<double>& data,	std::string add_to_history="");
 		
-// 		quantity_t(const vector<double>& data,unit_t& unit, 			string add_to_history="");
-// 		quantity_t(const double& data,const unit_t& unit, 				string add_to_history="");
+// 		quantity_t(const std::vector<double>& data,unit_t& unit, 			std::string add_to_history="");
+// 		quantity_t(const double& data,const unit_t& unit, 				std::string add_to_history="");
 		
-		quantity_t(const string& name,const vector<double>& data,const unit_t& unit);
-		quantity_t(const string& name,const unit_t& unit, string add_to_history="");
-		quantity_t(const string& name,const vector<double>& data,const unit_t& unit, const dimension_t& dimension);
-		quantity_t(const string& name,const vector<double>& data,const unit_t& unit, const dimension_t& dimension, const vector<string>& operations_history,string add_to_history="");
+        quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit);
+        quantity_t(const std::string& name,const unit_t& unit, std::string add_to_history="");
+        quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit, const dimension_t& dimension);
+        quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit, const dimension_t& dimension, const std::vector<std::string>& operations_history,std::string add_to_history="");
 		
 		///returns a copy of itself
 // 		quantity_t copy() const;
@@ -142,7 +140,7 @@ namespace quantity
 		///tries to change the current unit to its target unit; returns { } if unsuccessfull
 		quantity_t change_unit(const unit_t& target_unit)  const;
 		///tries to change the current unit to its target unit; returns { } if unsuccessfull
-		quantity_t change_unit(string target_unit_string)  const;
+		quantity_t change_unit(std::string target_unit_string)  const;
 
 		quantity_t resolution(double new_res=0)  const;
 
@@ -150,9 +148,9 @@ namespace quantity
 		quantity_t change_resolution(unsigned int new_data_size) const;
 // 		const unit_t& unit() const;
 // 		const unit_t unit_copy() const;
-		const string to_string_short() const;
-		const string to_string() const;
-		const string to_string_detailed() const;
+		const std::string to_string_short() const;
+		const std::string to_string() const;
+		const std::string to_string_detailed() const;
 		
 		
 		quantity_t log10() const;
@@ -210,7 +208,7 @@ namespace quantity
 		quantity_t get_data_by_index(unsigned int start, unsigned int stop)  const;
 		quantity_t get_data_by_index_rel(float start, float stop)  const;
 		quantity_t remove_data_by_index(unsigned int start, unsigned int stop)  const;
-		quantity_t remove_data_by_index(vector<unsigned int> remove_pos)  const;
+		quantity_t remove_data_by_index(std::vector<unsigned int> remove_pos)  const;
 		///deletes last entry
 		quantity_t pop_back()  const;
 		quantity_t remove_data_from_begin(unsigned int stop)  const;
@@ -284,12 +282,12 @@ namespace quantity
 		quantity_t& clear();
 		///lowest to highest
 		quantity_t& sort();
-		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
+		/// idx of std::vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
 		/// bins is the number of bins, all having same sizes
-		vector<int> bin_data(int bins_count) const;
-		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
-		/// returning the number of bins , where each idx of the result vector is containing the amount of data within the bin
-		vector<int> bin_data(const vector<double>& bins) const;
+		std::vector<int> bin_data(int bins_count) const;
+		/// idx of std::vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
+		/// returning the number of bins , where each idx of the result std::vector is containing the amount of data within the bin
+		std::vector<int> bin_data(const std::vector<double>& bins) const;
 	};
 	
 	
@@ -317,145 +315,145 @@ namespace quantity
 	class mass_t : public quantity_t
 	{
 	public:
-		mass_t(vector<double> data_s={},unit_t unit_s=units::derived::amu, dimension_t dim_s=dimensions::SI::mass); // atomic mass units
+		mass_t(std::vector<double> data_s={},unit_t unit_s=units::derived::amu, dimension_t dim_s=dimensions::SI::mass); // atomic mass units
 		mass_t(const quantity_t& quantity_s);
 	}; 
 
 	class abundance_t : public quantity_t
 	{
 	public:
-		abundance_t(vector<double> data_s={},unit_t unit_s={}, dimension_t dim_s=dimensions::SI::relative);
+		abundance_t(std::vector<double> data_s={},unit_t unit_s={}, dimension_t dim_s=dimensions::SI::relative);
 		abundance_t(const quantity_t& quantity_s);
 	}; 
 	
 	class energy_t : public quantity_t
 	{
 	public:
-		energy_t(vector<double> data_s={},unit_t unit_s=units::derived::electron_volt, dimension_t dim_s=dimensions::derived::energy);
+		energy_t(std::vector<double> data_s={},unit_t unit_s=units::derived::electron_volt, dimension_t dim_s=dimensions::derived::energy);
 		energy_t(const quantity_t& quantity_s);
 	}; 
 	
 	class secondary_voltage_t : public quantity_t
 	{
 	public:
-		secondary_voltage_t(vector<double> data_s={},unit_t unit_s=units::derived::volt, dimension_t dim_s=dimensions::derived::voltage);
+		secondary_voltage_t(std::vector<double> data_s={},unit_t unit_s=units::derived::volt, dimension_t dim_s=dimensions::derived::voltage);
 		secondary_voltage_t(const quantity_t& quantity_s);
 	}; 
 	
 	class rastersize_t : public quantity_t
 	{
 	public:
-		rastersize_t(vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::micro, dimension_t dim_s=dimensions::SI::length);
+		rastersize_t(std::vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::micro, dimension_t dim_s=dimensions::SI::length);
 		rastersize_t(const quantity_t& quantity_s);
 	};
 	
 	class depth_t : public quantity_t
 	{
 	public:
-		depth_t(vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::nano, dimension_t dim_s=dimensions::SI::length);
+		depth_t(std::vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::nano, dimension_t dim_s=dimensions::SI::length);
 		depth_t(const quantity_t& quantity_s);
 	};
 	class sputter_depth_t : public quantity_t
 	{
 	public:
-		sputter_depth_t(vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::nano, dimension_t dim_s=dimensions::SI::length);
+		sputter_depth_t(std::vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::nano, dimension_t dim_s=dimensions::SI::length);
 		sputter_depth_t(const quantity_t& quantity_s);
 	};
 	class total_sputter_depth_t : public quantity_t
 	{
 	public:
-		total_sputter_depth_t(vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::nano, dimension_t dim_s=dimensions::SI::length);
+		total_sputter_depth_t(std::vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::nano, dimension_t dim_s=dimensions::SI::length);
 		total_sputter_depth_t(const quantity_t& quantity_s);
 	};
 	
 	class sputter_time_t : public quantity_t
 	{
 	public:
-		sputter_time_t(vector<double> data_s={},unit_t unit_s=units::SI::second, dimension_t dim_s=dimensions::SI::time);
+		sputter_time_t(std::vector<double> data_s={},unit_t unit_s=units::SI::second, dimension_t dim_s=dimensions::SI::time);
 		sputter_time_t(const quantity_t& quantity_s);
 	};
 	
 	class total_sputter_time_t : public quantity_t
 	{
 	public:
-		total_sputter_time_t(vector<double> data_s={},unit_t unit_s=units::SI::second, dimension_t dim_s=dimensions::SI::time);
+		total_sputter_time_t(std::vector<double> data_s={},unit_t unit_s=units::SI::second, dimension_t dim_s=dimensions::SI::time);
 		total_sputter_time_t(const quantity_t& quantity_s);
 	};
 	
 	class concentration_t : public quantity_t
 	{
 	public:
-		concentration_t(vector<double> data_s={},unit_t unit_s=units::derived::atoms / ((units::SI::meter*units::prefixes::centi).pow(3)), dimension_t dim_s=dimensions::derived::concentration);
+		concentration_t(std::vector<double> data_s={},unit_t unit_s=units::derived::atoms / ((units::SI::meter*units::prefixes::centi).pow(3)), dimension_t dim_s=dimensions::derived::concentration);
 		concentration_t(const quantity_t& quantity_s);
 	};
 	
 	class intensity_t : public quantity_t
 	{
 	public:
-		intensity_t(vector<double> data_s={},unit_t unit_s=units::derived::counts / units::SI::second, dimension_t dim_s=dimensions::SI::substance_amount/dimensions::SI::time);
+		intensity_t(std::vector<double> data_s={},unit_t unit_s=units::derived::counts / units::SI::second, dimension_t dim_s=dimensions::SI::substance_amount/dimensions::SI::time);
 		intensity_t(const quantity_t& quantity_s);
 	};
 	
 	class current_t : public quantity_t
 	{
 	public:
-		current_t(vector<double> data_s={},unit_t unit_s=units::prefixes::nano*units::SI::Ampere, dimension_t dim_s=dimensions::SI::electic_current);
+		current_t(std::vector<double> data_s={},unit_t unit_s=units::prefixes::nano*units::SI::Ampere, dimension_t dim_s=dimensions::SI::electic_current);
 		current_t(const quantity_t& quantity_s);
 	};
 	
 	class sputter_current_t : public quantity_t
 	{
 	public:
-		sputter_current_t(vector<double> data_s={},unit_t unit_s=units::prefixes::nano*units::SI::Ampere, dimension_t dim_s=dimensions::SI::electic_current);
+		sputter_current_t(std::vector<double> data_s={},unit_t unit_s=units::prefixes::nano*units::SI::Ampere, dimension_t dim_s=dimensions::SI::electic_current);
 		sputter_current_t(const quantity_t& quantity_s);
 	};
 	
 	class analysis_current_t : public quantity_t
 	{
 	public:
-		analysis_current_t(vector<double> data_s={},unit_t unit_s=units::prefixes::nano*units::SI::Ampere, dimension_t dim_s=dimensions::SI::electic_current);
+		analysis_current_t(std::vector<double> data_s={},unit_t unit_s=units::prefixes::nano*units::SI::Ampere, dimension_t dim_s=dimensions::SI::electic_current);
 		analysis_current_t(const quantity_t& quantity_s);
 	};
 	
 	class dose_t : public quantity_t
 	{
 	public:
-		dose_t(vector<double> data_s={},unit_t unit_s=units::derived::atoms / ((units::SI::meter*units::prefixes::centi).pow(2)), dimension_t dim_s=dimensions::SI::substance_amount/((dimensions::SI::length)^2));
+		dose_t(std::vector<double> data_s={},unit_t unit_s=units::derived::atoms / ((units::SI::meter*units::prefixes::centi).pow(2)), dimension_t dim_s=dimensions::SI::substance_amount/((dimensions::SI::length)^2));
 		dose_t(const quantity_t& quantity_s);
 	}; 
 	
 	class SF_t : public quantity_t
 	{
 	public:
-		SF_t(vector<double> data_s={},unit_t unit_s=units::derived::atoms/ ((units::SI::meter*units::prefixes::centi).pow(3)) / (units::derived::counts/units::SI::second) , dimension_t dim_s=dimensions::SI::substance_amount/((dimensions::SI::length)^3) / (dimensions::SI::substance_amount/dimensions::SI::time) );
+		SF_t(std::vector<double> data_s={},unit_t unit_s=units::derived::atoms/ ((units::SI::meter*units::prefixes::centi).pow(3)) / (units::derived::counts/units::SI::second) , dimension_t dim_s=dimensions::SI::substance_amount/((dimensions::SI::length)^3) / (dimensions::SI::substance_amount/dimensions::SI::time) );
 		SF_t(const quantity_t& quantity_s);
 	}; 
 	///matrix RSF
 // 	class mRSF_t : public quantity_t
 // 	{
 // 	public:
-// 		mRSF_t(vector<double> data_s={},unit_t unit_s=units::SI::one,dimension_t dim_s=dimensions::SI::relative);
+// 		mRSF_t(std::vector<double> data_s={},unit_t unit_s=units::SI::one,dimension_t dim_s=dimensions::SI::relative);
 // 		mRSF_t(const quantity_t& quantity_s);
 // 	}; 
 	
 	class SR_t : public quantity_t
 	{
 	public:
-		SR_t(vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::nano / units::SI::second, dimension_t dim_s=dimensions::SI::length / dimensions::SI::time);
+		SR_t(std::vector<double> data_s={},unit_t unit_s=units::SI::meter*units::prefixes::nano / units::SI::second, dimension_t dim_s=dimensions::SI::length / dimensions::SI::time);
 		SR_t(const quantity_t& quantity_s);
 	};  
 	
 	class substance_amount_t : public quantity_t
 	{
 	public:
-		substance_amount_t(vector<double> data_s={},unit_t unit_s=units::SI::mol, dimension_t dim_s=dimensions::SI::substance_amount);
+		substance_amount_t(std::vector<double> data_s={},unit_t unit_s=units::SI::mol, dimension_t dim_s=dimensions::SI::substance_amount);
 		substance_amount_t(const quantity_t& quantity_s);
 	}; 
 	
 	class electrical_charge_t : public quantity_t
 	{
 	public:
-		electrical_charge_t(vector<double> data_s={},unit_t unit_s={units::derived::coulomb}, dimension_t dim_s=dimensions::SI::electic_current*dimensions::SI::time);
+		electrical_charge_t(std::vector<double> data_s={},unit_t unit_s={units::derived::coulomb}, dimension_t dim_s=dimensions::SI::electic_current*dimensions::SI::time);
 		electrical_charge_t(const quantity_t& quantity_s);
 	};
 
@@ -464,16 +462,16 @@ namespace quantity
 	{
 	private:
         class_logger_t logger;
-		vector<pair<double,double>> XYdata_pairs() const;
-		static bool sort_by_x(const pair<double,double>& P1, const pair<double,double>& P2);
-		static bool sort_by_y(const pair<double,double>& P1, const pair<double,double>& P2);
+		std::vector<std::pair<double,double>> XYdata_pairs() const;
+		static bool sort_by_x(const std::pair<double,double>& P1, const std::pair<double,double>& P2);
+		static bool sort_by_y(const std::pair<double,double>& P1, const std::pair<double,double>& P2);
 		quantity_t X_p;
 		quantity_t Y_p;
 	public:
 		map_t();
 		map_t(const quantity_t& X, const quantity_t& Y);
 		///overwrites X and Y quantities by XYdata_pairs
-		map_t(const quantity_t& X, const quantity_t& Y, const vector<pair<double,double>>& XYdata_pairs);
+		map_t(const quantity_t& X, const quantity_t& Y, const std::vector<std::pair<double,double>>& XYdata_pairs);
 		const quantity_t& X() const;
 		const quantity_t& Y() const;
 		///returns new_Y using akima splines
@@ -481,7 +479,7 @@ namespace quantity
 		///removes pairwise all infinity values from the map
 		const map_t remove_inf() const;
 		const map_t remove_nan() const;
-		///remove map entry by given X position
+		///remove std::map entry by given X position
 		const map_t remove_by_X(quantity_t X_s) const;
 		///delete last element
 		const map_t pop_back() const;
@@ -489,14 +487,14 @@ namespace quantity
 		bool is_set() const;
 		//scalar vs scalar
 		bool is_single_point() const;
-		const map<double,double> data_map() const;
-		string to_string() const;
-		string to_string_detailed() const;
-		string to_string_list() const;
+		const std::map<double,double> data_map() const;
+		std::string to_string() const;
+		std::string to_string_detailed() const;
+		std::string to_string_list() const;
 		///removes outliners until chisqr_relative is below treshold (default 10%)
 		map_t remove_outliners(fit_functions::polynom_t polynom_s,float gof_treshold=0.1) const;
 		map_t remove_worst_outliner(const fit_functions::polynom_t& polynom_s) const;
-		fit_functions::polynom_t polynom(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
+		fit_functions::polynom_t polynom(const std::vector<unsigned>& rank, const std::vector<double>& polynom_start_parameters) const;
 		fit_functions::polynom_t polynom(unsigned int polynom_grade) const;
 		map_t swap_X_Y() const;
 		map_t at(unsigned int idx_pos) const;
@@ -519,27 +517,27 @@ namespace quantity
 		map_t delta_y(const map_t& Y_ref) const;
 		///difference of Y and Y_ref
 		map_t delta_y(const quantity_t& Y_ref) const;
-		///the polynomial fitted map (X(),Y_fitted())
+		///the polynomial fitted std::map (X(),Y_fitted())
 		map_t polyfit(fit_functions::polynom_t polynom_s) const;
 		map_t polyfit(fit_functions::polynom_t polynom_s,const unsigned int number_of_points) const;
 		map_t polyfit(fit_functions::polynom_t polynom_s, quantity_t new_X) const;
-		///the polynomial fitted map (X(),Y_fitted())
+		///the polynomial fitted std::map (X(),Y_fitted())
 		map_t polyfit(unsigned int polynom_grade) const;
-		///the polynomial fitted map (X(),Y_fitted())
-		map_t polyfit(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
+		///the polynomial fitted std::map (X(),Y_fitted())
+		map_t polyfit(const std::vector<unsigned>& rank, const std::vector<double>& polynom_start_parameters) const;
 		quantity_t polyfit(const quantity_t& x_vals, fit_functions::polynom_t polynom_s) const;
 		quantity_t polyfit(const quantity_t& x_vals, unsigned int polynom_grade) const;
-		quantity_t polyfit(const quantity_t& x_vals, const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const;
+		quantity_t polyfit(const quantity_t& x_vals, const std::vector<unsigned>& rank, const std::vector<double>& polynom_start_parameters) const;
 		///using radius (X^2 + Y^2)
 		quantity_t distance() const;
-		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
+		/// idx of std::vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
 		/// bins is the number of bins, all having same sizes
 		///using radius (X^2 + Y^2)
-		vector<int> bin_data(int bins_count) const;
-		/// idx of vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
-		/// returning the number of bins , where each idx of the result vector is containing the amount of data within the bin
+		std::vector<int> bin_data(int bins_count) const;
+		/// idx of std::vector is the number of the bin and the value of the vector.at(idx) is number of data (within the bin); 
+		/// returning the number of bins , where each idx of the result std::vector is containing the amount of data within the bin
 		///using radius (X^2 + Y^2)
-		vector<int> bin_data(const vector<double>& bins) const;
+		std::vector<int> bin_data(const std::vector<double>& bins) const;
 		/// returns the number of filled data bins
 		int filled_data_bins(int bins_count) const;
 		int size() const;
@@ -571,25 +569,25 @@ namespace quantity
 		private:
             class_logger_t logger;
 			///line_id -> quantity_entry; each entry can be a vector
-			map<long long unsigned int, quantity_t> quantity_entries_p;
+			std::map<long long unsigned int, quantity_t> quantity_entries_p;
 		public:
-			string name;
-			string comment;
+			std::string name;
+			std::string comment;
 			column_t();
-			column_t(long long unsigned int line_id,const quantity_t& q, string name="", string comment="");
+			column_t(long long unsigned int line_id,const quantity_t& q, std::string name="", std::string comment="");
 			//quantities, have same unit, dimension and name; just their data might be different
-			const map<long long unsigned int, quantity_t>& quantity_entries() const;
+			const std::map<long long unsigned int, quantity_t>& quantity_entries() const;
 			///header quantity; all q-entries must have same dimension, unit and name
 			const quantity_t header() const;
 			///at least one quantity entry line is be set
 			bool is_set() const;
-			string to_string() const;
+			std::string to_string() const;
 			///true on success
 			bool add_quantity_entry(long long unsigned int line_id, quantity_t q);
 			///adds new lines/quantities to this column or replaces not_set ones; true on success
 			bool add_entries(const column_t& col);
 			///all line_ids with match with q
-			vector<long long unsigned int> get_line_ids(quantity_t q) const;
+			std::vector<long long unsigned int> get_line_ids(quantity_t q) const;
 			//true on success; sets all entries to {}, where q is identical
 			bool unset_quantities(const quantity_t& q);
 			//true on success
@@ -604,7 +602,7 @@ namespace quantity
 			bool operator!=(const column_t& col) const;
 			///quantity is not set, if line_id does not exist
 			quantity_t get_quantity(long long unsigned int line_id) const;
-			///column is transformed into 1 vector quantity; just possible if column entries are scalars
+			///column is transformed into 1 std::vector quantity; just possible if column entries are scalars
 			quantity_t get_quantity() const;
 			///calculates for each column entry its median
 			column_t median() const;
@@ -621,7 +619,7 @@ namespace quantity
 		}; // table_t::column_t
 	private:
 		///combination of col+name is unique
-		vector<column_t> columns_p;
+		std::vector<column_t> columns_p;
 		///generates a random line_id, which is not used yet
 		long long unsigned int get_new_random_line_id() const;
 		///generates a sequential line_id, which is not used yet
@@ -630,28 +628,28 @@ namespace quantity
 	public:
         table_t();
 		/// line_id --> line_name
-		map<long long unsigned int,string> line_names;
+		std::map<long long unsigned int,std::string> line_names;
 		bool add(const table_t& table);
-		bool add(const vector<column_t>& cols);
+		bool add(const std::vector<column_t>& cols);
 		bool add(const column_t& col);
 		///using get_new_sequential_line_id to generate a line_id
-		bool add(const quantity_t& Q, string col_name);
-		bool add(const quantity_t& Q, string col_name, long long unsigned int line_id);
+		bool add(const quantity_t& Q, std::string col_name);
+		bool add(const quantity_t& Q, std::string col_name, long long unsigned int line_id);
 		table_t& erase_line(long long unsigned int line_id);
-		table_t& erase_lines(set<long long unsigned int> line_ids);
+		table_t& erase_lines(std::set<long long unsigned int> line_ids);
 		///returns the corssponding column within the table
 		const column_t* get_col(const column_t& col) const;
 		///returns the corssponding column within the table
-		const column_t* get_col(const quantity_t& col_header, string col_name) const;
+		const column_t* get_col(const quantity_t& col_header, std::string col_name) const;
 		///returns only quantitie, which are set
 		map_t get_map(const column_t& col_X, const column_t& col_Y) const;
 		///returns 0th and 1st column idxs
 		map_t get_map() const;
 		map_t get_map(int X_col_idx, int Y_col_idx) const;
-		const vector<column_t>& columns() const;
-		const vector<column_t> line(long long unsigned int line_id) const;
-		const set<long long unsigned int> line_ids() const;
-		string to_string() const;
+		const std::vector<column_t>& columns() const;
+		const std::vector<column_t> line(long long unsigned int line_id) const;
+		const std::set<long long unsigned int> line_ids() const;
+		std::string to_string() const;
 		///removes all lines, with at least 1 entry, where quantity is not set
 		table_t& remove_empty_lines();
 		table_t& remove_empty_columns();

@@ -64,9 +64,9 @@ bool quantity::quantity_t::dimension_t::operator!=(const dimension_t& obj) const
 	return !operator==(obj);
 }
 
-string quantity::quantity_t::dimension_t::string_builder(const string base, int exponent)
+std::string quantity::quantity_t::dimension_t::string_builder(const std::string base, int exponent)
 {
-	stringstream ss;
+	std::stringstream ss;
 	if (exponent!=0)
 	{
 		ss << base;
@@ -88,11 +88,11 @@ bool quantity::quantity_t::dimension_t::is_relative() const
 	return true;
 }
 
-string quantity::quantity_t::dimension_t::to_string() const
+std::string quantity::quantity_t::dimension_t::to_string() const
 {
 	if (is_relative())
 		return "relative";
-	stringstream ss;
+	std::stringstream ss;
 	ss << string_builder("T",time);
 	ss << string_builder("L",length);
 	ss << string_builder("M",mass);

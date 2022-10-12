@@ -21,42 +21,74 @@
 #ifndef SIMS_PLOT_MEASUREMENT_TREE_T_H
 #define SIMS_PLOT_MEASUREMENT_TREE_T_H
 
-#include <QTreeWidget>
+#include <QTreeView>
 #include <QStandardItem>
 //#include "qcustomplot.h"
-#include "plotwindow_t.hpp"
+#include "sims_plotwindow_t.hpp"
 #include "../src/measurement.hpp"
 #include "../src/cluster.hpp"
 #include "../src/log.hpp"
+#include "../src/processor.hpp"
 
-class sims_plot_measurement_tree_t : public QTreeWidget
+Q_DECLARE_METATYPE(quantity::quantity_t); // saved in Qt::UserRole+1; the copy of the original data (+2)
+Q_DECLARE_METATYPE(quantity::quantity_t*); // saved in Qt::UserRole+2; the pointer to the original data
+Q_DECLARE_METATYPE(int); //graph_id saved in Qt::UserRole+3
+
+class sims_plot_measurement_tree_t : public QTreeView
 {
     Q_OBJECT
 private:
     ///columns; keep LAST in the row at last position for automated iteration
-    enum column_t{cluster,LAST};
+    enum class column_t{root, LAST};
+    ///for the header
+    static std::map<column_t,std::string> column_names;
     QWidget *parent = nullptr;
     class_logger_t logger;
     measurements_::sims_t* measurement = nullptr;
+    QStandardItemModel* model;
+    static void set_graph_id_in_item(int graph_id, QStandardItem *item);
+    ///-1 on error
+    static int get_graph_id_from_index(const QModelIndex& idx);
+    ///true if index contains data (Qt::UserRole+1 && Qt::UserRole+2) set
+    static bool index_has_data(const QModelIndex& idx);
+    static quantity::quantity_t* get_quantity_in_item_from_Qindex(const QModelIndex& idx);
+    ///the pointer to the originally quantity within its cluster
+    static quantity::quantity_t* get_quantity_in_cluster_from_Qindex(const QModelIndex& idx);
+    ///will populate item.setData with the quantities information in UserRole+1 and UserRole+2 within the 0th column
+    static void set_quantity_in_QStandardItem(QStandardItem* quantity_item, quantity::quantity_t& quantity);
+    template<typename quantity_or_cluster>
+    QList<QStandardItem*> row(quantity_or_cluster& q_or_c)
+    {
+        QList<QStandardItem*> row_;
+        int size=static_cast<int>(column_t::LAST);
+        row_.reserve(size);
+        for (int c=0; c<size;c++)
+        {
+            column_t col = static_cast<column_t>(c);
+            row_ << item(q_or_c, col);
+        }
+        return row_;
+    }
+    QStandardItem* item(quantity::quantity_t& quantity, column_t col);
+    QStandardItem* item(cluster_t& cluster, column_t col);
 
-    QStandardItem* tree_cluster_item(cluster_t* cluster);
-    QStandardItem* tree_item(cluster_t* cluster, column_t col);
-    QList<QStandardItem*> tree_cluster_row(cluster_t* cluster);
-    plotwindow_t* sims_plot_window = nullptr;
+    sims_plotwindow_t* sims_plot_window = nullptr;
     ///false if nullptr
     bool is_plot_window() const;
     ///false if nullptr
     bool is_measurement() const;
-    void plot(const quantity::intensity_t& intensity, const quantity::sputter_time_t& sputter_time);
-    void plot(const quantity::concentration_t& concentration, const quantity::sputter_time_t& sputter_time);
-    void plot(const quantity::intensity_t& intensity, const quantity::sputter_depth_t& sputter_depth);
-    void plot(const quantity::concentration_t& concentration, const quantity::sputter_depth_t& sputter_depth);
+    void set_model();
     void update_sims_plot_window();
+    void graph_id_from_Qindex(const QModelIndex& idx);
+    void set_header();
+//    void add_quantity_to_plot(quantity::quantity_t* quantity);
+//    void remove_quantity_from_plot(quantity::quantity_t* quantity);
 public:
     sims_plot_measurement_tree_t(QWidget *parent = nullptr);
+    void update();
     ///clears the graph; sets the measurement_pointer to NULL
     void unset_measurement();
-    void set_sims_plot_window(plotwindow_t* sims_plot_window_s);
+    void set_sims_plot_window(sims_plotwindow_t* sims_plot_window_s);
 public slots:
     ///set sims_plot_window to new_measurement
     void set_measurement(measurements_::sims_t* new_measurement);
@@ -64,5 +96,4 @@ signals:
     ///updates MG_tab_measurement_plotwindow
 //    void update_plotwindow();
 };
-
 #endif // SIMS_PLOT_MEASUREMENT_TREE_T_H

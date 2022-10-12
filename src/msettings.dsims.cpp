@@ -65,10 +65,10 @@ msettings::dsims_t::dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::
 	em_voltage = filecontents.em_voltage();
 }
 
-const string msettings::dsims_t::to_string(const string del) const
+const std::string msettings::dsims_t::to_string(const std::string del) const
 {
-	stringstream ss;
-// 	const string del = ",";
+	std::stringstream ss;
+// 	const std::string del = ",";
 	ss << sims_t::to_string() << del;
     ss << chamber_pressure.to_string_short() << del;
     ss << egate.to_string_short() << del;

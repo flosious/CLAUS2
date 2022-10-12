@@ -53,7 +53,7 @@ measurements_::sims_t::filter_t measurements_::sims_t::filter() const
 	return filter_t(*this); 
 }
 
-void measurements_::sims_t::add_clusters(vector<cluster_t>& clusters)
+void measurements_::sims_t::add_clusters(std::vector<cluster_t>& clusters)
 {
 	for (auto& C: clusters)
 	{
@@ -62,7 +62,7 @@ void measurements_::sims_t::add_clusters(vector<cluster_t>& clusters)
 	}
 }
 
-bool measurements_::sims_t::are_clusters_in_measurement(const vector<cluster_t>& clusters_s) const
+bool measurements_::sims_t::are_clusters_in_measurement(const std::vector<cluster_t>& clusters_s) const
 {
 	for (auto& C : clusters_s)
 	{
@@ -79,7 +79,7 @@ bool measurements_::sims_t::are_clusters_in_measurement(const cluster_t& cluster
 	return true;
 }
 
-bool measurements_::sims_t::are_intensities_of_clusters_set(const vector<cluster_t>& clusters_s) const
+bool measurements_::sims_t::are_intensities_of_clusters_set(const std::vector<cluster_t>& clusters_s) const
 {
 	for (auto& C : clusters_s)
 	{
@@ -105,7 +105,7 @@ measurements_::sims_t::calc_t measurements_::sims_t::calc(bool overwrite)
 	return calc_t{(*this),overwrite};
 }
 
-measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, string method, database_t& sql_wrapper, vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
+measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, std::string method, database_t& sql_wrapper, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
     measurement_t(filename,method,sql_wrapper), clusters(filecontents.clusters()), reference_isotopes(sample.matrix().isotopes()),
     logger(global_logger,__FILE__,"measurements_::sims_t")
 {
@@ -115,10 +115,10 @@ measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::
 			crater.total_sputter_depths << *tsd;
 }
 
-string measurements_::sims_t::to_string(const string del)
+std::string measurements_::sims_t::to_string(const std::string del)
 {
     //logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
-	stringstream ss;
+	std::stringstream ss;
 	ss << measurement_t::to_string() << del;
 // 	if (crater.total_sputter_depths.is_set() || crater.linescans.size()>0)
 	ss << "crater: ";
@@ -135,10 +135,10 @@ string measurements_::sims_t::to_string(const string del)
 	return ss.str();
 }
 
-const string measurements_::sims_t::to_string_short(const string del) const
+const std::string measurements_::sims_t::to_string_short(const std::string del) const
 {
     //logger::debug(31,"measurements_::sims_t::to_string()","","","entering");
-	stringstream ss;
+	std::stringstream ss;
 	ss << measurement_t::to_string();
 	return ss.str();
 }
@@ -206,7 +206,7 @@ const string measurements_::sims_t::to_string_short(const string del) const
 //				//some implanted parameters
 //				if (C.implant_parameters.sputter_depth_at_min.is_set())
 //					plot.Y1.add_arrow(C.implant_parameters.sputter_depth_at_min.data().at(0),plot.Y1.range().start/1,C.implant_parameters.sputter_depth_at_min.data().at(0),plot.Y1.range().stop,"bA",C.to_string() + " intensity minimum"); // arrow at minimum position
-//// 				cout << endl << "C.implant_parameters.sputter_depth_at_min: " << C.implant_parameters.sputter_depth_at_min.to_string() << endl;
+//// 				std::cout << std::endl << "C.implant_parameters.sputter_depth_at_min: " << C.implant_parameters.sputter_depth_at_min.to_string() << std::endl;
 //				//maybe print the fit polynom here? useful to determine the quality of the fit
 //			}
 //		}
@@ -334,18 +334,18 @@ const string measurements_::sims_t::to_string_short(const string del) const
 // 	plot.to_screen(to_string(),sleep_sec);
 // }
 
-void measurements_::sims_t:: export_origin_ascii(string path, const string delimiter)
+void measurements_::sims_t:: export_origin_ascii(std::string path, const std::string delimiter)
 {
 	if (clusters.size()==0)
 	{
         //logger::warning(1,"measurements_::sims_t::export_origin_ascii","clusters.size()==0",to_string());
 		return;
 	}
-// 	cout << measurements_::sims_t::to_string() << endl;
+// 	std::cout << measurements_::sims_t::to_string() << std::endl;
     //logger::debug(6,"measurements_::sims_t::export_origin_ascii","path",path,"starting export: " + to_string_short());
-	vector<origin_t::column_t> cols;
+	std::vector<origin_t::column_t> cols;
 	/*time-intensity-profile*/
-	stringstream comment,longname;
+	std::stringstream comment,longname;
 	comment << "crater ";
     if (sample.simple_name!="")
         comment << sample.simple_name;
@@ -418,7 +418,7 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 	}
 	for (auto& C : clusters)
 	{
-		ostringstream comment,longname;
+		std::ostringstream comment,longname;
 		comment << "^" << C.to_string(" ^") ;
 		longname << "^" << C.to_string(" ^") ;
 		
@@ -448,17 +448,17 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 		cols.push_back({crater.sputter_current().data(),"crater "+ crater.sputter_current().name(),crater.sputter_current().unit().to_string(),comment.str()});
 	}
 	
-	vector<vector<string>> matrix;
+	std::vector<std::vector<std::string>> matrix;
 	for (auto& col : cols)
 		matrix.push_back(col.vec());
 	matrix = tools::mat::transpose_matrix(matrix);
-	string out = tools::mat::format_matrix_to_string(&matrix);
+	std::string out = tools::mat::format_matrix_to_string(&matrix);
 	if (path!="")
 	{
 		path = tools::file::check_directory_string(path);
 		tools::file::mkpath(path,0750);
 	}
-	stringstream filename;
+	std::stringstream filename;
 	filename << olcdb;
     if (sample.simple_name!="")
         filename << "_" << sample.simple_name;
@@ -474,8 +474,8 @@ void measurements_::sims_t:: export_origin_ascii(string path, const string delim
 	if (repetition!="")
 		filename << "_r" << repetition;
 	filename << ".txt";
-// 	cout  << endl << "sample.wafer: " << sample.wafer << endl;
-// 	cout  << endl << "sample.wafer_string(): " << sample.wafer_string() << endl;
+// 	cout  << std::endl << "sample.wafer: " << sample.wafer << std::endl;
+// 	cout  << std::endl << "sample.wafer_string(): " << sample.wafer_string() << std::endl;
 	tools::file::write_to_file(path+filename.str(),&out,false);
 }
 
@@ -485,9 +485,9 @@ isotope_t measurements_::sims_t::isotope_corresponding_to_cluster(const cluster_
 }
 
 
-set<cluster_t *> measurements_::sims_t::clusters_corresponding_to_isotope(const isotope_t& isotope)
+std::set<cluster_t *> measurements_::sims_t::clusters_corresponding_to_isotope(const isotope_t& isotope)
 {
-	set<cluster_t*> Cs;
+	std::set<cluster_t*> Cs;
 	for (auto& C : clusters)
 	{
 		if (find(clusters.begin(),clusters.end(),C)!=clusters.end())

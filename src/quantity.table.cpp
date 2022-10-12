@@ -8,10 +8,10 @@ quantity::table_t::column_t::column_t() : name(""), comment(""), logger(global_l
 {
 }
 
-quantity::table_t::column_t::column_t(long long unsigned int line_id,const quantity_t& q, string name, string comment)
+quantity::table_t::column_t::column_t(long long unsigned int line_id,const quantity_t& q, std::string name, std::string comment)
     : name(name), comment(comment), logger(global_logger,__FILE__,"quantity::table_t::column_t")
 {
-	quantity_entries_p.insert(pair<long long unsigned int, quantity::quantity_t>(line_id,q));
+	quantity_entries_p.insert(std::pair<long long unsigned int, quantity::quantity_t>(line_id,q));
 	if (!q.is_set())
 	{
         //logger::debug(7,"quantity::table_t::column_t::column_t()","q is not set!",q.to_string());
@@ -74,9 +74,9 @@ bool quantity::table_t::column_t::operator!=(const column_t& col) const
 	return !operator==(col);
 }
 
-string quantity::table_t::column_t::to_string() const
+std::string quantity::table_t::column_t::to_string() const
 {
-	stringstream out;
+	std::stringstream out;
 	out << "name: '" << name << "'; ";
 	out << "quantity: '" << header().name() << " [" << header().unit().to_string() << "]" << " {" << header().dimension().to_string() << "}";
 	if (comment!="") out << "; comment: '" << comment << "'";
@@ -115,11 +115,11 @@ bool quantity::table_t::column_t::add_quantity_entry(long long unsigned int line
         //logger::error("quantity::table_t::column_t::add_quantity_entry","line_id already exists","quantity_entries.at("+ ::to_string(line_id)+")="+quantity_entries().at(line_id).to_string(),"returning false");
 		return false;
 	}
-	quantity_entries_p.insert(pair<long long unsigned int,quantity::quantity_t>(line_id,q));
+	quantity_entries_p.insert(std::pair<long long unsigned int,quantity::quantity_t>(line_id,q));
 	return true;
 }
 
-const map<long long unsigned int, quantity::quantity_t>& quantity::table_t::column_t::quantity_entries() const
+const std::map<long long unsigned int, quantity::quantity_t>& quantity::table_t::column_t::quantity_entries() const
 {
 	return quantity_entries_p;
 }
@@ -161,9 +161,9 @@ bool quantity::table_t::column_t::replace_quantity_entry(long long unsigned int 
 	return true;
 }
 
-vector<long long unsigned int> quantity::table_t::column_t::get_line_ids(quantity_t q) const
+std::vector<long long unsigned int> quantity::table_t::column_t::get_line_ids(quantity_t q) const
 {
-	vector<long long unsigned int> findings;
+	std::vector<long long unsigned int> findings;
 	q = q.change_unit(header().unit());
 	if (!q.is_set())
 		return {};
@@ -261,9 +261,9 @@ quantity::table_t::table_t() : logger(global_logger,__FILE__,"quantity::table_t:
 
 }
 
-const set<long long unsigned int> quantity::table_t::line_ids() const
+const std::set<long long unsigned int> quantity::table_t::line_ids() const
 {
-	set<long long unsigned int> ids;
+	std::set<long long unsigned int> ids;
 	
 	for (const auto& col : columns())
 	{
@@ -308,11 +308,11 @@ bool quantity::table_t::add(const table_t& table)
 	return true;
 }
 
-bool quantity::table_t::add(const quantity::quantity_t& Q, string col_name)
+bool quantity::table_t::add(const quantity::quantity_t& Q, std::string col_name)
 {
 	return add(Q,col_name,get_new_sequential_line_id());
 }
-bool quantity::table_t::add(const quantity::quantity_t& Q, string col_name, long long unsigned int line_id)
+bool quantity::table_t::add(const quantity::quantity_t& Q, std::string col_name, long long unsigned int line_id)
 {
 	if (!Q.is_set())
 	{
@@ -348,7 +348,7 @@ bool quantity::table_t::add(const column_t& col)
 	}
 	return true;
 }
-bool quantity::table_t::add(const vector<column_t>& cols)
+bool quantity::table_t::add(const std::vector<column_t>& cols)
 {
 	bool success=true;
 	for (const auto& col : cols)
@@ -372,26 +372,26 @@ quantity::table_t::column_t* quantity::table_t::column(const quantity::table_t::
 	return nullptr;
 }
 
-const vector<quantity::table_t::column_t>& quantity::table_t::columns() const
+const std::vector<quantity::table_t::column_t>& quantity::table_t::columns() const
 {
 	return columns_p;
 }
-// bool quantity::table_t::add_or_overwrite(const ::map<long long unsigned int,string>& line_names)
+// bool quantity::table_t::add_or_overwrite(const ::map<long long unsigned int,std::string>& line_names)
 // {
 // 	for (auto& l : line_names)
 // 		add_or_overwrite(l.first,l.second);
 // 	return true;
 // }
 // 
-// bool quantity::table_t::add_or_overwrite(long long unsigned int line_id, string line_name)
+// bool quantity::table_t::add_or_overwrite(long long unsigned int line_id, std::string line_name)
 // {
 // 	line_names_p[line_id] = line_name;
 // 	return true;
 // }
 
-string quantity::table_t::to_string() const
+std::string quantity::table_t::to_string() const
 {
-	stringstream out;
+	std::stringstream out;
 	out << "columns().size()=" << columns().size() << "; line_ids.size()="<< line_ids().size();;
 	return out.str();
 }
@@ -406,7 +406,7 @@ quantity::table_t& quantity::table_t::erase_line(long long unsigned int line_id)
 	return *this;
 }
 
-quantity::table_t& quantity::table_t::erase_lines(set<long long unsigned int> line_ids)
+quantity::table_t& quantity::table_t::erase_lines(std::set<long long unsigned int> line_ids)
 {
 	for (auto& id : line_ids)
 		erase_line(id);
@@ -421,7 +421,7 @@ const quantity::table_t::column_t* quantity::table_t::get_col(const column_t& co
 	return nullptr;
 }
 
-const quantity::table_t::column_t* quantity::table_t::get_col(const quantity_t& col_header, string col_name) const
+const quantity::table_t::column_t* quantity::table_t::get_col(const quantity_t& col_header, std::string col_name) const
 {
 	column_t col(0,col_header, col_name);
 	return get_col(col);
@@ -465,7 +465,7 @@ quantity::map_t quantity::table_t::get_map(int X_col_idx, int Y_col_idx) const
 		
 quantity::table_t& quantity::table_t::remove_empty_lines()
 {
-	set<long long unsigned int> erase_ids;
+	std::set<long long unsigned int> erase_ids;
 	//get line_ids with
 	for (const auto line_id : line_ids())
 	{

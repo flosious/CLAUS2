@@ -63,8 +63,6 @@
 //     modify the database file, like INSERT, UPDATE, DELETE, and others.
 // 
 
-using namespace std;
-
 
 /***********************/
 /***   database_t    ***/
@@ -80,24 +78,25 @@ private:
     sqlite3* sql_handle=nullptr;
     bool close();
 	/// returns -1 if error, or the id of the last entry in the table
-    int get_last_autoID_from_table(string table);
+    int get_last_autoID_from_table(std::string table);
 	///just allow the processor to open and close
 	
 	
 	///just allow the processor to open and close
 	
 public:
-    string file_location = "/home/florian/projects/claus2/build/database.sqlite3";
+//    std::string file_location = "/home/florian/projects/claus2/build/database.sqlite3";
+    std::string file_location = "database.sqlite3";
 	database_t(sqlite3* sql_handle);
-	database_t(sqlite3* sql_handle, string filename);
+	database_t(sqlite3* sql_handle, std::string filename);
 	~database_t();
     bool open();
-	bool execute_sql(string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr) const;
+	bool execute_sql(std::string sql, int (*func_ptr)(void*,int,char**,char**)=NULL, void* func_arg=nullptr) const;
 	
 	/*call backs*/
 	///general callback function -> populates *ptr -> matrix(vector(vector(string)))
 	static int callback_lines_cols(void *ptr, int argc, char **argv, char **azColName);
-	///general callback function -> populates *ptr -> map(colname,vector(string) lines ))
+	///general callback function -> populates *ptr -> map(colname,std::vector(string) lines ))
 	static int callback_lines_map(void *ptr, int argc, char **argv, char **azColName);
 };
 

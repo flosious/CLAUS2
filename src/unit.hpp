@@ -30,7 +30,6 @@
 #include <stdio.h>
 // #include <gsl/gsl_const_mksa.h>
 
-using namespace std;
 extern Logger global_logger;
 /// just supporting the SI system at the moment, integer exponents
 class unit_t
@@ -73,7 +72,7 @@ public:
 		int candelas;
 		bool relative=false;
 		bool is_relative() const;
-		const string to_string() const;
+        const std::string to_string() const;
 		bool is_set() const;
 		bool operator==(const base_exponents_t& obj) const;
 		bool operator!=(const base_exponents_t& obj) const;
@@ -87,32 +86,32 @@ public:
 // 	char* symbol = "";
 // public:
 private:
-	static const map<std::string,unit_t> symbol_to_base_unit;
+    static const std::map<std::string,unit_t> symbol_to_base_unit;
 	static const std::unordered_map<std::string, unit_t> symbol_prefix_unit;
 // 	static const std::unordered_map<std::string, unit_t> symbol_to_unit;
-	static const map<std::string, unit_t> symbol_to_unit;
+    static const std::map<std::string, unit_t> symbol_to_unit;
 public:
 	base_exponents_t base_units_exponents{0,0,0,0,0,0,0,false};
 public:
     unit_t() : logger(global_logger,__FILE__,"unit_t") {};
     unit_t(const unit_t& unit_) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(unit_.prefered_output_string), logger(global_logger,__FILE__,"unit_t") {};
     unit_t(double multiplier) : multiplier(multiplier),logger(global_logger,__FILE__,"unit_t") {};
-    unit_t(const unit_t& unit_, double multiplier, string prefered_unit_string = "" ) : base_units_exponents(unit_.base_units_exponents), multiplier(multiplier), prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
-    unit_t(const unit_t& unit_, string prefered_unit_string ) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
-    unit_t(base_exponents_t unit_exponents, double multiplier,string prefered_unit_string ="" ) : base_units_exponents(unit_exponents),multiplier(multiplier),prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
-	unit_t(string symbols,string prefered_string="");
-// 	unit_t(unit_t unit_, string prefered_string);
+    unit_t(const unit_t& unit_, double multiplier, std::string prefered_unit_string = "" ) : base_units_exponents(unit_.base_units_exponents), multiplier(multiplier), prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
+    unit_t(const unit_t& unit_, std::string prefered_unit_string ) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
+    unit_t(base_exponents_t unit_exponents, double multiplier,std::string prefered_unit_string ="" ) : base_units_exponents(unit_exponents),multiplier(multiplier),prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
+    unit_t(std::string symbols,std::string prefered_string="");
+// 	unit_t(unit_t unit_, std::string prefered_string);
 	
-// 	static unit_t string_to_unit(string unit_s);
+// 	static unit_t string_to_unit(std::string unit_s);
 // 	constexpr unit_t(unit_t unit, double multiplier);
-// 	unit_t(string name_s) {};
+// 	unit_t(std::string name_s) {};
 	bool is_set() const;
 	///return any matching symbol
-	const string to_string() const;
-	///forces the exact output string if unit_t is same
-// 	const string to_string(const string output) const;
+    const std::string to_string() const;
+    ///forces the exact output std::string if unit_t is same
+// 	const std::string to_string(const std::string output) const;
 	///return exact matching symbol, if not found -> fallback to any
-// 	const string to_string(string symbol) const;
+// 	const std::string to_string(std::string symbol) const;
 // 	double change_unit(unit_t new_unit);
 	bool operator<(const unit_t& obj) const;
 	bool operator==(const unit_t& obj) const;
@@ -126,8 +125,8 @@ public:
 	double multiplier=1;
 	/*tests*/
 // 	signed int meter_ : 5;
-	string prefered_output_string;
-// 	static const string symbol(const unit_t unit},1};
+    std::string prefered_output_string;
+// 	static const std::string symbol(const unit_t unit},1};
 };
 
 

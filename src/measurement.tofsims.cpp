@@ -22,7 +22,7 @@
 measurements_::tofsims_t::tofsims_t(files_::tofsims_t& tofsims_file,
 
                                     database_t& sql_wrapper,
-                                    vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
+                                    std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
                                     settings(tofsims_file),
                                     sims_t(tofsims_file.name,tofsims_file.contents,"tofsims",sql_wrapper,total_sputter_dephs),
                                     logger(global_logger,__FILE__,"measurements_::tofsims_t")

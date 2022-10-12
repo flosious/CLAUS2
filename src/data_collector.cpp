@@ -1,6 +1,6 @@
 #include "data_collector.hpp"
 
-data_collectors_t::sims_t::sims_t(const vector<measurements_::sims_t*>& Ms_s)  : logger(global_logger,__FILE__,"data_collectors_t::sims_t")
+data_collectors_t::sims_t::sims_t(const std::vector<measurements_::sims_t*>& Ms_s)  : logger(global_logger,__FILE__,"data_collectors_t::sims_t")
 {
 	measurements.reserve(Ms_s.size());
 	for (const auto M : Ms_s)

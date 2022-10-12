@@ -14,10 +14,10 @@ quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y) : X_p(X), Y_p(Y
 	
 }
 
-quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y, const vector<pair<double,double>>& XYdata_pairs) : X_p(X), Y_p(Y), logger(global_logger,__FILE__,"quantity::map_t")
+quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y, const std::vector<std::pair<double,double>>& XYdata_pairs) : X_p(X), Y_p(Y), logger(global_logger,__FILE__,"quantity::map_t")
 {
-	vector<double> Xdata(XYdata_pairs.size());
-	vector<double> Ydata(XYdata_pairs.size());
+	std::vector<double> Xdata(XYdata_pairs.size());
+	std::vector<double> Ydata(XYdata_pairs.size());
 	int i=0;
 	for (auto& XY : XYdata_pairs)
 	{
@@ -44,14 +44,14 @@ const quantity::map_t quantity::map_t::map_interp_akima(const quantity_t new_X) 
 	return map_t(new_X,new_Y);
 }
 
-const map<double,double> quantity::map_t::data_map() const
+const std::map<double,double> quantity::map_t::data_map() const
 {
 	return tools::vec::combine_vecs_to_map(X().data(),Y().data());
 }
 
 const quantity::map_t quantity::map_t::remove_inf() const
 {
-	vector<unsigned int> remove_pos;
+	std::vector<unsigned int> remove_pos;
 	for (int i=0; i<X().data().size() && i<Y().data().size();i++)
 	{
 		if (isinf(X().data().at(i)) || isinf(Y().data().at(i)))
@@ -80,7 +80,7 @@ const quantity::map_t quantity::map_t::remove_by_X(quantity::quantity_t X_s) con
         //logger::error("quantity::map_t::remove_X()()","X() units are not the same",to_string() + " " + X_s.to_string());
 		return *this;
 	}
-	vector<unsigned int> rem_idx;
+	std::vector<unsigned int> rem_idx;
 	for (int i=0;i<X().data().size();i++)
 	{
 		if (tools::vec::find_in_vec(X().data().at(i),X_s.data())!=nullptr)
@@ -92,7 +92,7 @@ const quantity::map_t quantity::map_t::remove_by_X(quantity::quantity_t X_s) con
 
 const quantity::map_t quantity::map_t::remove_nan() const
 {
-	vector<unsigned int> remove_pos;
+	std::vector<unsigned int> remove_pos;
 	for (int i=0; i<X().data().size() && i<Y().data().size();i++)
 	{
 		if (isnan(X().data().at(i)) || isnan(Y().data().at(i)))
@@ -119,31 +119,31 @@ bool quantity::map_t::is_single_point() const
 
 std::string quantity::map_t::to_string() const
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "X: " << X().to_string() << "; Y: " << Y().to_string();
 	return ss.str();
 }
 
 std::string quantity::map_t::to_string_detailed() const
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "X: " << X().to_string_detailed() << "; Y: " << Y().to_string_detailed() ;
 	return ss.str();
 }
 
 std::string quantity::map_t::to_string_list() const
 {
-	stringstream ss;
-	ss << X().name() << "\t" << Y().name() << endl;
-	ss << X().unit().to_string() << "\t" << Y().unit().to_string() << endl;
-	ss << X().dimension().to_string() << "\t" << Y().dimension().to_string() << endl;
+	std::stringstream ss;
+    ss << X().name() << "\t" << Y().name() << std::endl;
+    ss << X().unit().to_string() << "\t" << Y().unit().to_string() << std::endl;
+    ss << X().dimension().to_string() << "\t" << Y().dimension().to_string() << std::endl;
 	if (X().data().size()!=Y().data().size())
 	{
 		ss << "<"<< X().data().size() << ">\t<" << Y().data().size() << ">";
 		return ss.str();
 	}
 	for (int i=0;i<X().data().size();i++)
-		ss << X().data().at(i) << "\t" << Y().data().at(i) << endl;
+        ss << X().data().at(i) << "\t" << Y().data().at(i) << std::endl;
 	return ss.str();
 }
 
@@ -152,7 +152,7 @@ fit_functions::polynom_t quantity::map_t::polynom(unsigned int polynom_grade) co
 	return fit_functions::polynom_t(polynom_grade,data_map());
 }
 
-fit_functions::polynom_t quantity::map_t::polynom(const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const
+fit_functions::polynom_t quantity::map_t::polynom(const std::vector<unsigned>& rank, const std::vector<double>& polynom_start_parameters) const
 {
 	const auto data = tools::vec::combine_vecs_to_map(X().data(), Y().data());
 	fit_functions::polynom_t poly(rank,polynom_start_parameters,data);
@@ -191,7 +191,7 @@ quantity::quantity_t quantity::map_t::polyfit(const quantity_t& x_vals, unsigned
 	return Y().fit_polynom_by_x_data(X(),x_vals,polynom_grade);
 }
 
-quantity::quantity_t quantity::map_t::polyfit(const quantity_t& x_vals, const vector<unsigned>& rank, const vector<double>& polynom_start_parameters) const
+quantity::quantity_t quantity::map_t::polyfit(const quantity_t& x_vals, const std::vector<unsigned>& rank, const std::vector<double>& polynom_start_parameters) const
 {
 	auto y_data = polynom(rank,polynom_start_parameters).y_data(x_vals.data());
 	return {Y(),y_data};
@@ -199,7 +199,7 @@ quantity::quantity_t quantity::map_t::polyfit(const quantity_t& x_vals, const ve
 
 quantity::quantity_t quantity::map_t::distance() const
 {
-	vector<double> distances(X().data().size());
+	std::vector<double> distances(X().data().size());
 	for (int i=0;i<X().data().size();i++)
 		distances.at(i)=sqrt(pow(X().data().at(i),2)+pow(Y().data().at(i),2));
 	quantity_t XY_radius("distance",distances,units::SI::one);
@@ -211,7 +211,7 @@ quantity::quantity_t quantity::map_t::distance() const
 	return XY_radius;
 }
 
-vector<int> quantity::map_t::bin_data(int bins_count) const
+std::vector<int> quantity::map_t::bin_data(int bins_count) const
 {
 	if (bins_count==0 || X().data().size() == 0 || Y().data().size()==0 || X().data().size()!=Y().data().size())
 		return {};
@@ -256,7 +256,7 @@ const quantity::map_t quantity::map_t::change_resolution(const quantity_t new_X_
 	return {new_X,new_Y};
 }
 
-vector<int> quantity::map_t::bin_data(const vector<double>& bins) const
+std::vector<int> quantity::map_t::bin_data(const std::vector<double>& bins) const
 {
 	if (bins.size()==0 || X().data().size() == 0 || Y().data().size()==0 || X().data().size()!=Y().data().size())
 		return {};
@@ -271,7 +271,7 @@ quantity::map_t quantity::map_t::remove_outliners( fit_functions::polynom_t poly
 	{
 // 		result_map = result_map.delta_y(polynom_s).sort_Y_from_low_to_high().pop_back();
 		auto X = result_map.delta_y(polynom_s).sort_Y_from_low_to_high().back().X();
-// 		cout << endl << X.to_string() << endl;
+// 		std::cout << std::endl << X.to_string() << std::endl;
 		result_map = result_map.remove_by_X(X);
 		polynom_s = result_map.polynom(polynom_s.rank(),polynom_s.fit_parameters());
         //logger::info(3,"quantity::map_t::remove_outliners()","removing from map: " + X.to_string());
@@ -360,12 +360,12 @@ quantity::map_t quantity::map_t::delta_y(const map_t& Y_ref) const
 	return (*this - Y_ref).absolute();
 }
 
-vector<pair<double,double>> quantity::map_t::XYdata_pairs() const
+std::vector<std::pair<double,double>> quantity::map_t::XYdata_pairs() const
 {
-	vector<pair<double,double>> pairs(size());
+	std::vector<std::pair<double,double>> pairs(size());
 	for (int i=0;i<size();i++)
 	{
-		pairs.at(i) = pair<double,double> (X().data().at(i),Y().data().at(i));
+		pairs.at(i) = std::pair<double,double> (X().data().at(i),Y().data().at(i));
 	}
 	return pairs;
 }
@@ -378,12 +378,12 @@ quantity::map_t quantity::map_t::reverse_order() const
 /********* STATICS *********/
 
 
-bool quantity::map_t::sort_by_x(const pair<double,double>& P1, const pair<double,double>& P2)
+bool quantity::map_t::sort_by_x(const std::pair<double,double>& P1, const std::pair<double,double>& P2)
 {
 	return (P1.first < P2.first);
 }
 
-bool quantity::map_t::sort_by_y(const pair<double,double>& P1, const pair<double,double>& P2)
+bool quantity::map_t::sort_by_y(const std::pair<double,double>& P1, const std::pair<double,double>& P2)
 {
 	return (P1.second < P2.second);
 }

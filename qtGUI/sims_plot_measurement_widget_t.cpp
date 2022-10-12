@@ -38,4 +38,10 @@ sims_plot_measurement_widget_t::~sims_plot_measurement_widget_t()
 void sims_plot_measurement_widget_t::update(measurements_::sims_t* new_measurement)
 {
     logger.debug(__func__,"new_measurement").signal(new_measurement->to_string_short());
+    ui->clusters_tree->set_measurement(new_measurement);
+}
+
+void sims_plot_measurement_widget_t::on_clusters_button_clicked()
+{
+    auto_calc();
 }

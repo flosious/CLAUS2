@@ -22,7 +22,7 @@
 /*********************************/
 /****       tofsims_t        *****/
 /*********************************/
-files_::tofsims_t::name_t::name_t(string& filename_with_path_s) :
+files_::tofsims_t::name_t::name_t(std::string& filename_with_path_s) :
                                         files_::sims_t::name_t(filename_with_path_s,"_",{".TXT"},{}),
                                         logger(global_logger,__FILE__,"files_::tofsims_t::name_t")
 {
@@ -31,17 +31,17 @@ files_::tofsims_t::name_t::name_t(string& filename_with_path_s) :
 
 bool files_::tofsims_t::name_t::parse_analysis_energy_element()
 {
-	smatch match;
-	regex reg;
-// 	cout << "IN" << endl;
-// 	cout << "not_parseable_filename_parts_p: " << not_parseable_filename_parts_p.size() << endl;
-// 	cout << to_string() << endl;
-	for (vector<string>::iterator FNp = not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
+	std::smatch match;
+	std::regex reg;
+// 	std::cout << "IN" << std::endl;
+// 	std::cout << "not_parseable_filename_parts_p: " << not_parseable_filename_parts_p.size() << std::endl;
+// 	std::cout << to_string() << std::endl;
+	for (std::vector<std::string>::iterator FNp = not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
 	{
 		reg = ("^([0-9]{1,5})(V|eV|kV|keV)(Mn|Mn\\+|Bi|Bi\\+|Bi\\+\\+)$"); 
 		if (regex_search(*FNp,match,reg)) 
 		{	
-			string element_p = (match[3]);
+			std::string element_p = (match[3]);
 			if (match[2]=="kV" || match[2]=="keV")
 				analysis_energy_p = quantity::energy_t{{tools::str::str_to_double(match[1])*1000},{"eV"}};
 			else
@@ -56,7 +56,7 @@ bool files_::tofsims_t::name_t::parse_analysis_energy_element()
 		}
 		else
 		{
-// 			cout << "not recognized: " << *FNp << endl;
+// 			std::cout << "not recognized: " << *FNp << std::endl;
 		}
 	}
 	return false;

@@ -27,7 +27,7 @@ database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle), logger(glob
 { 
 } 
 
-database_t::database_t(sqlite3* sql_handle, string filename) : sql_handle(sql_handle), file_location(filename), logger(global_logger,__FILE__,"database_t")
+database_t::database_t(sqlite3* sql_handle, std::string filename) : sql_handle(sql_handle), file_location(filename), logger(global_logger,__FILE__,"database_t")
 {
 }
 
@@ -219,7 +219,7 @@ bool database_t::open() {
 database_t::~database_t() 
 { 
     close();
-//     cout << "DB closed\n";
+//     std::cout << "DB closed\n";
 } 
 
 
@@ -229,7 +229,7 @@ bool database_t::close() {
     return true; 
 }
 
-bool database_t::execute_sql(string sql, int (*func_ptr)(void*,int,char**,char**), void* func_arg) const
+bool database_t::execute_sql(std::string sql, int (*func_ptr)(void*,int,char**,char**), void* func_arg) const
 {
     char *zErrMsg = 0;
 	int rc = sqlite3_exec(this->sql_handle, sql.c_str(), func_ptr, func_arg, &zErrMsg);
@@ -247,8 +247,8 @@ bool database_t::execute_sql(string sql, int (*func_ptr)(void*,int,char**,char**
 
 // int database_t::callback_lines_cols(void *ptr, int argc, char **argv, char **azColName)
 // {
-//       vector<vector<string>> *lines = static_cast<vector<vector<string>>*>(ptr);
-//       vector<string> columns;
+//       std::vector<std::vector<std::string>> *lines = static_cast<std::vector<std::vector<std::string>>*>(ptr);
+//       std::vector<std::string> columns;
 // 	  if (lines->size()==0) 
 // 	  {
 // 		//header//
@@ -271,7 +271,7 @@ bool database_t::execute_sql(string sql, int (*func_ptr)(void*,int,char**,char**
 
 int database_t::callback_lines_map(void *ptr, int argc, char **argv, char **azColName)
 {
-      map<string,vector<string>> *lines_map = static_cast<map<string,vector<string>>*>(ptr);
+      std::map<std::string,std::vector<std::string>> *lines_map = static_cast<std::map<std::string,std::vector<std::string>>*>(ptr);
       for(int i=0; i<argc; i++)
 	  {
 		if (argv[i]) 
@@ -433,29 +433,29 @@ int database_t::callback_lines_map(void *ptr, int argc, char **argv, char **azCo
 // //     return true;
 // // }
 // 
-// void database_t::add_measurements(vector<measurement_t>* measurements)
+// void database_t::add_measurements(std::vector<measurement_t>* measurements)
 // {
 // 	for (int i=0;i<measurements->size();i++)
 // 		if (!add_measurement(&measurements->at(i))) error_messages.push_back("database_t::add_measurements : " + measurements->at(i).id_get().filename_wo_crater_depths);
 // 	return;
 // }
 // 
-// // map<string, vector<string>> database_t::get_line_map(string table, int rowid)
+// // std::map<std::string, std::vector<std::string>> database_t::get_line_map(std::string table, int rowid)
 // // {
 // // 	
 // // }
 
-int database_t::get_last_autoID_from_table(string table)
+int database_t::get_last_autoID_from_table(std::string table)
 {
 	int id=-1;
-	string sql = "SELECT seq FROM sqlite_sequence WHERE name='" +table+ "'";
+	std::string sql = "SELECT seq FROM sqlite_sequence WHERE name='" +table+ "'";
 	/*
-	vector<vector<string>> lines_cols;
+	std::vector<std::vector<std::string>> lines_cols;
 	execute_sql(sql,callback_lines_cols,&lines_cols);
 	if (lines_cols.size()!=2) return -1;
 	id = tools::str::str_to_int(lines_cols[1][0]);
 	*/
-	map<string,vector<string>> lines_map;
+	std::map<std::string,std::vector<std::string>> lines_map;
 	execute_sql(sql,callback_lines_map,&lines_map);
 	if (lines_map["seq"].size()!=1) return -1;
 	id = tools::str::str_to_int(lines_map["seq"][0]);
@@ -464,23 +464,23 @@ int database_t::get_last_autoID_from_table(string table)
 
 // 
 // 
-// vector<measurement_t> database_t::get_measurements()
+// std::vector<measurement_t> database_t::get_measurements()
 // {
 // 	
-// 	map<string, vector<string>> lines_map;
-// 	string sql = "SELECT * FROM " \
+// 	std::map<std::string, std::vector<std::string>> lines_map;
+// 	std::string sql = "SELECT * FROM " \
 //             TABLENAME_measurements \
 //             "";
 // 	
 // 	execute_sql(sql,callback_lines_map,&lines_map);
 // 	print(lines_map);
 // 	
-// 	/*transform map to measurement_t*/
-// // 	map<string, vector<string>>::iterator it=lines_map.find("SAMPLE_ID");
+// 	/*transform std::map to measurement_t*/
+// // 	std::map<std::string, std::vector<std::string>>::iterator it=lines_map.find("SAMPLE_ID");
 // 	if (lines_map.empty()) return {};
 // 	int measurements_count = lines_map["sample_id"].size();
 // 	if (measurements_count==0) return {};
-// 	vector<measurement_t> measurements(measurements_count);
+// 	std::vector<measurement_t> measurements(measurements_count);
 // 	for (int i=0;i<measurements_count;i++)
 // 	{
 // 		measurement_t *measurement=&measurements[i];
@@ -502,7 +502,7 @@ int database_t::get_last_autoID_from_table(string table)
 // {
 // 	int db_id=0;
 // 	identifier_t id = measurement->id_get();
-// 	string sql = "SELECT * FROM " \
+// 	std::string sql = "SELECT * FROM " \
 // 			TABLENAME_measurements \
 // 			" WHERE " \
 // 			"olcdb=" +to_string(id.olcdb)+ " AND " \
@@ -510,7 +510,7 @@ int database_t::get_last_autoID_from_table(string table)
 // 			"filename_wo_crater_depths='" +id.filename_wo_crater_depths+ "' AND " \
 // 			"mgroup=" +to_string(id.group)+ " AND " \
 // 			"tool='" +id.tool+ "';";
-// 	map<string,vector<string>> lines_map;
+// 	std::map<std::string,std::vector<std::string>> lines_map;
 // 	execute_sql(sql,callback_lines_map,&lines_map);
 // 	print(lines_map);
 // 	return db_id;
@@ -520,7 +520,7 @@ int database_t::get_last_autoID_from_table(string table)
 // {
 // // 	bool error_l;
 // 	identifier_t id = measurement->id_get();
-// 	string sql = "INSERT INTO " \
+// 	std::string sql = "INSERT INTO " \
 //             TABLENAME_samples \
 //             " (lot, lot_slpits, wafer, chip_x, chip_y, monitor)" \
 //             " VALUES " \
@@ -621,9 +621,9 @@ int database_t::get_last_autoID_from_table(string table)
 // 
 // 
 // 
-// // bool database_t::get_implanted_reference_samples(vector<implanted_reference_struct> *refs, implanted_reference_struct where) {
-// //     string sql = "SELECT * FROM " + string(TABLENAME_implanted_reference_samples);
-// //     string sqlm="";
+// // bool database_t::get_implanted_reference_samples(std::vector<implanted_reference_struct> *refs, implanted_reference_struct where) {
+// //     std::string sql = "SELECT * FROM " + string(TABLENAME_implanted_reference_samples);
+// //     std::string sqlm="";
 // //     if (where.sample_name!="") sqlm+=" sample_name = "+string("'")+where.sample_name+"' AND";
 // //     if (where.lot!="") sqlm+=" lot = "+string("'")+where.lot+"' AND";
 // //     if (where.wafer!="") sqlm+=" wafer = "+string("'")+where.wafer+"' AND";
@@ -653,9 +653,9 @@ int database_t::get_last_autoID_from_table(string table)
 // //     return true;
 // // }
 // 
-// // bool database_t::set_implanted_reference_samples(vector<implanted_reference_struct> *refs, int ID) {
+// // bool database_t::set_implanted_reference_samples(std::vector<implanted_reference_struct> *refs, int ID) {
 // //     for (int i=0;i<refs->size();i++) {
-// //         string sql = "UPDATE " + string(TABLENAME_implanted_reference_samples) + " SET ";
+// //         std::string sql = "UPDATE " + string(TABLENAME_implanted_reference_samples) + " SET ";
 // //             sql+="sample_name= '"+refs->at(i).sample_name+"', ";
 // //             sql+="lot= '"+refs->at(i).lot+"', ";
 // //             sql+="wafer= '"+refs->at(i).wafer+"', ";
@@ -692,7 +692,7 @@ bool sample_t::load_from_database ()
 			"chip_y=" +to_string(chip_y())+ " AND " \
 			"monitor='" +monitor()+ "';";
 
-	map<string,vector<string>> lines_map;
+	std::map<std::string,std::vector<std::string>> lines_map;
 	if (!db.execute_sql(sql,database_t::callback_lines_map,&lines_map)) 
 	{
 		return false;
@@ -703,18 +703,18 @@ bool sample_t::load_from_database ()
 	implanted_dose.unit="at/cm^2";
 	implanted_dose.dimension = "amount*(length)^(-2)";
 	implanted_dose.data.resize(1);
-	vector<string>* implant_doses=&lines_map["implant_dose"];
-	vector<string>* implant_isotopes=&lines_map["implant_isotope"];
+	std::vector<std::string>* implant_doses=&lines_map["implant_dose"];
+	std::vector<std::string>* implant_isotopes=&lines_map["implant_isotope"];
 	if (!matrix.set_isotopes_from_name(lines_map["matrix_elements"][0]))
 	{
-		cout << "sample_t::load_from_database: !matrix.set(" << lines_map["matrix_elements"][0] << ")" << endl;
+		std::cout << "sample_t::load_from_database: !matrix.set(" << lines_map["matrix_elements"][0] << ")" << std::endl;
 	}
 	for (int i=0;i<implant_doses->size();i++)
 	{
 		isotope_t isotope(implant_isotopes->at(i));
 		if (!isotope.is_set()) 
 		{
-			cout << "sample_t::load_from_database: !isotope.is_set(): " << implant_isotopes->at(i) << endl;
+			std::cout << "sample_t::load_from_database: !isotope.is_set(): " << implant_isotopes->at(i) << std::endl;
 			continue;
 		}
 		implanted_dose.data[0]=tools::str::str_to_double(implant_doses->at(i));

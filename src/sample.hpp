@@ -34,8 +34,6 @@
 #include "files.hpp"
 #include "database_t.hpp"
 
-using namespace std;
-
 
 class sample_t
 {
@@ -47,10 +45,10 @@ public:
 	{
 	private:
         class_logger_t logger;
-		///maybe loaded from DB if not set by ctor
+		///maybe loaded from DB if not std::set by ctor
 		///isotope mapping to its absolute concentration in amount of atoms or mole
 		/// OR relative concentration in at%; enforcing always 100at% within a matrix
-		void substance_amount_to_relative(vector<isotope_t>& isotopes);
+		void substance_amount_to_relative(std::vector<isotope_t>& isotopes);
 		static const int logger_verbosity_offset = 11;
 	public:
 		matrix_t();
@@ -63,22 +61,22 @@ public:
 		* indistinguishable isotopes like "29Si30 Si50 Ge10 Sn10" --> will lead to an error and aborting
 		* not recognized isotopes --> will lead to an error an aborting
 		*/
-		matrix_t(const vector<string> elements_or_isotopes_s);
-		matrix_t(const string matrix_elements_s);
-		matrix_t(vector<isotope_t> isotopes);
+		matrix_t(const std::vector<std::string> elements_or_isotopes_s);
+		matrix_t(const std::string matrix_elements_s);
+		matrix_t(std::vector<isotope_t> isotopes);
 		
-		const vector<isotope_t> isotopes() const;
+		const std::vector<isotope_t> isotopes() const;
 		///points to the corresponding isotope of this iso
 		isotope_t* isotope(isotope_t iso);
 		const isotope_t* isotope(isotope_t iso) const;
 		///returns the pointer to the element within this matrix
 		element_t* element(const element_t& ele);
 		const element_t* element(const element_t& ele ) const;
-		vector<element_t> elements;
+		std::vector<element_t> elements;
 		bool is_in(const isotope_t& iso) const;
 		bool is_in(const element_t& ele) const;
 		const bool is_set() const;
-		const string to_string() const;
+		const std::string to_string() const;
 		///RELATIVE! in at%
 		const quantity::concentration_t concentration(isotope_t iso) const;
 		const quantity::concentration_t concentration(element_t ele) const;
@@ -110,10 +108,10 @@ public:
 		quantity::concentration_t concentration_maximum;
 		quantity::depth_t depth_at_concentration_maxium;
 		implant_s(quantity::dose_t dose={}, quantity::concentration_t concentration_maximum={}, quantity::depth_t depth_at_concentration_maxium={});
-		string to_string() const;
+		std::string to_string() const;
 	};
 private:
-	map<isotope_t,implant_s> implants_p;
+	std::map<isotope_t,implant_s> implants_p;
 	///populates implants and matrix_p
 	void load_from_database();
 protected:
@@ -125,22 +123,22 @@ public:
         class_logger_t logger;
 		static const int logger_verbosity_offset = 10;
 		const database_t& sql_wrapper;
-		static const string tablename;
+		static const std::string tablename;
 		///saved load_from_table entries
-// 		map<string,vector<string>> table_entries_s;
-		map<isotope_t,implant_s> implants_s;
+// 		std::map<std::string,std::vector<std::string>> table_entries_s;
+		std::map<isotope_t,implant_s> implants_s;
 		matrix_t matrix_s;
 		bool load_from_table();
 		const sample_t& sample;
 	public:
         db_t(const sample_t& sample, const database_t& sql_wrapper);
-		bool insert(const implant_s implant, const string comment="");
+		bool insert(const implant_s implant, const std::string comment="");
 		///load entries from old db into this(new)
-		static bool migrate_claus1_db(database_t& sql_wrapper, const string filename = "migrate.database.sqlite3");
+		static bool migrate_claus1_db(database_t& sql_wrapper, const std::string filename = "migrate.database.sqlite3");
 		static bool create_table(database_t& sql_wrapper);
 		matrix_t& matrix();
 		implant_s implant(const isotope_t& isotope);
-		const map<isotope_t,implant_s>& implants();
+		const std::map<isotope_t,implant_s>& implants();
 	};
 	class chip_t
 	{
@@ -155,15 +153,15 @@ public:
 		bool operator<(const chip_t& obj) const;
 		bool operator>(const chip_t& obj) const;
 		bool is_set() const;
-		void to_screen(string prefix="");
-		const string to_string(const string del=", ") const;
+		void to_screen(std::string prefix="");
+		const std::string to_string(const std::string del=", ") const;
 	};
-// 	set<measurements::dsims_t*> dsims;
-// 	set<measurements::tofsims_t*> tofsims;
-// 	set<measurements::profiler_t*> profiler;
+// 	std::set<measurements::dsims_t*> dsims;
+// 	std::set<measurements::tofsims_t*> tofsims;
+// 	std::set<measurements::profiler_t*> profiler;
 	
 	implant_s implant(const isotope_t& isotope);
-	const map<isotope_t,implant_s>& implants() const;
+	const std::map<isotope_t,implant_s>& implants() const;
 	///checks if there is at least 1 isotope implanted
 	bool is_implanted();
 	bool is_implanted(const isotope_t& isotope);
@@ -171,16 +169,16 @@ public:
 	sample_t(files_::file_t::name_t& fn,database_t& sql_wrapper);
 // 	sample_t(int& wafer, string& monitor, string& lot, string& lot_split, chip_t chip, string& simple_name, matrix_t& matrix);
 
-	string to_string(const string del=", ");
+	std::string to_string(const std::string del=", ");
 	///with out matrix
-	string to_name(const string del=", ") const;
+	std::string to_name(const std::string del=", ") const;
 	chip_t chip;
 	int wafer;
-	string lot;
-	string lot_split;
-	string monitor;
-	string simple_name;
-	const string wafer_string() const;
+	std::string lot;
+	std::string lot_split;
+	std::string monitor;
+	std::string simple_name;
+	const std::string wafer_string() const;
     void set_matrix(const sample_t::matrix_t& mat);
     const matrix_t& matrix() const;
 	

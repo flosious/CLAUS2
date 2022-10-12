@@ -38,8 +38,6 @@
 #include "calc.hpp"
 #include "data_collector.hpp"
 
-using namespace std;
-
 
 /* FORWARD DECLARATIONS*/
 /************************/
@@ -81,14 +79,14 @@ public:
         mgroup_t(measurements_::measurement_t& measurement);
 	public:
 
-		string to_string(const string del=", ");
+		std::string to_string(const std::string del=", ");
 		/*const defitions*/
 		///"51087" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
         int olcdb;
 		///measurement group identifier: "5" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
-        string group_id;
+        std::string group_id;
         ///given by user, optional
-        string name="";
+        std::string name="";
 
 		/*functions*/
 //        virtual int remove_measurements();
@@ -120,9 +118,9 @@ public:
 				const cluster_t zaehler;
 				const cluster_t nenner;
 				///DO NOT USE! supporting points of all known intensities and concentrations ratios for the clusters zaehler and nenner
-				const pair<quantity::quantity_t,quantity::quantity_t> known_Crels_from_Clusters_to_Irels() const;
+				const std::pair<quantity::quantity_t,quantity::quantity_t> known_Crels_from_Clusters_to_Irels() const;
 				///supporting points of all known intensities and concentrations ratios for the clusters zaehler and nenner
-				const pair<quantity::quantity_t,quantity::quantity_t> known_Crels_from_sample_matrix_to_Irels_truncated_median() const;
+				const std::pair<quantity::quantity_t,quantity::quantity_t> known_Crels_from_sample_matrix_to_Irels_truncated_median() const;
 				const quantity::intensity_t Irel(const measurements_::sims_t* M) const;
 				const quantity::intensity_t Irel_from_truncated_medians(const measurements_::sims_t* M) const;
 				const quantity::concentration_t Crel_from_sample(const measurements_::sims_t* M) const;
@@ -137,7 +135,7 @@ public:
                 class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
-				const vector<measurements_::sims_t*>& measurements;
+				const std::vector<measurements_::sims_t*>& measurements;
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				SR_c(calc_t& calc);
@@ -147,7 +145,7 @@ public:
 				///sets SR for known matrices
 				calc_t& copy_to_same_matrices(bool overwrite = false);
 				///uses SR from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24
-				calc_t& interpolate_from_known_sample_matrices(vector<unsigned int> rank={1,1}, bool overwrite = false);
+				calc_t& interpolate_from_known_sample_matrices(std::vector<unsigned int> rank={1,1}, bool overwrite = false);
 			};
 			///sputter_depth
 			class SD_c
@@ -156,7 +154,7 @@ public:
                 class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
-				const vector<measurements_::sims_t*>& measurements;
+				const std::vector<measurements_::sims_t*>& measurements;
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				bool overwrite = false;
@@ -170,8 +168,8 @@ public:
                 class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
-				const vector<measurements_::sims_t*>& measurements;
-				const map<cluster_t*,quantity::intensity_t> RSFs_to_ref_intensities();
+				const std::vector<measurements_::sims_t*>& measurements;
+				const std::map<cluster_t*,quantity::intensity_t> RSFs_to_ref_intensities();
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				SF_c(calc_t& calc);
@@ -190,8 +188,8 @@ public:
                 class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
-				const vector<measurements_::sims_t*>& measurements;
-				const map<cluster_t*,quantity::intensity_t> clusters_to_ref_intensities();
+				const std::vector<measurements_::sims_t*>& measurements;
+				const std::map<cluster_t*,quantity::intensity_t> clusters_to_ref_intensities();
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				RSF_c(calc_t& calc);
@@ -203,9 +201,9 @@ public:
 				///sets RSF for known matrices
 				calc_t& copy_to_same_matrices(bool overwrite=false);
 				///uses RSF from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24; for 1 specific cluster
-				calc_t& interpolate_from_known_sample_matrices(const cluster_t& cluster, vector<unsigned int> rank={1,1}, bool overwrite = false);
+				calc_t& interpolate_from_known_sample_matrices(const cluster_t& cluster, std::vector<unsigned int> rank={1,1}, bool overwrite = false);
 				///uses RSF from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24; for all clusters
-				calc_t& interpolate_from_known_sample_matrices(vector<unsigned int> rank={1,1}, bool overwrite = false);
+				calc_t& interpolate_from_known_sample_matrices(std::vector<unsigned int> rank={1,1}, bool overwrite = false);
 			};
 			class concentration_c
 			{
@@ -213,7 +211,7 @@ public:
                 class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
-				const vector<measurements_::sims_t*>& measurements;
+				const std::vector<measurements_::sims_t*>& measurements;
 			public:
 				///overwrite with calculation results (even if they are empty); false -> just use value if no is already set
 				concentration_c(calc_t& calc);
@@ -229,19 +227,19 @@ public:
                 class_logger_t logger;
 				sims_t& MG;
 				calc_t& calc;
-				const vector<measurements_::sims_t*>& measurements;
+				const std::vector<measurements_::sims_t*>& measurements;
 				///checks whether all intensities of all matrix_clusters are set
 				bool intensities_are_set() const;
 			public:
 				///calculation of matrix concentrations
 				matrix_c(calc_t& calc);
 				///rank{0,1,0} -> 0*a0+1*a1*x+0*a2*x*x == 0*a0+1*a1*x =rank{0,1}
-				calc_t& interpolate(const vector<unsigned int> polynom_rank = {0,1}, bool overwrite = false);
+				calc_t& interpolate(const std::vector<unsigned int> polynom_rank = {0,1}, bool overwrite = false);
 				calc_t& linear_interpolated_elemental_concentration(bool overwrite = false);
 				calc_t& pbp_const_from_db(bool overwrite = false);
 				calc_t& mean_const_from_db(bool overwrite = false);
 				calc_t& median_const_from_db(bool overwrite = false);
-				///reference_isotopes will set mgroups_::sims_t::set_reference_isotopes_in_measurements()
+				///reference_isotopes will std::set mgroups_::sims_t::set_reference_isotopes_in_measurements()
 				calc_t& median_const_from_reference_isotopes(bool overwrite = false);
 				calc_t& trimmed_mean_const_from_db(bool overwrite = false);
 				calc_t& const_from_db(quantity::quantity_t (*operation) (quantity::quantity_t), bool overwrite=false);
@@ -256,7 +254,7 @@ public:
 			calc_t& SR_SF_from_implants_maxima(bool overwrite=false);
 			calc_t& normalize_to_ref_intensity(bool overwrite=false);
 
-            const vector<measurements_::sims_t*> measurements;
+            const std::vector<measurements_::sims_t*> measurements;
 			
 			SR_c SRs;
 			SD_c SDs;
@@ -269,31 +267,31 @@ public:
 		void check();
 		///sets mat_isos as matrix_isotopes in all samples within all measurements within this group
 		bool set_matrix_isotopes_in_unknown_samples();
-		vector<isotope_t> matrix_isotopes_p;
+		std::vector<isotope_t> matrix_isotopes_p;
 	public:
 		sims_t(measurements_::sims_t& measurement);
-		void export_origin_ascii(string path="", const string delimiter="\t");
-		string to_string_short() const;
+		void export_origin_ascii(std::string path="", const std::string delimiter="\t");
+		std::string to_string_short() const;
 		calc_t calc();
 		///all different matrices from all samples within this group
-		set<sample_t::matrix_t> matrices();
+		std::set<sample_t::matrix_t> matrices();
 		///all different clusters from all measurements within this group
-		set<cluster_t> clusters();
-		const map<sample_t::matrix_t, cluster_t::RSF_t> matrix_to_RSF(const cluster_t& cluster);
-		const map<sample_t::matrix_t,quantity::SR_t> matrix_to_SRs();
-		const vector<const measurements_::sims_t*> measurements_const();
-		virtual vector<measurements_::sims_t*> measurements();
-		virtual vector<measurements_::sims_t> measurements_copy();
+		std::set<cluster_t> clusters();
+		const std::map<sample_t::matrix_t, cluster_t::RSF_t> matrix_to_RSF(const cluster_t& cluster);
+		const std::map<sample_t::matrix_t,quantity::SR_t> matrix_to_SRs();
+		const std::vector<const measurements_::sims_t*> measurements_const();
+		virtual std::vector<measurements_::sims_t*> measurements();
+		virtual std::vector<measurements_::sims_t> measurements_copy();
 		virtual const msettings::sims_t* settings() const;
 		///listed RSF to coressponding cluster and matrix
 		quantity::SF_t RSF(cluster_t cluster, sample_t::matrix_t matrix);
 		///all isotopes contained in all matrices in all samples
-		const vector<isotope_t> matrix_isotopes();
+		const std::vector<isotope_t> matrix_isotopes();
 		void set_reference_isotopes_in_measurements();
 		///all clusters contained in all matrices in all measurements
-		const vector<cluster_t> matrix_clusters();
+		const std::vector<cluster_t> matrix_clusters();
 		///all isotopes corresponding to matrix_clusters
-		const vector<isotope_t> isotopes_corresponding_to_matrix_clusters();
+		const std::vector<isotope_t> isotopes_corresponding_to_matrix_clusters();
 		const std::map< cluster_t*, quantity::substance_amount_t > matrix_cluster_to_matrix_iso_substance_amount();
 		///returs pointer to the matching measurement within this group
 		measurements_::sims_t* measurement(const measurements_::sims_t& M);
@@ -334,15 +332,15 @@ public:
 	private:
         class_logger_t logger;
 	public:
-        vector<measurements_::dsims_t> measurements_p;
+        std::vector<measurements_::dsims_t> measurements_p;
         msettings::dsims_t settings_p;
-        dsims_t(vector<measurements_::dsims_t*> dsims_measurements);
-        dsims_t(vector<measurements_::dsims_t>& dsims_measurements);
+        dsims_t(std::vector<measurements_::dsims_t*> dsims_measurements);
+        dsims_t(std::vector<measurements_::dsims_t>& dsims_measurements);
 		dsims_t(measurements_::dsims_t& dsims_measurements);
         const msettings::sims_t* settings() const final;
-		vector<measurements_::sims_t*> measurements() final;
-		vector<measurements_::sims_t> measurements_copy() final;
-		string to_string(const string del=", ");
+		std::vector<measurements_::sims_t*> measurements() final;
+		std::vector<measurements_::sims_t> measurements_copy() final;
+		std::string to_string(const std::string del=", ");
 		
 		/*normalize to primary current*/
 		dsims_t normalize_to_Iprimary();
@@ -359,16 +357,16 @@ public:
 	private:
         class_logger_t logger;
 	public:
-        vector<measurements_::tofsims_t> measurements_p;
+        std::vector<measurements_::tofsims_t> measurements_p;
         msettings::tofsims_t settings_p;
-        tofsims_t(vector<measurements_::tofsims_t*> tofsims_measurements);
-        tofsims_t(vector<measurements_::tofsims_t>& tofsims_measurements);
+        tofsims_t(std::vector<measurements_::tofsims_t*> tofsims_measurements);
+        tofsims_t(std::vector<measurements_::tofsims_t>& tofsims_measurements);
 		tofsims_t(measurements_::tofsims_t& tofsims_measurements);
 		virtual ~tofsims_t();
 		const msettings::sims_t* settings() const final;
-		vector<measurements_::sims_t*> measurements() final;
-		vector<measurements_::sims_t> measurements_copy() final;
-		string to_string(const string del=", ");
+		std::vector<measurements_::sims_t*> measurements() final;
+		std::vector<measurements_::sims_t> measurements_copy() final;
+		std::string to_string(const std::string del=", ");
 
         ///true: successfully remove
         bool remove_measurement(const measurements_::tofsims_t* measurement);

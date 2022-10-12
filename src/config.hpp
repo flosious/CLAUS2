@@ -32,8 +32,6 @@
 // #include "database_t.hpp"
 // #include "sample.hpp"
 
-using namespace std;
-
 class config_t 
 {
 private:
@@ -48,63 +46,63 @@ public:
 	
     /*DEFAULTS*/
     ///default config file location
-    const string default_file = "/home/florian/projects/claus2/build/config.conf";
+    const std::string default_file = "/home/florian/projects/claus2/build/config.conf";
     ///config file endings: *.conf & *.cfg
-    unordered_set<string> file_endings {".conf", ".cfg", ".config"};
+    std::unordered_set<std::string> file_endings {".conf", ".cfg", ".config"};
     
     
     /*VARIABLES*/
     ///config file list
-    unordered_set<string> files;
-    unordered_set<string> files_loaded;
+    std::unordered_set<std::string> files;
+    std::unordered_set<std::string> files_loaded;
 	
     /*FUNCTIONS*/   
     ///parse the lines to config
-    int parse(vector<string> config_lines);
+    int parse(std::vector<std::string> config_lines);
     ///loads the actual file to RAM
-    int load_file(string filename_with_path);
+    int load_file(std::string filename_with_path);
     /*save_functions*/
     ///sets the outformat columns (time depth intensity concentration)
-//     void save_output_format(vector<string> values);
-	void save_export_column_names(string value);
+//     void save_output_format(std::vector<std::string> values);
+	void save_export_column_names(std::string value);
     ///sets value to test
-    void save_test(string value);
+    void save_test(std::string value);
 
     
     ///adds entry to replacements
-    void save_replacements(vector<string> values);
+    void save_replacements(std::vector<std::string> values);
     ///set types to measurement_file_types
-    void save_measurement_file_types(string value);
+    void save_measurement_file_types(std::string value);
     ///set the measurement tool (dsims, tofsims, xps,...)
-//     void save_measurement_tool(string value);
+//     void save_measurement_tool(std::string value);
 	/// defines a measurement_group (groupid + olcdbid + settings + tool)
-	void save_measurement_group_definition(string value);
-	void save_sample_definition(string value);
+	void save_measurement_group_definition(std::string value);
+	void save_sample_definition(std::string value);
 	/// defines a measurement 
-	void save_measurement_definition(string value);
+	void save_measurement_definition(std::string value);
 	/// what should be exported? intensity, concentration, sputter_depth ....
-	void save_export_types(string value);
+	void save_export_types(std::string value);
     /*************/
 	
     /*formatting*/
     ///filename
-	string export_filename="";
-	string export_types="";
+	std::string export_filename="";
+	std::string export_types="";
     ///replace "this" with "with" in all strings (filenames, pathnames, headers, ...)
-    map<string, string> replacements; 
+    std::map<std::string, std::string> replacements;
     ///file endings of the measurement files
-//     vector<string> measurement_file_types {".asc",".txt",".asc_rpc"};
+//     std::vector<std::string> measurement_file_types {".asc",".txt",".asc_rpc"};
     ///data column delimiter
-    string data_column_delimiter="\t";
+    std::string data_column_delimiter="\t";
 
     ///what to put in output files
-//     vector<string> output_format {"time","depth","intensity","concentration"};
+//     std::vector<std::string> output_format {"time","depth","intensity","concentration"};
 	
     /*directories*/
     
     ///directory name of exports; output to measurement directory, when empty
-    string dsims_export_location="";
-	string tofsims_export_location="";
+    std::string dsims_export_location="";
+	std::string tofsims_export_location="";
 
     ///constructor
     config_t();
@@ -115,11 +113,11 @@ public:
     ///load just default config file; returns the number of succesfully loaded files
     int load();
     ///loads one external config file; returns the number of succesfully loaded files
-    int load(string filename_with_path);
+    int load(std::string filename_with_path);
     ///loads multiple external config file; returns the number of succesfully loaded files
-    int load(unordered_set<string> filenames_with_path);
+    int load(std::unordered_set<std::string> filenames_with_path);
     ///returns all config files in the file list
-    unordered_set<string> filter_files(unordered_set<string>& file_list);
+    std::unordered_set<std::string> filter_files(std::unordered_set<std::string>& file_list);
     
 };
 

@@ -35,10 +35,14 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->files_treeView, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
     QObject::connect(ui->measurements_treeView, SIGNAL(update_mgroups_treeview()), ui->mgroups_treeview, SLOT(update()));
     QObject::connect(ui->mgroups_treeview, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
+    QObject::connect(ui->sims_plot_measurement_widget, SIGNAL(auto_calc()),this, SLOT(auto_calc()) );
 //    QObject::connect(ui->mgroups_treeview, SIGNAL(set_measurement_in_sims_plot_measurement_tree),ui->sims_plot_measurement_widget,SLOT(set_measurement));
 
 //    ui->mgroups_treeview->header()->setStretchLastSection(false);
-
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
+    ui->tofsims_export_directory_textEdit->setText(QString(""));
+    ui->dsims_export_directory_textEdit->setText(QString(""));
+#endif
     logger.debug(__func__,"MainWindow").exit();
 }
 
@@ -66,15 +70,26 @@ void MainWindow::dropEvent(QDropEvent *e)
         dropped_files.reserve(urlList.size());
         for (int i=0; i < urlList.size() ; i++)
         {
-              dropped_files.push_back(urlList.at(i).toString().toStdString());
+//            dropped_files.push_back(urlList.at(i).toString().toStdString());
+            dropped_files.push_back(urlList.at(i).toString().toStdString());
         }
 
         for (auto& L : dropped_files)
         {
             // file:///tmp/systemd-private-0ecda464d0ec48abbd82c45271cbe11f-systemd-logind.service-yYlCij
-            tools::str::remove_substring_from_mainstring(&L,"file://");
-            tools::str::remove_substring_from_mainstring(&L,"FILE://");
+            tools::str::remove_substring_from_mainstring(&L,"file:");
+            tools::str::remove_substring_from_mainstring(&L,"FILE:");
             tools::str::replace_chars(&L,"%23","#");
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
+// there is a problem in recognizing the "u" (mikron letter); also olcdb is not parsed correctly (returns -1)
+            tools::str::replace_chars(&L,"///","");
+            //qt5 automatically replaces the windows style path delimiter with the unix path delimiter, lets change it back
+            tools::str::replace_chars(&L,"/","\\"); // unix to windows style
+            std::stringstream mu;
+            mu << static_cast<char>(230);
+            tools::str::replace_chars(&L,"µ",mu.str());
+//            tools::str::replace_umlaute_to_windows_compatible(&L);
+#endif
             logger.debug(__func__,"dropped_files").value(L,11);
         }
         //collecting and filtering
@@ -82,7 +97,7 @@ void MainWindow::dropEvent(QDropEvent *e)
         filenames_collector.add_files_or_folders(dropped_files,ui->scan_dropped_files_recursivly->isChecked());
         ///all filenames are unknown in the beginning
         const auto new_filenames = filenames_collector.filenames();
-
+        logger.debug(__func__,"new_filenames").value(new_filenames.size(),10,tools::vec::combine_vec_to_string(new_filenames, ", "));
         int next_tof_file_idx = claus->tofsims.files.size();
         int next_dsims_file_idx = claus->dsims.files.size();
         int next_dektak6m_file_idx = claus->dektak6m.files.size();
@@ -99,7 +114,7 @@ void MainWindow::dropEvent(QDropEvent *e)
 //            auto flogger = logger.debug(__func__,"tab: "+std::to_string(ui->tabWidget->currentIndex()));
             std::string log_object("tab: " + std::to_string(ui->tabWidget->currentIndex()));
             logger.debug(__func__,log_object).enter();
-            vector<unsigned int> indices;
+            std::vector<unsigned int> indices;
             //tofsims
             for (int i = next_tof_file_idx; i<claus->tofsims.files.size(); i++)
             {
@@ -142,6 +157,7 @@ void MainWindow::dropEvent(QDropEvent *e)
                 std::iota(measurement_indices.begin(),measurement_indices.end(),dsims_measurements_size_before_adding);
                 claus->dsims.auto_group_measurements(measurement_indices);
 
+                measurement_indices.clear();
                 //tofsims
                 measurement_indices.resize(claus->tofsims.measurements.size()-tofsims_measurements_size_before_adding);
                 std::iota(measurement_indices.begin(),measurement_indices.end(),tofsims_measurements_size_before_adding);
@@ -175,6 +191,8 @@ void MainWindow::dropEvent(QDropEvent *e)
 //        ui->tabWidget->setCurrentIndex(0);
 
     }
+    else
+        logger.error(__func__,"dropped file").value("has no URL");
 }
 
 void MainWindow::on_button_files_to_measurements_clicked()
@@ -304,16 +322,6 @@ void MainWindow::on_mgroups_treeview_clicked(const QModelIndex &index)
         return;
     }
 
-    //get selected measurements_::sims_t *
-//    measurements_::sims_t* M = ui->mgroups_treeview->get_selected_sims_measurement();
-
-    //send selected measurement to sims_plot_widget
-//    if (M!=nullptr)
-//        ui->sims_plot_measurement_widget->update(M);
-
-    //testing
-//    ui->mgroups_treeview->dsims_section.;
-//    ui->mgroups_treeview->tofsims_section.get_selected_rows();
 }
 
 void MainWindow::on_mgroups_treeview_customContextMenuRequested(const QPoint &pos)
@@ -335,11 +343,13 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     }
 }
 
-void MainWindow::on_MG_tab_measurement_cluster_tree_button_clicked()
+void MainWindow::auto_calc()
 {
     /*tof sims*/
     for (auto& MG : claus->tofsims.mgroups)
     {
+        if (MG.measurements_p.size()==0)
+            continue;
         MG.set_reference_isotopes_in_measurements();
         MG.set_natural_abundances_in_matrix_clusters();
         auto calc = MG.calc();
@@ -371,10 +381,14 @@ void MainWindow::on_MG_tab_measurement_cluster_tree_button_clicked()
         // C
         calc.concentrations.from_SF();
         /*exporting*/
+
         std::string export_path = ui->tofsims_export_directory_textEdit->toPlainText().toStdString();
         if (export_path=="")
-            export_path = ui->tofsims_export_directory_textEdit->placeholderText().toStdString();
+            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
+//        if (export_path=="")
+//            export_path = ui->tofsims_export_directory_textEdit->placeholderText().toStdString();
         export_path = tools::file::check_directory_string(export_path);
+        logger.info(__func__,MG.to_string()).signal("exporting to: " + export_path);
         MG.export_origin_ascii(export_path);
     }
 
@@ -382,6 +396,8 @@ void MainWindow::on_MG_tab_measurement_cluster_tree_button_clicked()
     /*D sims*/
     for (auto& MG : claus->dsims.mgroups)
     {
+        if (MG.measurements_p.size()==0)
+            continue;
         MG.set_reference_isotopes_in_measurements();
         MG.set_natural_abundances_in_matrix_clusters();
         auto calc = MG.calc();
@@ -415,8 +431,13 @@ void MainWindow::on_MG_tab_measurement_cluster_tree_button_clicked()
         /*exporting*/
         std::string export_path = ui->dsims_export_directory_textEdit->toPlainText().toStdString();
         if (export_path=="")
-            export_path = ui->dsims_export_directory_textEdit->placeholderText().toStdString();
+            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
+
+//        if (export_path=="")
+//            export_path = ui->dsims_export_directory_textEdit->placeholderText().toStdString();
+
         export_path = tools::file::check_directory_string(export_path);
+        logger.info(__func__,MG.to_string()).signal("exporting to: " + export_path);
         MG.export_origin_ascii(export_path);
     }
 }

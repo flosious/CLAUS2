@@ -10,9 +10,9 @@ sample_t::implant_s::implant_s(quantity::dose_t dose, quantity::concentration_t 
 {
 }
 
-string sample_t::implant_s::to_string() const
+std::string sample_t::implant_s::to_string() const
 {
-	stringstream out;
+	std::stringstream out;
 	out << "dose: " << dose.to_string() << "; concentration_maximum: " << concentration_maximum.to_string() << "; depth at concentration_maximum: " << depth_at_concentration_maxium.to_string();
 	return out.str();
 }
@@ -21,7 +21,7 @@ string sample_t::implant_s::to_string() const
 /***     sample_t::db_t     ***/
 /******************************/
 
-const string sample_t::db_t::tablename = "implanted_samples";
+const std::string sample_t::db_t::tablename = "implanted_samples";
 
 sample_t::db_t::db_t(const sample_t& sample, const database_t& sql_wrapper)
     : sample(sample), sql_wrapper(sql_wrapper), logger(global_logger,__FILE__,"sample_t::db_t")
@@ -32,7 +32,7 @@ sample_t::db_t::db_t(const sample_t& sample, const database_t& sql_wrapper)
 // 		table_exists=true;
 }
 
-const map<isotope_t, sample_t::implant_s>& sample_t::db_t::implants()
+const std::map<isotope_t, sample_t::implant_s>& sample_t::db_t::implants()
 {
 	load_from_table();
 	return implants_s;
@@ -40,7 +40,7 @@ const map<isotope_t, sample_t::implant_s>& sample_t::db_t::implants()
 
 
 ///load entries from old db into this(new)
-bool sample_t::db_t::migrate_claus1_db(database_t& sql_wrapper, const string filename)
+bool sample_t::db_t::migrate_claus1_db(database_t& sql_wrapper, const std::string filename)
 {
 	
 	sqlite3* claus1_sql_handle=nullptr;
@@ -50,8 +50,8 @@ bool sample_t::db_t::migrate_claus1_db(database_t& sql_wrapper, const string fil
         //logger::error("sample_t::db_t::migrate_claus1_db()","!claus1.open",filename);
 		return false;
 	}
-	map<string,vector<string>> table_entries_s;
-	stringstream sql;
+	std::map<std::string,std::vector<std::string>> table_entries_s;
+	std::stringstream sql;
 	sql << "SELECT * FROM everything;";
 	if (!claus1.execute_sql(sql.str(),database_t::callback_lines_map,&table_entries_s)) 
 	{
@@ -147,9 +147,9 @@ bool sample_t::db_t::load_from_table()
     //logger::debug(logger_verbosity_offset+6,"sample_t::db_t::load_from_table()","entering");
 	if (implants_s.size()>0 || matrix_s.is_set()) // already loaded
 		return true;
-	map<string,vector<string>> table_entries_s;
+	std::map<std::string,std::vector<std::string>> table_entries_s;
 			
-	string sql1	= "SELECT * FROM " +tablename+ 	" WHERE " \
+	std::string sql1	= "SELECT * FROM " +tablename+ 	" WHERE " \
 			"lot='" + sample.lot + "'" \
 			" AND wafer=" +std::to_string(sample.wafer);
 	
@@ -234,7 +234,7 @@ bool sample_t::db_t::load_from_table()
             //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: maximum_concentration("+iso.to_string()+")="+C_max.to_string());
         }
 		implant_s I{D,C_max,SD_max};
-		implants_s.insert(pair<isotope_t,implant_s>(iso,I));
+		implants_s.insert(std::pair<isotope_t,implant_s>(iso,I));
 	}
 	
     //logger::debug(logger_verbosity_offset+6,"sample_t::db_t::load_from_table()","exiting");
@@ -292,9 +292,9 @@ bool sample_t::chip_t::is_set() const
 	return false;
 }
 
-void sample_t::chip_t::to_screen(string prefix)
+void sample_t::chip_t::to_screen(std::string prefix)
 {
-	cout << prefix << "chip\t" << "X:"<< x << ", Y:"<< y << endl;
+    std::cout << prefix << "chip\t" << "X:"<< x << ", Y:"<< y << std::endl;
 }
 
 bool sample_t::chip_t::operator<(const sample_t::chip_t& obj) const
@@ -313,11 +313,11 @@ bool sample_t::chip_t::operator>(const chip_t& obj) const
 	return false;
 }
 
-const string sample_t::chip_t::to_string(const string del) const
+const std::string sample_t::chip_t::to_string(const std::string del) const
 {
 	if (x<0 && y < 0)
 		return "";
-	stringstream out;
+	std::stringstream out;
 	out << "X"<<x << "Y" << y;
 	return out.str();
 }
@@ -348,7 +348,7 @@ sample_t::implant_s sample_t::implant(const isotope_t& isotope)
 	return {};
 }
 
-const map<isotope_t,sample_t::implant_s>& sample_t::implants() const
+const std::map<isotope_t,sample_t::implant_s>& sample_t::implants() const
 {
 	return implants_p;
 }
@@ -377,7 +377,7 @@ sample_t::sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f,data
 // 																database(*this,sql_wrapper)
 {
     load_from_database();
-// 	cout << "f.matrix() = " << f.matrix().to_string() << endl;
+// 	std::cout << "f.matrix() = " << f.matrix().to_string() << std::endl;
 }
 
 sample_t::sample_t(files_::file_t::name_t& fn, database_t& sql_wrapper) : wafer(fn.wafer()), 
@@ -393,9 +393,9 @@ sample_t::sample_t(files_::file_t::name_t& fn, database_t& sql_wrapper) : wafer(
     load_from_database();
 }
 
-const string sample_t::wafer_string() const
+const std::string sample_t::wafer_string() const
 {
-	stringstream ss;
+	std::stringstream ss;
 	if (wafer<1)
 		return "";
 	if (wafer<10)
@@ -460,9 +460,9 @@ bool sample_t::operator!=(const sample_t& obj) const
 	return !operator==(obj);
 }
 
-string sample_t::to_string(const string del)
+std::string sample_t::to_string(const std::string del)
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "lot: " << lot;
 	if (lot_split!="")
 		ss << lot_split;
@@ -479,10 +479,10 @@ string sample_t::to_string(const string del)
 	return ss.str();
 }
 
-string sample_t::to_name(const string del) const
+std::string sample_t::to_name(const std::string del) const
 {
-	stringstream ss;
-//    cout << lot << "\t" << wafer << endl;
+	std::stringstream ss;
+//    std::cout << lot << "\t" << wafer << std::endl;
 //    return "";
     ss << "lot: " << lot;
 	if (lot_split!="")
@@ -542,7 +542,7 @@ bool sample_t::operator>(const sample_t& obj) const
 
 
 
-// const string sample_t::db_tablename {"samples"};
+// const std::string sample_t::db_tablename {"samples"};
 // bool sample_t::create_table()
 // {
 //     std::string sql;

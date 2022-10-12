@@ -4,7 +4,7 @@ cluster_t::cluster_t() :  logger(global_logger,__FILE__,"cluster_t")
 {
 }
 
-cluster_t::cluster_t(set<isotope_t> isotopes,
+cluster_t::cluster_t(std::set<isotope_t> isotopes,
 					 quantity::sputter_time_t sputter_time, 
 					 quantity::intensity_t intensity, 
 					 quantity::depth_t sputter_depth, 
@@ -18,7 +18,7 @@ cluster_t::cluster_t(set<isotope_t> isotopes,
 {
 }
 
-cluster_t::cluster_t(string clustername, 
+cluster_t::cluster_t(std::string clustername, 
 			  quantity::sputter_time_t sputter_time,
 			  quantity::intensity_t intensity,
 			  quantity::depth_t sputter_depth,
@@ -32,14 +32,14 @@ cluster_t::cluster_t(string clustername,
 {
 }
 
-vector<isotope_t> cluster_t::parse_clustername(const string clustername)
+std::vector<isotope_t> cluster_t::parse_clustername(const std::string clustername)
 {
-	smatch match;
+	std::smatch match;
 	int nucleons;
 	double amount;
-	string symbol;
-	vector<isotope_t> isotopes;
-	vector<string> clustername_parts = tools::str::get_strings_between_delimiter(clustername, " ");
+	std::string symbol;
+	std::vector<isotope_t> isotopes;
+	std::vector<std::string> clustername_parts = tools::str::get_strings_between_delimiter(clustername, " ");
 	
 	for (auto& iso_p : clustername_parts)
 	{
@@ -48,7 +48,7 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 			isotopes.push_back(iso);
 		else
 		{
-            //logger::error("cluster_t::parse_clustername()","regex_search(iso_p,match,regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",clustername,"return {}");
+            //logger::error("cluster_t::parse_clustername()","regex_search(iso_p,match,std::regex('^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)')",clustername,"return {}");
 			return {};
 		}
 	}
@@ -57,7 +57,7 @@ vector<isotope_t> cluster_t::parse_clustername(const string clustername)
 }
 
 
-cluster_t::cluster_t(const vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s), logger(global_logger,__FILE__,"cluster_t")
+cluster_t::cluster_t(const std::vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s), logger(global_logger,__FILE__,"cluster_t")
 {
 }
 
@@ -65,12 +65,12 @@ cluster_t::cluster_t(const isotope_t isotope_s) : isotopes({isotope_s}), logger(
 {
 }
 
-string cluster_t::to_string(const string del) const
+std::string cluster_t::to_string(const std::string del) const
 {
 	
 	const int max = isotopes.size();
 	if (max==0) return "";
-	stringstream out;
+	std::stringstream out;
 	for (int i=0;i<max;i++)
 	{
 		out << isotopes.at(i).to_string();
@@ -92,19 +92,19 @@ quantity::intensity_t cluster_t::intensity_background(float treshold) const
 		return {};
 	unsigned int bins = 10;
 // 	statistics::histogram_t histogram(intensity.data(),10);
-// 	cout << endl << "HISTOGRAM: " << endl;
+// 	std::cout << std::endl << "HISTOGRAM: " << std::endl;
 // 	print(histogram.linear_bins());
 // 	print(histogram.log10_bins());
 	
 	auto histograms = histogram_builder_t(intensity);
 	auto histo = histograms.equally_linearly_distanced_bins(bins);
 	auto histo_detail = histo.rebuild(histo.quantity_data_size_to_its_bin().rbegin()->second).equally_log10_distanced_bins(bins);
-// 	cout << "linear: " << endl << histo.to_string() << endl;
-// 	cout << "log10: " << endl << histo_detail.to_string() << endl;
-// 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().median().to_string() << endl;
-// 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().get_data_by_index_rel(0,0.25).median().to_string() << endl;
+// 	std::cout << "linear: " << std::endl << histo.to_string() << std::endl;
+// 	std::cout << "log10: " << std::endl << histo_detail.to_string() << std::endl;
+// 	std::cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().median().to_string() << std::endl;
+// 	std::cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().get_data_by_index_rel(0,0.25).median().to_string() << std::endl;
 // 	for (const auto& m : histograms.equally_linearly_distanced_bins(bins).quantity_data_size_to_its_bin())
-// 		cout << m.first << endl;
+// 		std::cout << m.first << std::endl;
 	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).median();
 // 	return histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().remove_data_equal_to(0).get_data_by_index_rel(0,0.25).median();
 }
@@ -115,20 +115,20 @@ quantity::concentration_t cluster_t::concentration_background(float treshold) co
 		return {};
 	unsigned int bins = 10;
 // 	statistics::histogram_t histogram(intensity.data(),10);
-// 	cout << endl << "HISTOGRAM: " << endl;
+// 	std::cout << std::endl << "HISTOGRAM: " << std::endl;
 // 	print(histogram.linear_bins());
 // 	print(histogram.log10_bins());
 	
 	auto histograms = histogram_builder_t(concentration);
 	auto histo = histograms.equally_linearly_distanced_bins(bins);
 // 	auto histo_detail = histo.rebuild(histo.quantity_data_size_to_its_bin().rbegin()->second).equally_log10_distanced_bins(bins);
-// 	cout << "linear: " << endl << histo.to_string() << endl;
-// 	cout << "log10: " << endl << histo_detail.to_string() << endl;
-// 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().median().to_string() << endl;
-// 	cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().get_data_by_index_rel(0,0.25).median().to_string() << endl;
+// 	std::cout << "linear: " << std::endl << histo.to_string() << std::endl;
+// 	std::cout << "log10: " << std::endl << histo_detail.to_string() << std::endl;
+// 	std::cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().median().to_string() << std::endl;
+// 	std::cout << histo.quantity_data_size_to_its_bin().rbegin()->second.quantities_in_bin().get_data_by_index_rel(0,0.25).median().to_string() << std::endl;
 	const auto sum = histo.quantities_in_bins();
 // 	for (const auto& m : histo.quantity_data_size_to_its_bin())
-// 		cout << m.first << "\t[" << m.second.start().data().front() << "," << m.second.stop().data().front() << ")\trel:" << (double)m.first/sum*100 << endl ;
+// 		std::cout << m.first << "\t[" << m.second.start().data().front() << "," << m.second.stop().data().front() << ")\trel:" << (double)m.first/sum*100 << std::endl ;
 	double relative_size = (double)histo.quantity_data_size_to_its_bin().rbegin()->first/sum;
 	if (relative_size < treshold)
 	{
@@ -254,16 +254,16 @@ quantity::abundance_t cluster_t::abundance()
 	return abu;
 }
 
-string cluster_t::name() const
+std::string cluster_t::name() const
 {
 	return to_string("");
 }
 
-isotope_t cluster_t::corresponding_isotope(const vector<isotope_t > reference_isotopes) const
+isotope_t cluster_t::corresponding_isotope(const std::vector<isotope_t > reference_isotopes) const
 {
 	if (isotopes.size()==1)
 		return isotopes.at(0);
-	set<isotope_t> isos;
+	std::set<isotope_t> isos;
 	for (auto& i:isotopes)
 	{
 		if (find(reference_isotopes.begin(),reference_isotopes.end(),i)==reference_isotopes.end())
@@ -311,7 +311,7 @@ cluster_t cluster_t::interpolate(const quantity::quantity_t& new_Q, const quanti
 		return {};
 	}
 	cluster_t new_cluster(isotopes);
-	map<double,double> XY_data;
+	std::map<double,double> XY_data;
 // 	new_cluster.sputter_depth_p = new_sputter_depth;
 	if (sputter_depth.is_set())
 		new_cluster.sputter_depth = sputter_depth.interp(old_Q,new_Q); ///Exception safe???
@@ -379,9 +379,9 @@ cluster_t cluster_t::filter_impulse(int window_size, float factor)
 /* matrix_clusters_c */
 /********************************************/
 
-string matrix_clusters_c::to_string(const string del) const
+std::string matrix_clusters_c::to_string(const std::string del) const
 {
-	stringstream out;
+	std::stringstream out;
 	unsigned int i=0;
 	unsigned int s = clusters.size();
 	for (auto& C : clusters)
@@ -397,20 +397,20 @@ string matrix_clusters_c::to_string(const string del) const
 /*"30Si" can be a reference cluster for elemental Si or isotopical purified Si*/
 /*"30Si 28Si" can be a reference cluster for elemental Si or isotopical purified Si*/
 /*"74Ge 28Si" can be a reference cluster for elemental Si+Ge or isotopical purified Si+Ge*/
-matrix_clusters_c::matrix_clusters_c(vector<cluster_t>& clusters_s, const vector<isotope_t> matrix_isotopes) : logger(global_logger,__FILE__,"matrix_clusters_c")
+matrix_clusters_c::matrix_clusters_c(std::vector<cluster_t>& clusters_s, const std::vector<isotope_t> matrix_isotopes) : logger(global_logger,__FILE__,"matrix_clusters_c")
 {
 	if (matrix_isotopes.size()==0)
 		return;
 	if (clusters_s.size()==0)
 		return;
 	
-// 	cout << "matrix_isotopes.size(): " << matrix_isotopes.size() << endl;
-// 	cout << "clusters_s.size(): " << clusters_s.size() << endl;
+// 	std::cout << "matrix_isotopes.size(): " << matrix_isotopes.size() << std::endl;
+// 	std::cout << "clusters_s.size(): " << clusters_s.size() << std::endl;
 	
 	bool insert=false;
 	for (auto& C : clusters_s) 
 	{
-// 		cout << "C: " << C.to_string() << endl;
+// 		std::cout << "C: " << C.to_string() << std::endl;
 		insert = true;
 		for (auto& I : C.isotopes)
 		{
@@ -442,7 +442,7 @@ quantity::intensity_t matrix_clusters_c::intensity_sum() const
 // 		if (!intensity.is_set())
 // 			intensity = C->intensity;
 // 		else
-// 		cout << "matrix_clusters_c::intensity_sum(): " << C->to_string() << endl;
+// 		std::cout << "matrix_clusters_c::intensity_sum(): " << C->to_string() << std::endl;
 		intensity += C->intensity;
 	}
 	return intensity;
@@ -462,9 +462,9 @@ quantity::concentration_t matrix_clusters_c::concentration_sum() const
 	return concentration;
 }
 
-const vector<cluster_t*> matrix_clusters_c::clusters_from_ele(element_t ele) const
+const std::vector<cluster_t*> matrix_clusters_c::clusters_from_ele(element_t ele) const
 {
-	vector<cluster_t*> clusters_res;
+	std::vector<cluster_t*> clusters_res;
 	for (const auto& c : clusters)
 	{
 		//asuming that there can be just 1 element per matrix_cluster
@@ -474,11 +474,11 @@ const vector<cluster_t*> matrix_clusters_c::clusters_from_ele(element_t ele) con
 	return clusters_res;
 }
 
-const vector<cluster_t> matrix_clusters_c::cluster_names()
+const std::vector<cluster_t> matrix_clusters_c::cluster_names()
 {
 	if (clusters.size()==0)
 		return {};
-	vector<cluster_t> c_names(clusters.size());
+	std::vector<cluster_t> c_names(clusters.size());
 	int i = 0;
 	for (auto& C : clusters)
 	{
@@ -488,9 +488,9 @@ const vector<cluster_t> matrix_clusters_c::cluster_names()
 	return c_names;
 }
 
-const vector<element_t> matrix_clusters_c::elements() const
+const std::vector<element_t> matrix_clusters_c::elements() const
 {
-	set<element_t> eles;
+	std::set<element_t> eles;
 	for (const auto& iso : isotopes())
 		eles.insert(iso);
 	return {eles.begin(),eles.end()};
@@ -498,7 +498,7 @@ const vector<element_t> matrix_clusters_c::elements() const
 
 const std::vector< isotope_t > matrix_clusters_c::isotopes() const
 {
-	set<isotope_t> isotopes;
+	std::set<isotope_t> isotopes;
 	if (clusters.size()==0)
 		return {};
 	for (auto& C : clusters)
@@ -539,20 +539,20 @@ void matrix_clusters_c::set_natural_abundances()
 /**************************************************************/
 
 
-cluster_t::RSF_t::RSF_t(const quantity::quantity_t& q, const vector<cluster_t>& reference_clusters_s) : 
+cluster_t::RSF_t::RSF_t(const quantity::quantity_t& q, const std::vector<cluster_t>& reference_clusters_s) : 
             quantity_t("RSF",q.data(),q.unit(),q.dimension()), reference_clusters_p(RSF_t(reference_clusters_s).reference_clusters_p),
             logger(global_logger,__FILE__,"cluster_t::RSF_t")
 {
 }
 
-cluster_t::RSF_t::RSF_t(const vector<cluster_t>& reference_clusters_s) : logger(global_logger,__FILE__,"cluster_t::RSF_t")
+cluster_t::RSF_t::RSF_t(const std::vector<cluster_t>& reference_clusters_s) : logger(global_logger,__FILE__,"cluster_t::RSF_t")
 {
 	reference_clusters_p.reserve(reference_clusters_s.size());
 	for (const auto& C : reference_clusters_s)
 		reference_clusters_p.push_back(cluster_t{C.isotopes});
 }
 
-const vector<cluster_t>& cluster_t::RSF_t::reference_clusters() const
+const std::vector<cluster_t>& cluster_t::RSF_t::reference_clusters() const
 {
 	return reference_clusters_p;
 }

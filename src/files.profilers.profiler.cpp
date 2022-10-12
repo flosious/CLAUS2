@@ -18,7 +18,7 @@
 
 #include "files.hpp"
 
-files_::profilers_t::profiler_t::contents_t::contents_t(string& filename_with_path,const string& delimiter,const set<string>& identifiers, const std::string& contents_string) :
+files_::profilers_t::profiler_t::contents_t::contents_t(std::string& filename_with_path,const std::string& delimiter,const std::set<std::string>& identifiers, const std::string& contents_string) :
     files_::file_t::contents_t(filename_with_path, delimiter, identifiers,{}, contents_string)
 {
 }

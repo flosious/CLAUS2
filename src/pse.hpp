@@ -27,67 +27,65 @@
 #include "log.hpp"
 
 
-using namespace std;
-
-
 
 class pse_t 
 {
 // 	friend class config_t;
 private:
-    class_logger_t logger;
-	const string source_url="https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl";
-    const string filename="/home/florian/projects/claus2/build/pse.csv";
-	const string delimiter = ",";
+    static class_logger_t logger;
+	const std::string source_url="https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl";
+//    const std::string filename="/home/florian/projects/claus2/build/pse.csv";
+    const std::string filename="pse.csv";
+	const std::string delimiter = ",";
 	
 	class pse_isotope_t
 	{
     private:
         class_logger_t logger;
 	public:
-		pse_isotope_t(const double abundance_s, const int nucleons_s, const double mass_s, const string symbol_alternative_s="");
+		pse_isotope_t(const double abundance_s, const int nucleons_s, const double mass_s, const std::string symbol_alternative_s="");
 		const double abundance;
 		const int nucleons;
 		const double mass;
 		///H hydrogen
-// 		const string symbol;
+// 		const std::string symbol;
 		///like D for 2H
-		const string symbol_alternative;
-		const bool operator==(const pse_isotope_t& obj) const;
-		const bool operator<(const pse_isotope_t& obj) const;
+        const std::string symbol_alternative;
+        const bool operator==(const pse_isotope_t& obj) const;
+        const bool operator<(const pse_isotope_t& obj) const;
 	};
 	class pse_element_t
 	{
     private:
         class_logger_t logger;
 	public:
-		pse_element_t(string symbol_s, int protons_s, vector<pse_isotope_t>& isotope_s);
-		pse_element_t(string symbol_s, int protons_s, pse_isotope_t& isotope_s);
-// 		pse_element_t(const set<pse_isotope_t>& isotope_s);
-		const int protons;
-		const string symbol;
-		const vector<pse_isotope_t> isotopes;
-// 		pse_element_t(const vector<isotope_t>& isotopes_s);
-// 		const vector<isotope_t> isotopes;
+		pse_element_t(std::string symbol_s, int protons_s, std::vector<pse_isotope_t>& isotope_s);
+		pse_element_t(std::string symbol_s, int protons_s, pse_isotope_t& isotope_s);
+// 		pse_element_t(const std::set<pse_isotope_t>& isotope_s);
+        const int protons;
+        const std::string symbol;
+        const std::vector<pse_isotope_t> isotopes;
+// 		pse_element_t(const std::vector<isotope_t>& isotopes_s);
+// 		const std::vector<isotope_t> isotopes;
 		const pse_isotope_t* isotope_with_highest_abundance() const;
 		const pse_isotope_t* isotope_from_nucleons(int nucleons) const;
-		const double mass() const;
-		const bool operator==(const pse_element_t& obj) const;
-		const bool operator<(const pse_element_t& obj) const;
+        const double mass() const;
+        const bool operator==(const pse_element_t& obj) const;
+        const bool operator<(const pse_element_t& obj) const;
 		
 	};
-// 	map<string,element_t> symbol_to_element_p;
-// 	vector<isotope_t> isotopes_p;
+// 	std::map<std::string,element_t> symbol_to_element_p;
+// 	std::vector<isotope_t> isotopes_p;
 	
-	vector<pse_element_t> elements_p;
+	std::vector<pse_element_t> elements_p;
 public:
-    pse_t();
-// 	pse_t(const vector<pse_element_t> elements_s);
-	const vector<pse_element_t>& elements();
-	const pse_element_t* element(string symbol);
+    pse_t(std::shared_ptr<logger_t> logger_s);
+// 	pse_t(const std::vector<pse_element_t> elements_s);
+	const std::vector<pse_element_t>& elements();
+	const pse_element_t* element(std::string symbol);
 	
-	const vector<pse_isotope_t>* isotopes(string symbol="");
-	const pse_isotope_t* isotope(string symbol, int nucleons);
+	const std::vector<pse_isotope_t>* isotopes(std::string symbol="");
+	const pse_isotope_t* isotope(std::string symbol, int nucleons);
 	
 	bool load_file();
 	///all natural(earth) elements within the PSE
@@ -95,10 +93,10 @@ public:
 	///an overview/console dump
 	void to_screen();
 	///source URL, which feeded the pse.csv file in the year 2018
-	const string source() const;
+	const std::string source() const;
 };
 
 extern pse_t PSE;
-extern Logger global_logger;
+
 
 #endif // PSE_HPP

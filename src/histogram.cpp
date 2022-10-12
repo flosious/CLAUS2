@@ -37,7 +37,7 @@ histogram_builder_t::histogram_builder_t(quantity::quantity_t qs) :
 
 histogram_t histogram_builder_t::equally_linearly_distanced_bins(unsigned int number_of_bins) const
 {
-	vector<histogram_t::bin_t> bins;
+	std::vector<histogram_t::bin_t> bins;
 	bins.reserve(number_of_bins);
 	const auto start = qs.min();
 	const auto stop = qs.max();
@@ -56,7 +56,7 @@ histogram_t histogram_builder_t::equally_linearly_distanced_bins(unsigned int nu
 
 histogram_t histogram_builder_t::equally_log10_distanced_bins(unsigned int number_of_bins) const
 {
-	vector<histogram_t::bin_t> bins;
+	std::vector<histogram_t::bin_t> bins;
 	bins.reserve(number_of_bins);
 	const auto QS = qs.remove_data_smaller_than(0).remove_data_equal_to(0);
 	const auto start = QS.min();
@@ -80,7 +80,7 @@ histogram_t histogram_builder_t::equally_summand_distanced_bins(quantity::quanti
         //logger::error("histogram_builder_t::equally_summand_distanced_bins","units not changeable", q_summand.to_string(), qs.to_string());
 		return histogram_t{{}};
 	}
-	vector<histogram_t::bin_t> bins;
+	std::vector<histogram_t::bin_t> bins;
 	/*calcualte the number_of_bins to cover the whole min-max-range*/
 	unsigned int number_of_bins = ceil(((qs.max()-qs.min())/q_summand).data().front());
 	bins.reserve(number_of_bins);
@@ -104,7 +104,7 @@ histogram_t histogram_builder_t::equally_factor_distanced_bins(quantity::quantit
         //logger::error("histogram_builder_t::equally_factor_distanced_bins","units not changeable", q_factor.to_string(), qs.to_string());
 		return histogram_t{{}};
 	}
-	vector<histogram_t::bin_t> bins;
+	std::vector<histogram_t::bin_t> bins;
 	/*calcualte the number_of_bins to cover the whole min-max-range*/
 	double delta = qs.max().data().front()-qs.min().data().front();
 	unsigned int number_of_bins = ceil(pow(delta,1/q_factor.data().front()));
@@ -125,7 +125,7 @@ histogram_t histogram_builder_t::equally_factor_distanced_bins(quantity::quantit
 /***      			 histogram_t   			           *****/
 /***********************************************************/
 
-histogram_t::histogram_t(const vector<bin_t>& bins) :bins_p(bins), logger(global_logger,__FILE__,"histogram_t")
+histogram_t::histogram_t(const std::vector<bin_t>& bins) :bins_p(bins), logger(global_logger,__FILE__,"histogram_t")
 {
 }
 
@@ -173,17 +173,17 @@ histogram_t& histogram_t::operator<<(const quantity::quantity_t& q)
 	return add(q);
 }
 
-const vector<histogram_t::bin_t> histogram_t::bins() const
+const std::vector<histogram_t::bin_t> histogram_t::bins() const
 {
 	return bins_p;
 }
 
-string histogram_t::to_string() const
+std::string histogram_t::to_string() const
 {
-	stringstream out;
+	std::stringstream out;
 	for (int i=0; i<bins().size();i++)
 	{
-		out << "[" << i << "]\t" << "[" << bins_p.at(i).start().data().front() << "," << bins_p.at(i).stop().data().front() << ")\t\t"  << bins_p.at(i).quantities_in_bin().data().size() << endl;
+		out << "[" << i << "]\t" << "[" << bins_p.at(i).start().data().front() << "," << bins_p.at(i).stop().data().front() << ")\t\t"  << bins_p.at(i).quantities_in_bin().data().size() << std::endl;
 	}
 	return out.str();
 }
@@ -196,7 +196,7 @@ const histogram_builder_t histogram_t::rebuild() const
 	return histogram_builder_t(qs);
 }
 
-const histogram_builder_t histogram_t::rebuild(const vector<bin_t>& bins) const
+const histogram_builder_t histogram_t::rebuild(const std::vector<bin_t>& bins) const
 {
 	quantity::quantity_t qs;
 	for (const auto& bin : bins)
@@ -209,9 +209,9 @@ const histogram_builder_t histogram_t::rebuild(const bin_t& bin) const
 	return histogram_builder_t(bin.quantities_in_bin());
 }
 
-const map<unsigned int, histogram_t::bin_t> histogram_t::quantity_data_size_to_its_bin() const
+const std::map<unsigned int, histogram_t::bin_t> histogram_t::quantity_data_size_to_its_bin() const
 {
-	map<unsigned int, histogram_t::bin_t> result;
+	std::map<unsigned int, histogram_t::bin_t> result;
 	for (const auto& bin : bins())
 	{
 		result.insert({bin.quantities_in_bin().data().size(),bin});

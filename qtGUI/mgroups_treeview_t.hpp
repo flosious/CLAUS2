@@ -30,10 +30,10 @@
 #include "../src/processor.hpp"
 
 
-Q_DECLARE_METATYPE(measurements_::dsims_t*);
-Q_DECLARE_METATYPE(mgroups_::dsims_t*);
-Q_DECLARE_METATYPE(measurements_::tofsims_t*);
-Q_DECLARE_METATYPE(mgroups_::tofsims_t*);
+Q_DECLARE_METATYPE(measurements_::dsims_t*); //saved in Qt::UserRole+1
+Q_DECLARE_METATYPE(mgroups_::dsims_t*); //saved in Qt::UserRole+2
+Q_DECLARE_METATYPE(measurements_::tofsims_t*); //saved in Qt::UserRole+1
+Q_DECLARE_METATYPE(mgroups_::tofsims_t*); //saved in Qt::UserRole+2
 
 class mgroups_treeview_t : public QTreeView
 {
@@ -57,7 +57,7 @@ private:
         {
             class_logger_t logger(global_logger,__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
             QStandardItem *item = new QStandardItem;
-            stringstream ss;
+            std::stringstream ss;
             QVariant variant_data;
             switch (col)
             {
@@ -96,7 +96,7 @@ private:
         {
             class_logger_t logger(global_logger,__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
             QStandardItem *item = new QStandardItem;
-            stringstream ss;
+            std::stringstream ss;
             QVariant variant_data;
             switch (col)
             {
@@ -179,7 +179,7 @@ private:
         {
             logger.debug(__func__,"this").enter();
             QStandardItem *item = new QStandardItem(QString(""));
-            stringstream ss;
+            std::stringstream ss;
             switch (col)
             {
             case col_method:
@@ -344,7 +344,7 @@ private:
         {
             logger.debug(__func__,"this").enter();
             QStandardItem *item = new QStandardItem;
-            stringstream ss;
+            std::stringstream ss;
             switch (col)
             {
             case col_method:
@@ -362,7 +362,7 @@ private:
                 break;
             case col_sizes:
                 logger.debug(__func__,"col_sizes").enter();
-                stringstream ss;
+                std::stringstream ss;
                 ss << "mgroups: <" << this->tool->mgroups.size() << ">";
                 auto s = ss.str().c_str();
                 item->setText(s);

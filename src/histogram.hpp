@@ -53,9 +53,9 @@ public:
 private:
     class_logger_t logger;
 	///the actual histogram
-	vector<bin_t> bins_p;
+	std::vector<bin_t> bins_p;
 public:
-	histogram_t(const vector<bin_t>& bins);
+	histogram_t(const std::vector<bin_t>& bins);
 	unsigned int quantities_in_bins() const;
 // 	histogram_t(const quantity::quantity_t& Qs);
 	///tries to add a new quantity to the correct bin;
@@ -63,17 +63,17 @@ public:
 	///tries to add a new quantity to the correct bin
 	histogram_t& operator<<(const quantity::quantity_t& q);
 	///the actual histogram
-	const vector<bin_t> bins() const;
-	string to_string() const;
+	const std::vector<bin_t> bins() const;
+	std::string to_string() const;
 	///range start
 // 	const quantity::quantity_t& start() const;
 	///range stop
 // 	const quantity::quantity_t& stop() const;
 	/// e.g. {155,bin[2]}, {10,bin[0]}, {5, bin[1]}
-	const map<unsigned int, bin_t> quantity_data_size_to_its_bin() const;
+	const std::map<unsigned int, bin_t> quantity_data_size_to_its_bin() const;
 	const histogram_builder_t rebuild() const;
 	const histogram_builder_t rebuild(const bin_t& bin) const;
-	const histogram_builder_t rebuild(const vector<bin_t>& bins) const;
+	const histogram_builder_t rebuild(const std::vector<bin_t>& bins) const;
 };
 	
 class histogram_builder_t
