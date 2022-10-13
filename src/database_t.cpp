@@ -23,11 +23,11 @@
 
 
 
-database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle), logger(global_logger,__FILE__,"database_t")
+database_t::database_t(sqlite3* sql_handle) :sql_handle(sql_handle), logger(__FILE__,"database_t")
 { 
 } 
 
-database_t::database_t(sqlite3* sql_handle, std::string filename) : sql_handle(sql_handle), file_location(filename), logger(global_logger,__FILE__,"database_t")
+database_t::database_t(sqlite3* sql_handle, std::string filename) : sql_handle(sql_handle), file_location(filename), logger(__FILE__,"database_t")
 {
 }
 

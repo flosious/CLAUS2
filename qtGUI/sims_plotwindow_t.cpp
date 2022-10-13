@@ -35,7 +35,7 @@ const std::map<int, QColor> sims_plotwindow_t::iterate_colors
     { 9,QColor(255/1,    255/2,  255/2)}
 };
 
-sims_plotwindow_t::sims_plotwindow_t(QWidget *parent) : logger(global_logger,__FILE__,"sims_plotwindow_t")
+sims_plotwindow_t::sims_plotwindow_t(QWidget *parent) : logger(__FILE__,"sims_plotwindow_t")
 {
 //    axisRect()->axis(QCPAxis::atLeft, 1);
 }

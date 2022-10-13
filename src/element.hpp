@@ -61,6 +61,6 @@ public:
 	bool operator<(const element_t& obj) const;
 	bool is_set();
 };
-extern Logger global_logger;
+
 
 #endif // ELEMENT_T_HPP

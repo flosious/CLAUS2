@@ -165,6 +165,6 @@ public:
 	
 };
 
-extern Logger global_logger;
+
 
 #endif // CLUSTER_T_HPP

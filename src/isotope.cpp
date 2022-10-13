@@ -1,20 +1,20 @@
 #include "isotope.hpp"
 
-/*PSE singleton*/
-// pse_t PSE;
+/*pse_t::singleton*/
+// pse_t pse_t::
 
 /************************************/
 /*********     isotope_t       ******/
 /************************************/
 
-isotope_t::isotope_t() : symbol(""),nucleons(0), logger(global_logger,__FILE__,"isotope_t")
+isotope_t::isotope_t() : symbol(""),nucleons(0), logger(__FILE__,"isotope_t")
 {
 }
 
 
 isotope_t::isotope_t(std::string symbol_s, int nucleons_s, double abundance_s, double amount_s)
     : symbol(symbol_s), nucleons(nucleons_s), abundance({abundance_s}), substance_amount({amount_s}),
-      logger(global_logger,__FILE__,"isotope_t")
+      logger(__FILE__,"isotope_t")
 {
 	if (abundance_s<0)
 		abundance.clear();
@@ -22,7 +22,7 @@ isotope_t::isotope_t(std::string symbol_s, int nucleons_s, double abundance_s, d
 		substance_amount.clear();
 }
 
-isotope_t::isotope_t(std::string str, double abundance_s, double amount_s) : logger(global_logger,__FILE__,"isotope_t")
+isotope_t::isotope_t(std::string str, double abundance_s, double amount_s) : logger(__FILE__,"isotope_t")
 {
     std::smatch match;
 	if (regex_search(str,match,std::regex("^([0-9]{0,3})([a-zA-Z]{1,3})([0-9]*)$"))) /// 11B_fit
@@ -33,7 +33,7 @@ isotope_t::isotope_t(std::string str, double abundance_s, double amount_s) : log
 		if (match[1]!="") nucleons = tools::str::str_to_int(match[1]);
 		else 
         {
-            nucleons=PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
+            nucleons=pse_t::element(symbol)->isotope_with_highest_abundance()->nucleons;
 		}
 		if (match[2]!="") symbol = match[2];
 		else
@@ -64,12 +64,12 @@ const quantity::mass_t isotope_t::mass() const
         //logger::error("isotope_t::mass() nucleons not std::set or found", "this will likely cause calculation errors");
 		return quantity::mass_t();
 	}
-    if (PSE.element(symbol)->isotope_from_nucleons(nucleons)==nullptr)
+    if (pse_t::element(symbol)->isotope_from_nucleons(nucleons)==nullptr)
     {
-        //logger::error("quantity::mass_t::abundance() isotope not found in PSE", "this will likely cause calculation errors");
+        //logger::error("quantity::mass_t::abundance() isotope not found in pse_t::, "this will likely cause calculation errors");
         return quantity::mass_t();
     }
-    return quantity::mass_t({PSE.element(symbol)->isotope_from_nucleons(nucleons)->mass});
+    return quantity::mass_t({pse_t::element(symbol)->isotope_from_nucleons(nucleons)->mass});
 }
 
 // const int isotope_t::nucleons() const
@@ -80,7 +80,7 @@ const quantity::mass_t isotope_t::mass() const
 // 		logger::error("isotope_t::mass() symbol not set", "this will likely cause calculation errors");
 // 		return nucleons_p;
 // 	}
-// 	return PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
+// 	return pse_t::element(symbol)->isotope_with_highest_abundance()->nucleons;
 // }
 
 bool isotope_t::is_set() const
@@ -138,12 +138,12 @@ void isotope_t::set_natural_abundance_from_PSE()
 {
     if (!is_set())
         return;
-    auto iso_in_PSE = PSE.isotope(symbol,nucleons);
-    if (iso_in_PSE==nullptr)
+    auto iso_in_pse = pse_t::isotope(symbol,nucleons);
+    if (iso_in_pse =nullptr)
     {
-        //logger::error("isotope_t::set_natural_abundance_from_PSE","could not find isotope in PSE: " + to_string());
+        //logger::error("isotope_t::set_natural_abundance_from_pse_t::,"could not find isotope in pse_t:: " + to_string());
         return;
     }
-    abundance = quantity::abundance_t({iso_in_PSE->abundance});
+    abundance = quantity::abundance_t({iso_in_pse->abundance});
 }
 

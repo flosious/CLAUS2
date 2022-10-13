@@ -1,10 +1,10 @@
 #include "quantity.hpp"
 
-quantity::map_t::map_t() : X_p(), Y_p(), logger(global_logger,__FILE__,"quantity::map_t")
+quantity::map_t::map_t() : X_p(), Y_p(), logger(__FILE__,"quantity::map_t")
 {
 }
 
-quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y) : X_p(X), Y_p(Y), logger(global_logger,__FILE__,"quantity::map_t")
+quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y) : X_p(X), Y_p(Y), logger(__FILE__,"quantity::map_t")
 {
 	if (X.data().size()!=Y.data().size())
 	{
@@ -14,7 +14,7 @@ quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y) : X_p(X), Y_p(Y
 	
 }
 
-quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y, const std::vector<std::pair<double,double>>& XYdata_pairs) : X_p(X), Y_p(Y), logger(global_logger,__FILE__,"quantity::map_t")
+quantity::map_t::map_t(const quantity_t& X, const quantity_t& Y, const std::vector<std::pair<double,double>>& XYdata_pairs) : X_p(X), Y_p(Y), logger(__FILE__,"quantity::map_t")
 {
 	std::vector<double> Xdata(XYdata_pairs.size());
 	std::vector<double> Ydata(XYdata_pairs.size());

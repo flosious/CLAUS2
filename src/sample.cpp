@@ -6,7 +6,7 @@
 
 sample_t::implant_s::implant_s(quantity::dose_t dose, quantity::concentration_t concentration_maximum, quantity::depth_t depth_at_concentration_maxium) :
                                 dose(dose), concentration_maximum(concentration_maximum), depth_at_concentration_maxium(depth_at_concentration_maxium),
-                                logger(global_logger,__FILE__,"sample_t::implant_s")
+                                logger(__FILE__,"sample_t::implant_s")
 {
 }
 
@@ -24,7 +24,7 @@ std::string sample_t::implant_s::to_string() const
 const std::string sample_t::db_t::tablename = "implanted_samples";
 
 sample_t::db_t::db_t(const sample_t& sample, const database_t& sql_wrapper)
-    : sample(sample), sql_wrapper(sql_wrapper), logger(global_logger,__FILE__,"sample_t::db_t")
+    : sample(sample), sql_wrapper(sql_wrapper), logger(__FILE__,"sample_t::db_t")
 {
 // 	if (!create_table())
 // 		logger::error("sample_t::db_t::db_t()","could not create sql table","","");
@@ -282,7 +282,7 @@ bool sample_t::chip_t::operator!=(const sample_t::chip_t& obj) const
 	return !(operator==(obj));
 }
 
-sample_t::chip_t::chip_t(const int x, const int y) : x(x), y(y), logger(global_logger,__FILE__,"sample_t::chip_t")
+sample_t::chip_t::chip_t(const int x, const int y) : x(x), y(y), logger(__FILE__,"sample_t::chip_t")
 {
 }
 
@@ -373,7 +373,7 @@ sample_t::sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f,data
 																simple_name(fn.simple_name()),
 																matrix_p(f.matrix()),
                                                                 sql_wrapper(&sql_wrapper)
-//                                                                logger(global_logger,__FILE__,"sample_t")
+//                                                                logger(__FILE__,"sample_t")
 // 																database(*this,sql_wrapper)
 {
     load_from_database();
@@ -387,7 +387,7 @@ sample_t::sample_t(files_::file_t::name_t& fn, database_t& sql_wrapper) : wafer(
 																chip(fn.chip_x(),fn.chip_y()),
 																simple_name(fn.simple_name()),
                                                                 sql_wrapper(&sql_wrapper)
-//                                                                logger(global_logger,__FILE__,"sample_t")
+//                                                                logger(__FILE__,"sample_t")
 // 																database(*this,sql_wrapper)
 {
     load_from_database();

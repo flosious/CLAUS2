@@ -20,6 +20,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "../src/definitions.hpp"
 #include <QMainWindow>
 #include <QEvent>
 #include <QMouseEvent>
@@ -46,7 +47,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    class_logger_t logger;
+    class_logger_t class_logger;
 //    QProgressBar *files_loading_progress_bar;
 private slots:
 
@@ -82,6 +83,5 @@ public slots:
 
 };
 
-extern Logger global_logger;
 extern processor *claus;
 #endif // MAINWINDOW_H

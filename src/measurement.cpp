@@ -25,7 +25,7 @@ bool measurements_::measurement_t::use_group=true;
 
 measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, std::string method, database_t& database) :
                                                 repetition(filename.repetition()), olcdb(filename.olcdb()),group_id(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
-                                                sample(filename,database), logger(global_logger,__FILE__,"measurements_::measurement_t")
+                                                sample(filename,database), logger(__FILE__,"measurements_::measurement_t")
 {
 //    sample_t s(filename,filecontents,database);
 //	sample = tools::find_in_V(s,samples_list);
@@ -43,7 +43,7 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, fi
 
 measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, std::string method, database_t& database) :
             repetition(filename.repetition()), olcdb(filename.olcdb()), group_id(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
-            sample(filename,database), logger(global_logger,__FILE__,"measurements_::measurement_t")
+            sample(filename,database), logger(__FILE__,"measurements_::measurement_t")
 {
 //	if (sample==nullptr)
 //	{

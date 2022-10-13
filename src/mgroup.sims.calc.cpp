@@ -105,7 +105,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 
 mgroups_::sims_t::calc_t::SR_c::SR_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::SR_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::SR_c")
 {
 }
 
@@ -212,7 +212,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
 
 mgroups_::sims_t::calc_t::SD_c::SD_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::SD_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::SD_c")
 {
 }
 
@@ -237,7 +237,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SD_c::from_SR(bool overwrit
 
 mgroups_::sims_t::calc_t::SF_c::SF_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::SF_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::SF_c")
 {
 }
 
@@ -329,7 +329,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_max(bool
 
 mgroups_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::RSF_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::RSF_c")
 {
 }
 
@@ -486,7 +486,7 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 
 mgroups_::sims_t::calc_t::concentration_c::concentration_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::concentration_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::concentration_c")
 {
 }
 
@@ -515,7 +515,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(boo
 
 mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc) :
                                                                                 zaehler(zaehler), nenner(nenner), calc(calc),
-                                                                                logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::Crel_to_Irel_c")
+                                                                                logger(__FILE__,"mgroups_::sims_t::calc_t::Crel_to_Irel_c")
 {
 }
 

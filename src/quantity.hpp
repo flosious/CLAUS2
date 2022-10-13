@@ -660,5 +660,5 @@ namespace quantity
 
 }
 
-extern Logger global_logger;
+
 #endif // QUANTITY_HPP

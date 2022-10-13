@@ -18,13 +18,13 @@
 
 #include "files.hpp"
 
-files_::dsims_t::dsims_t(std::string& filename, const std::string& contents_string) : name(filename),contents(filename, contents_string), logger(global_logger,__FILE__,"files_::dsims_t")
+files_::dsims_t::dsims_t(std::string& filename, const std::string& contents_string) : name(filename),contents(filename, contents_string), logger(__FILE__,"files_::dsims_t")
 {
 }
 
 files_::dsims_t::dsims_t(files_::dsims_t::name_t& name_s, files_::dsims_t::contents_t& contents_s) : 
             name(name_s), contents(contents_s),
-            logger(global_logger,__FILE__,"files_::dsims_t")
+            logger(__FILE__,"files_::dsims_t")
 {
 }
 

@@ -21,21 +21,21 @@
 
 mgroups_::tofsims_t::tofsims_t(measurements_::tofsims_t& tofsims_measurements) : 
                 sims_t(tofsims_measurements) , settings_p(tofsims_measurements.settings),
-                logger(global_logger,__FILE__,"mgroups_::tofsims_t")
+                logger(__FILE__,"mgroups_::tofsims_t")
 {
 	measurements_p.push_back(tofsims_measurements);
 }
 
 mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t* > tofsims_measurements) :
     sims_t(*(tofsims_measurements.front())), settings_p(tofsims_measurements.front()->settings),
-    logger(global_logger,__FILE__,"mgroups_::tofsims_t")
+    logger(__FILE__,"mgroups_::tofsims_t")
 {
     measurements_p = (tools::vec::pointers_to_values(tofsims_measurements));
 }
 
 mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t >& tofsims_measurements) : 
     sims_t(tofsims_measurements.front()), settings_p(tofsims_measurements.front().settings),
-    logger(global_logger,__FILE__,"mgroups_::tofsims_t"), measurements_p(tofsims_measurements)
+    logger(__FILE__,"mgroups_::tofsims_t"), measurements_p(tofsims_measurements)
 {
 //	tofsims_measurements.pop_back();
 //	for (auto DM=tofsims_measurements.begin();DM!=tofsims_measurements.end();DM++)

@@ -199,5 +199,5 @@ public:
 };
 
 // extern database_t db;
-//extern Logger global_logger;
+//
 #endif // SAMPLE_T_HPP

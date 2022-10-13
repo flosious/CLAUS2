@@ -23,7 +23,7 @@
 /****  Dsims_t  *****/
 /********************/
 
-msettings::dsims_t::dsims_t() : sims_t(), logger(global_logger,__FILE__,"msettings::dsims_t")
+msettings::dsims_t::dsims_t() : sims_t(), logger(__FILE__,"msettings::dsims_t")
 {
 }
 
@@ -32,7 +32,7 @@ msettings::dsims_t::dsims_t(files_::dsims_t& file) : dsims_t(file.name,file.cont
 {
 }
 
-msettings::dsims_t::dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents) : sims_t(filename), logger(global_logger,__FILE__,"msettings::dsims_t")
+msettings::dsims_t::dsims_t(files_::dsims_t::name_t& filename, files_::dsims_t::contents_t& filecontents) : sims_t(filename), logger(__FILE__,"msettings::dsims_t")
 {
 	ion_t sputter_ion_from_file = ion_t(filecontents.sputter_element(),{{1}}); // Cs + or O2 +
 	/*overwrite values from filename with contents*/

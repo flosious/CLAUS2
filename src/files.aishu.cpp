@@ -19,7 +19,7 @@
 #include "files.hpp"
 
 files_::aishu_t::aishu_t(std::string& filename, const std::string& contents_string)
-    : logger(global_logger,__FILE__,"files_::aishu_t"), name(filename), contents(filename, contents_string)
+    : logger(__FILE__,"files_::aishu_t"), name(filename), contents(filename, contents_string)
 {
 }
 
@@ -85,7 +85,7 @@ files_::aishu_t::name_t::name_t(std::string filename) : file_t::name_t(filename,
 
 files_::aishu_t::contents_t::contents_t(std::string& filename_with_path, const std::string& contents_string)
     : file_t::contents_t(filename_with_path,",",{"Circuit"},{0,1},contents_string),
-      logger(global_logger,__FILE__,"files_::aishu_t::contents_t")
+      logger(__FILE__,"files_::aishu_t::contents_t")
 {
 
 }
@@ -108,7 +108,7 @@ std::vector<files_::aishu_t::contents_t::block_t> files_::aishu_t::contents_t::b
 
 files_::aishu_t::contents_t::block_t::block_t(const std::vector<std::vector<std::string>>& header,
                                               const std::vector<std::vector<std::string>>& data)
-    : logger(global_logger,__FILE__,"files_::aishu_t::contents_t::block_t"), header(header), data(data)
+    : logger(__FILE__,"files_::aishu_t::contents_t::block_t"), header(header), data(data)
 {
 
 }

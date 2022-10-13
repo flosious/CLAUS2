@@ -26,5 +26,5 @@ public:
     std::vector<std::string> filenames() const;
 
 };
-extern Logger global_logger;
+
 #endif // FILENAMES_COLLECTOR_T_HPP

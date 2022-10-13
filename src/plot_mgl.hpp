@@ -137,5 +137,5 @@ public:
 	void to_screen(const std::string window_title="", double sleep_sec=2);
 	void to_file(const std::string filename);
 };
-extern Logger global_logger;
+
 #endif //PLOT_T_HPP

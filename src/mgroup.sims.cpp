@@ -19,7 +19,7 @@
 
 #include "mgroup.hpp"
 
-mgroups_::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement), logger(global_logger,__FILE__,"mgroups_::sims_t")
+mgroups_::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement), logger(__FILE__,"mgroups_::sims_t")
 {	
 }
 

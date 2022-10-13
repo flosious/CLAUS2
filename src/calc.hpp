@@ -449,6 +449,6 @@ public:
 	}; //calc_t::sims_t
 }; //calc_t
 
-extern Logger global_logger;
+
 
 #endif // CALC_T_HPP

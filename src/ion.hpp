@@ -50,6 +50,6 @@ public:
 	std::string to_string(const std::string del="+") const;
 	bool is_set() const;
 };
-extern Logger global_logger;
+
 
 #endif // ION_T_HPP

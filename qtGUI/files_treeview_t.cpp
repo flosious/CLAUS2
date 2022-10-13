@@ -268,7 +268,7 @@ void files_treeview_t::connect_signals_to_slots()
     connect(delete_selection_action,&QAction::triggered, this, &files_treeview_t::delete_selection);
 }
 
-files_treeview_t::files_treeview_t(QWidget *parent) : QTreeView(parent), logger(global_logger,__FILE__,"files_treeview_t")
+files_treeview_t::files_treeview_t(QWidget *parent) : QTreeView(parent), logger(__FILE__,"files_treeview_t")
 {
     //sets the model
     set_actions();

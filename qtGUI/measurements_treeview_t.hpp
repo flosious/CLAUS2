@@ -125,5 +125,5 @@ signals:
     void update_mgroups_treeview();
 };
 extern processor *claus;
-extern Logger global_logger;
+
 #endif // MEASUREMENTS_TREEVIEW_T_HPP

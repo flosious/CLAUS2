@@ -247,7 +247,7 @@ const std::string unit_t::base_exponents_t::to_string() const
 // 	prefered_output_string = prefered_string;
 // }
 
-unit_t::unit_t(std::string symbols, std::string prefered_string) : prefered_output_string(prefered_string), logger(global_logger,__FILE__,"unit_t")
+unit_t::unit_t(std::string symbols, std::string prefered_string) : prefered_output_string(prefered_string), logger(__FILE__,"unit_t")
 {
 	tools::str::remove_spaces(&symbols);
 	

@@ -23,11 +23,11 @@
 /****       tofsims_t        *****/
 /*********************************/
 
-files_::tofsims_t::tofsims_t(std::string& filename, const std::string& contents_string) : name(filename),contents(filename, contents_string), logger(global_logger,__FILE__,"files_::tofsims_t")
+files_::tofsims_t::tofsims_t(std::string& filename, const std::string& contents_string) : name(filename),contents(filename, contents_string), logger(__FILE__,"files_::tofsims_t")
 {
 }
 files_::tofsims_t::tofsims_t(files_::tofsims_t::name_t& name_s, files_::tofsims_t::contents_t& contents_s) : 
-            name(name_s), contents(contents_s), logger(global_logger,__FILE__,"files_::tofsims_t")
+            name(name_s), contents(contents_s), logger(__FILE__,"files_::tofsims_t")
 {
 }
 

@@ -68,7 +68,7 @@ void mgroups_treeview_t::resizeColumns()
 }
 
 mgroups_treeview_t::mgroups_treeview_t(QWidget *parent ) :
-    logger(global_logger,__FILE__,"mgroups_treeview_t"), parent(parent), model(new QStandardItemModel (sections::LAST, columns::col_LAST)),
+    logger(__FILE__,"mgroups_treeview_t"), parent(parent), model(new QStandardItemModel (sections::LAST, columns::col_LAST)),
     dsims_section(dsims,&claus->dsims, model), tofsims_section(tofsims,&claus->tofsims, model)
 {
     set_actions();

@@ -56,5 +56,5 @@ public:
 		quantity::table_t measurement_line_names() const;
 	};
 };
-extern Logger global_logger;
+
 #endif // DATA_COLLECTOR_T_HPP

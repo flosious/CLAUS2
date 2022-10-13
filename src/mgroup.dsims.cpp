@@ -21,21 +21,21 @@
 
 mgroups_::dsims_t::dsims_t(measurements_::dsims_t& dsims_measurements) : 
                 sims_t(dsims_measurements), settings_p(dsims_measurements.settings),
-                logger(global_logger,__FILE__,"mgroups_::dsims_t")
+                logger(__FILE__,"mgroups_::dsims_t")
 {
 	measurements_p.push_back(dsims_measurements);
 }
 
 mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t* > dsims_measurements) :
     sims_t(*(dsims_measurements.front())), settings_p(dsims_measurements.front()->settings),
-    logger(global_logger,__FILE__,"mgroups_::dsims_t")
+    logger(__FILE__,"mgroups_::dsims_t")
 {
     measurements_p = (tools::vec::pointers_to_values(dsims_measurements));
 }
 
 mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t >& dsims_measurements) : 
     sims_t(dsims_measurements.front()), settings_p(dsims_measurements.front().settings),
-    logger(global_logger,__FILE__,"mgroups_::dsims_t"), measurements_p(dsims_measurements)
+    logger(__FILE__,"mgroups_::dsims_t"), measurements_p(dsims_measurements)
 {
 //	dsims_measurements.pop_back();
 //	for (auto DM=dsims_measurements.begin();DM!=dsims_measurements.end();DM++)

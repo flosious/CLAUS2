@@ -22,7 +22,7 @@
 /*******       measurements_::sims_t::calc_t::implant_c::quantity_c        *********/
 /***********************************************************************************/
 
-measurements_::sims_t::calc_t::implant_c::quantity_c::quantity_c(const quantity::quantity_t& Y) :Y(Y), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::implant_c::quantity_c")
+measurements_::sims_t::calc_t::implant_c::quantity_c::quantity_c(const quantity::quantity_t& Y) :Y(Y), logger(__FILE__,"measurements_::sims_t::calc_t::implant_c::quantity_c")
 {
 }
 
@@ -214,12 +214,12 @@ quantity::quantity_t measurements_::sims_t::calc_t::implant_c::quantity_c::backg
 /*******         measurements_::sims_t::calc_t::implant_c::map_c           *********/
 /***********************************************************************************/
 
-measurements_::sims_t::calc_t::implant_c::map_c::map_c() : logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::implant_c::map_c")
+measurements_::sims_t::calc_t::implant_c::map_c::map_c() : logger(__FILE__,"measurements_::sims_t::calc_t::implant_c::map_c")
 {
 	minimum_index_position_p=-1;
 	maximum_index_position_p=-1;
 }
-measurements_::sims_t::calc_t::implant_c::map_c::map_c(const quantity::map_t& XY_map) : XY_map_p(XY_map), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::implant_c::map_c")
+measurements_::sims_t::calc_t::implant_c::map_c::map_c(const quantity::map_t& XY_map) : XY_map_p(XY_map), logger(__FILE__,"measurements_::sims_t::calc_t::implant_c::map_c")
 {
     if (XY_map.size()==0)
         logger.error(__func__,XY_map.to_string()).value(XY_map.size());
@@ -346,7 +346,7 @@ bool measurements_::sims_t::calc_t::implant_c::map_c::has_sufficient_implant_are
 
 measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& M, cluster_t& cluster, double X_resolution_factor) :
     implant_parameters(M.sample.implant(cluster.corresponding_isotope(M.reference_isotopes))), M(M), cluster(cluster), X_resolution_factor(X_resolution_factor),
-    logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::implant_c")
+    logger(__FILE__,"measurements_::sims_t::calc_t::implant_c")
 {
 // 	auto mapper = M.concentration_vs_sputter_depth(cluster);
 // 	if (mapper.is_set())

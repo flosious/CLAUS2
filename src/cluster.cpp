@@ -1,6 +1,6 @@
 #include "cluster.hpp"
 
-cluster_t::cluster_t() :  logger(global_logger,__FILE__,"cluster_t")
+cluster_t::cluster_t() :  logger(__FILE__,"cluster_t")
 {
 }
 
@@ -14,7 +14,7 @@ cluster_t::cluster_t(std::set<isotope_t> isotopes,
 					 intensity(intensity), 
 					 sputter_depth(sputter_depth), 
                      concentration(concentration),
-                     logger(global_logger,__FILE__,"cluster_t")
+                     logger(__FILE__,"cluster_t")
 {
 }
 
@@ -28,7 +28,7 @@ cluster_t::cluster_t(std::string clustername,
 			  sputter_depth(sputter_depth), 
 			  concentration(concentration),
               isotopes(parse_clustername(clustername)),
-              logger(global_logger,__FILE__,"cluster_t")
+              logger(__FILE__,"cluster_t")
 {
 }
 
@@ -57,11 +57,11 @@ std::vector<isotope_t> cluster_t::parse_clustername(const std::string clusternam
 }
 
 
-cluster_t::cluster_t(const std::vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s), logger(global_logger,__FILE__,"cluster_t")
+cluster_t::cluster_t(const std::vector<isotope_t>& isotopes_s)  : isotopes(isotopes_s), logger(__FILE__,"cluster_t")
 {
 }
 
-cluster_t::cluster_t(const isotope_t isotope_s) : isotopes({isotope_s}), logger(global_logger,__FILE__,"cluster_t")
+cluster_t::cluster_t(const isotope_t isotope_s) : isotopes({isotope_s}), logger(__FILE__,"cluster_t")
 {
 }
 
@@ -397,7 +397,7 @@ std::string matrix_clusters_c::to_string(const std::string del) const
 /*"30Si" can be a reference cluster for elemental Si or isotopical purified Si*/
 /*"30Si 28Si" can be a reference cluster for elemental Si or isotopical purified Si*/
 /*"74Ge 28Si" can be a reference cluster for elemental Si+Ge or isotopical purified Si+Ge*/
-matrix_clusters_c::matrix_clusters_c(std::vector<cluster_t>& clusters_s, const std::vector<isotope_t> matrix_isotopes) : logger(global_logger,__FILE__,"matrix_clusters_c")
+matrix_clusters_c::matrix_clusters_c(std::vector<cluster_t>& clusters_s, const std::vector<isotope_t> matrix_isotopes) : logger(__FILE__,"matrix_clusters_c")
 {
 	if (matrix_isotopes.size()==0)
 		return;
@@ -541,11 +541,11 @@ void matrix_clusters_c::set_natural_abundances()
 
 cluster_t::RSF_t::RSF_t(const quantity::quantity_t& q, const std::vector<cluster_t>& reference_clusters_s) : 
             quantity_t("RSF",q.data(),q.unit(),q.dimension()), reference_clusters_p(RSF_t(reference_clusters_s).reference_clusters_p),
-            logger(global_logger,__FILE__,"cluster_t::RSF_t")
+            logger(__FILE__,"cluster_t::RSF_t")
 {
 }
 
-cluster_t::RSF_t::RSF_t(const std::vector<cluster_t>& reference_clusters_s) : logger(global_logger,__FILE__,"cluster_t::RSF_t")
+cluster_t::RSF_t::RSF_t(const std::vector<cluster_t>& reference_clusters_s) : logger(__FILE__,"cluster_t::RSF_t")
 {
 	reference_clusters_p.reserve(reference_clusters_s.size());
 	for (const auto& C : reference_clusters_s)

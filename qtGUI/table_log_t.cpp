@@ -19,7 +19,7 @@
 
 #include "table_log_t.hpp"
 
-table_log_t::table_log_t(QWidget *parent) : parent(parent)
+table_log_t::table_log_t(QWidget *parent) : parent(parent), logger(__FILE__,"table_log_t")
 {
     set_header();
 }
@@ -128,21 +128,21 @@ void table_log_t::set_header()
 
     setHorizontalHeaderLabels(header_labels);
 }
-void table_log_t::update(const logger_t& logger)
+void table_log_t::update()
 {
     clearContents();
     setRowCount(0);
     std::vector<logger_message_t> new_messages, warnings, infos, debugs, fatals, errors;
-    new_messages.reserve(logger.messages().size());
+    new_messages.reserve(logger_t::messages().size());
 
-    fatals = logger.filter().type(logger_message_t::fatal).messages();
-    errors = logger.filter().type(logger_message_t::error).messages();
+    fatals = logger_t::filter().type(logger_message_t::fatal).messages();
+    errors = logger_t::filter().type(logger_message_t::error).messages();
     if (print_warning())
-        warnings = logger.filter().type(logger_message_t::warning).messages();
+        warnings = logger_t::filter().type(logger_message_t::warning).messages();
     if (print_info())
-        infos = logger.filter().type(logger_message_t::info).messages();
+        infos = logger_t::filter().type(logger_message_t::info).messages();
     if (print_debug())
-        debugs = logger.filter().type(logger_message_t::debug).messages();
+        debugs = logger_t::filter().type(logger_message_t::debug).messages();
 //    new_messages.reserve(fatals.size()+errors.size()+warnings.size()+infos.size()+debugs.size());
     new_messages.insert(new_messages.end(),fatals.begin(),fatals.end());
     new_messages.insert(new_messages.end(),errors.begin(),errors.end());

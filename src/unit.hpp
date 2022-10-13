@@ -30,7 +30,7 @@
 #include <stdio.h>
 // #include <gsl/gsl_const_mksa.h>
 
-extern Logger global_logger;
+
 /// just supporting the SI system at the moment, integer exponents
 class unit_t
 {
@@ -93,12 +93,12 @@ private:
 public:
 	base_exponents_t base_units_exponents{0,0,0,0,0,0,0,false};
 public:
-    unit_t() : logger(global_logger,__FILE__,"unit_t") {};
-    unit_t(const unit_t& unit_) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(unit_.prefered_output_string), logger(global_logger,__FILE__,"unit_t") {};
-    unit_t(double multiplier) : multiplier(multiplier),logger(global_logger,__FILE__,"unit_t") {};
-    unit_t(const unit_t& unit_, double multiplier, std::string prefered_unit_string = "" ) : base_units_exponents(unit_.base_units_exponents), multiplier(multiplier), prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
-    unit_t(const unit_t& unit_, std::string prefered_unit_string ) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
-    unit_t(base_exponents_t unit_exponents, double multiplier,std::string prefered_unit_string ="" ) : base_units_exponents(unit_exponents),multiplier(multiplier),prefered_output_string(prefered_unit_string), logger(global_logger,__FILE__,"unit_t") {};
+    unit_t() : logger(__FILE__,"unit_t") {};
+    unit_t(const unit_t& unit_) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(unit_.prefered_output_string), logger(__FILE__,"unit_t") {};
+    unit_t(double multiplier) : multiplier(multiplier),logger(__FILE__,"unit_t") {};
+    unit_t(const unit_t& unit_, double multiplier, std::string prefered_unit_string = "" ) : base_units_exponents(unit_.base_units_exponents), multiplier(multiplier), prefered_output_string(prefered_unit_string), logger(__FILE__,"unit_t") {};
+    unit_t(const unit_t& unit_, std::string prefered_unit_string ) : base_units_exponents(unit_.base_units_exponents), multiplier(unit_.multiplier), prefered_output_string(prefered_unit_string), logger(__FILE__,"unit_t") {};
+    unit_t(base_exponents_t unit_exponents, double multiplier,std::string prefered_unit_string ="" ) : base_units_exponents(unit_exponents),multiplier(multiplier),prefered_output_string(prefered_unit_string), logger(__FILE__,"unit_t") {};
     unit_t(std::string symbols,std::string prefered_string="");
 // 	unit_t(unit_t unit_, std::string prefered_string);
 	

@@ -19,12 +19,16 @@
 
 #include "mainwindow.h"
 
+//using log_f = function_logger_t logger(class_logger, __func__);
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
-      logger(global_logger,__FILE__,"MainWindow")
+      log_c
 {
-    logger.debug(__func__,"MainWindow").enter();
+    log_f;
+//    function_logger_t logger(class_logger,__func__);
+    logger.debug("MainWindow").enter();
     ui->setupUi(this);
     setAcceptDrops(true);
 
@@ -43,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tofsims_export_directory_textEdit->setText(QString(""));
     ui->dsims_export_directory_textEdit->setText(QString(""));
 #endif
-    logger.debug(__func__,"MainWindow").exit();
+    logger.debug("MainWindow").exit();
 }
 
 MainWindow::~MainWindow()
@@ -61,7 +65,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e)
 
 void MainWindow::dropEvent(QDropEvent *e)
 {
-    logger.debug(__func__,"this").enter();
+    log_f;
+    logger.debug("this").enter();
     std::vector<std::string> dropped_files;
     const QMimeData* mimeData = e->mimeData();
     if (mimeData->hasUrls())
@@ -90,14 +95,14 @@ void MainWindow::dropEvent(QDropEvent *e)
             tools::str::replace_chars(&L,"µ",mu.str());
 //            tools::str::replace_umlaute_to_windows_compatible(&L);
 #endif
-            logger.debug(__func__,"dropped_files").value(L,11);
+            logger.debug("dropped_files").value(L,11);
         }
         //collecting and filtering
         filenames_collector_t filenames_collector;
         filenames_collector.add_files_or_folders(dropped_files,ui->scan_dropped_files_recursivly->isChecked());
         ///all filenames are unknown in the beginning
         const auto new_filenames = filenames_collector.filenames();
-        logger.debug(__func__,"new_filenames").value(new_filenames.size(),10,tools::vec::combine_vec_to_string(new_filenames, ", "));
+        logger.debug("new_filenames").value(new_filenames.size(),10,tools::vec::combine_vec_to_string(new_filenames, ", "));
         int next_tof_file_idx = claus->tofsims.files.size();
         int next_dsims_file_idx = claus->dsims.files.size();
         int next_dektak6m_file_idx = claus->dektak6m.files.size();
@@ -113,14 +118,14 @@ void MainWindow::dropEvent(QDropEvent *e)
 //            func_logger_t f_logger(logger,"tab: "+std::to_string(ui->tabWidget->currentIndex()));
 //            auto flogger = logger.debug(__func__,"tab: "+std::to_string(ui->tabWidget->currentIndex()));
             std::string log_object("tab: " + std::to_string(ui->tabWidget->currentIndex()));
-            logger.debug(__func__,log_object).enter();
+            logger.debug(log_object).enter();
             std::vector<unsigned int> indices;
             //tofsims
             for (int i = next_tof_file_idx; i<claus->tofsims.files.size(); i++)
             {
 
                 auto& F = claus->tofsims.files.at(i);
-                logger.info(__func__,log_object).value(F.name.filename(),10,"tofsims");
+                logger.info(log_object).value(F.name.filename(),10,"tofsims");
                 claus->tofsims.add_file_to_measurement(F);
                 indices.push_back(i);
             }
@@ -131,7 +136,7 @@ void MainWindow::dropEvent(QDropEvent *e)
             for (int i = next_dsims_file_idx; i<claus->dsims.files.size(); i++)
             {
                 auto& F = claus->dsims.files.at(i);
-                logger.info(__func__,log_object).value(F.name.filename(),10,"dsims");
+                logger.info(log_object).value(F.name.filename(),10,"dsims");
                 claus->dsims.add_file_to_measurement(F);
                 indices.push_back(i);
             }
@@ -142,7 +147,7 @@ void MainWindow::dropEvent(QDropEvent *e)
             for (int i = next_dektak6m_file_idx; i<claus->dektak6m.files.size(); i++)
             {
                 auto& F = claus->dektak6m.files.at(i);
-                logger.info(__func__,log_object).value(F.name.filename(),10,"dektak6m");
+                logger.info(log_object).value(F.name.filename(),10,"dektak6m");
                 claus->dektak6m.add_file_to_measurement(F);
                 indices.push_back(i);
             }
@@ -165,7 +170,7 @@ void MainWindow::dropEvent(QDropEvent *e)
 
 //                ui->mgroups_treeview->resizeColumns();
             }
-            logger.debug(__func__,log_object).exit();
+            logger.debug(log_object).exit();
         }
 
         ui->measurements_treeView->update();
@@ -175,31 +180,32 @@ void MainWindow::dropEvent(QDropEvent *e)
         //aishu special treatment
         if (claus->aishu.files.size()>0)
         {
-            logger.debug(__func__,"aishu.files").enter();
+            logger.debug("aishu.files").enter();
             for (auto& af : claus->aishu.files)
             {
                 af.export_to_aishu_format();
             }
-            logger.debug(__func__,"aishu.files").exit();
+            logger.debug("aishu.files").exit();
         }
 
 
 
-        logger.debug(__func__,"this").exit();
+        logger.debug("this").exit();
         //focus tab to files_treeView
 //        ui->tabWidget->setCurrentWidget(ui->tab_files);
 //        ui->tabWidget->setCurrentIndex(0);
 
     }
     else
-        logger.error(__func__,"dropped file").value("has no URL");
+        logger.error("dropped file").value("has no URL");
 }
 
 void MainWindow::on_button_files_to_measurements_clicked()
 {
-    logger.debug(__func__,"this").enter();
+    log_f;
+    logger.debug("this").enter();
     ui->files_treeView->selections_to_measurements();
-    logger.debug(__func__,"this").exit();
+    logger.debug("this").exit();
 }
 
 void MainWindow::on_remove_files_duplicates_clicked()
@@ -222,7 +228,8 @@ void MainWindow::on_remove_files_duplicates_clicked()
 
 void MainWindow::on_measurements_treeView_clicked(const QModelIndex &index)
 {
-    logger.debug(__func__,"this").value("row=" + std::to_string( index.row() ) + "; column=" + std::to_string( index.column() ));
+    log_f;
+    logger.debug("this").value("row=" + std::to_string( index.row() ) + "; column=" + std::to_string( index.column() ));
 
     if (ui->measurements_treeView->dsims_entries().get_selected_rows().size()>0)
     {
@@ -241,65 +248,63 @@ void MainWindow::on_measurements_treeView_clicked(const QModelIndex &index)
 
 void MainWindow::on_tab_log_warning_stateChanged(int arg1)
 {
-    if (global_logger==nullptr)
-        return;
+    log_f;
     if (arg1==0)
         ui->tab_log_table->set_print_warning(false);
     else if (arg1==2)
         ui->tab_log_table->set_print_warning(true);
-    ui->tab_log_table->update(*global_logger);
-    logger.debug(__func__,"set_print_warning").value(std::to_string(arg1));
+    ui->tab_log_table->update();
+    logger.debug("set_print_warning").value(std::to_string(arg1));
 }
 
 void MainWindow::on_tab_log_info_stateChanged(int arg1)
 {
-    if (global_logger==nullptr)
-        return;
+    log_f;
     if (arg1==0)
         ui->tab_log_table->set_print_info(false);
     else if (arg1==2)
         ui->tab_log_table->set_print_info(true);
-    ui->tab_log_table->update(*global_logger);
-    logger.debug(__func__,"set_print_info").value(std::to_string(arg1));
+    ui->tab_log_table->update();
+    logger.debug("set_print_info").value(std::to_string(arg1));
 }
 
 void MainWindow::on_tab_log_debug_stateChanged(int arg1)
 {
-    if (global_logger==nullptr)
-        return;
-
+    log_f;
     if (arg1==0)
         ui->tab_log_table->set_print_debug(false);
     else if (arg1==2)
         ui->tab_log_table->set_print_debug(true);
-    ui->tab_log_table->update(*global_logger);
-    logger.debug(__func__,"set_print_debug").value(std::to_string(arg1));
+    ui->tab_log_table->update();
+    logger.debug("set_print_debug").value(std::to_string(arg1));
 }
 
 void MainWindow::on_tab_log_clear_button_clicked()
 {
     ui->tab_log_table->clearContents();
     ui->tab_log_table->setRowCount(0);
-    logger.clear_messages();
+    logger_t::clear_messages();
 }
 
 void MainWindow::on_files_treeView_customContextMenuRequested(const QPoint &pos)
 {
-    logger.debug(__func__,"this").enter();
+    log_f;
+    logger.debug("this").enter();
     QModelIndex index = ui->files_treeView->indexAt(pos);
     if (index.isValid())
     {
-        logger.debug(__func__,"pos").value("x="+std::to_string(pos.x()) + "; y="+std::to_string(pos.y()));
+        logger.debug("pos").value("x="+std::to_string(pos.x()) + "; y="+std::to_string(pos.y()));
         ui->files_treeView->contextMenu->exec(ui->files_treeView->viewport()->mapToGlobal(pos));
     }
 }
 
 void MainWindow::on_measurements_treeView_customContextMenuRequested(const QPoint &pos)
 {
+    log_f;
     QModelIndex index = ui->measurements_treeView->indexAt(pos);
     if (index.isValid())
     {
-        logger.debug(__func__,"pos").value("x="+std::to_string(pos.x()) + "; y="+std::to_string(pos.y()));
+        logger.debug("pos").value("x="+std::to_string(pos.x()) + "; y="+std::to_string(pos.y()));
         ui->measurements_treeView->contextMenu->exec(ui->measurements_treeView->viewport()->mapToGlobal(pos));
     }
 }
@@ -336,15 +341,17 @@ void MainWindow::on_mgroups_treeview_customContextMenuRequested(const QPoint &po
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
+    log_f;
     if (index==7) // log tab
     {
-        logger.debug(__func__,"this").enter();
-        ui->tab_log_table->update(*global_logger);
+        logger.debug("this").enter();
+        ui->tab_log_table->update();
     }
 }
 
 void MainWindow::auto_calc()
 {
+    log_f;
     /*tof sims*/
     for (auto& MG : claus->tofsims.mgroups)
     {
@@ -388,7 +395,7 @@ void MainWindow::auto_calc()
 //        if (export_path=="")
 //            export_path = ui->tofsims_export_directory_textEdit->placeholderText().toStdString();
         export_path = tools::file::check_directory_string(export_path);
-        logger.info(__func__,MG.to_string()).signal("exporting to: " + export_path);
+        logger.info(MG.to_string()).signal("exporting to: " + export_path);
         MG.export_origin_ascii(export_path);
     }
 
@@ -437,7 +444,7 @@ void MainWindow::auto_calc()
 //            export_path = ui->dsims_export_directory_textEdit->placeholderText().toStdString();
 
         export_path = tools::file::check_directory_string(export_path);
-        logger.info(__func__,MG.to_string()).signal("exporting to: " + export_path);
+        logger.info(MG.to_string()).signal("exporting to: " + export_path);
         MG.export_origin_ascii(export_path);
     }
 }

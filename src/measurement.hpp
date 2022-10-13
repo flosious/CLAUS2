@@ -472,7 +472,7 @@ public:
 	}; // tofsims_t
 }; // measurements_
 
-extern Logger global_logger;
+
 // extern database_t db;
 
 #endif // MEASUREMENT_T_HPP

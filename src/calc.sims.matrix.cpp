@@ -26,7 +26,7 @@ calc_t::sims_t::matrix_t::matrix_t(const std::vector<isotope_t>& matrix_isotopes
 								   measurements_p(measurements),
 								   matrix_clusters_p(matrix_clusters_from_matrix_isotopes()),
                                    RSFs_p(matrix_clusters(),isotopical_Crel_to_median_Irel_linear_fitted(),RSFs),
-                                   logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t")
+                                   logger(__FILE__,"calc_t::sims_t::matrix_t")
 // 								   RSFs_p(matrix_clusters(),elemental_Crel_to_median_Irel_linear_fitted(),RSFs)
 {
 // 	for (auto& M:measurements)
@@ -235,7 +235,7 @@ calc_t::sims_t::matrix_t::RSF_t::RSF_t(const cluster_t zaehler,
 									   quantity::quantity_t::dimension_t dim_s) :
 									   cluster_relations_copies_t(zaehler,nenner,abundance_ratio),
                                        quantity::quantity_t("mRSF",data_s,unit_s,dim_s),
-                                       logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::RSF_t")
+                                       logger(__FILE__,"calc_t::sims_t::matrix_t::RSF_t")
 {
 	if (!is_relative())
 	{
@@ -314,7 +314,7 @@ calc_t::sims_t::matrix_t::RSF_t calc_t::sims_t::matrix_t::RSF_t::invert() const
 /*********     clusters_t    ************/
 /****************************************/
 
-calc_t::sims_t::matrix_t::clusters_t::clusters_t(const std::set<cluster_t>& matrix_clusters) : logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::clusters_t")
+calc_t::sims_t::matrix_t::clusters_t::clusters_t(const std::set<cluster_t>& matrix_clusters) : logger(__FILE__,"calc_t::sims_t::matrix_t::clusters_t")
 {
 	for (auto& C : matrix_clusters)
 	{
@@ -447,7 +447,7 @@ calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters,
 										 const std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
 										 const std::vector<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
                                          matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs),
-                                         logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::RSFs_t")
+                                         logger(__FILE__,"calc_t::sims_t::matrix_t::RSFs_t")
 {
     //logger::debug(11,"calc_t::sims_t::matrix_t::RSFs_t::RSFs_t","entering");
 // 	std::cout << "RSFs" << std::endl;
@@ -468,7 +468,7 @@ calc_t::sims_t::matrix_t::RSFs_t::RSFs_t(const clusters_t& matrix_clusters,
 										 const std::vector<calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t>& Crel_to_Irel_lin_fits, 
 										 const std::set<calc_t::sims_t::matrix_t::RSF_t>& RSFs) :
                                          matrix_clusters_p(matrix_clusters), Crel_to_Irel_lin_fits_p(Crel_to_Irel_lin_fits), RSFs_manually_set_p(RSFs.begin(),RSFs.end()),
-                                         logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::RSFs_t")
+                                         logger(__FILE__,"calc_t::sims_t::matrix_t::RSFs_t")
 {
 	
 }
@@ -828,18 +828,18 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_natural_a
 	{
 		if (rsf.abundance_ratio.is_set()) // already set
 			continue;
-		if (PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)==nullptr) 
+        if (pse_t::isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)==nullptr)
 		{
             //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.zaehler().isotopes.front().to_string());
 			continue;
 		}
-		if (PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)==nullptr)
+        if (pse_t::isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)==nullptr)
 		{
             //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.nenner().isotopes.front().to_string());
 			continue;
 		}
-		quantity::abundance_t abu_Z ({PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)->abundance});
-		quantity::abundance_t abu_N ({PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)->abundance});
+        quantity::abundance_t abu_Z ({pse_t::isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)->abundance});
+        quantity::abundance_t abu_N ({pse_t::isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)->abundance});
 		rsf.abundance_ratio = abu_Z / abu_N;
         //logger::info(2,"calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()", rsf.to_string());
 	}
@@ -849,18 +849,18 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_natural_a
 		
 		if (rsf.abundance_ratio.is_set()) // already set
 			continue;
-		if (PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)==nullptr) 
+        if (pse_t::isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)==nullptr)
 		{
             //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.zaehler().isotopes.front().to_string());
 			continue;
 		}
-		if (PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)==nullptr) 
+        if (pse_t::isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)==nullptr)
 		{
             //logger::error("calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()","NOT found in PSE: "+rsf.nenner().isotopes.front().to_string());
 			continue;
 		}
-		quantity::abundance_t abu_Z ({PSE.isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)->abundance});
-		quantity::abundance_t abu_N ({PSE.isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)->abundance});
+        quantity::abundance_t abu_Z ({pse_t::isotope(rsf.zaehler().isotopes.front().symbol,rsf.zaehler().isotopes.front().nucleons)->abundance});
+        quantity::abundance_t abu_N ({pse_t::isotope(rsf.nenner().isotopes.front().symbol,rsf.nenner().isotopes.front().nucleons)->abundance});
 		rsf.abundance_ratio = abu_Z / abu_N;
         //logger::info(2,"calc_t::sims_t::matrix_t::RSFs_t::add_natural_abundances()", rsf.to_string());
 	}
@@ -969,7 +969,7 @@ calc_t::sims_t::matrix_t::RSFs_t calc_t::sims_t::matrix_t::RSFs_t::add_missing_R
 
 calc_t::sims_t::matrix_t::concentration_c::concentration_c(const RSFs_t& RSFs, const measurements_::sims_t& measurement) : 
             measurement_p(measurement),matrix_clusters(measurement_p.clusters,RSFs.matrix_clusters().isotopes()),RSFs_p(RSFs),
-            logger(global_logger,__FILE__,"calc_t::sims_t::matrix_t::concentration_c")
+            logger(__FILE__,"calc_t::sims_t::matrix_t::concentration_c")
 {
 // 	clear_concentrations_of_mcs();
 	if (use_elemental()) // add natural isotope ratios
@@ -1010,7 +1010,7 @@ calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentrati
 		if (use_elemental())
 		{
 			const auto iso = C->corresponding_isotope(matrix_clusters.isotopes());
-			substract = substract / PSE.isotope(iso.symbol,iso.nucleons)->abundance;
+            substract = substract / pse_t::isotope(iso.symbol,iso.nucleons)->abundance;
 		}
 		residual_concentration = residual_concentration - substract;
 	}
@@ -1021,7 +1021,7 @@ calc_t::sims_t::matrix_t::concentration_c& calc_t::sims_t::matrix_t::concentrati
 		if (use_elemental())
 		{
 			const auto iso = clusters_with_unknown_concentrations.begin()->corresponding_isotope(matrix_clusters.isotopes());
-			residual_concentration = residual_concentration * PSE.isotope(iso.symbol,iso.nucleons)->abundance;
+            residual_concentration = residual_concentration * pse_t::isotope(iso.symbol,iso.nucleons)->abundance;
 		}
 		measurement_p.cluster(*clusters_with_unknown_concentrations.begin())->concentration = residual_concentration;
 	}
@@ -1035,7 +1035,7 @@ void calc_t::sims_t::matrix_t::concentration_c::set_natural_abundances_in_cluste
 		for (auto& I : C->isotopes)
 		{
 // 			if (I.abundance.is_set()) continue;
-			const auto P = PSE.isotope(I.symbol,I.nucleons);
+            const auto P = pse_t::isotope(I.symbol,I.nucleons);
 			if (P==nullptr)
 				continue;
 			
@@ -1087,7 +1087,7 @@ quantity::concentration_t calc_t::sims_t::matrix_t::concentration_c::cluster(con
 	}
 	if (use_elemental())
 	{
-		return element(cor_iso)*PSE.isotope(cor_iso.symbol,cor_iso.nucleons)->abundance;
+        return element(cor_iso)*pse_t::isotope(cor_iso.symbol,cor_iso.nucleons)->abundance;
 	}
 	return isotope(cor_iso);
 }

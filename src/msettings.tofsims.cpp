@@ -25,7 +25,7 @@
 
 msettings::tofsims_t::tofsims_t(files_::tofsims_t::name_t& filename, files_::tofsims_t::contents_t& filecontents) : 
     sims_t(filename), analysis_ion(filename.analysis_ion()), analysis_energy(filename.analysis_energy()),
-    logger(global_logger,__FILE__,"msettings::tofsims_t")
+    logger(__FILE__,"msettings::tofsims_t")
 {
 }
 

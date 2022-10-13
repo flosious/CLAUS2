@@ -31,7 +31,7 @@
 // }
 
 histogram_builder_t::histogram_builder_t(quantity::quantity_t qs) :
-        /*start(qs.min()),stop(qs.max()),*/ qs(qs.sort()), logger(global_logger,__FILE__,"histogram_builder_t")
+        /*start(qs.min()),stop(qs.max()),*/ qs(qs.sort()), logger(__FILE__,"histogram_builder_t")
 {
 }
 
@@ -125,7 +125,7 @@ histogram_t histogram_builder_t::equally_factor_distanced_bins(quantity::quantit
 /***      			 histogram_t   			           *****/
 /***********************************************************/
 
-histogram_t::histogram_t(const std::vector<bin_t>& bins) :bins_p(bins), logger(global_logger,__FILE__,"histogram_t")
+histogram_t::histogram_t(const std::vector<bin_t>& bins) :bins_p(bins), logger(__FILE__,"histogram_t")
 {
 }
 
@@ -225,7 +225,7 @@ const std::map<unsigned int, histogram_t::bin_t> histogram_t::quantity_data_size
 
 histogram_t::bin_t::bin_t(const quantity::quantity_t& start, const quantity::quantity_t& stop)
     : start_p(start), stop_p(stop),
-      logger(global_logger,__FILE__,"histogram_t::bin_t")
+      logger(__FILE__,"histogram_t::bin_t")
 {
 }
 

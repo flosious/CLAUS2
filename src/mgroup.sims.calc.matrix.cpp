@@ -24,7 +24,7 @@
 
 mgroups_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      logger(global_logger,__FILE__,"mgroups_::sims_t::calc_t::matrix_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::matrix_c")
 {
 }
 

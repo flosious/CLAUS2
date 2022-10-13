@@ -101,5 +101,5 @@ public:
 };
 
 /// sqlite3
-extern Logger global_logger;
+
 #endif // database_HPP

@@ -155,52 +155,50 @@ logger_t::filter_t logger_t::filter_t::object_name(const std::string object_name
 
 
 
-logger_t::use_case_t::use_case_t(
+use_case_t::use_case_t(
         logger_message_t::mtype_t mtype,
         std::string_view source_file_name,
         std::string_view class_name,
         std::string_view func_name,
-        std::string_view object_name,
-        logger_t& logger)
+        std::string_view object_name)
             : mtype(mtype),
               source_file_name(source_file_name),
               class_name(class_name),
               func_name(func_name),
-              object_name(object_name),
-              logger(logger)
+              object_name(object_name)
 {
 
 }
 
-void logger_t::use_case_t::log(std::string_view message_description, std::string_view message_details, unsigned int verbosity_level)
+void use_case_t::log(std::string_view message_description, std::string_view message_details, unsigned int verbosity_level)
 {
-    logger.log(verbosity_level,mtype,source_file_name,class_name,func_name,object_name,message_description, message_details);
+    logger_t::log(verbosity_level,mtype,source_file_name,class_name,func_name,object_name,message_description, message_details);
 }
 
-//void logger_t::use_case_t::signal(std::string_view message_description,unsigned int verbosity_level, std::string_view message_details)
+//void use_case_t::signal(std::string_view message_description,unsigned int verbosity_level, std::string_view message_details)
 //{
 //    log(message_description,message_details,verbosity_level);
 //}
-//void logger_t::use_case_t::enter(unsigned int verbosity_level, std::string_view message_details)
+//void use_case_t::enter(unsigned int verbosity_level, std::string_view message_details)
 //{
 //    log("enter",message_details,verbosity_level);
 //}
-void logger_t::use_case_t::exit(unsigned int verbosity_level, std::string_view message_details)
+void use_case_t::exit(unsigned int verbosity_level, std::string_view message_details)
 {
     log("exit",message_details,verbosity_level);
 }
 
-void logger_t::use_case_t::quantity(std::string_view quantity_to_string_short, unsigned int verbosity_level, std::string_view message_details)
+void use_case_t::quantity(std::string_view quantity_to_string_short, unsigned int verbosity_level, std::string_view message_details)
 {
     log(quantity_to_string_short,message_details,verbosity_level);
 }
 
-//void logger_t::use_case_t::value(std::string_view value_to_string, unsigned int verbosity_level, std::string_view message_details)
+//void use_case_t::value(std::string_view value_to_string, unsigned int verbosity_level, std::string_view message_details)
 //{
 //    log(value_to_string,message_details,verbosity_level);
 //}
 
-void logger_t::use_case_t::is_statement(std::string_view concerning_object_name, bool value, std::string_view consequence ,unsigned int verbosity_level)
+void use_case_t::is_statement(std::string_view concerning_object_name, bool value, std::string_view consequence ,unsigned int verbosity_level)
 {
     std::stringstream message_description, message_details;
     if (value)
@@ -215,7 +213,7 @@ void logger_t::use_case_t::is_statement(std::string_view concerning_object_name,
     log(message_description.str(),message_details.str(),verbosity_level);
 }
 
-//void logger_t::use_case_t::if_statement(std::string_view concerning_object_A_name, std::string_view concerning_object_A_value, std::string_view comparator, std::string_view concerning_object_B_name, std::string_view concerning_object_B_value, unsigned int verbosity_level)
+//void use_case_t::if_statement(std::string_view concerning_object_A_name, std::string_view concerning_object_A_value, std::string_view comparator, std::string_view concerning_object_B_name, std::string_view concerning_object_B_value, unsigned int verbosity_level)
 //{
 //    std::stringstream message_description, message_details;
 //    message_description << concerning_object_A_name << comparator << concerning_object_B_name;
@@ -237,6 +235,8 @@ void logger_t::print_last()
     if (messages().size()>0)
         print(messages().back());
 }
+
+bool logger_t::print_to_standard_output = true;
 
 void logger_t::print(const logger_message_t& message)
 {
@@ -273,7 +273,7 @@ void logger_t::log(unsigned int verbosity_level,
 
 std::vector<logger_message_t> logger_t::messages_p;
 
-void logger_t::add_message(const logger_message_t& message) const
+void logger_t::add_message(const logger_message_t& message)
 {
     messages_p.push_back(message);
 }
@@ -283,7 +283,7 @@ logger_t::logger_t()
 
 }
 
-const std::vector<logger_message_t>& logger_t::messages() const
+const std::vector<logger_message_t>& logger_t::messages()
 {
     return messages_p;
 }
@@ -303,7 +303,7 @@ void logger_t::clear_messages(std::vector<unsigned long> ids)
     std::remove_if(messages_p.begin(),messages_p.end(), [ids](logger_message_t& M) {if (std::find(ids.begin(),ids.end(),M.sequence_id)==ids.end()) return false; return true; } );
 }
 
-logger_t::filter_t logger_t::filter() const
+logger_t::filter_t logger_t::filter()
 {
     return filter_t(messages_p);
 }
@@ -332,77 +332,77 @@ void logger_t::to_file(std::string path_with_filename)
 
 /******************/
 
-logger_t::use_case_t logger_t::fatal(std::string_view func_name,
-           std::string_view object_name)
-{
-    return fatal("","",func_name,object_name);
-}
+//logger_t::use_case_t logger_t::fatal(std::string_view func_name,
+//           std::string_view object_name)
+//{
+//    return fatal("","",func_name,object_name);
+//}
 
-logger_t::use_case_t logger_t::fatal(std::string_view source_file_name,
+use_case_t logger_t::fatal(std::string_view source_file_name,
                      std::string_view class_name,
                      std::string_view func_name,
                      std::string_view object_name)
 
 {
 //    log(verbosity_level,logger_message_t::fatal,source_file_name,class_name,func_name,object_name,message_description,message_details);
-    return use_case_t(logger_message_t::fatal, source_file_name, class_name,func_name,object_name,*this);
+    return use_case_t(logger_message_t::fatal, source_file_name, class_name,func_name,object_name);
 }
 
 /******************/
-logger_t::use_case_t logger_t::error(std::string_view func_name,
-           std::string_view object_name)
-{
-    return error("","",func_name,object_name);
-}
-logger_t::use_case_t logger_t::error(std::string_view source_file_name,
+//logger_t::use_case_t logger_t::error(std::string_view func_name,
+//           std::string_view object_name)
+//{
+//    return error("","",func_name,object_name);
+//}
+use_case_t logger_t::error(std::string_view source_file_name,
                      std::string_view class_name,
                      std::string_view func_name,
                      std::string_view object_name)
 
 {
-    return use_case_t(logger_message_t::error, source_file_name, class_name,func_name,object_name,*this);
+    return use_case_t(logger_message_t::error, source_file_name, class_name,func_name,object_name);
 }
 /******************/
-logger_t::use_case_t logger_t::warning(std::string_view func_name,
-           std::string_view object_name)
-{
-    return warning("","",func_name,object_name);
-}
-logger_t::use_case_t logger_t::warning(std::string_view source_file_name,
+//logger_t::use_case_t logger_t::warning(std::string_view func_name,
+//           std::string_view object_name)
+//{
+//    return warning("","",func_name,object_name);
+//}
+use_case_t logger_t::warning(std::string_view source_file_name,
                      std::string_view class_name,
                      std::string_view func_name,
                      std::string_view object_name)
 
 {
-    return use_case_t(logger_message_t::warning, source_file_name, class_name,func_name,object_name,*this);
+    return use_case_t(logger_message_t::warning, source_file_name, class_name,func_name,object_name);
 }
 /******************/
-logger_t::use_case_t logger_t::info(std::string_view func_name,
-           std::string_view object_name)
-{
-    return info("","",func_name,object_name);
-}
-logger_t::use_case_t logger_t::info(std::string_view source_file_name,
+//logger_t::use_case_t logger_t::info(std::string_view func_name,
+//           std::string_view object_name)
+//{
+//    return info("","",func_name,object_name);
+//}
+use_case_t logger_t::info(std::string_view source_file_name,
                      std::string_view class_name,
                      std::string_view func_name,
                      std::string_view object_name)
 
 {
-    return use_case_t(logger_message_t::info, source_file_name, class_name,func_name,object_name,*this);
+    return use_case_t(logger_message_t::info, source_file_name, class_name,func_name,object_name);
 }
 /******************/
-logger_t::use_case_t logger_t::debug(std::string_view func_name,
-           std::string_view object_name)
-{
-    return debug("","",func_name,object_name);
-}
-logger_t::use_case_t logger_t::debug(std::string_view source_file_name,
+//logger_t::use_case_t logger_t::debug(std::string_view func_name,
+//           std::string_view object_name)
+//{
+//    return debug("","",func_name,object_name);
+//}
+use_case_t logger_t::debug(std::string_view source_file_name,
                      std::string_view class_name,
                      std::string_view func_name,
                      std::string_view object_name)
 
 {
-    return use_case_t(logger_message_t::debug, source_file_name, class_name,func_name,object_name,*this);
+    return use_case_t(logger_message_t::debug, source_file_name, class_name,func_name,object_name);
 }
 
 /**************************************/
@@ -414,18 +414,14 @@ logger_t::use_case_t logger_t::debug(std::string_view source_file_name,
 //    return logger->window_p;
 //}
 
-void class_logger_t::add_message(const logger_message_t& message) const
-{
-    if (logger==nullptr)
-        std::cout << message.to_string() << std::endl;
-    else
-        logger->add_message(message);
-}
+//void class_logger_t::add_message(const logger_message_t& message)
+//{
+//    logger_t::add_message(message);
+//}
 
-class_logger_t::class_logger_t(Logger& logger_s,
-                               std::string_view source_file_name_p,
-                               std::string_view class_name_p)
-    : logger(logger_s), source_file_name_p(source_file_name_p), class_name_p(class_name_p)
+class_logger_t::class_logger_t(const std::string source_file_name_p,
+                               const std::string class_name_p)
+    : source_file_name_p(source_file_name_p), class_name_p(class_name_p)
 {
 
 }
@@ -454,58 +450,58 @@ class_logger_t::class_logger_t(Logger& logger_s,
 //    logger->print_warning();
 //}
 
-logger_t::use_case_t class_logger_t::fatal(std::string_view func_name, std::string_view object_name)
+use_case_t class_logger_t::fatal(std::string_view func_name, std::string_view object_name)
 {
     return logger_t::fatal(source_file_name_p, class_name_p, func_name, object_name);
 }
 
-logger_t::use_case_t class_logger_t::error(std::string_view func_name, std::string_view object_name)
+use_case_t class_logger_t::error(std::string_view func_name, std::string_view object_name)
 {
     return logger_t::error(source_file_name_p, class_name_p, func_name, object_name);
 }
 
-logger_t::use_case_t class_logger_t::warning(std::string_view func_name, std::string_view object_name)
+use_case_t class_logger_t::warning(std::string_view func_name, std::string_view object_name)
 {
     return logger_t::warning(source_file_name_p, class_name_p, func_name, object_name);
 }
 
-logger_t::use_case_t class_logger_t::info(std::string_view func_name, std::string_view object_name)
+use_case_t class_logger_t::info(std::string_view func_name, std::string_view object_name)
 {
     return logger_t::info(source_file_name_p, class_name_p, func_name, object_name);
 }
 
-logger_t::use_case_t class_logger_t::debug(std::string_view func_name, std::string_view object_name)
+use_case_t class_logger_t::debug(std::string_view func_name, std::string_view object_name)
 {
     return logger_t::debug(source_file_name_p, class_name_p, func_name, object_name);
 }
 
 /**************************************/
-/******       func_logger      ********/
+/******       function_logger_t      ********/
 /**************************************/
 
-func_logger_t::func_logger_t(class_logger_t& class_logger, std::string_view func_name) :
-    func_name_p(func_name),class_logger_t(class_logger)
+function_logger_t::function_logger_t(class_logger_t& class_logger, std::string_view func_name) :
+    func_name_p(func_name),class_logger(class_logger)
 {
 }
 
-logger_t::use_case_t func_logger_t::fatal(std::string_view object_name)
+use_case_t function_logger_t::fatal(std::string_view object_name)
 {
-    return class_logger_t::fatal(func_name_p,object_name);
+    return class_logger.fatal(func_name_p,object_name);
 }
-logger_t::use_case_t func_logger_t::error(std::string_view object_name)
+use_case_t function_logger_t::error(std::string_view object_name)
 {
-    return class_logger_t::error(func_name_p,object_name);
+    return class_logger.error(func_name_p,object_name);
 }
-logger_t::use_case_t func_logger_t::warning(std::string_view object_name)
+use_case_t function_logger_t::warning(std::string_view object_name)
 {
-    return class_logger_t::warning(func_name_p,object_name);
+    return class_logger.warning(func_name_p,object_name);
 }
-logger_t::use_case_t func_logger_t::info(std::string_view object_name)
+use_case_t function_logger_t::info(std::string_view object_name)
 {
-    return class_logger_t::info(func_name_p,object_name);
+    return class_logger.info(func_name_p,object_name);
 }
-logger_t::use_case_t func_logger_t::debug(std::string_view object_name)
+use_case_t function_logger_t::debug(std::string_view object_name)
 {
-    return class_logger_t::debug(func_name_p,object_name);
+    return class_logger.debug(func_name_p,object_name);
 }
 

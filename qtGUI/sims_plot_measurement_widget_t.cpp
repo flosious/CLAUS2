@@ -21,7 +21,7 @@
 
 sims_plot_measurement_widget_t::sims_plot_measurement_widget_t(QWidget *parent) :
     QWidget(parent),
-    logger(global_logger,__FILE__,"sims_plot_measurement_widget_t"),
+    logger(__FILE__,"sims_plot_measurement_widget_t"),
     ui(new Ui::sims_plot_measurement_widget_t)
 {
     ui->setupUi(this);

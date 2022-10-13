@@ -34,7 +34,7 @@ const std::map<double, double> fit_functions::data_1D_to_2D(std::vector<double> 
  * asym2sig_t*
  *************/
 
-fit_functions::asym2sig_t::asym2sig_t() : logger(global_logger,__FILE__,"fit_functions::asym2sig_t")
+fit_functions::asym2sig_t::asym2sig_t() : logger(__FILE__,"fit_functions::asym2sig_t")
 {
 
 }
@@ -252,7 +252,7 @@ std::string fit_functions::asym2sig_t::to_string(std::string prefix) const
  **POLYNOM***
  ************/
 
-fit_functions::polynom_t::polynom_t(const std::vector<double>& fit_parameters) : fit_parameters_p(fit_parameters), logger(global_logger,__FILE__,"fit_functions::polynom_t")
+fit_functions::polynom_t::polynom_t(const std::vector<double>& fit_parameters) : fit_parameters_p(fit_parameters), logger(__FILE__,"fit_functions::polynom_t")
 {
 	successfully_fitted_p= true;
 	rank_p.resize(fit_parameters.size(),0);
@@ -262,7 +262,7 @@ fit_functions::polynom_t::polynom_t(const std::vector<unsigned int> rank,
 									const std::vector<double>& fit_parameters, 
 									const std::map<double, double>& data_XY) : 
                                     fit_parameters_p(fit_parameters), rank_p(rank),
-                                    logger(global_logger,__FILE__,"fit_functions::polynom_t")
+                                    logger(__FILE__,"fit_functions::polynom_t")
 {
 	successfully_fitted_p = fit(data_XY); //fit the data only once
 }
@@ -484,7 +484,7 @@ bool fit_functions::polynom_t::fit(std::map<double,double> data_XY)
 /****  linear_t  ******/
 /**********************/
 
-fit_functions::linear_t::linear_t(const double slope,const std::map<double,double>& data_XY) : slope_p(slope), logger(global_logger,__FILE__,"fit_functions::linear_t")
+fit_functions::linear_t::linear_t(const double slope,const std::map<double,double>& data_XY) : slope_p(slope), logger(__FILE__,"fit_functions::linear_t")
 {	
 	successfully_fitted_p = fit(data_XY);
 }

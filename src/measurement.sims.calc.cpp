@@ -20,7 +20,7 @@
 
 measurements_::sims_t::calc_t::calc_t(sims_t& measurement, bool overwrite) : 
     M(measurement), SR(*this), SD(*this), SF(*this),RSF(*this),concentration(*this), overwrite(overwrite),matrix(*this) ,
-    logger(global_logger,__FILE__,"measurements_::sims_t::calc_t")
+    logger(__FILE__,"measurements_::sims_t::calc_t")
 {
 }
 
@@ -39,7 +39,7 @@ measurements_::sims_t::calc_t::implant_c& measurements_::sims_t::calc_t::implant
 /**        SD_c         **/
 /*************************/
 
-measurements_::sims_t::calc_t::SD_c::SD_c(calc_t& calc) : M(calc.M), calc(calc), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::SD_c")
+measurements_::sims_t::calc_t::SD_c::SD_c(calc_t& calc) : M(calc.M), calc(calc), logger(__FILE__,"measurements_::sims_t::calc_t::SD_c")
 {
 }
 
@@ -66,7 +66,7 @@ measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SD_c::from_SR(bool
 /**        concentration_c         **/
 /************************************/
 
-measurements_::sims_t::calc_t::concentration_c::concentration_c(calc_t& calc) : M(calc.M), calc(calc), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::concentration_c")
+measurements_::sims_t::calc_t::concentration_c::concentration_c(calc_t& calc) : M(calc.M), calc(calc), logger(__FILE__,"measurements_::sims_t::calc_t::concentration_c")
 {
 }
 
@@ -99,7 +99,7 @@ quantity::concentration_t measurements_::sims_t::calc_t::concentration_c::from_S
 /*************************/
 /**        SR_c         **/
 /*************************/
-measurements_::sims_t::calc_t::SR_c::SR_c(calc_t& calc) : M(calc.M), calc(calc), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::SR_c")
+measurements_::sims_t::calc_t::SR_c::SR_c(calc_t& calc) : M(calc.M), calc(calc), logger(__FILE__,"measurements_::sims_t::calc_t::SR_c")
 {
 }
 
@@ -162,7 +162,7 @@ quantity::SR_t measurements_::sims_t::calc_t::SR_c::from_implant_max(cluster_t& 
 /*************************/
 /**        SF_c         **/
 /*************************/
-measurements_::sims_t::calc_t::SF_c::SF_c(calc_t& calc) : M(calc.M), calc(calc), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::SF_c")
+measurements_::sims_t::calc_t::SF_c::SF_c(calc_t& calc) : M(calc.M), calc(calc), logger(__FILE__,"measurements_::sims_t::calc_t::SF_c")
 {
 }
 
@@ -220,7 +220,7 @@ quantity::SF_t measurements_::sims_t::calc_t::SF_c::from_db_max(cluster_t& clust
 /*************************/
 /**       RSF_c         **/
 /*************************/
-measurements_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc) : M(calc.M), calc(calc), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::RSF_c")
+measurements_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc) : M(calc.M), calc(calc), logger(__FILE__,"measurements_::sims_t::calc_t::RSF_c")
 {
 }
 
@@ -637,7 +637,7 @@ cluster_t::RSF_t measurements_::sims_t::calc_t::RSF_c::from_SF_mean_ref(const cl
 /**      matrix_c       **/
 /*************************/
 
-measurements_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc) : calc(calc), M(calc.M), logger(global_logger,__FILE__,"measurements_::sims_t::calc_t::matrix_c")
+measurements_::sims_t::calc_t::matrix_c::matrix_c(calc_t& calc) : calc(calc), M(calc.M), logger(__FILE__,"measurements_::sims_t::calc_t::matrix_c")
 {
 }
 

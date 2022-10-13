@@ -47,6 +47,6 @@ private:
     class_logger_t logger;
 };
 
-extern Logger global_logger;
+
 
 #endif // SIMS_PLOT_MEASUREMENT_WIDGET_T_H

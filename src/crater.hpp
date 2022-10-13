@@ -105,6 +105,6 @@ public:
 	///finds a common minimal sputter_time
 	quantity::sputter_time_t common_sputter_time(std::vector<cluster_t>& clusters);
 };
-extern Logger global_logger;
+
 
 #endif // CRATER_T_HPP

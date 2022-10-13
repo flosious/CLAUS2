@@ -19,7 +19,7 @@
 #include "files.hpp"
 
 
-files_::jpg_t::jpg_t(std::string& filename) : name(filename,"_",{".jpg",".jpeg"},{}), logger(global_logger,__FILE__,"files_::jpg_t")
+files_::jpg_t::jpg_t(std::string& filename) : name(filename,"_",{".jpg",".jpeg"},{}), logger(__FILE__,"files_::jpg_t")
 {
 }
 

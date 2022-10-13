@@ -94,7 +94,7 @@ std::vector<QStandardItem*> measurements_treeview_t::parent_entry_t::itemCols(co
 /*****************************************/
 
 measurements_treeview_t::tofsims_t::tofsims_t(measurements_treeview_t *measurements_treeview) :
-        parent_entry_t(tofsims,measurements_treeview), logger(global_logger,__FILE__,"measurements_treeview_t::tofsims_t")
+        parent_entry_t(tofsims,measurements_treeview), logger(__FILE__,"measurements_treeview_t::tofsims_t")
 {
 }
 
@@ -127,7 +127,7 @@ std::vector<QStandardItem*> measurements_treeview_t::tofsims_t::itemCols()
 /*****************************************/
 
 measurements_treeview_t::dektak6m_t::dektak6m_t(measurements_treeview_t *measurements_treeview) :
-        parent_entry_t(dektak6m,measurements_treeview), logger(global_logger,__FILE__,"measurements_treeview_t::dektak6m_t")
+        parent_entry_t(dektak6m,measurements_treeview), logger(__FILE__,"measurements_treeview_t::dektak6m_t")
 {
 }
 
@@ -157,7 +157,7 @@ std::vector<QStandardItem*> measurements_treeview_t::dektak6m_t::itemCols()
 /*****************************************/
 
 measurements_treeview_t::dsims_t::dsims_t(measurements_treeview_t *measurements_treeview) :
-        parent_entry_t(dsims,measurements_treeview), logger(global_logger,__FILE__,"measurements_treeview_t::dsims_t")
+        parent_entry_t(dsims,measurements_treeview), logger(__FILE__,"measurements_treeview_t::dsims_t")
 {
 }
 
@@ -193,7 +193,7 @@ std::map<measurements_treeview_t::methods,std::string> measurements_treeview_t::
 };
 
 measurements_treeview_t::measurements_treeview_t(QWidget *parent)
-    : QTreeView(parent), parent(parent), logger(global_logger,__FILE__,"measurements_treeview_t")
+    : QTreeView(parent), parent(parent), logger(__FILE__,"measurements_treeview_t")
 {
     set_actions();
     set_contextMenu();

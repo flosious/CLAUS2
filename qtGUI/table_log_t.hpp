@@ -37,7 +37,7 @@ public:
     ///will add missing rows
 //    void add_row(const QList<QTableWidgetItem*>& row, color_t color);
     void set_row(unsigned int row_idx, const logger_message_t& message);
-    void update(const logger_t& logger);
+    void update();
     void set_print_warning(bool state);
     void set_print_info(bool state);
     void set_print_debug(bool state);
@@ -54,6 +54,7 @@ protected:
 #endif
     bool print_warning_p=true;
     bool print_info_p=true;
+    class_logger_t logger;
 private:
     static std::map<column_t,std::string> column_to_name;
     static std::map<color_t, QColor> color_to_QColor;

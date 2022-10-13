@@ -4,12 +4,12 @@
 /*********  quantity::table_t::column_t  ************/
 /****************************************************/
 
-quantity::table_t::column_t::column_t() : name(""), comment(""), logger(global_logger,__FILE__,"quantity::table_t::column_t")
+quantity::table_t::column_t::column_t() : name(""), comment(""), logger(__FILE__,"quantity::table_t::column_t")
 {
 }
 
 quantity::table_t::column_t::column_t(long long unsigned int line_id,const quantity_t& q, std::string name, std::string comment)
-    : name(name), comment(comment), logger(global_logger,__FILE__,"quantity::table_t::column_t")
+    : name(name), comment(comment), logger(__FILE__,"quantity::table_t::column_t")
 {
 	quantity_entries_p.insert(std::pair<long long unsigned int, quantity::quantity_t>(line_id,q));
 	if (!q.is_set())
@@ -256,7 +256,7 @@ quantity::table_t::column_t quantity::table_t::column_t::cut_median(float alpha)
 /*********  quantity::table_t  ************/
 /******************************************/
 
-quantity::table_t::table_t() : logger(global_logger,__FILE__,"quantity::table_t::table_t")
+quantity::table_t::table_t() : logger(__FILE__,"quantity::table_t::table_t")
 {
 
 }

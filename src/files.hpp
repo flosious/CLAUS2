@@ -427,5 +427,5 @@ public:
         bool operator<(const aishu_t& obj) const;
     };
 };
-extern Logger global_logger;
+
 #endif // FILES_HPP

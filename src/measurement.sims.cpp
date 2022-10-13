@@ -107,7 +107,7 @@ measurements_::sims_t::calc_t measurements_::sims_t::calc(bool overwrite)
 
 measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, std::string method, database_t& sql_wrapper, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
     measurement_t(filename,method,sql_wrapper), clusters(filecontents.clusters()), reference_isotopes(sample.matrix().isotopes()),
-    logger(global_logger,__FILE__,"measurements_::sims_t")
+    logger(__FILE__,"measurements_::sims_t")
 {
 	crater.total_sputter_depths << filename.total_sputter_depths();
 	for (auto& tsd : total_sputter_dephs)

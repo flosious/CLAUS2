@@ -25,11 +25,11 @@
 /****************************/
 
 
-sample_t::matrix_t::matrix_t() : logger(global_logger,__FILE__,"sample_t::matrix_t")
+sample_t::matrix_t::matrix_t() : logger(__FILE__,"sample_t::matrix_t")
 {
 }
 
-sample_t::matrix_t::matrix_t(std::vector<isotope_t> isotopes) : logger(global_logger,__FILE__,"sample_t::matrix_t")
+sample_t::matrix_t::matrix_t(std::vector<isotope_t> isotopes) : logger(__FILE__,"sample_t::matrix_t")
 {
 // 	std::cout << std::endl << "IN-matrix::isotopes.size()=" << isotopes.size() << std::endl;
 // 	for (auto& i : isotopes)
@@ -61,12 +61,12 @@ sample_t::matrix_t::matrix_t(std::vector<isotope_t> isotopes) : logger(global_lo
 // 			std::cout << "iso=" << i.substance_amount.to_string() << std::endl;
 }
 
-sample_t::matrix_t::matrix_t(const std::string matrix_elements_s) : logger(global_logger,__FILE__,"sample_t::matrix_t")
+sample_t::matrix_t::matrix_t(const std::string matrix_elements_s) : logger(__FILE__,"sample_t::matrix_t")
 {
 	*this = matrix_t{tools::str::get_strings_between_delimiter(matrix_elements_s," ")};
 }
 
-sample_t::matrix_t::matrix_t(const std::vector<std::string> elements_or_isotopes_s) : logger(global_logger,__FILE__,"sample_t::matrix_t")
+sample_t::matrix_t::matrix_t(const std::vector<std::string> elements_or_isotopes_s) : logger(__FILE__,"sample_t::matrix_t")
 {
 	/* 
 	 * mole/abundance/concentration/atoms input values are asumed as absolutes, which are iternally normalized to 100at%: 
@@ -114,7 +114,7 @@ sample_t::matrix_t::matrix_t(const std::vector<std::string> elements_or_isotopes
 			/*******/
 			
 			/*catch error*/
-			if (PSE.element(symbol)==nullptr)
+			if (pse_t::element(symbol)==nullptr)
 			{
 				*this = matrix_t(); //make me empty
                 //logger::error("sample_t::matrix_t::matrix_t() symbol is not listed in the PSE, skipping use space as seperator for multiple symbols", ele_or_iso);
@@ -126,7 +126,7 @@ sample_t::matrix_t::matrix_t(const std::vector<std::string> elements_or_isotopes
                 //logger::error("sample_t::matrix_t::matrix_t() symbol not parseable, skipping", ele_or_iso);
 				return;
 			}
-			if (nucleons>0 && PSE.element(symbol)->isotope_from_nucleons(nucleons)==nullptr)
+			if (nucleons>0 && pse_t::element(symbol)->isotope_from_nucleons(nucleons)==nullptr)
 			{
 				*this = matrix_t(); //make me empty
                 //logger::error("sample_t::matrix_t::matrix_t() isotope is not listed in the PSE, skipping", ele_or_iso);
@@ -138,7 +138,7 @@ sample_t::matrix_t::matrix_t(const std::vector<std::string> elements_or_isotopes
 			if (nucleons==-1)
 			{
 				//add all isotopes of the symbols element with natural abundance
-				for (auto& pse_iso: PSE.element(symbol)->isotopes ) 
+				for (auto& pse_iso: pse_t::element(symbol)->isotopes ) 
 				{
 					isotope_t iso{symbol,pse_iso.nucleons,pse_iso.abundance};
 					iso.substance_amount = quantity::substance_amount_t({amount*pse_iso.abundance});

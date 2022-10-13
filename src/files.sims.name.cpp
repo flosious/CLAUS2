@@ -33,7 +33,7 @@ files_::sims_t::name_t::name_t(std::string& filename_with_path_s,
 													delimiter_s,
 													OR_identifiers_s,
                                                     AND_identifiers_s),
-                            logger(global_logger,__FILE__,"files_::sims_t::name_t")
+                            logger(__FILE__,"files_::sims_t::name_t")
 {
 }
 

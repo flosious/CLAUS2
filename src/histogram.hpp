@@ -94,5 +94,5 @@ public:
 	/// bin_pos[i] = min() * q_factor^i
 	histogram_t equally_factor_distanced_bins(quantity::quantity_t q_factor) const;
 }; //histogram_t
-extern Logger global_logger;
+
 #endif // QUANTITY_HPP

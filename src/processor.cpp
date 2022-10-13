@@ -67,7 +67,7 @@ processor::filter::files_t<T> processor::filter::files_t<T>::by_wafer(int wafer)
 /**************************************/
 
 
-processor::processor(std::vector<std::string> args_p) :   logger(global_logger,__FILE__,"processor"),
+processor::processor(std::vector<std::string> args_p) :   logger(__FILE__,"processor"),
                                                 database(sql),
                                                 tofsims(unknown_filenames,samples_list_p,database,config_p),
                                                 dsims(unknown_filenames,samples_list_p,database,config_p),

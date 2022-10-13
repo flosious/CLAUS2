@@ -26,7 +26,7 @@ files_::file_t::contents_t::contents_t(std::string& filename_with_path,
                                        const std::string& contents_s) :
     filename_with_path(filename_with_path), delimiter(delimiter),
     identifiers(identifiers),
-    logger(global_logger,__FILE__,"files_::file_t::contents_t"),
+    logger(__FILE__,"files_::file_t::contents_t"),
     delete_cols_before_parsing(delete_cols_before_parsing),
     contents_p(contents_s)
 {

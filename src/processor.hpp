@@ -98,7 +98,7 @@ private:
         config_t* config = nullptr;
     public:
         tool_with_files(std::vector<std::string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database,config_t& config) :
-            filenames_list(&filenames_list), samples_list(&samples_list), database(&database), config(&config),logger(global_logger,__FILE__,"processor::tool_with_files")
+            filenames_list(&filenames_list), samples_list(&samples_list), database(&database), config(&config),logger(__FILE__,"processor::tool_with_files")
         {}
 //        tool_with_files(std::vector<std::string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
         std::vector<file_type> files;
@@ -116,7 +116,7 @@ private:
     public:
         tool_with_files_measurements(
                         std::vector<std::string>& filenames_list,std::vector<sample_t>& samples_list,database_t& database,config_t& config) :
-            tool_with_files<file_type>(filenames_list,samples_list,database,config),logger(global_logger,__FILE__,"processor::tool_with_files_measurements")
+            tool_with_files<file_type>(filenames_list,samples_list,database,config),logger(__FILE__,"processor::tool_with_files_measurements")
         {}
 //        tool_with_files_measurements(std::vector<std::string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
         std::vector<measurement_type> measurements;
@@ -159,7 +159,7 @@ public:
         class_logger_t logger;
     public:
         tool_with_files_measurements_groups(std::vector<std::string>& filenames_list,std::vector<sample_t>& samples_list,database_t& database,config_t& config) :
-            tool_with_files_measurements<file_type, measurement_type>(filenames_list,samples_list,database,config),logger(global_logger,__FILE__,"processor::tool_with_files_measurements_groups")
+            tool_with_files_measurements<file_type, measurement_type>(filenames_list,samples_list,database,config),logger(__FILE__,"processor::tool_with_files_measurements_groups")
         {}
 //        tool_with_files_measurements_groups(std::vector<std::string>& filenames_list, std::vector<sample_t>& samples_list, database_t& database, config_t& config);
         std::vector<mgroup_type> mgroups;
@@ -331,6 +331,6 @@ public:
 };
 
 // extern database_t db;
-extern Logger global_logger;
+
 
 #endif // PROCESSOR_HPP

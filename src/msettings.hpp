@@ -93,5 +93,5 @@ public:
 		bool operator!=(const tofsims_t& obj) const;
 	};
 };
-extern Logger global_logger;
+
 #endif // MEASUREMENT_SETTINGS_T_HPP

@@ -36,6 +36,13 @@
 
 #define FILE_TYPE_DELIMITER std::string(".")
 
+#define __CLASS__ typeid(*this).name()
+//definition; used in class constructor
+#define log_c class_logger(__FILE__,__CLASS__)
+
+//used in a class function to start logging
+#define log_f function_logger_t logger(class_logger, __func__);
+
 // namespace 
 // {
 // #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)

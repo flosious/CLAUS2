@@ -37,7 +37,7 @@ origin_t::column_t::column_t(const std::vector<double>& data_s, std::string long
 	longname(longname),
 	unit(unit),
     comment(comment),
-    logger(global_logger,__FILE__,"origin_t::column_t")
+    logger(__FILE__,"origin_t::column_t")
 {
 }
 

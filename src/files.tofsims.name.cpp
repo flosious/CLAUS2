@@ -24,7 +24,7 @@
 /*********************************/
 files_::tofsims_t::name_t::name_t(std::string& filename_with_path_s) :
                                         files_::sims_t::name_t(filename_with_path_s,"_",{".TXT"},{}),
-                                        logger(global_logger,__FILE__,"files_::tofsims_t::name_t")
+                                        logger(__FILE__,"files_::tofsims_t::name_t")
 {
 	parse_analysis_energy_element();
 }

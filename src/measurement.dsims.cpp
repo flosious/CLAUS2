@@ -20,7 +20,7 @@
 
 measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, database_t& sql_wrapper, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
         sims_t(dsims_file.name,dsims_file.contents,"dsims",sql_wrapper,total_sputter_dephs),
-                settings(dsims_file.name,dsims_file.contents), logger(global_logger,__FILE__,"measurements_::dsims_t")
+                settings(dsims_file.name,dsims_file.contents), logger(__FILE__,"measurements_::dsims_t")
 {
 	crater.sputter_beam = dsims_file.contents.Ipr();
 	

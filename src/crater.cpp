@@ -21,11 +21,11 @@
 /************/
 /*LINESCAN_T*/
 /************/
-crater_t::linescan_t::linescan_t() : logger(global_logger,__FILE__,"crater_t::linescan_t")
+crater_t::linescan_t::linescan_t() : logger(__FILE__,"crater_t::linescan_t")
 {
 }
 
-crater_t::linescan_t::linescan_t(quantity::quantity_t xy, quantity::quantity_t z) : xy(xy),z(z), logger(global_logger,__FILE__,"crater_t::linescan_t")
+crater_t::linescan_t::linescan_t(quantity::quantity_t xy, quantity::quantity_t z) : xy(xy),z(z), logger(__FILE__,"crater_t::linescan_t")
 {
 }
 
@@ -165,19 +165,19 @@ const std::string crater_t::sputter_beam_t::to_string(const std::string del) con
 /**************/
 /** CRATER_T **/
 /**************/
-crater_t::crater_t() : logger(global_logger,__FILE__,"crater_t")
+crater_t::crater_t() : logger(__FILE__,"crater_t")
 {
 }
 
-crater_t::crater_t(const quantity::sputter_depth_t& sputter_depth) : sputter_depth(sputter_depth), logger(global_logger,__FILE__,"crater_t")
+crater_t::crater_t(const quantity::sputter_depth_t& sputter_depth) : sputter_depth(sputter_depth), logger(__FILE__,"crater_t")
 {
 }
-crater_t::crater_t(const quantity::sputter_time_t& sputter_time) : sputter_time(sputter_time), logger(global_logger,__FILE__,"crater_t")
+crater_t::crater_t(const quantity::sputter_time_t& sputter_time) : sputter_time(sputter_time), logger(__FILE__,"crater_t")
 {
 }
 
 crater_t::crater_t(const quantity::sputter_time_t& sputter_time, const quantity::sputter_depth_t& sputter_depth) : 
-    sputter_time(sputter_time), sputter_depth(sputter_depth), logger(global_logger,__FILE__,"crater_t")
+    sputter_time(sputter_time), sputter_depth(sputter_depth), logger(__FILE__,"crater_t")
 {
 }
 

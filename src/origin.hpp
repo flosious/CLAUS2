@@ -54,5 +54,5 @@ public:
 	origin_t(std::vector<cluster_t>& clusters);
 	std::string to_string();
 };
-extern Logger global_logger;
+
 #endif // ORIGIN_T_HPP

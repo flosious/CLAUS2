@@ -27,7 +27,7 @@ measurements_::profilers_t::profiler_t::profiler_t(files_::file_t::name_t& filen
 												   database_t& sql_wrapper) :
                                                    measurement_t(filename,filecontents,method,sql_wrapper),
                                                    linescan_p(linescan_s),
-                                                   logger(global_logger,__FILE__,"measurements_::profilers_t::profiler_t")
+                                                   logger(__FILE__,"measurements_::profilers_t::profiler_t")
 {
 }
 

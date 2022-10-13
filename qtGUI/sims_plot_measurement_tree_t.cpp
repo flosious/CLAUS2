@@ -88,7 +88,7 @@ void sims_plot_measurement_tree_t::set_quantity_in_QStandardItem(QStandardItem* 
 
 sims_plot_measurement_tree_t::sims_plot_measurement_tree_t(QWidget *parent) :
     parent(parent),
-    logger(global_logger,__FILE__,"sims_plot_measurement_tree_t"),
+    logger(__FILE__,"sims_plot_measurement_tree_t"),
     model(new QStandardItemModel)
 {
     set_model();

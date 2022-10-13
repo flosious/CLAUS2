@@ -377,6 +377,6 @@ public:
 	};
 	
 };
-extern Logger global_logger;
+
 
 #endif // MEASUREMENT_GROUP_T_HPP

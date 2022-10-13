@@ -1,6 +1,6 @@
 #include "filenames_collector_t.hpp"
 
-filenames_collector_t::filenames_collector_t() : logger(global_logger,__FILE__,"filenames_collector_t")
+filenames_collector_t::filenames_collector_t() : logger(__FILE__,"filenames_collector_t")
 {
 
 }

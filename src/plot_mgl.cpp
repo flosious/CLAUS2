@@ -20,7 +20,7 @@
 #include <mgl2/mgl.h>
 #include <mgl2/fltk.h>
 
-plot_t::plot_t(bool Y1_log10, bool Y2_log10, bool Y3_log10) : logger(global_logger,__FILE__,"plot_t")
+plot_t::plot_t(bool Y1_log10, bool Y2_log10, bool Y3_log10) : logger(__FILE__,"plot_t")
 {
 	Y1.log10_scale= Y1_log10;
 	Y2.log10_scale= Y2_log10;
@@ -173,7 +173,7 @@ void plot_t::to_file(const std::string filename)
 
 plot_t::axis_t::line_t::line_t(double x_start, double y_star, double x_stop, double y_stop, std::string color, std::string text) :
                         x_start(x_start), y_start(y_star),x_stop(x_stop),y_stop(y_stop), color(color), text(text),
-                        logger(global_logger,__FILE__,"plot_t::axis_t::line_t")
+                        logger(__FILE__,"plot_t::axis_t::line_t")
 {
 }
 
@@ -442,18 +442,18 @@ plot_t::axis_t::range_t plot_t::axis_t::range_t::log10() const
 	return range_t(log_start,log_stop);
 }
 
-plot_t::axis_t::range_t::range_t(double start, double stop) : start(start), stop(stop), backgound_minimum_p(-1), logger(global_logger,__FILE__,"plot_t::axis_t::range_t")
+plot_t::axis_t::range_t::range_t(double start, double stop) : start(start), stop(stop), backgound_minimum_p(-1), logger(__FILE__,"plot_t::axis_t::range_t")
 {
 }
 
 
-plot_t::axis_t::range_t::range_t(const quantity::quantity_t* Ys) : logger(global_logger,__FILE__,"plot_t::axis_t::range_t")
+plot_t::axis_t::range_t::range_t(const quantity::quantity_t* Ys) : logger(__FILE__,"plot_t::axis_t::range_t")
 {
 	std::vector<const quantity::quantity_t*> X {Ys};
 	*this = range_t(X);
 }
 
-plot_t::axis_t::range_t::range_t(const std::vector<const quantity::quantity_t *> Ys) : backgound_minimum_p(backgound_minimum_c(Ys)), logger(global_logger,__FILE__,"plot_t::axis_t::range_t")
+plot_t::axis_t::range_t::range_t(const std::vector<const quantity::quantity_t *> Ys) : backgound_minimum_p(backgound_minimum_c(Ys)), logger(__FILE__,"plot_t::axis_t::range_t")
 {
     //logger::debug(15,"plot_t::axis_t::range_t::range_t()","entering");
 
@@ -536,7 +536,7 @@ double plot_t::axis_t::range_t::range_t::background_minimum() const
 
 plot_t::axis_t::points_t::points_t(const quantity::map_t& XY, const std::string legende, const std::string color)
     : XY(XY.remove_inf()), legende(legende), color(color),
-      logger(global_logger,__FILE__,"plot_t::axis_t::points_t")
+      logger(__FILE__,"plot_t::axis_t::points_t")
 {
 }
 

@@ -143,5 +143,5 @@ public:
 		std::vector<double> y_data(std::vector<double> x_data);
 	};
 };
-extern Logger global_logger;
+
 #endif // FIT_FUCTIONS

@@ -25,6 +25,7 @@
 #include "tools.hpp"
 #include <regex>
 #include "log.hpp"
+#include "definitions.hpp"
 
 
 
@@ -32,16 +33,16 @@ class pse_t
 {
 // 	friend class config_t;
 private:
-    static class_logger_t logger;
-	const std::string source_url="https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl";
+    static class_logger_t class_logger;
+    static const std::string source_url;
 //    const std::string filename="/home/florian/projects/claus2/build/pse.csv";
-    const std::string filename="pse.csv";
-	const std::string delimiter = ",";
+    static const std::string filename;
+    static const std::string delimiter;;
 	
 	class pse_isotope_t
 	{
     private:
-        class_logger_t logger;
+        static class_logger_t class_logger;
 	public:
 		pse_isotope_t(const double abundance_s, const int nucleons_s, const double mass_s, const std::string symbol_alternative_s="");
 		const double abundance;
@@ -51,13 +52,13 @@ private:
 // 		const std::string symbol;
 		///like D for 2H
         const std::string symbol_alternative;
-        const bool operator==(const pse_isotope_t& obj) const;
-        const bool operator<(const pse_isotope_t& obj) const;
+        bool operator==(const pse_isotope_t& obj) const;
+        bool operator<(const pse_isotope_t& obj) const;
 	};
 	class pse_element_t
 	{
     private:
-        class_logger_t logger;
+        static class_logger_t class_logger;
 	public:
 		pse_element_t(std::string symbol_s, int protons_s, std::vector<pse_isotope_t>& isotope_s);
 		pse_element_t(std::string symbol_s, int protons_s, pse_isotope_t& isotope_s);
@@ -69,34 +70,32 @@ private:
 // 		const std::vector<isotope_t> isotopes;
 		const pse_isotope_t* isotope_with_highest_abundance() const;
 		const pse_isotope_t* isotope_from_nucleons(int nucleons) const;
-        const double mass() const;
-        const bool operator==(const pse_element_t& obj) const;
-        const bool operator<(const pse_element_t& obj) const;
+        double mass() const;
+        bool operator==(const pse_element_t& obj) const;
+        bool operator<(const pse_element_t& obj) const;
 		
 	};
 // 	std::map<std::string,element_t> symbol_to_element_p;
 // 	std::vector<isotope_t> isotopes_p;
 	
-	std::vector<pse_element_t> elements_p;
+    static std::vector<pse_element_t> elements_p;
 public:
-    pse_t(std::shared_ptr<logger_t> logger_s);
+    pse_t() = delete;
 // 	pse_t(const std::vector<pse_element_t> elements_s);
-	const std::vector<pse_element_t>& elements();
-	const pse_element_t* element(std::string symbol);
+    static const std::vector<pse_element_t>& elements();
+    static const pse_element_t* element(std::string symbol);
 	
-	const std::vector<pse_isotope_t>* isotopes(std::string symbol="");
-	const pse_isotope_t* isotope(std::string symbol, int nucleons);
+    static const std::vector<pse_isotope_t>* isotopes(std::string symbol="");
+    static const pse_isotope_t* isotope(std::string symbol, int nucleons);
 	
-	bool load_file();
+    static bool load_file();
 	///all natural(earth) elements within the PSE
 	
 	///an overview/console dump
-	void to_screen();
+    static void to_screen();
 	///source URL, which feeded the pse.csv file in the year 2018
-	const std::string source() const;
+    static const std::string source();
 };
-
-extern pse_t PSE;
 
 
 #endif // PSE_HPP

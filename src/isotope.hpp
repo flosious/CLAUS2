@@ -56,7 +56,7 @@ public:
 	const bool operator!=(const isotope_t& obj) const;
 	const bool operator<(const isotope_t& obj) const;
 };
-extern Logger global_logger;
+
 
 
 

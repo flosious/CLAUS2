@@ -31,13 +31,13 @@ quantity::quantity_t::quantity_t(const quantity_t& quant,const unit_t& unit, std
 
 // quantity::quantity_t::quantity_t(const quantity_t& Q) : name_s()
 
-quantity::quantity_t::quantity_t() : name_s(""), data_s({}),dimension_s(dimensions::SI::relative), logger(global_logger,__FILE__,"quantity::quantity_t")
+quantity::quantity_t::quantity_t() : name_s(""), data_s({}),dimension_s(dimensions::SI::relative), logger(__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit) :
                                     name_s(name), data_s(data), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)),
-                                    logger(global_logger,__FILE__,"quantity::quantity_t")
+                                    logger(__FILE__,"quantity::quantity_t")
 {
 }
 
@@ -58,19 +58,19 @@ quantity::quantity_t::quantity_t(const quantity::quantity_t& quant, const unit_t
 
 quantity::quantity_t::quantity_t(const std::string& name,const unit_t& unit, std::string add_to_history) :
     name_s(name), data_s({}), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)), operations_history_s({add_to_history}),
-    logger(global_logger,__FILE__,"quantity::quantity_t")
+    logger(__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit, const dimension_t& dimension, const std::vector<std::string>& operations_history,std::string add_to_history) :
     name_s(name), data_s(data), unit_s(unit), dimension_s(dimension), operations_history_s(tools::vec::add(operations_history,add_to_history)),
-    logger(global_logger,__FILE__,"quantity::quantity_t")
+    logger(__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit, const dimension_t& dimension) :
     name_s(name), data_s(data), unit_s(unit), dimension_s(dimension),
-    logger(global_logger,__FILE__,"quantity::quantity_t")
+    logger(__FILE__,"quantity::quantity_t")
 {
 }
 

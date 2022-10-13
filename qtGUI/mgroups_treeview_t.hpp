@@ -55,7 +55,7 @@ private:
         ///save measurement* pointer data in item role (Qt::UserRole+ !1! )
         static QStandardItem* item(measurement_t& measurement, columns col)
         {
-            class_logger_t logger(global_logger,__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
+            class_logger_t logger(__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
             QStandardItem *item = new QStandardItem;
             std::stringstream ss;
             QVariant variant_data;
@@ -94,7 +94,7 @@ private:
         ///save mgroup* pointer data in item role (Qt::UserRole+ !2! )
         static QStandardItem* item(mgroup_t& mgroup, columns col)
         {
-            class_logger_t logger(global_logger,__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
+            class_logger_t logger(__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
             QStandardItem *item = new QStandardItem;
             std::stringstream ss;
             QVariant variant_data;
@@ -274,7 +274,7 @@ private:
         }
         sections tool_section_id;
         tool_section_t(sections tool_section_id, tool_with_files_measurements_groups_t* tool, QStandardItemModel* model) :
-            tool_section_id(tool_section_id),tool(tool), logger(global_logger,__FILE__,"mgroups_treeview_t::tool_section_t"), model(model)
+            tool_section_id(tool_section_id),tool(tool), logger(__FILE__,"mgroups_treeview_t::tool_section_t"), model(model)
         {
         }
         ///return true if something was changed
@@ -405,5 +405,5 @@ signals:
     void update_measurements_treeview();
 };
 extern processor *claus;
-extern Logger global_logger;
+
 #endif // MGROUPS_TREEVIEW_T_H

@@ -25,7 +25,7 @@
 
 files_::tofsims_t::contents_t::contents_t(std::string& filename_with_path, const std::string& contents_string)
     : files_::sims_t::contents_t(filename_with_path,"\t",{"# Profile Smoothing","# Profile Compression"},contents_string),
-      logger(global_logger,__FILE__,"files_::tofsims_t::contents_t")
+      logger(__FILE__,"files_::tofsims_t::contents_t")
 {
 }
 
@@ -46,13 +46,13 @@ std::vector<isotope_t> files_::tofsims_t::contents_t::parse_isotopes(std::string
 
 		isotope_t isotope;
 		isotope.symbol=symbol;
-        if (PSE.element(symbol)==nullptr)
+        if (pse_t::element(symbol)==nullptr)
         {
 //            logger.error(__func__,"element not found in PSE").signal(symbol);
             return {};
         }
 		if (nucleons!="") isotope.nucleons = tools::str::str_to_int(nucleons);
-		else isotope.nucleons = PSE.element(symbol)->isotope_with_highest_abundance()->nucleons;
+        else isotope.nucleons = pse_t::element(symbol)->isotope_with_highest_abundance()->nucleons;
 		if (atoms!="") isotope.substance_amount = quantity::substance_amount_t({tools::str::str_to_double(atoms)});
 // 		else isotope.substance_amount=1;
 // 		std::cout << "nucleons="<<nucleons<<"\tsymbol="<<symbol<<"\tatoms="<<atoms<<"\tisotopes="<<isotopes<<endl;

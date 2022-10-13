@@ -28,7 +28,7 @@ files_::file_t::name_t::name_t(std::string& filename_with_path_s,
 											delimiter(delimiter_s),
 											OR_identifiers_s(OR_identifiers_s),
                                             AND_identifiers_s(AND_identifiers_s),
-                                            logger(global_logger,__FILE__,"files_::file_t::name_t")
+                                            logger(__FILE__,"files_::file_t::name_t")
 {	
     not_parseable_filename_parts_p = tools::str::get_strings_between_delimiter(filename(),delimiter);
     parse_filename_parts();
@@ -471,7 +471,7 @@ bool files_::file_t::name_t::operator!=(files_::file_t::name_t& obj)
 
 
 files_::file_t::crater_in_name_t::crater_in_name_t(std::string& filename_with_path_s,const std::string delimiter_s,const std::set<std::string> OR_identifiers_s,const std::set<std::string> AND_identifiers_s) :
-    files_::file_t::name_t(filename_with_path_s,delimiter_s,OR_identifiers_s,AND_identifiers_s), logger(global_logger,__FILE__,"files_::file_t::crater_in_name_t")
+    files_::file_t::name_t(filename_with_path_s,delimiter_s,OR_identifiers_s,AND_identifiers_s), logger(__FILE__,"files_::file_t::crater_in_name_t")
 {
 }
 

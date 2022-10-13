@@ -28,7 +28,7 @@ calc_t::sims_t::sims_t(const std::vector<measurements_::sims_t>& measurements) :
 calc_t::sims_t::cluster_relations_copies_t::cluster_relations_copies_t(const cluster_t& Z,
                                                                        const cluster_t& N,
                                                                        const quantity::abundance_t& abundance_ratio)
-        : zaehler_p(Z), nenner_p(N), abundance_ratio(abundance_ratio), logger(global_logger,__FILE__,"calc_t::sims_t::cluster_relations_copies_t")
+        : zaehler_p(Z), nenner_p(N), abundance_ratio(abundance_ratio), logger(__FILE__,"calc_t::sims_t::cluster_relations_copies_t")
 {
 }
 
@@ -51,7 +51,7 @@ calc_t::sims_t::cluster_relations_t::cluster_relations_t(const measurements_::si
 														 measurement(measurement), 
 														 zaehler(measurement.cluster(zaehler_s)), 
                                                          nenner(measurement.cluster(nenner_s)),
-                                                         logger(global_logger,__FILE__,"calc_t::sims_t::cluster_relations_t")
+                                                         logger(__FILE__,"calc_t::sims_t::cluster_relations_t")
 {
 	if (zaehler==nullptr)
     {
@@ -76,7 +76,7 @@ bool calc_t::sims_t::cluster_relations_t::clusters_exist() const
 
 
 calc_t::sims_t::Crel_t::Crel_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner) :
-                            cluster_relations_t(measurement,zaehler,nenner), logger(global_logger,__FILE__,"calc_t::sims_t::Crel_t")
+                            cluster_relations_t(measurement,zaehler,nenner), logger(__FILE__,"calc_t::sims_t::Crel_t")
 {
 }
 
@@ -149,7 +149,7 @@ const quantity::concentration_t calc_t::sims_t::Crel_t::from_sample_matrix_isoto
 /*******************************************************/
 
 calc_t::sims_t::Irel_t::Irel_t(const measurements_::sims_t& measurement, const cluster_t& zaehler, const cluster_t& nenner) :
-                                cluster_relations_t(measurement,zaehler,nenner), logger(global_logger,__FILE__,"calc_t::sims_t::Irel_t")
+                                cluster_relations_t(measurement,zaehler,nenner), logger(__FILE__,"calc_t::sims_t::Irel_t")
 {
 // 	zaehler_p;
 }
@@ -227,7 +227,7 @@ calc_t::sims_t::Crel_to_Irel_data_fit_routine_template::Crel_to_Irel_data_fit_ro
 																							   const quantity::map_t& Crel_to_Irel_map) :
 // 																							   zaehler_p(zaehler.isotopes), nenner_p(nenner.isotopes),
                                                                                                Crel_to_Irel_map(Crel_to_Irel_map), cluster_relations_copies_t(zaehler,nenner),
-                                                                                               logger(global_logger,__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fit_routine_template")
+                                                                                               logger(__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fit_routine_template")
 {
 }
 
@@ -290,7 +290,7 @@ calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t::Crel_to_Irel_data_polynomial
 // 																					   const std::pair<quantity::concentration_t, quantity::intensity_t> Crel_to_Irel_data, 
 																					   const quantity::map_t& Crel_to_Irel_map,
 																					   fit_functions::polynom_t polynom) : 
-                                        Crel_to_Irel_data_fit_routine_template(zaehler,nenner,Crel_to_Irel_map), logger(global_logger,__FILE__,"calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t"),
+                                        Crel_to_Irel_data_fit_routine_template(zaehler,nenner,Crel_to_Irel_map), logger(__FILE__,"calc_t::sims_t::Crel_to_Irel_data_polynomial_fit_t"),
 										polynom_p(polynom)
 {
 }
@@ -348,7 +348,7 @@ const quantity::concentration_t calc_t::sims_t::Crel_to_Irel_data_polynomial_fit
 calc_t::sims_t::Crel_to_Irel_data_fits_t::Crel_to_Irel_data_fits_t(const quantity::map_t& Crel_to_Irel_map, const cluster_t& zaehler, const cluster_t& nenner) :
 													Crel_to_Irel_map(Crel_to_Irel_map), 
                                                     cluster_relations_copies_t(zaehler,nenner),
-                                                    logger(global_logger,__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fits_t")
+                                                    logger(__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fits_t")
 // 													zaehler_p(zaehler.isotopes),nenner_p(nenner.isotopes)
 {
 }
@@ -374,7 +374,7 @@ calc_t::sims_t::Crel_to_Irel_data_collector_t::Crel_to_Irel_data_collector_t(con
 																				   const cluster_t& nenner,
 																				   const std::vector<measurements_::sims_t>& measurements) :
                                                                                    zaehler(zaehler), nenner(nenner),measurements(measurements),
-                                                                                   logger(global_logger,__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fits_t")
+                                                                                   logger(__FILE__,"calc_t::sims_t::Crel_to_Irel_data_fits_t")
 {
 }
 

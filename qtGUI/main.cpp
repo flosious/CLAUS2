@@ -26,14 +26,12 @@
 //global scope
 processor *claus = nullptr;
 //Logger global_logger = std::make_shared<logger_t>();
-Logger global_logger;
 
 //Logger global_logger;
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    global_logger = std::make_shared<logger_t>();
     processor KLAUS(tools::str::args_to_vec(argc, argv)); // processor needs a logger printing to std::cout
     //define global variable
     claus = &KLAUS;

@@ -29,7 +29,7 @@ bool mgroups_::mgroup_t::use_settings=true;
 
 mgroups_::mgroup_t::mgroup_t(measurements_::measurement_t& measurement) : 
                             olcdb(measurement.olcdb), group_id(measurement.group_id),
-                            logger(global_logger,__FILE__,"mgroups_::mgroup_t")
+                            logger(__FILE__,"mgroups_::mgroup_t")
 {
 }
 

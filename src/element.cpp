@@ -20,19 +20,18 @@
 #include "element.hpp"
 
 /*PSE singleton*/
-pse_t PSE(global_logger);
 
 /************************************/
 /*********     element_t       ******/
 /************************************/
 
-element_t::element_t() : logger(global_logger,__FILE__,"element_t")
+element_t::element_t() : logger(__FILE__,"element_t")
 {
 }
 
-element_t::element_t(std::string symbol_s, double abs_amount, bool use_natural_abundance) :symbol(symbol_s),substance_amount({abs_amount}), logger(global_logger,__FILE__,"element_t")
+element_t::element_t(std::string symbol_s, double abs_amount, bool use_natural_abundance) :symbol(symbol_s),substance_amount({abs_amount}), logger(__FILE__,"element_t")
 {
-	if (PSE.element(symbol_s)==nullptr)
+    if (pse_t::element(symbol_s)==nullptr)
 	{
         if (symbol_s!="")
         {
@@ -40,7 +39,7 @@ element_t::element_t(std::string symbol_s, double abs_amount, bool use_natural_a
         }
 		return;
 	}
-	for (auto& iso:PSE.element(symbol_s)->isotopes)
+    for (auto& iso:pse_t::element(symbol_s)->isotopes)
 	{
 		if (use_natural_abundance)
 			isotopes.push_back({symbol_s,iso.nucleons,iso.abundance,iso.abundance*abs_amount});
@@ -57,7 +56,7 @@ element_t::element_t(isotope_t isotope_s) : element_t(std::vector<isotope_t>{iso
 element_t::element_t(std::vector< isotope_t > isotopes_s) : 
 													isotopes(isotopes_s),
                                                     symbol(isotopes_s.at(0).symbol),
-                                                    logger(global_logger,__FILE__,"element_t")
+                                                    logger(__FILE__,"element_t")
 {
 // 	if (isotopes.size()==0) return;
 // 	substance_amount=isotopes.front().substance_amount;
@@ -105,7 +104,7 @@ const int element_t::protons()
         //logger::error("pse_t::element_t::protons() symbol is empty","abort");
 		return -1;
 	}
-	return PSE.element(symbol)->protons;
+    return pse_t::element(symbol)->protons;
 }
 
 // quantity::substance_amount_t& element_t::substance_amount() const
@@ -138,7 +137,7 @@ const quantity::mass_t element_t::mass()
 {
 	if (symbol!="" && isotopes.size()==0)
 	{
-		return quantity::mass_t({PSE.element(symbol)->mass()});
+        return quantity::mass_t({pse_t::element(symbol)->mass()});
 	}
 	quantity::mass_t mass_s({0});
 	for (int i=0;i<isotopes.size();i++)
