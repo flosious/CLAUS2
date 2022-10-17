@@ -70,7 +70,7 @@ public:
 /***********/	
 	friend class processor;
 private:
-    class_logger_t logger;
+    class_logger_t class_logger;
 	quantity::sputter_time_t total_sputter_time_s;
 	///calculates common X points from all clusters and sets sputter_depth_s and/or sputter_time
 	quantity::sputter_depth_t total_sputter_depths;

@@ -6,6 +6,6 @@ sed -i 's/`PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig pkg-config --cfla
 sed -i 's/-Wall//g' Makefile.*
 sed -i 's/-Wextra//g' Makefile.*
 echo "using $threads threads"
-make -j $threads
+time make -j $threads
 echo "used $threads threads"
 cp release/qtGUI.exe /home/florian/Sync/claus2/qtGUI2.exe

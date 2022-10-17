@@ -107,7 +107,7 @@ measurements_::sims_t::calc_t measurements_::sims_t::calc(bool overwrite)
 
 measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, std::string method, database_t& sql_wrapper, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
     measurement_t(filename,method,sql_wrapper), clusters(filecontents.clusters()), reference_isotopes(sample.matrix().isotopes()),
-    logger(__FILE__,"measurements_::sims_t")
+    class_logger(__FILE__,"measurements_::sims_t")
 {
 	crater.total_sputter_depths << filename.total_sputter_depths();
 	for (auto& tsd : total_sputter_dephs)
@@ -142,197 +142,6 @@ const std::string measurements_::sims_t::to_string_short(const std::string del) 
 	ss << measurement_t::to_string();
 	return ss.str();
 }
-
-//void measurements_::sims_t::plot_now(double sleep_sec)
-//{
-	
-//	plot_t plot;
-//	matrix_clusters_c MC = matrix_clusters();
-//	quantity::intensity_t ref_intensity = MC.intensity_sum();
-	
-//	plot.Y1.range(1,1E6,true);
-//	if (plot.Y3.range().stop<101)
-//		plot.Y3.range(0.01,105,false);
-//	else
-//		plot.Y3.range(0.01,plot.Y3.range().stop,false);
-	
-//	///X axis is sputter_depth
-//	if (crater.sputter_depth.is_set())
-//	{
-//		if (MC.clusters.size()>1 && ref_intensity.is_set())
-//			plot.Y1.add_curve(crater.sputter_depth,ref_intensity,MC.to_string());
-		
-//		for (auto& C: clusters)
-//		{
-//			if (C.intensity.is_set())
-//			{
-//				plot.Y1.add_curve(crater.sputter_depth,C.intensity,C.to_string());
-//			}
-//			if (C.concentration.is_set())
-//			{
-//				if (C.concentration.unit().base_units_exponents.relative)
-//				{
-//					if (C.abundance().is_set()) // elemental concentration output
-//					{
-//						for (const auto& iso : C.isotopes)
-//						{
-//							if (!iso.abundance.is_set())
-//								continue;
-//							plot.Y3.add_curve(crater.sputter_depth,(C.concentration/iso.abundance).change_unit(units::derived::atom_percent),iso.symbol);
-//							break; // error prone to clusters with more than 2 different isotopes
-//						}
-//					}
-//					else
-//						plot.Y3.add_curve(crater.sputter_depth,C.concentration.change_unit(units::derived::atom_percent),C.to_string());
-//				}
-//				else
-//					plot.Y2.add_curve(crater.sputter_depth,C.concentration,C.to_string());
-//			}
-//		}
-		
-//		double start_y2, stop_y2;
-//		if (plot.Y2.range().background_minimum()>=0)
-//			start_y2 = plot.Y2.range().background_minimum();
-//		else
-//			start_y2 = plot.Y2.range().start;
-//		stop_y2 = plot.Y2.range().stop;
-//		plot.Y2.range(start_y2,stop_y2,true);
-		
-//		//add some implant_parameters to the graph
-//		for (auto& C : clusters)
-//		{
-//			if (C.intensity.is_set())
-//			{
-//				//some implanted parameters
-//				if (C.implant_parameters.sputter_depth_at_min.is_set())
-//					plot.Y1.add_arrow(C.implant_parameters.sputter_depth_at_min.data().at(0),plot.Y1.range().start/1,C.implant_parameters.sputter_depth_at_min.data().at(0),plot.Y1.range().stop,"bA",C.to_string() + " intensity minimum"); // arrow at minimum position
-//// 				std::cout << std::endl << "C.implant_parameters.sputter_depth_at_min: " << C.implant_parameters.sputter_depth_at_min.to_string() << std::endl;
-//				//maybe print the fit polynom here? useful to determine the quality of the fit
-//			}
-//		}
-//	}
-	
-//	///X axis is sputter_time
-//	else if (crater.sputter_time.is_set())
-//	{
-//	}
-//	else
-//	{
-//        //logger::error("measurements_::sims_t::plot_now()","no X axis");
-//		return;
-//	}
-	
-//	plot.to_screen(to_string(),sleep_sec);
-	
-//	return;
-//}
-	
-// void measurements_::sims_t::plot_now_old(double sleep_sec)
-// {
-// 	plot_t plot;
-// 	quantity::quantity_t X;
-// 	if (crater.sputter_depth.is_set())
-// 	{
-// 		X = crater.sputter_depth.change_unit("nm");
-// 		if (!X.is_set())
-// 		{
-// 			logger::error("measurements_::sims_t::plot_now","can not change unit to nm", X.to_string());
-// 			X = crater.sputter_depth;
-// 		}
-// 		
-// 	}
-// 	else if (crater.sputter_time.is_set())
-// 		X = crater.sputter_time.change_unit("min");
-// 	else
-// 	{
-// 		logger::error("measurements_::sims_t::to_string", "neither sputter_time nor sputter_depth is set","","no plot");
-// 		return;
-// 	}
-// 	
-// // 	if (crater.sputter_current().is_set())
-// // 		plot.Y3.add_curve(X,crater.sputter_current().change_unit({"nA"}));
-// 	
-// 	plot.Y1.range(1,1E6,true);
-// 	if (plot.Y3.range().stop<101)
-// 		plot.Y3.range(0.01,105,false);
-// 	else
-// 		plot.Y3.range(0.01,plot.Y3.range().stop,false);
-// 	
-// 	matrix_clusters_c MC = matrix_clusters();
-// 	quantity::intensity_t ref_intensity = MC.intensity_sum();
-// 	if (MC.clusters.size()>1 && ref_intensity.is_set())
-// 		plot.Y1.add_curve(X,ref_intensity,MC.to_string());
-// 	quantity::concentration_t concentration_backgrounds;
-// 	for (auto& C: clusters)
-// 	{
-// 		auto calc_ = calc();
-// 		if (C.intensity.is_set())
-// 		{
-// 			plot.Y1.add_curve(X,C.intensity,C.to_string()); 
-// 			if (sample.implant(C.corresponding_isotope(reference_isotopes)).dose.is_set())
-// 			{
-// 				// unit is not same as unit(x)
-// // 				const auto implant_ = calc_.implant(C);
-// // 				quantity::quantity_t min = implant_.minimum_starting_position().change_unit(X.unit());
-// 				if (C.implant_parameters.sputter_depth_at_min.is_set())
-// 				{
-// 					plot.Y1.add_arrow(min.data().at(0),0.1,min.data().at(0),1E6,"bA",C.to_string() ); // arrow at minimum position
-// 					if (X.dimension()==quantity::dimensions::SI::time)
-// 					{
-// 						plot.Y1.add_curve(implant_.fitted_curve().X().change_unit(X.unit()),implant_.fitted_curve().Y(),C.to_string()+"_fitted");
-// 					}
-// 					else
-// 					{
-// 						const quantity::sputter_depth_t SD((implant_.fitted_curve().X()*implant_.SR()).change_unit(X.unit()));
-// 						plot.Y1.add_curve(SD,implant_.fitted_curve().Y(),C.to_string()+"_fitted_from_DB");
-// 					}
-// 				}
-// 			}
-// 		}
-// 		if (C.concentration.is_set())
-// 		{
-// 			if (C.concentration.unit().base_units_exponents.relative)
-// 			{
-// 				if (C.abundance().is_set()) // elemental concentration output
-// 				{
-// 					for (const auto& iso : C.isotopes)
-// 					{
-// 						if (!iso.abundance.is_set())
-// 							continue;
-// 						plot.Y3.add_curve(X,(C.concentration/iso.abundance).change_unit(units::derived::atom_percent),iso.symbol);
-// 						break; // error prone to clusters with more than 2 different isotopes
-// 					}
-// 				}
-// 				else
-// 					plot.Y3.add_curve(X,C.concentration.change_unit(units::derived::atom_percent),C.to_string());
-// 			}
-// 			else
-// 			{
-// 				plot.Y2.add_curve(X,C.concentration.change_unit(units::derived::atoms_per_ccm),C.to_string());
-// 				concentration_backgrounds << C.concentration_background().change_unit(units::derived::atoms_per_ccm);
-// 				if (sample.implant(C.corresponding_isotope(reference_isotopes)).dose.is_set())
-// 				{
-// 					const auto implant_ = calc_.implant(C);
-// 					auto max_pos = X.at(implant_.maximum_pos_index()*implant_.X_resolution_factor_());
-// 					plot.Y2.add_arrow(max_pos.data().at(0),plot.Y2.range().start,max_pos.data().at(0),plot.Y2.range().stop,"bA",C.to_string() +" from DB: " + C.concentration.at(implant_.maximum_pos_index()*implant_.X_resolution_factor_()).to_string_short()  + "\\@" + max_pos.to_string_short()  ); // arrow at minimum position
-// 					
-// 					/**/
-// // 					C.concentration.polyfit()
-// // 					plot.Y2.add_arrow();
-// 				}
-// 				
-// 			}
-// 		}
-// 	}
-// 	double start_y2, stop_y2;
-// 	if (concentration_backgrounds.is_set())
-// 		start_y2 = concentration_backgrounds.min().data().front();
-// 	else
-// 		start_y2 = plot.Y2.range().start;
-// 	stop_y2 = plot.Y2.range().stop;
-// 	plot.Y2.range(start_y2,stop_y2,true); 
-// 	plot.to_screen(to_string(),sleep_sec);
-// }
 
 void measurements_::sims_t:: export_origin_ascii(std::string path, const std::string delimiter)
 {
@@ -589,54 +398,60 @@ quantity::map_t measurements_::sims_t::intensity_vs_sputter_time(const cluster_t
 	return {crater.sputter_time,intensity(cluster)};
 }
 
-measurements_::sims_t measurements_::sims_t::change_resolution(quantity::sputter_depth_t sputter_depth_res)
+bool measurements_::sims_t::change_sputter_depth_resolution(quantity::sputter_depth_t sputter_depth_res)
 {
+    log_f;
 	if (!sputter_depth_res.is_set())
 	{
         //logger::error("measurements_::sims_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
-		return *this;
+        return false;
 	}
 	if (sputter_depth_res.data().size()==1 && sputter_depth_res.data().at(0)<=0)
 	{
         //logger::error("measurements_::sims_t::change_resolution","!sputter_depth_res is <= 0","","returning this");
-		return *this;
+        return false;
 	}
-	sims_t copy_M = *this;
+    auto copy_M = *this;
 	copy_M.crater = copy_M.crater.change_resolution(sputter_depth_res);
+    logger.debug("copy_M.crater.sputter_depth").value(copy_M.crater.sputter_depth.to_string_detailed());
 	if (!copy_M.crater.sputter_depth.is_set())
-		return copy_M;
+        return false;
 	for (auto& C: copy_M.clusters)
 	{
 		C = C.interpolate(copy_M.crater.sputter_depth,crater.sputter_depth);
+        if (!C.is_set())
+        {
+            return false;
+        }
 	}
-	
-	return copy_M;
+    *this = copy_M;
+    return true;
 }
-measurements_::sims_t measurements_::sims_t::change_resolution(quantity::sputter_time_t sputter_time_res)
+bool measurements_::sims_t::change_sputter_time_resolution(quantity::sputter_time_t sputter_time_res)
 {
 	if (!sputter_time_res.is_set())
 	{
         //logger::error("measurements_::sims_t::change_resolution","!sputter_time_res.is_set()","","returning this");
-		return *this;
+        return false;
 	}
 	if (sputter_time_res.data().size()==1 && sputter_time_res.data().at(0)<=0)
 	{
         //logger::error("measurements_::sims_t::change_resolution","!sputter_time_res is <= 0","","returning this");
-		return *this;
+        return false;
 	}
 	sims_t copy_M = *this;
 	copy_M.crater = copy_M.crater.change_resolution(sputter_time_res);
 	if (!copy_M.crater.sputter_time.is_set()) 
-		return copy_M;
+        return false;
 	for (auto& C: copy_M.clusters)
 	{
 		C = C.interpolate(copy_M.crater.sputter_time,crater.sputter_time);
 		if (!C.is_set())
 		{
-            //logger::error("measurements_::sims_t::change_resolution","could not interpolate " + C.to_string(),"returning *this");
-			return *this;
+            return false;
 		}
 	}
-	return copy_M;
+    *this = copy_M;
+    return true;
 }
 

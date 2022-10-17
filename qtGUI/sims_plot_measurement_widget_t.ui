@@ -38,12 +38,6 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="sims_plotwindow_t" name="sims_plot_window" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>1</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -56,7 +50,7 @@
        <item>
         <widget class="sims_plot_measurement_tree_t" name="clusters_tree">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -71,6 +65,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="clusters_button">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>

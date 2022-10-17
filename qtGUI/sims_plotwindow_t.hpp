@@ -25,6 +25,7 @@
 #include "../src/measurement.hpp"
 #include "../src/cluster.hpp"
 #include "../src/quantity.hpp"
+#include "../src/definitions.hpp"
 /*
     should allow multiple measurements (each may differenct clusters in size)
     carying about:
@@ -37,7 +38,7 @@ class sims_plotwindow_t : public QCustomPlot
 private:
     static const std::map<int, QColor> iterate_colors;
     static QColor get_color_from_graph_id(int graph_id);
-    class_logger_t logger;
+    class_logger_t class_logger;
     ///x-axis quantity; defines range of graph if value given
     quantity::quantity_t xAxis_quantity;
 public:

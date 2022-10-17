@@ -42,9 +42,12 @@ public slots:
     void on_clusters_button_clicked();
 signals:
     void auto_calc();
+private slots:
+    void on_splitter_3_splitterMoved(int pos, int index);
+
 private:
     Ui::sims_plot_measurement_widget_t *ui;
-    class_logger_t logger;
+    class_logger_t class_logger;
 };
 
 

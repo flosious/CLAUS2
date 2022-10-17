@@ -165,19 +165,19 @@ const std::string crater_t::sputter_beam_t::to_string(const std::string del) con
 /**************/
 /** CRATER_T **/
 /**************/
-crater_t::crater_t() : logger(__FILE__,"crater_t")
+crater_t::crater_t() : class_logger(__FILE__,"crater_t")
 {
 }
 
-crater_t::crater_t(const quantity::sputter_depth_t& sputter_depth) : sputter_depth(sputter_depth), logger(__FILE__,"crater_t")
+crater_t::crater_t(const quantity::sputter_depth_t& sputter_depth) : sputter_depth(sputter_depth), class_logger(__FILE__,"crater_t")
 {
 }
-crater_t::crater_t(const quantity::sputter_time_t& sputter_time) : sputter_time(sputter_time), logger(__FILE__,"crater_t")
+crater_t::crater_t(const quantity::sputter_time_t& sputter_time) : sputter_time(sputter_time), class_logger(__FILE__,"crater_t")
 {
 }
 
 crater_t::crater_t(const quantity::sputter_time_t& sputter_time, const quantity::sputter_depth_t& sputter_depth) : 
-    sputter_time(sputter_time), sputter_depth(sputter_depth), logger(__FILE__,"crater_t")
+    sputter_time(sputter_time), sputter_depth(sputter_depth), class_logger(__FILE__,"crater_t")
 {
 }
 
@@ -346,18 +346,21 @@ quantity::sputter_time_t crater_t::common_sputter_time(std::vector<cluster_t>& c
 
 crater_t crater_t::change_resolution(quantity::sputter_depth_t sputter_depth_res)
 {
+    log_f;
+    logger.debug("sputter_depth_res").enter();
 	if (!sputter_depth.is_set())
 	{
-        //logger::error("crater_t::change_resolution","!sputter_depth().is_set()","","returning this");
+        logger.error("sputter_depth").value("not set");
 		return *this;
 	}
 	if (!sputter_depth_res.is_set())
 	{
-        //logger::error("crater_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
+        logger.error("sputter_depth_res").value("not set");
 		return *this;
 	}
 	if (sputter_depth_res.data().size()==1 && sputter_depth_res.data().at(0)==0)
 	{
+        logger.error("sputter_depth_res").value("0");
         //logger::error("crater_t::change_resolution","!sputter_depth_res is 0","","returning this");
 		return *this;
 	}
@@ -374,18 +377,21 @@ crater_t crater_t::change_resolution(quantity::sputter_depth_t sputter_depth_res
 
 crater_t crater_t::change_resolution(quantity::sputter_time_t sputter_time_res)
 {
+    log_f;
+    logger.debug("sputter_time_res").enter();
 	if (!sputter_time.is_set())
 	{
-        //logger::error("crater_t::change_resolution","!sputter_depth().is_set()","","returning this");
+        logger.error("sputter_time").value("not set");
 		return *this;
 	}
 	if (!sputter_time_res.is_set())
 	{
-        //logger::error("crater_t::change_resolution","!sputter_depth_res.is_set()","","returning this");
+        logger.error("sputter_time_res").value("not set");
 		return *this;
 	}
 	if (sputter_time_res.data().size()==1 && sputter_time_res.data().at(0)==0)
 	{
+        logger.error("sputter_time_res").value("0");
         //logger::error("crater_t::change_resolution","!sputter_depth_res is 0","","returning this");
 		return *this;
 	}

@@ -120,7 +120,7 @@ public:
 	{
         friend class processor;
     private:
-        class_logger_t logger;
+        class_logger_t class_logger;
 	protected:
 		///some general data filters
 		class filter_t
@@ -408,8 +408,8 @@ public:
 		bool add(sims_t& measurement);
 		
 		//changes sputter_time axis and all others accordingly
-		sims_t change_resolution(quantity::sputter_time_t sputter_time_res);
-		sims_t change_resolution(quantity::sputter_depth_t sputter_depth_res);
+        bool change_sputter_time_resolution(quantity::sputter_time_t sputter_time_res);
+        bool change_sputter_depth_resolution(quantity::sputter_depth_t sputter_depth_res);
 		
 		crater_t crater;
 		std::vector<cluster_t> clusters;

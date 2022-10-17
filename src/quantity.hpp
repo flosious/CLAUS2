@@ -144,7 +144,8 @@ namespace quantity
 
 		quantity_t resolution(double new_res=0)  const;
 
-		quantity_t change_resolution(quantity_t new_res) const;
+        quantity_t change_resolution(quantity_t new_res) const;
+        quantity_t change_resolution(double start, double step, double stop=-1) const;
 		quantity_t change_resolution(unsigned int new_data_size) const;
 // 		const unit_t& unit() const;
 // 		const unit_t unit_copy() const;
@@ -161,7 +162,8 @@ namespace quantity
 		quantity_t at(unsigned int start_pos, unsigned int end_pos) const;
 		
 		bool operator>(quantity_t obj) const;
-		bool operator>=(quantity_t obj) const;
+        bool operator>=(quantity_t obj) const;
+        bool operator<=(quantity_t obj) const;
 		bool operator<(quantity_t obj) const;
 		bool operator==(quantity_t obj) const;
 		bool operator!=(quantity_t obj) const;
@@ -261,7 +263,12 @@ namespace quantity
 		quantity_t integrate(const quantity_t& x_data,const quantity_t& x_data_start) const;
 		/// point by point integration
         quantity_t integrate_pbp(const quantity_t& x_data);
+        ///round mathimatically correct
         quantity_t round_(const unsigned int decimals=0) const;
+        ///round up
+        quantity_t ceil_(const unsigned int decimals=0) const;
+        //round down
+        quantity_t floor_(const unsigned int decimals=0) const;
 		quantity_t diff() const;
 		quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
 		quantity_t fit_polynom_by_x_data(const quantity_t& x_data, quantity_t new_x_data, int polynom_grade=17 ) const;

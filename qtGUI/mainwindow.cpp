@@ -344,7 +344,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     log_f;
     if (index==7) // log tab
     {
-        logger.debug("this").enter();
+        logger.debug(std::to_string(index)).enter();
         ui->tab_log_table->update();
     }
 }
@@ -384,18 +384,34 @@ void MainWindow::auto_calc()
         calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
         // SF + RSF
         calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
-        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
+        calc.SFs.from_RSF_median_ref().SFs.from_implant_max();
+//        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
         // C
         calc.concentrations.from_SF();
-        /*exporting*/
 
+        /*change numerical sputter_depth resolution*/
+        for (auto& M : MG.measurements_p)
+        {
+            if (!M.crater.sputter_depth.is_set())
+                continue;
+            auto new_SD_res = M.crater.sputter_depth.change_resolution(M.crater.sputter_depth.min().ceil_().data().front(),1,M.crater.sputter_depth.max().floor_().data().front());
+            if (new_SD_res.is_set())
+            {
+                if (M.change_sputter_depth_resolution(new_SD_res))
+                    logger.info("new_SD_res").value(new_SD_res.resolution().to_string_short());
+                else
+                    logger.info("new_SD_res").value("could not change res to: " + new_SD_res.resolution().to_string_short());
+            }
+        }
+
+        /*exporting*/
         std::string export_path = ui->tofsims_export_directory_textEdit->toPlainText().toStdString();
         if (export_path=="")
             export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
 //        if (export_path=="")
 //            export_path = ui->tofsims_export_directory_textEdit->placeholderText().toStdString();
         export_path = tools::file::check_directory_string(export_path);
-        logger.info(MG.to_string()).signal("exporting to: " + export_path);
+        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
         MG.export_origin_ascii(export_path);
     }
 
@@ -432,9 +448,26 @@ void MainWindow::auto_calc()
         calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
         // SF + RSF
         calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
-        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
+        calc.SFs.from_RSF_median_ref().SFs.from_implant_max(); //median
+//        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
         // C
         calc.concentrations.from_SF();
+
+        /*change numerical sputter_depth resolution*/
+        for (auto& M : MG.measurements_p)
+        {
+            if (!M.crater.sputter_depth.is_set())
+                continue;
+            auto new_SD_res = M.crater.sputter_depth.change_resolution(M.crater.sputter_depth.min().ceil_().data().front(),1,M.crater.sputter_depth.max().floor_().data().front());
+            if (new_SD_res.is_set())
+            {
+                if (M.change_sputter_depth_resolution(new_SD_res))
+                    logger.info("new_SD_res").value(new_SD_res.resolution().to_string_short());
+                else
+                    logger.info("new_SD_res").value("could not change res to: " + new_SD_res.resolution().to_string_short());
+            }
+        }
+
         /*exporting*/
         std::string export_path = ui->dsims_export_directory_textEdit->toPlainText().toStdString();
         if (export_path=="")
@@ -444,7 +477,7 @@ void MainWindow::auto_calc()
 //            export_path = ui->dsims_export_directory_textEdit->placeholderText().toStdString();
 
         export_path = tools::file::check_directory_string(export_path);
-        logger.info(MG.to_string()).signal("exporting to: " + export_path);
+        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
         MG.export_origin_ascii(export_path);
     }
 }

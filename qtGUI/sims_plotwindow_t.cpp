@@ -35,14 +35,18 @@ const std::map<int, QColor> sims_plotwindow_t::iterate_colors
     { 9,QColor(255/1,    255/2,  255/2)}
 };
 
-sims_plotwindow_t::sims_plotwindow_t(QWidget *parent) : logger(__FILE__,"sims_plotwindow_t")
+sims_plotwindow_t::sims_plotwindow_t(QWidget *parent) : QCustomPlot(parent), class_logger(__FILE__,"sims_plotwindow_t")
 {
 //    axisRect()->axis(QCPAxis::atLeft, 1);
+    setInteraction(QCP::iRangeDrag,true);
+    setInteraction(QCP::iRangeZoom,true);
+    setInteraction(QCP::iSelectPlottables);
+    setSelectionRectMode(QCP::srmZoom);
 }
 
 QColor sims_plotwindow_t::get_color_from_graph_id(int graph_id)
 {
-    return iterate_colors.at(graph_id%10);
+    return iterate_colors.at(graph_id % iterate_colors.size());
 }
 
 void sims_plotwindow_t::set_xAxis_quantity(const quantity::quantity_t& X)
@@ -58,13 +62,7 @@ void sims_plotwindow_t::set_xAxis_quantity(const quantity::quantity_t& X)
 
 int sims_plotwindow_t::add_Y_quantity(const quantity::quantity_t& Y)
 {
-    // intensity axis
-    yAxis->setScaleType(QCPAxis::stLogarithmic);
-    yAxis->setRange(1, 1E6);
-    QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
-    yAxis->setTicker(logTicker);
-    // concentration axis
-    yAxis2->setScaleType(QCPAxis::stLogarithmic);
+    log_f;
 
     int graph_id = -1;
     if (!Y.is_set() )
@@ -84,6 +82,7 @@ int sims_plotwindow_t::add_Y_quantity(const quantity::quantity_t& Y)
     {
         addGraph(xAxis, yAxis); // left + bottom
         graph_id = graphCount()-1;
+        logger.debug(Y.to_string()).signal("added to graph",15,"graph_id="+ std::to_string(graph_id) + " xAxis1; yAxis1");
 //        graph(graph_id)->
 //        graph(graph_id)->setPen(QColor(50, 50, 50, 255));
 //        graph(graph_id)->setLineStyle(QCPGraph::lsNone);
@@ -97,6 +96,7 @@ int sims_plotwindow_t::add_Y_quantity(const quantity::quantity_t& Y)
     {
         addGraph(xAxis, yAxis2); // right + bottom
         graph_id = graphCount()-1;
+        logger.debug(Y.to_string()).signal("added to graph",15,"graph_id="+ std::to_string(graph_id) + " xAxis1; yAxis2");
 //        graph(graph_id)->setPen(QColor(50, 50, 50, 255));
 //        graph(graph_id)->setLineStyle(QCPGraph::lsNone);
 //        graph(graph_id)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 4));
@@ -104,13 +104,27 @@ int sims_plotwindow_t::add_Y_quantity(const quantity::quantity_t& Y)
 //        graph(graph_id)->setData(QVector<double>::fromStdVector(xAxis_quantity.data()),QVector<double>::fromStdVector(Y.data()));
 //        graph(graph_id)->rescaleAxes();
     }
-    logger.debug(__func__,Y.to_string_short()).value("graph_id="+ std::to_string(graph_id));
+    else
+    {
+        logger.error(Y.to_string()).signal("could not add; unknown Axis");
+    }
     if (graph_id>=0)
     {
         graph(graph_id)->setName(Y.name().c_str());
         graph(graph_id)->setData(QVector<double>::fromStdVector(xAxis_quantity.data()), QVector<double>::fromStdVector(Y.data()) );
         graph(graph_id)->setPen(get_color_from_graph_id(graph_id));
+
+        // intensity axis
+        yAxis->setScaleType(QCPAxis::stLogarithmic);
+        yAxis->setRange(1, 1E6);
+        QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
+        yAxis->setTicker(logTicker);
+        // concentration
+        yAxis2->setScaleType(QCPAxis::stLogarithmic);
+        yAxis2->rescale();
+
         replot();
     }
+
     return graph_id;
 }

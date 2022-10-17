@@ -261,14 +261,39 @@ quantity::quantity_t quantity::quantity_t::polyfit(const fit_functions::polynom_
 
 quantity::quantity_t quantity::quantity_t::round_(const unsigned int decimals) const
 {
-	if (!is_set()) 
-		return {};
-	auto data_c = data_s;
-	const double multiplier = pow(10,decimals);
-	for (auto& d : data_c)
+    if (!is_set())
+        return {};
+    auto data_c = data_s;
+    const double multiplier = pow(10,decimals);
+    for (auto& d : data_c)
         d = round(d*multiplier)/multiplier;
-// 	operations_history_s.push_back("round");
-	return {*this,data_c,"round"};
+
+    return {*this,data_c,"round"};
+}
+
+quantity::quantity_t quantity::quantity_t::ceil_(const unsigned int decimals) const
+{
+    if (!is_set())
+        return {};
+    auto data_c = data_s;
+    const double multiplier = pow(10,decimals);
+    for (auto& d : data_c)
+        d = ceil(d*multiplier)/multiplier;
+
+    return {*this,data_c,"ceil"};
+}
+
+
+quantity::quantity_t quantity::quantity_t::floor_(const unsigned int decimals) const
+{
+    if (!is_set())
+        return {};
+    auto data_c = data_s;
+    const double multiplier = pow(10,decimals);
+    for (auto& d : data_c)
+        d = floor(d*multiplier)/multiplier;
+
+    return {*this,data_c,"floor"};
 }
 
 quantity::quantity_t quantity::quantity_t::diff() const
@@ -906,10 +931,6 @@ quantity::quantity_t quantity::quantity_t::change_resolution(quantity_t new_res)
 // 		logger::error("quantity::quantity_t::change_resolution()","name != new_res.name",name + "!=" + new_res.name,"returning empty");
 // 		return {};
 // 	}
-	if (new_res.data().size()!=1)
-    {
-        //logger::debug(13,"quantity::quantity_t::change_resolution()","new_res.data.size()!=1",tools::to_string(new_res.data().size()));
-    }
 
 	if (!new_res.is_set())
 	{
@@ -922,9 +943,43 @@ quantity::quantity_t quantity::quantity_t::change_resolution(quantity_t new_res)
         //logger::debug(13,"quantity::quantity_t::resolution()","!old_Q.is_set()","","returning empty");
 		return {};
 	}
+
+    if (new_res.data().size()>1)
+    {
+        if ((new_res.min() >= min()) && (new_res.max() <= max()) )
+            return new_res;
+        else
+            return {};
+    }
+
     //logger::debug(13,"quantity::quantity_t::resolution()","new_res",new_res.to_string());
 // 	return resolution(new_res.data.front());
 	return resolution(new_res.data_s.front());
+}
+
+
+quantity::quantity_t quantity::quantity_t::change_resolution(double start, double step, double stop) const
+{
+    if (!is_set())
+        return {};
+    if (step<=0)
+        return {};
+    if (start < min().data().front())
+        return {};
+    if (stop > max().data().front())
+        return {};
+    if (start == stop)
+        return {};
+
+    if (stop <= 0)
+    {
+        stop = max().floor_().data().front();
+    }
+    int new_size = floor((stop-start)/step)+1;
+    std::vector<double> new_data(new_size);
+    for (int i=0;i<new_size;i++)
+        new_data.at(i) = i*step + start;
+    return {*this,new_data,"resolutiion"};
 }
 
 quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
@@ -945,11 +1000,11 @@ quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
 	int new_size = floor((max-min)/new_res)+1;
 	
 	std::vector<double> new_data(new_size);
-	for (int i=0;i<new_size;i++)
-		new_data.at(i) = i*new_res + min;
+    for (int i=0;i<new_size;i++)
+        new_data.at(i) = i*new_res + min;
 // 	data_s = new_data;
 // 	operations_history_s.push_back("resolutiion");
-	return {*this,new_data,"resolutiion"};;
+    return {*this,new_data,"resolution"};
 }
 
 const std::string quantity::quantity_t::to_string_short() const
@@ -1321,6 +1376,13 @@ bool quantity::quantity_t::operator>=(quantity_t obj) const
 	if (*this>obj)
 		return true;
 	return false;
+}
+
+bool quantity::quantity_t::operator<=(quantity_t obj) const
+{
+    if ((*this < obj ) || (*this == obj))
+        return true;
+    return false;
 }
 
 bool quantity::quantity_t::operator>(quantity_t obj) const

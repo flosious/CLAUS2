@@ -1,6 +1,6 @@
 
 /*
-	Copyright (C) 2021 Florian Bärwolf
+    Copyright (C) 2021-2022 Florian Bärwolf
 	floribaer@gmx.de
 
     This program is free software: you can redistribute it and/or modify
@@ -42,35 +42,5 @@
 
 //used in a class function to start logging
 #define log_f function_logger_t logger(class_logger, __func__);
-
-// namespace 
-// {
-// #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
-// 	const std::string PATH_DELIMITER = "\\";
-// 	const std::string LINE_DELIMITER = "\r\n";
-// #elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
-// 	const std::string PATH_DELIMITER = "/";
-// 	const std::string LINE_DELIMITER = "\n";
-// #endif
-// 	const std::string FILE_TYPE_DELIMITER = ".";
-// };
-
-/*
-class definitions_t
-{
-public:
-	bool olcdbid;
-	bool lot;
-	bool lot_split;
-	bool wafer;
-	bool chip;
-	bool monitor;
-	bool group;
-	bool repition;
-	bool simple_name;
-	definitions_t(bool olcdbid_s, bool lot_s, bool lot_split_s, bool wafer_s, bool monitor_s, bool chip_s, bool group_s, bool repetition_s, bool simple_name_s);
-	
-// 	const bool operator==(const file_t::name_t& obj1, const file_t::name_t& obj2) const;
-};*/
 
 #endif // DEFINITIONS_T

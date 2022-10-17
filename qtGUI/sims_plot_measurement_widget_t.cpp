@@ -21,7 +21,7 @@
 
 sims_plot_measurement_widget_t::sims_plot_measurement_widget_t(QWidget *parent) :
     QWidget(parent),
-    logger(__FILE__,"sims_plot_measurement_widget_t"),
+    class_logger(__FILE__,"sims_plot_measurement_widget_t"),
     ui(new Ui::sims_plot_measurement_widget_t)
 {
     ui->setupUi(this);
@@ -37,11 +37,18 @@ sims_plot_measurement_widget_t::~sims_plot_measurement_widget_t()
 
 void sims_plot_measurement_widget_t::update(measurements_::sims_t* new_measurement)
 {
-    logger.debug(__func__,"new_measurement").signal(new_measurement->to_string_short());
+    class_logger.debug(__func__,"new_measurement").signal(new_measurement->to_string_short());
     ui->clusters_tree->set_measurement(new_measurement);
 }
 
 void sims_plot_measurement_widget_t::on_clusters_button_clicked()
 {
     auto_calc();
+}
+
+void sims_plot_measurement_widget_t::on_splitter_3_splitterMoved(int pos, int index)
+{
+    log_f;
+    logger.debug("sims_plot_window").signal("replot");
+    ui->sims_plot_window->replot();
 }

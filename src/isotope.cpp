@@ -139,7 +139,7 @@ void isotope_t::set_natural_abundance_from_PSE()
     if (!is_set())
         return;
     auto iso_in_pse = pse_t::isotope(symbol,nucleons);
-    if (iso_in_pse =nullptr)
+    if (iso_in_pse == nullptr)
     {
         //logger::error("isotope_t::set_natural_abundance_from_pse_t::,"could not find isotope in pse_t:: " + to_string());
         return;
