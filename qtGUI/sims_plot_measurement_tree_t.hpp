@@ -72,25 +72,43 @@ private:
     QStandardItem* item(quantity::quantity_t& quantity, column_t col);
     QStandardItem* item(cluster_t& cluster, column_t col);
 
-    sims_plotwindow_t* sims_plot_window = nullptr;
+    sims_plotwindow_t* sims_plotwindow = nullptr;
     ///false if nullptr
     bool is_plot_window() const;
     ///false if nullptr
     bool is_measurement() const;
     void set_model();
-    void update_sims_plot_window();
+    void update_sims_plotwindow();
     void graph_id_from_Qindex(const QModelIndex& idx);
     void set_header();
 //    void add_quantity_to_plot(quantity::quantity_t* quantity);
 //    void remove_quantity_from_plot(quantity::quantity_t* quantity);
+    class x_axis_t
+    {
+    private:
+        enum class options{sputter_time,sputter_depth,sputter_points,LAST};
+        options option = options::sputter_time;
+    public:
+        quantity::quantity_t quantity(const measurements_::sims_t& measurement) const;
+        ///toggles sputter_time on
+        ///
+        void use_sputter_time();
+        ///toggles sputter_depth on
+        void use_sputter_depth();
+        ///toggles sputter_points on
+        void use_number_of_points();
+    };
+
+    x_axis_t x_axis;
 public:
     sims_plot_measurement_tree_t(QWidget *parent = nullptr);
+
     void update();
     ///clears the graph; sets the measurement_pointer to NULL
     void unset_measurement();
-    void set_sims_plot_window(sims_plotwindow_t* sims_plot_window_s);
+    void set_sims_plotwindow(sims_plotwindow_t* sims_plotwindow_s);
 public slots:
-    ///set sims_plot_window to new_measurement
+    ///set sims_plotwindow to new_measurement
     void set_measurement(measurements_::sims_t* new_measurement);
 signals:
     ///updates MG_tab_measurement_plotwindow

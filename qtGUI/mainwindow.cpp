@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->files_treeView, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
     QObject::connect(ui->measurements_treeView, SIGNAL(update_mgroups_treeview()), ui->mgroups_treeview, SLOT(update()));
     QObject::connect(ui->mgroups_treeview, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
-    QObject::connect(ui->sims_plot_measurement_widget, SIGNAL(auto_calc()),this, SLOT(auto_calc()) );
+
 //    QObject::connect(ui->mgroups_treeview, SIGNAL(set_measurement_in_sims_plot_measurement_tree),ui->sims_plot_measurement_widget,SLOT(set_measurement));
 
 //    ui->mgroups_treeview->header()->setStretchLastSection(false);
@@ -311,16 +311,28 @@ void MainWindow::on_measurements_treeView_customContextMenuRequested(const QPoin
 
 void MainWindow::on_mgroups_treeview_clicked(const QModelIndex &index)
 {
+    log_f;
     measurements_::sims_t* M = nullptr;
+//    index.row();
+//    index.siblingAtColumn(0);
+    logger.debug("dsims").enter();
+    ui->mgroups_treeview->dsims_section.show_selection_in_log({index.siblingAtColumn(0)});
+    logger.debug("tofsims").enter();
+    ui->mgroups_treeview->tofsims_section.show_selection_in_log({index.siblingAtColumn(0)});
 
-    M = ui->mgroups_treeview->dsims_section.get_measurement_from_QIndex(index);
+//    ui->mgroups_treeview->expand(index);
+
+
+    M = ui->mgroups_treeview->dsims_section.get_measurement_from_QIndex(index.siblingAtColumn(0));
     if (M!=nullptr)
     {
         ui->sims_plot_measurement_widget->update(M);
         return;
     }
 
-    M = ui->mgroups_treeview->tofsims_section.get_measurement_from_QIndex(index);
+
+
+    M = ui->mgroups_treeview->tofsims_section.get_measurement_from_QIndex(index.siblingAtColumn(0));
     if (M!=nullptr)
     {
         ui->sims_plot_measurement_widget->update(M);
@@ -349,7 +361,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     }
 }
 
-void MainWindow::auto_calc()
+void MainWindow::on_calc_button_clicked()
 {
     log_f;
     /*tof sims*/
@@ -384,8 +396,8 @@ void MainWindow::auto_calc()
         calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
         // SF + RSF
         calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
-        calc.SFs.from_RSF_median_ref().SFs.from_implant_max();
-//        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
+//        calc.SFs.from_RSF_median_ref().SFs.from_implant_max();
+        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
         // C
         calc.concentrations.from_SF();
 
@@ -394,7 +406,7 @@ void MainWindow::auto_calc()
         {
             if (!M.crater.sputter_depth.is_set())
                 continue;
-            auto new_SD_res = M.crater.sputter_depth.change_resolution(M.crater.sputter_depth.min().ceil_().data().front(),1,M.crater.sputter_depth.max().floor_().data().front());
+            auto new_SD_res = M.crater.sputter_depth.change_resolution(M.crater.sputter_depth.min().ceil_().data().front(),0.1,M.crater.sputter_depth.max().floor_().data().front());
             if (new_SD_res.is_set())
             {
                 if (M.change_sputter_depth_resolution(new_SD_res))
@@ -403,16 +415,6 @@ void MainWindow::auto_calc()
                     logger.info("new_SD_res").value("could not change res to: " + new_SD_res.resolution().to_string_short());
             }
         }
-
-        /*exporting*/
-        std::string export_path = ui->tofsims_export_directory_textEdit->toPlainText().toStdString();
-        if (export_path=="")
-            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
-//        if (export_path=="")
-//            export_path = ui->tofsims_export_directory_textEdit->placeholderText().toStdString();
-        export_path = tools::file::check_directory_string(export_path);
-        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
-        MG.export_origin_ascii(export_path);
     }
 
 
@@ -448,8 +450,8 @@ void MainWindow::auto_calc()
         calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
         // SF + RSF
         calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
-        calc.SFs.from_RSF_median_ref().SFs.from_implant_max(); //median
-//        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
+//        calc.SFs.from_RSF_median_ref().SFs.from_implant_max(); //median
+        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
         // C
         calc.concentrations.from_SF();
 
@@ -458,7 +460,7 @@ void MainWindow::auto_calc()
         {
             if (!M.crater.sputter_depth.is_set())
                 continue;
-            auto new_SD_res = M.crater.sputter_depth.change_resolution(M.crater.sputter_depth.min().ceil_().data().front(),1,M.crater.sputter_depth.max().floor_().data().front());
+            auto new_SD_res = M.crater.sputter_depth.change_resolution(M.crater.sputter_depth.min().ceil_().data().front(),0.1,M.crater.sputter_depth.max().floor_().data().front());
             if (new_SD_res.is_set())
             {
                 if (M.change_sputter_depth_resolution(new_SD_res))
@@ -467,17 +469,39 @@ void MainWindow::auto_calc()
                     logger.info("new_SD_res").value("could not change res to: " + new_SD_res.resolution().to_string_short());
             }
         }
+    }
+}
 
-        /*exporting*/
+void MainWindow::on_export_button_clicked()
+{
+    log_f;
+
+    /*tof sims*/
+    for (auto& MG : claus->tofsims.mgroups)
+    {
+        std::string export_path = ui->tofsims_export_directory_textEdit->toPlainText().toStdString();
+        if (export_path=="")
+            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
+//        if (export_path=="")
+//            export_path = ui->tofsims_export_directory_textEdit->placeholderText().toStdString();
+        export_path = tools::file::check_directory_string(export_path);
+        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
+        MG.export_origin_ascii(export_path);
+    }
+
+    /*D sims*/
+    for (auto& MG : claus->dsims.mgroups)
+    {
         std::string export_path = ui->dsims_export_directory_textEdit->toPlainText().toStdString();
         if (export_path=="")
             export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
 
-//        if (export_path=="")
-//            export_path = ui->dsims_export_directory_textEdit->placeholderText().toStdString();
+    //        if (export_path=="")
+    //            export_path = ui->dsims_export_directory_textEdit->placeholderText().toStdString();
 
         export_path = tools::file::check_directory_string(export_path);
         logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
         MG.export_origin_ascii(export_path);
     }
+
 }

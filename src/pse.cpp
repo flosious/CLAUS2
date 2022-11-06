@@ -238,7 +238,7 @@ bool pse_t::load_file()
 	if (contents.size()==0)
 	{
         //logger::fatal("pse_t::load_file()",filename,"lot loadable", "dying...");
-//        logger.fatal(__func__,"PSE").signal("could not load PSE from file");
+        logger.fatal("PSE").signal("could not load PSE from file");
 		exit (EXIT_FAILURE);
 		return false;
 	}

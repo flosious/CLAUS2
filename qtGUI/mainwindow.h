@@ -71,6 +71,10 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
+    void on_calc_button_clicked();
+
+    void on_export_button_clicked();
+
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
@@ -79,7 +83,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 public slots:
-    void auto_calc();
+
 
 };
 

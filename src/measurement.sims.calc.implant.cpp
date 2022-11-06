@@ -22,12 +22,13 @@
 /*******       measurements_::sims_t::calc_t::implant_c::quantity_c        *********/
 /***********************************************************************************/
 
-measurements_::sims_t::calc_t::implant_c::quantity_c::quantity_c(const quantity::quantity_t& Y) :Y(Y), logger(__FILE__,"measurements_::sims_t::calc_t::implant_c::quantity_c")
+measurements_::sims_t::calc_t::implant_c::quantity_c::quantity_c(const quantity::quantity_t& Y) :Y(Y), class_logger(__FILE__,"measurements_::sims_t::calc_t::implant_c::quantity_c")
 {
 }
 
 unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index_position()
 {
+    log_f;
 	if (minimum_index_position_p>=0)
 		return minimum_index_position_p;
 	
@@ -36,17 +37,17 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 	if (!Y.is_set() || Y.data().size()<5)
 		return minimum_index_position_p;
 	
-    logger.debug(__func__,"Y.data.size()").value(Y.data().size());
+    logger.debug("Y.data.size()").value(Y.data().size());
 
 	int start, stop;
 	if (!Y.is_set())
 		return 0;
 	auto coarse_minimum = minimum_index_position_coarse();
-    logger.debug(__func__,"coarse_minimum").value(coarse_minimum);
+    logger.debug("coarse_minimum").value(coarse_minimum);
 	auto coarse_max_right = Y.get_data_by_index(coarse_minimum,Y.data().size()-1).max_idx() + coarse_minimum;
-    logger.debug(__func__,"coarse_max_right").value(coarse_max_right);
+    logger.debug("coarse_max_right").value(coarse_max_right);
 	auto coarse_max_left = Y.get_data_by_index(0,coarse_minimum).max_idx();
-    logger.debug(__func__,"coarse_max_left").value(coarse_max_left);
+    logger.debug("coarse_max_left").value(coarse_max_left);
     if (coarse_max_left==-1)
         coarse_max_left=0;
     if (coarse_max_left >= coarse_minimum)
@@ -55,11 +56,11 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 		start = coarse_max_left;
 	
 	stop = coarse_max_right;
-    logger.debug(__func__,"start").value(start);
-    logger.debug(__func__,"stop").value(stop);
+    logger.debug("start").value(start);
+    logger.debug("stop").value(stop);
 
     const auto cut_Y_polynom = Y.get_data_by_index(start, stop).log10().polynom(7);
-    logger.debug(__func__,"cut_Y_polynom.gof").value(cut_Y_polynom.gof());
+    logger.debug("cut_Y_polynom.gof").value(cut_Y_polynom.gof());
     if (isnan(cut_Y_polynom.gof()) || cut_Y_polynom.gof()<0.3) // bad fit; probably very wide (big distance) local minimum
     {
         return coarse_max_left;
@@ -69,9 +70,9 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::minimum_index
 		return coarse_minimum;
 	
 	auto min_pos_finer = cut_Y.min_idx()+start;
-    logger.debug(__func__,"min_pos_finer").value(min_pos_finer);
+    logger.debug("min_pos_finer").value(min_pos_finer);
     auto min_pos_finest = Y.get_data_by_index(min_pos_finer*3/4 , min_pos_finer*5/4).polyfit(2).min_idx() + min_pos_finer*3/4; // this polyfit can be a very bad fit!!! not checked!!!
-    logger.debug(__func__,"min_pos_finest").value(min_pos_finest);
+    logger.debug("min_pos_finest").value(min_pos_finest,10,Y.at(min_pos_finest).to_string());
 	
     if (min_pos_finest<0)
         min_pos_finest=0;
@@ -142,6 +143,7 @@ quantity::quantity_t measurements_::sims_t::calc_t::implant_c::quantity_c::minim
 
 unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_index_position()
 {
+    log_f;
 	if (maximum_index_position_p >= 0)
 		return maximum_index_position_p;
 	
@@ -150,26 +152,26 @@ unsigned int measurements_::sims_t::calc_t::implant_c::quantity_c::maximum_index
 	if (!Y.is_set() || Y.data().size()<5)
 		return maximum_index_position_p;
 	
-    logger.debug(__func__,"this").enter(15,Y.data().size());
+    logger.debug("this").enter(15,Y.data().size());
     auto min = minimum_index_position();
-    logger.debug(__func__,"minimum_index_position()").value(min);
-	/// get the rough position of the maximum
+    logger.debug("minimum_index_position()").value(min);
+    /// get the rough position of the maximum
     maximum_index_position_p = statistics::get_max_index_from_Y(Y.remove_data_from_begin(min).polyfit(17).data()) + min;
-    logger.debug(__func__,"maximum_index_position_p(rough)").value(maximum_index_position_p);
+    logger.debug("maximum_index_position_p(rough)").value(maximum_index_position_p);
 
 
 	int delta = (maximum_index_position_p - minimum_index_position())*8/10;
 	int stop_idx = maximum_index_position_p + delta;
 	unsigned int start_idx = maximum_index_position_p - delta;
-    logger.debug(__func__,"delta(fine)").value(delta);
-    logger.debug(__func__,"stop_idx(fine)").value(delta);
-    logger.debug(__func__,"start_idx(fine)").value(delta);
+    logger.debug("delta(fine)").value(delta);
+    logger.debug("stop_idx(fine)").value(stop_idx);
+    logger.debug("start_idx(fine)").value(start_idx);
 	auto reduced_q = Y.get_data_by_index(start_idx,stop_idx);
-    logger.debug(__func__,"reduced_q").value(reduced_q.to_string());
+    logger.debug("reduced_q").value(reduced_q.to_string());
 	auto intensity_poly6 = reduced_q.polyfit(6);
 	/// get fine position of the maximum
-	maximum_index_position_p = statistics::get_max_index_from_Y(intensity_poly6.data());
-    logger.debug(__func__,"maximum_index_position_p(fine)").value(maximum_index_position_p);
+    maximum_index_position_p = statistics::get_max_index_from_Y(intensity_poly6.data())+start_idx;
+    logger.debug("maximum_index_position_p(fine)").value(maximum_index_position_p,10,Y.at(maximum_index_position_p).to_string());
 	//debugging
 //	double seconds_for_fit_plot=0;
 //	if (seconds_for_fit_plot>=0)
@@ -346,7 +348,7 @@ bool measurements_::sims_t::calc_t::implant_c::map_c::has_sufficient_implant_are
 
 measurements_::sims_t::calc_t::implant_c::implant_c(sims_t& M, cluster_t& cluster, double X_resolution_factor) :
     implant_parameters(M.sample.implant(cluster.corresponding_isotope(M.reference_isotopes))), M(M), cluster(cluster), X_resolution_factor(X_resolution_factor),
-    logger(__FILE__,"measurements_::sims_t::calc_t::implant_c")
+    class_logger(__FILE__,"measurements_::sims_t::calc_t::implant_c")
 {
 // 	auto mapper = M.concentration_vs_sputter_depth(cluster);
 // 	if (mapper.is_set())
@@ -420,6 +422,7 @@ quantity::dose_t measurements_::sims_t::calc_t::implant_c::dose()
 }
 quantity::SR_t measurements_::sims_t::calc_t::implant_c::SR_from_max()
 {
+    log_f;
 	quantity::quantity_t ST_at_max;
 	if (!implant_parameters.depth_at_concentration_maxium.is_set())
 		return {};
@@ -430,8 +433,10 @@ quantity::SR_t measurements_::sims_t::calc_t::implant_c::SR_from_max()
 	
 	if (ST_at_max.is_set() && !cluster.implant_parameters.sputter_time_at_max.is_set())
 			cluster.implant_parameters.sputter_time_at_max = ST_at_max;
-	
-	
+
+    logger.info("I_vs_ST().minimum_pos()").value(I_vs_ST().minimum_pos().to_string());
+    logger.info("ST_at_max").value(ST_at_max.to_string());
+
 	return implant_parameters.depth_at_concentration_maxium / ST_at_max;
 }
 quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF()
@@ -442,13 +447,14 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF()
 }
 quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_dose()
 {
+    log_f;
 	if (!implant_parameters.dose.is_set())
     {
 		return {};
     }
     if (!has_sufficient_implant_area())
     {
-        logger.info(__func__,M.to_string_short() + "->" + cluster.to_string()).value("!has_sufficient_implant_area()");
+        logger.info(M.to_string_short() + "->" + cluster.to_string()).value("!has_sufficient_implant_area()");
 		return {};
     }
 	
@@ -465,6 +471,7 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_dose()
 
 quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_max()
 {
+    log_f;
 	if (!implant_parameters.concentration_maximum.is_set())
 		return {};
 	quantity::intensity_t I_max = I_vs_ST().maximum_value();
@@ -476,7 +483,7 @@ quantity::SF_t measurements_::sims_t::calc_t::implant_c::SF_from_max()
 //    logger.debug(__func__,M.to_string_short() + "->" + cluster.to_string()+"->I_max").value(I_max.to_string());
 //    logger.debug(__func__,M.to_string_short() + "->" + cluster.to_string()+"->implant_parameters.concentration_maximum").value(implant_parameters.concentration_maximum.to_string());
 	quantity::SF_t SF_p = ( implant_parameters.concentration_maximum / I_max ). change_unit(units::derived::atoms_per_ccm/units::derived::counts*units::SI::second);
-    logger.info(__func__,M.to_string_short() + "->" + cluster.to_string()).value(SF_p.to_string_short(),10,"I_max="+I_max.to_string_short() + "; concentration_maximum="+implant_parameters.concentration_maximum.to_string_short());
+    logger.info(M.to_string_short() + "->" + cluster.to_string()).value(SF_p.to_string_short(),10,"I_max="+I_max.to_string_short() + "; concentration_maximum="+implant_parameters.concentration_maximum.to_string_short());
     //logger::info(3,"measurements_::sims_t::calc_t::implant_c::SF_from_max()",M.to_string_short() + " " + cluster.to_string() + " " + SF_p.to_string());
 		
 	return SF_p;

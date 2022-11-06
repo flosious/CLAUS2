@@ -18,6 +18,33 @@
 
 #include "sims_plot_measurement_tree_t.hpp"
 
+
+/*****************************/
+/********  x_axis_t  *********/
+/*****************************/
+
+quantity::quantity_t sims_plot_measurement_tree_t::x_axis_t::quantity(const measurements_::sims_t& measurement) const
+{
+    switch (option)
+    {
+    case options::sputter_depth:
+    {
+        return measurement.crater.sputter_depth;
+    }
+    case options::sputter_time:
+    {
+        return measurement.crater.sputter_time;
+    }
+    case options::sputter_points:
+    {
+        return measurement.crater.sputter_points();
+    }
+    }
+    return {};
+}
+
+/*****************************/
+
 std::map<sims_plot_measurement_tree_t::column_t,std::string> sims_plot_measurement_tree_t::column_names{
     {column_t::root,"cluster"}
 };
@@ -105,14 +132,14 @@ void sims_plot_measurement_tree_t::set_measurement(measurements_::sims_t* new_me
     logger.debug(__func__,new_measurement->to_string_short()).enter();
 
     //set xAxis in sims_plotwindow
-    if (measurement->crater.sputter_depth.is_set())
-        sims_plot_window->set_xAxis_quantity(measurement->crater.sputter_depth);
-    else if (measurement->crater.sputter_time.is_set())
-        sims_plot_window->set_xAxis_quantity(measurement->crater.sputter_time);
-    else
-        logger.error(__func__,measurement->to_string_short()).value("no x axis in crater");
+//    if (measurement->crater.sputter_depth.is_set())
+//        sims_plotwindow->set_xAxis_quantity(measurement->crater.sputter_depth);
+//    else if (measurement->crater.sputter_time.is_set())
+//        sims_plotwindow->set_xAxis_quantity(measurement->crater.sputter_time);
+//    else
+//        logger.error(__func__,measurement->to_string_short()).value("no x axis in crater");
 
-    //update this & sims_plot_window
+    //update this & sims_plotwindow
     update();
 }
 
@@ -125,7 +152,7 @@ QStandardItem* sims_plot_measurement_tree_t::item(quantity::quantity_t& quantity
         {
             quantity_item->setText(quantity.name().c_str());
             set_quantity_in_QStandardItem(quantity_item,quantity);
-            int graph_id = sims_plot_window->add_Y_quantity(quantity);
+            int graph_id = sims_plotwindow->add_graph(x_axis.quantity(*measurement), quantity);
             set_graph_id_in_item(graph_id,quantity_item);
             quantity_item->setEditable(false);
             quantity_item->setCheckable(true);
@@ -164,7 +191,7 @@ QStandardItem* sims_plot_measurement_tree_t::item(cluster_t& cluster, column_t c
 
 bool sims_plot_measurement_tree_t::is_plot_window() const
 {
-    if (sims_plot_window==nullptr)
+    if (sims_plotwindow==nullptr)
         return false;
     return true;
 }
@@ -208,9 +235,9 @@ void sims_plot_measurement_tree_t::unset_measurement()
     model->removeRows(0,model->rowCount());
 }
 
-void sims_plot_measurement_tree_t::set_sims_plot_window(sims_plotwindow_t* sims_plot_window_s)
+void sims_plot_measurement_tree_t::set_sims_plotwindow(sims_plotwindow_t* sims_plotwindow_s)
 {
-    sims_plot_window = sims_plot_window_s;
+    sims_plotwindow = sims_plotwindow_s;
 }
 
 
@@ -218,6 +245,8 @@ void sims_plot_measurement_tree_t::update()
 {
     if (!is_plot_window())
         return;
+    //this has to be removed later, when several measurements can be added to the plot
+    sims_plotwindow->clearGraphs();
     if (!is_measurement())
         return;
 //    clear();
@@ -227,20 +256,21 @@ void sims_plot_measurement_tree_t::update()
     {
         model->appendRow(row(C));
     }
-    expandAll();
-    sims_plot_window->clearGraphs();
-//    QCPAxisRect *wideAxisRect = new QCPAxisRect(sims_plot_window);
-//    wideAxisRect->axis(QCPAxis::atLeft,1);
-//    sims_plot_window->setInteraction(QCP::iRangeDrag,true);
-//    sims_plot_window->setInteraction(QCP::iRangeZoom,true);
-//    sims_plot_window->setInteraction(QCP::iSelectPlottables);
-//    sims_plot_window->setSelectionRectMode(QCP::srmZoom);
+    sims_plotwindow->replot();
+//    expandAll();
 
-//    sims_plot_window->clearGraphs();
+//    QCPAxisRect *wideAxisRect = new QCPAxisRect(sims_plotwindow);
+//    wideAxisRect->axis(QCPAxis::atLeft,1);
+//    sims_plotwindow->setInteraction(QCP::iRangeDrag,true);
+//    sims_plotwindow->setInteraction(QCP::iRangeZoom,true);
+//    sims_plotwindow->setInteraction(QCP::iSelectPlottables);
+//    sims_plotwindow->setSelectionRectMode(QCP::srmZoom);
+
+//    sims_plotwindow->clearGraphs();
 
     //each cluster_item in the treeWidget contains a pointer to its cluster_t
 
-//    sims_plot_window->addGraph();
+//    sims_plotwindow->addGraph();
 
 
 }

@@ -141,7 +141,7 @@ namespace quantity
 		quantity_t change_unit(const unit_t& target_unit)  const;
 		///tries to change the current unit to its target unit; returns { } if unsuccessfull
 		quantity_t change_unit(std::string target_unit_string)  const;
-
+        ///will change the resolution so all data-points are integer multiples of "new_res"
 		quantity_t resolution(double new_res=0)  const;
 
         quantity_t change_resolution(quantity_t new_res) const;
@@ -265,10 +265,13 @@ namespace quantity
         quantity_t integrate_pbp(const quantity_t& x_data);
         ///round mathimatically correct
         quantity_t round_(const unsigned int decimals=0) const;
+        quantity_t round_to_multiple(double multiple) const;
         ///round up
         quantity_t ceil_(const unsigned int decimals=0) const;
+        quantity_t ceil_to_multiple(double multiple) const;
         //round down
         quantity_t floor_(const unsigned int decimals=0) const;
+        quantity_t floor_to_multiple(double multiple) const;
 		quantity_t diff() const;
 		quantity_t interp(const quantity_t& old_X, const quantity_t& new_X) const;
 		quantity_t fit_polynom_by_x_data(const quantity_t& x_data, quantity_t new_x_data, int polynom_grade=17 ) const;
@@ -387,12 +390,19 @@ namespace quantity
 		total_sputter_time_t(const quantity_t& quantity_s);
 	};
 	
-	class concentration_t : public quantity_t
-	{
-	public:
-		concentration_t(std::vector<double> data_s={},unit_t unit_s=units::derived::atoms / ((units::SI::meter*units::prefixes::centi).pow(3)), dimension_t dim_s=dimensions::derived::concentration);
-		concentration_t(const quantity_t& quantity_s);
-	};
+    class concentration_t : public quantity_t
+    {
+    public:
+        concentration_t(std::vector<double> data_s={},unit_t unit_s=units::derived::atoms / ((units::SI::meter*units::prefixes::centi).pow(3)), dimension_t dim_s=dimensions::derived::concentration);
+        concentration_t(const quantity_t& quantity_s);
+    };
+    ///relative concentration
+    class concentration_rel_t : public quantity_t
+    {
+    public:
+        concentration_rel_t(std::vector<double> data_s={},unit_t unit_s=units::derived::atom_percent, dimension_t dim_s=dimensions::SI::relative);
+        concentration_rel_t(const quantity_t& quantity_s);
+    };
 	
 	class intensity_t : public quantity_t
 	{

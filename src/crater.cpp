@@ -242,6 +242,14 @@ const quantity::quantity_t* crater_t::X() const
 	return nullptr;
 }
 
+quantity::quantity_t crater_t::sputter_points() const
+{
+    if (X()==nullptr)
+        return {};
+    quantity::quantity_t Q("sputter_points",X()->data_X_1D(),units::SI::one);
+    return Q;
+}
+
 
 // quantity::sputter_time_t crater_t::common_sputter_time(std::vector<cluster_t>& clusters)
 quantity::quantity_t crater_t::common_X_quantity(const std::vector<quantity::quantity_t>& X_quantities)

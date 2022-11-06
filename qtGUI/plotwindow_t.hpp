@@ -26,6 +26,37 @@
 
 class plotwindow_t : public QCustomPlot
 {
+private:
+    class axis_t
+    {
+    private:
+        bool log_scale=false;
+    public:
+        axis_t();
+        ///change to logarithmic scale
+        void set_log_scale();
+        ///change to linear scale
+        void set_lin_scale();
+        int add_quantity(const quantity::quantity_t& q);
+    };
+//protected:
+//    class axis_t
+//    {
+//    private:
+//        std::string name_p;
+//        unit_t unit_p;
+//        quantity::quantity_t::dimension_t dimension_p;
+//        QCPAxis *qcpAxis;
+//    public:
+//        axis_t(const std::string& name, const unit_t& unit, const quantity::quantity_t::dimension_t& dimension, QCPAxis *qcpAxis);
+////        axis_t(const std::string& name, const unit_t& unit, QCPAxisRect *axisRect, AxisType axisType);
+//        std::string name() const;
+//        unit_t unit() const;
+//        bool change_unit(const unit_t& new_unit);
+//    };
+
+//    QCPAxisRect *axisRect_p;
+//    axis_t x;
 public:
     plotwindow_t(QWidget *parent = nullptr);
     void plot(const measurements_::sims_t& M);

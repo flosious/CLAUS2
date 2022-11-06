@@ -54,7 +54,7 @@ public:
 	class mgroup_t 
 	{
     private:
-        class_logger_t logger;
+        class_logger_t class_logger;
 	// 	friend class config_t;
 	protected:
 		static bool use_olcdb;
@@ -63,9 +63,13 @@ public:
         template<typename M_t>
         static bool remove_measurement(std::vector<M_t>& measurements, const M_t* measurement)
         {
+            class_logger_t class_logger(__FILE__,"mgroups_::mgroup_t");
+            log_f;
             int idx = measurement_index(measurements,measurement);
+            logger.debug("idx").value(idx);
             if (idx>=0)
             {
+                logger.debug("measurement").value(measurements.at(idx).to_string_short());
                 tools::vec::erase(measurements,{static_cast<unsigned int>(idx)});
                 return true;
             }

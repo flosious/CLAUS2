@@ -45,12 +45,12 @@ private:
     ///don t forget to adjust column_names; leave LAST as last
     enum columns {col_method, col_sizes, col_olcdb, col_group_id, col_settings, col_LAST};
     static std::map<columns,std::string> column_names;
-
+    class_logger_t class_logger;
     template<typename mgroup_t, typename measurement_t, typename tool_with_files_measurements_groups_t>
     class tool_section_t
     {
     private:
-        class_logger_t logger;
+        class_logger_t class_logger;
     protected:
         ///save measurement* pointer data in item role (Qt::UserRole+ !1! )
         static QStandardItem* item(measurement_t& measurement, columns col)
@@ -175,15 +175,16 @@ private:
             return group_item;
         }
 
-        QStandardItem* unrouped_measurements_section_item(columns col)
+        QStandardItem* ungrouped_measurements_section_item(columns col)
         {
-            logger.debug(__func__,"this").enter();
+            log_f;
+            logger.debug("this").enter();
             QStandardItem *item = new QStandardItem(QString(""));
             std::stringstream ss;
             switch (col)
             {
             case col_method:
-                logger.debug(__func__,"col_method").enter();
+                logger.debug("col_method").enter();
                 ss.str("");
                 ss << "ungrouped";
                 item->setText(ss.str().c_str());
@@ -195,30 +196,30 @@ private:
                         item->appendRow( row(M) );
                     }
                 }
-                logger.debug(__func__,"col_method").exit();
+                logger.debug("col_method").exit();
                 break;
             case col_sizes:
-                logger.debug(__func__,"col_sizes").enter();
+                logger.debug("col_sizes").enter();
                 ss.str("");
                 ss << "measurements: <" << this->tool->measurements.size() << ">";
                 item->setText(ss.str().c_str());
                 item->setEditable(false);
-                logger.debug(__func__,"col_sizes").exit();
+                logger.debug("col_sizes").exit();
                 break;
             }
-            logger.debug(__func__,"this").exit();
+            logger.debug("this").exit();
             return item;
         }
-        QList<QStandardItem*> unrouped_measurements_section_row()
+        QList<QStandardItem*> ungrouped_measurements_section_row()
         {
             QList<QStandardItem*> column_items;
             for (int c=0;c<col_LAST;c++)
             {
                 columns col = static_cast<columns>(c);
-                column_items << unrouped_measurements_section_item(col);
+                column_items << ungrouped_measurements_section_item(col);
             }
             // this will lead to a SIGBUS ERROR
-//            column_items << unrouped_measurements_section_item(col_method) << unrouped_measurements_section_item(col_sizes);
+//            column_items << ungrouped_measurements_section_item(col_method) << ungrouped_measurements_section_item(col_sizes);
             return column_items;
         }
         QStandardItemModel* model;
@@ -260,6 +261,8 @@ private:
                 return true;
             return false;
         }
+
+
         static measurement_t* get_measurement_from_QIndex(const QModelIndex& idx)
         {
             if (!index_has_measurement(idx))
@@ -274,8 +277,79 @@ private:
         }
         sections tool_section_id;
         tool_section_t(sections tool_section_id, tool_with_files_measurements_groups_t* tool, QStandardItemModel* model) :
-            tool_section_id(tool_section_id),tool(tool), logger(__FILE__,"mgroups_treeview_t::tool_section_t"), model(model)
+            tool_section_id(tool_section_id),tool(tool), class_logger(__FILE__,"mgroups_treeview_t::tool_section_t"), model(model)
         {
+        }
+        bool expanded=true;
+        ///measurement pointers in here indicate expanded items in treeview
+        std::set<const mgroup_t*> are_mgroups_expanded;
+
+        void saveStates_to_persistentModelIndexList(QTreeView *treeview)
+        {
+            log_f;
+            are_mgroups_expanded.clear();
+            QModelIndex index = model->index(tool_section_id,0);
+            if (treeview->isExpanded(index))
+            {
+                expanded=true;
+                for (int r=0;r<model->rowCount(index);r++)
+                {
+                    QModelIndex child_index = model->index(r,0,index);
+                    if (treeview->isExpanded(child_index))
+                    {
+                        are_mgroups_expanded.insert(get_mgroup_from_QIndex(child_index));
+                        logger.debug("child_index").value("is expanded",10,"row: " + std::to_string(child_index.row()) + " column: " + std::to_string(child_index.column()) );
+                    }
+                }
+            }
+            else
+                expanded=false;
+        }
+        void restoreStates_from_persistentModelIndexList(QTreeView *treeview)
+        {
+            log_f;
+            if (!expanded)
+                return;
+            QModelIndex index = model->index(tool_section_id,0);
+
+            treeview->expand(index);
+            logger.debug("model->rowCount(index)").value(model->rowCount(index));
+            for (int r=0;r<model->rowCount(index);r++)
+            {
+                QModelIndex child_index = model->index(r,0,index); // this seems not to work
+                if (!child_index.isValid())
+                    continue;
+                logger.debug("child_index").value("valid",11,"row: " + std::to_string(child_index.row())+ " col: " + std::to_string(child_index.column()) );
+                if (are_mgroups_expanded.find(get_mgroup_from_QIndex(child_index))==are_mgroups_expanded.end())
+                    continue;
+                treeview->expand(child_index);
+                logger.debug("child_index").value("expanded",10,"row: " + std::to_string(child_index.row())+ " col: " + std::to_string(child_index.column()) );
+            }
+        }
+        void show_selection_in_log(const QModelIndexList& indexes)
+        {
+            log_f;
+            logger.debug("indexes.size()").value(indexes.size());
+            for (auto& idx : indexes)
+            {
+                if (!idx.isValid())
+                    continue;
+                if (idx.column()!=0)
+                    continue;
+                logger.debug("index").value("isValid",10,"col: " + std::to_string(idx.column()) +" row:" + std::to_string(idx.row()));
+                if ( is_UNgrouped_measurement(idx) )
+                {
+                    logger.info("index").value("is_UNgrouped_measurement",10,"measurement: " + get_measurement_from_QIndex(idx)->to_string_short());
+                }
+                else if ( is_grouped_measurement(idx) )
+                {
+                    logger.debug("index").value("is_grouped_measurement",10,"measurement: " + get_measurement_from_QIndex(idx)->to_string_short() + " mgroup: "+ get_mgroup_from_QIndex(idx)->to_string_short());
+                }
+                else if (is_mgroup(idx))
+                {
+                    logger.debug("index").value("is_mgroup",10,get_mgroup_from_QIndex(idx)->to_string_short());
+                }
+            }
         }
         ///return true if something was changed
         bool ungroup_selection(const QModelIndexList& indexes)
@@ -305,78 +379,93 @@ private:
         ///returns true, is something was deleted; false if nothing changed
         bool delete_selection(const QModelIndexList& indexes)
         {
+            log_f;
             bool go_update=false;
             for (auto& idx : indexes)
             {
                 if (!idx.isValid())
                     continue;
+                logger.debug("index").value("isValid",10,"col: " + std::to_string(idx.column()) +" row:" + std::to_string(idx.row()));
                 if (idx.column()!=0)
                     continue;
-
+                logger.debug("index").value("is in column: 0");
                 if ( is_UNgrouped_measurement(idx) ) //ungrouped measurements or section
                 {
+                    logger.debug("index").value("is_UNgrouped_measurement",10,"measurement: " + get_measurement_from_QIndex(idx)->to_string_short());
                     std::vector<unsigned int> erase_idx;
                     auto idx_pos = tools::vec::get_index_position_by_comparing_pointers(tool->measurements, get_measurement_from_QIndex(idx));
                     if (idx_pos>=0)
                     {
+//                        logger.debug("index").value("is_UNgrouped_measurement and idx_pos: "+std::to_string(idx_pos),10,"removed measurement: " + get_measurement_from_QIndex(idx)->to_string_short());
                         tools::vec::erase(tool->measurements,erase_idx);
                         go_update = true;
                     }
                 }
                 else if (is_grouped_measurement(idx)) // measurement
                 {
+                    logger.debug("index").value("is_grouped_measurement",10,"measurement: " + get_measurement_from_QIndex(idx)->to_string_short() + " mgroup: "+ get_mgroup_from_QIndex(idx)->to_string_short());
                     if (get_mgroup_from_QIndex(idx)->remove_measurement(get_measurement_from_QIndex(idx)))
                     {
+//                        logger.debug("mgroup").value( get_mgroup_from_QIndex(idx)->to_string_short(),10, "removed measurement: " + get_measurement_from_QIndex(idx)->to_string_short() );
                         go_update = true;
                     }
                 }
                 else if (is_mgroup(idx)) // mgroup
                 {
+                    logger.debug("index").value("is_mgroup",10,get_mgroup_from_QIndex(idx)->to_string_short());
                     if (tool->remove_mgroup(get_mgroup_from_QIndex(idx)))
                     {
+//                        logger.debug("mgroup").value("removed: " +  get_mgroup_from_QIndex(idx)->to_string_short() );
                         go_update = true;
                     }
+                }
+                if (go_update)
+                {
+                    logger.debug("removeRow").value("row: " + std::to_string( idx.row()) + " ; column: " + std::to_string(idx.column()) );
+//                    model->removeRow(idx.row(),idx.parent());
                 }
             }
             return go_update;
         }
         QStandardItem* tool_section_item(columns col)
         {
-            logger.debug(__func__,"this").enter();
+            log_f;
+            logger.debug("this").enter();
             QStandardItem *item = new QStandardItem;
             std::stringstream ss;
             switch (col)
             {
             case col_method:
-                logger.debug(__func__,"col_method").enter();
+                logger.debug("col_method").enter();
                 ss.str("");
                 ss << section_names.at(tool_section_id);
                 item->setText(ss.str().c_str());
-                item->appendRow(unrouped_measurements_section_row());
+                item->appendRow(ungrouped_measurements_section_row());
                 for (auto& MG : this->tool->mgroups)
                 {
                     item->appendRow(row(MG));
                 }
                 item->setEditable(false);
-                logger.debug(__func__,"col_method").exit();
+                logger.debug("col_method").exit();
                 break;
             case col_sizes:
-                logger.debug(__func__,"col_sizes").enter();
+                logger.debug("col_sizes").enter();
                 std::stringstream ss;
                 ss << "mgroups: <" << this->tool->mgroups.size() << ">";
                 auto s = ss.str().c_str();
                 item->setText(s);
-                logger.debug(__func__,"col_sizes").signal(s);
+                logger.debug("col_sizes").signal(s);
                 item->setEditable(false);
-                logger.debug(__func__,"col_sizes").exit();
+                logger.debug("col_sizes").exit();
                 break;
             }
-            logger.debug(__func__,"this").exit();
+            logger.debug("this").exit();
             return item;
         }
     }; // tool_section_t
-
-    class_logger_t logger;
+    void saveState();
+    ///restores the states of the items
+    void restoreState();
     QWidget *parent;
     QStandardItemModel* model;
     void set_model();
@@ -394,7 +483,7 @@ public:
 
     void keyPressEvent(QKeyEvent *e) override;
     void delete_selection();
-
+//    void show_selection_in_log();
     void ungroup_selection();
 
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>()) override;

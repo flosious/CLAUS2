@@ -268,7 +268,7 @@ public:
 				class quantity_c
 				{
 				private:
-                    class_logger_t logger;
+                    class_logger_t class_logger;
 					quantity::quantity_t Y;
 					int minimum_index_position_p = -1;
 					int maximum_index_position_p = -1;
@@ -318,7 +318,7 @@ public:
                     bool has_sufficient_implant_area(double abs_treshold = 10,  double rel_treshold=5);
 				};
 			private:
-                class_logger_t logger;
+                class_logger_t class_logger;
 				sims_t& M;
 				cluster_t& cluster;
 				double X_resolution_factor;

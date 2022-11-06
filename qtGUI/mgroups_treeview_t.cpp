@@ -28,7 +28,7 @@ std::map<mgroups_treeview_t::sections,std::string> mgroups_treeview_t::section_n
 
 std::map<mgroups_treeview_t::columns,std::string> mgroups_treeview_t::column_names
 {
-    {col_method,"method groups"},
+    {col_method,"groups/measurements"},
     {col_sizes,"<size>"},
     {col_olcdb,"olcdb"},
     {col_group_id,"group id"},
@@ -39,7 +39,8 @@ std::map<mgroups_treeview_t::columns,std::string> mgroups_treeview_t::column_nam
 
 void mgroups_treeview_t::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
 {
-    logger.debug(__func__,"this").enter();
+    log_f;
+    logger.debug("this").enter();
     if (topLeft == bottomRight)
     {
         std::string name = model->itemFromIndex(topLeft)->text().toStdString();
@@ -48,13 +49,13 @@ void mgroups_treeview_t::dataChanged(const QModelIndex &topLeft, const QModelInd
         {
             auto* MG = dsims_section.get_mgroup_from_QIndex(topLeft);
             MG->name =name;
-            logger.debug(__func__,"MG tofsims name").signal(MG->name);
+            logger.debug("MG tofsims name").signal(MG->name);
         }
         else if (tofsims_section.is_mgroup(topLeft))
         {
             auto* MG = tofsims_section.get_mgroup_from_QIndex(topLeft);
             MG->name =name;
-            logger.debug(__func__,"MG tofsims name").signal(MG->name);
+            logger.debug("MG tofsims name").signal(MG->name);
         }
     }
 }
@@ -68,7 +69,7 @@ void mgroups_treeview_t::resizeColumns()
 }
 
 mgroups_treeview_t::mgroups_treeview_t(QWidget *parent ) :
-    logger(__FILE__,"mgroups_treeview_t"), parent(parent), model(new QStandardItemModel (sections::LAST, columns::col_LAST)),
+    class_logger(__FILE__,"mgroups_treeview_t"), parent(parent), model(new QStandardItemModel (sections::LAST, columns::col_LAST)),
     dsims_section(dsims,&claus->dsims, model), tofsims_section(tofsims,&claus->tofsims, model)
 {
     set_actions();
@@ -93,6 +94,41 @@ mgroups_treeview_t::mgroups_treeview_t(QWidget *parent ) :
 }
 
 
+void mgroups_treeview_t::saveState()
+{
+    log_f;
+    logger.debug("this").enter();
+//    persistentModelIndexList.clear();
+//    ///all data is carried in the 0th column item/index
+//    for (int r=0;r<model->rowCount();r++)
+//    {
+//        QModelIndex index = model->index(r,0);
+//        if (isExpanded(index))
+//        {
+//            index.data()=1;
+//        }
+//        //save childrens to this index
+//        QPersistentModelIndex persistentIndex(index);
+//        persistentModelIndexList << persistentIndex;
+//    }
+//    QModelIndex index = model->index(dsims,0);
+//    if (isExpanded(index))
+//        dsims_section.expanded=true;
+//    else
+//        dsims_section.expanded=false;
+    dsims_section.saveStates_to_persistentModelIndexList(this);
+    tofsims_section.saveStates_to_persistentModelIndexList(this);
+}
+
+void mgroups_treeview_t::restoreState()
+{
+    log_f;
+    logger.debug("this").enter();
+    dsims_section.restoreStates_from_persistentModelIndexList(this);
+    tofsims_section.restoreStates_from_persistentModelIndexList(this);
+}
+
+
 void mgroups_treeview_t::set_model()
 {
     model->clear();
@@ -108,6 +144,7 @@ void mgroups_treeview_t::set_model()
 
 void mgroups_treeview_t::set_header()
 {
+    log_f;
 //    model->setHorizontalHeaderLabels({"method","olcdb","group_id","settings"});
     QStringList list;
     list.reserve(col_LAST);
@@ -116,7 +153,7 @@ void mgroups_treeview_t::set_header()
         columns col = static_cast<columns>(i);
         if (column_names.find(col)==column_names.end())
         {
-            logger.fatal(__func__,"column_names").value(std::to_string(col),10,"col not found in column_names <"+std::to_string(col_LAST) +">");
+            logger.fatal("column_names").value(std::to_string(col),10,"col not found in column_names <"+std::to_string(col_LAST) +">");
             return;
         }
         list.push_back(QString(column_names[col].c_str()));
@@ -150,6 +187,18 @@ void mgroups_treeview_t::keyPressEvent(QKeyEvent *e)
     else
         QTreeView::keyPressEvent(e);
 }
+
+//void mgroups_treeview_t::show_selection_in_log()
+//{
+//    log_f;
+//    logger.debug("this").enter();
+//    bool go_update = false;
+//    QModelIndexList indexes = this->selectionModel()->selectedIndexes();
+
+//    dsims_section.show_selection_in_log(indexes);
+//    tofsims_section.show_selection_in_log(indexes);
+//    logger.debug("this").exit();
+//}
 
 void mgroups_treeview_t::ungroup_selection()
 {
@@ -198,24 +247,26 @@ void mgroups_treeview_t::delete_selection()
 
 void mgroups_treeview_t::update()
 {
-    logger.debug(__func__,"this").enter();
+    log_f;
+    logger.debug("this").enter();
+    saveState();
 
-
-    logger.debug(__func__,"this").signal("dsims_section.tool_section_item(col_method)");
+    logger.debug("this").signal("dsims_section.tool_section_item(col_method)");
     model->setItem(dsims,col_method,dsims_section.tool_section_item(col_method));
-    logger.debug(__func__,"this").signal("dsims_section.tool_section_item(col_sizes)");
+    logger.debug("this").signal("dsims_section.tool_section_item(col_sizes)");
     model->setItem(dsims,col_sizes,dsims_section.tool_section_item(col_sizes));
 
 
-    logger.debug(__func__,"this").signal("tofsims_section.tool_section_item(col_method)");
+    logger.debug("this").signal("tofsims_section.tool_section_item(col_method)");
     model->setItem(tofsims,col_method,tofsims_section.tool_section_item(col_method));
-    logger.debug(__func__,"this").signal("tofsims_section.tool_section_item(col_sizes)");
+    logger.debug("this").signal("tofsims_section.tool_section_item(col_sizes)");
     model->setItem(tofsims,col_sizes,tofsims_section.tool_section_item(col_sizes));
 
-    logger.debug(__func__,"this").signal("resizeColumns");
+    restoreState();
+//    logger.debug("this").signal("resizeColumns");
 //    resizeColumns();
 //    model->setItem(tofsims,0,tofsims_section.tool_section_item());
-    logger.debug(__func__,"this").exit();
+    logger.debug("this").exit();
 
 }
 

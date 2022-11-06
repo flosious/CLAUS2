@@ -224,8 +224,12 @@ public:
 	static int get_index_position_by_comparing_pointers(const std::vector<T>& values, const T* search_val)
 	{
 	    for (unsigned int i=0;i<values.size();i++)
-		if (&values[i] == search_val)
-		    return i;
+        {
+            if (&values[i] == search_val)
+            {
+                return i;
+            }
+        }
 	    return -1;
 	}
 	template<class T>

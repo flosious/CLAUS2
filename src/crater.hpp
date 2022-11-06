@@ -90,6 +90,7 @@ public:
 	sputter_beam_t sputter_beam;
 	quantity::sputter_depth_t sputter_depth;
 	quantity::sputter_time_t sputter_time;
+    quantity::quantity_t sputter_points() const;
 	///resolution is 1s
 	quantity::sputter_time_t unix_sputter_time(std::string date_time_start);
 	quantity::current_t& sputter_current();

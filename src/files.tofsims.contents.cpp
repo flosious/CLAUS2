@@ -124,7 +124,10 @@ std::vector<cluster_t> files_::tofsims_t::contents_t::clusters()
 		auto& col = cols.at(i);
 		if (col.cluster_name!="")
 		{
-			clusters_p.push_back(parse_isotopes(col.cluster_name));
+            auto isotopes = parse_isotopes(col.cluster_name);
+            if (isotopes.size()==0)
+                continue;
+            clusters_p.push_back(isotopes);
 		}
         if (col.dimension.find("Intensity")!=std::string::npos)
 		{

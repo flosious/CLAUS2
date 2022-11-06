@@ -271,6 +271,34 @@ quantity::quantity_t quantity::quantity_t::round_(const unsigned int decimals) c
     return {*this,data_c,"round"};
 }
 
+quantity::quantity_t quantity::quantity_t::round_to_multiple(double multiple) const
+{
+    auto copy = *this;
+    for (auto& d : copy.data_s)
+    {
+        d = round(d / multiple)*multiple;
+    }
+    return copy;
+}
+quantity::quantity_t quantity::quantity_t::ceil_to_multiple(double multiple) const
+{
+    auto copy = *this;
+    for (auto& d : copy.data_s)
+    {
+        d = ceil(d / multiple)*multiple;
+    }
+    return copy;
+}
+quantity::quantity_t quantity::quantity_t::floor_to_multiple(double multiple) const
+{
+    auto copy = *this;
+    for (auto& d : copy.data_s)
+    {
+        d = floor(d / multiple) * multiple;
+    }
+    return copy;
+}
+
 quantity::quantity_t quantity::quantity_t::ceil_(const unsigned int decimals) const
 {
     if (!is_set())
@@ -976,6 +1004,8 @@ quantity::quantity_t quantity::quantity_t::change_resolution(double start, doubl
         stop = max().floor_().data().front();
     }
     int new_size = floor((stop-start)/step)+1;
+    if (new_size<=0)
+        return {};
     std::vector<double> new_data(new_size);
     for (int i=0;i<new_size;i++)
         new_data.at(i) = i*step + start;
@@ -995,13 +1025,15 @@ quantity::quantity_t quantity::quantity_t::resolution(double new_res) const
 	if (data().size()<2) 
 		return {};
 	
-	double max = statistics::get_max_from_Y(data_s);
-	double min = statistics::get_min_from_Y(data_s);
-	int new_size = floor((max-min)/new_res)+1;
+    double max_ = statistics::get_max_from_Y(data_s);
+    double min_ = statistics::get_min_from_Y(data_s);
+//    double max_ = max().floor_to_multiple(new_res).data().front();
+//    double min_ = min().ceil_to_multiple(new_res).data().front();
+    int new_size = floor((max_-min_)/new_res)+1;
 	
 	std::vector<double> new_data(new_size);
     for (int i=0;i<new_size;i++)
-        new_data.at(i) = i*new_res + min;
+        new_data.at(i) = i*new_res + min_;
 // 	data_s = new_data;
 // 	operations_history_s.push_back("resolutiion");
     return {*this,new_data,"resolution"};
@@ -1694,7 +1726,7 @@ quantity::intensity_t::intensity_t(const quantity_t& quantity_s) : intensity_t(q
 quantity::current_t::current_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("current",data_s,unit_s,dim_s){}
 quantity::current_t::current_t(const quantity_t& quantity_s) : current_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
-quantity::sputter_current_t::sputter_current_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_current_t",data_s,unit_s,dim_s){}
+quantity::sputter_current_t::sputter_current_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("sputter_current",data_s,unit_s,dim_s){}
 quantity::sputter_current_t::sputter_current_t(const quantity_t& quantity_s) : sputter_current_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::analysis_current_t::analysis_current_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("primary_analysis_current",data_s,unit_s,dim_s){}
@@ -1702,6 +1734,9 @@ quantity::analysis_current_t::analysis_current_t(const quantity_t& quantity_s) :
 
 quantity::concentration_t::concentration_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("concentration",data_s,unit_s,dim_s){}
 quantity::concentration_t::concentration_t(const quantity_t& quantity_s) : concentration_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
+
+quantity::concentration_rel_t::concentration_rel_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("relative concentration",data_s,unit_s,dim_s){}
+quantity::concentration_rel_t::concentration_rel_t(const quantity_t& quantity_s) : concentration_rel_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}
 
 quantity::dose_t::dose_t(std::vector<double> data_s,unit_t unit_s, dimension_t dim_s) : quantity_t("dose",data_s,unit_s,dim_s){}
 quantity::dose_t::dose_t(const quantity_t& quantity_s) : dose_t(quantity_s.data(),quantity_s.unit(),quantity_s.dimension()) {}

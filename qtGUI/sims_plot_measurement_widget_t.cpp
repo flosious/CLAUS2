@@ -26,7 +26,7 @@ sims_plot_measurement_widget_t::sims_plot_measurement_widget_t(QWidget *parent) 
 {
     ui->setupUi(this);
     //give the cluster_tree something to plot, which is not NULL!
-    ui->clusters_tree->set_sims_plot_window(ui->sims_plot_window);
+    ui->clusters_tree->set_sims_plotwindow(ui->sims_plotwindow);
 }
 
 sims_plot_measurement_widget_t::~sims_plot_measurement_widget_t()
@@ -41,14 +41,21 @@ void sims_plot_measurement_widget_t::update(measurements_::sims_t* new_measureme
     ui->clusters_tree->set_measurement(new_measurement);
 }
 
-void sims_plot_measurement_widget_t::on_clusters_button_clicked()
-{
-    auto_calc();
-}
-
 void sims_plot_measurement_widget_t::on_splitter_3_splitterMoved(int pos, int index)
 {
+//    log_f;
+//    logger.debug("sims_plotwindow").signal("replot");
+//    ui->sims_plotwindow->replot();
+}
+
+void sims_plot_measurement_widget_t::on_clusters_tree_pressed(const QModelIndex &index)
+{
     log_f;
-    logger.debug("sims_plot_window").signal("replot");
-    ui->sims_plot_window->replot();
+    logger.info("pressed").enter();
+}
+
+void sims_plot_measurement_widget_t::on_clusters_tree_clicked(const QModelIndex &index)
+{
+    log_f;
+    logger.info("clicked").enter();
 }

@@ -21,6 +21,9 @@
 
 plotwindow_t::plotwindow_t(QWidget *parent) : QCustomPlot(parent)
 {
+//    plotLayout()->clear();
+//    axisRect_p = new QCPAxisRect(this);
+
     setInteraction(QCP::iRangeDrag,true);
     setInteraction(QCP::iRangeZoom,true);
     setInteraction(QCP::iSelectPlottables);
