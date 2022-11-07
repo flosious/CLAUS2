@@ -116,16 +116,16 @@ void mgroups_treeview_t::saveState()
 //        dsims_section.expanded=true;
 //    else
 //        dsims_section.expanded=false;
-    dsims_section.saveStates_to_persistentModelIndexList(this);
-    tofsims_section.saveStates_to_persistentModelIndexList(this);
+    dsims_section.saveStates_to_expanded_mgroups_position_list(this);
+    tofsims_section.saveStates_to_expanded_mgroups_position_list(this);
 }
 
 void mgroups_treeview_t::restoreState()
 {
     log_f;
     logger.debug("this").enter();
-    dsims_section.restoreStates_from_persistentModelIndexList(this);
-    tofsims_section.restoreStates_from_persistentModelIndexList(this);
+    dsims_section.restoreStates_from_expanded_mgroups_position_list(this);
+    tofsims_section.restoreStates_from_expanded_mgroups_position_list(this);
 }
 
 
@@ -223,6 +223,7 @@ void mgroups_treeview_t::ungroup_selection()
 /////new, using QVariant custom class pointers
 void mgroups_treeview_t::delete_selection()
 {
+//    saveState();
     bool go_update = false;
     QModelIndexList indexes = this->selectionModel()->selectedIndexes();
 
@@ -250,7 +251,7 @@ void mgroups_treeview_t::update()
     log_f;
     logger.debug("this").enter();
     saveState();
-
+//    model->removeRows(0,2);
     logger.debug("this").signal("dsims_section.tool_section_item(col_method)");
     model->setItem(dsims,col_method,dsims_section.tool_section_item(col_method));
     logger.debug("this").signal("dsims_section.tool_section_item(col_sizes)");

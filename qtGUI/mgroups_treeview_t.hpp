@@ -68,6 +68,8 @@ private:
                 /* new */
                 variant_data.setValue(&measurement);
                 item->setData(variant_data,Qt::UserRole+1);
+                item->setCheckable(true);
+                item->setCheckState(Qt::Unchecked);
                 /******/
                 break;
             case col_sizes:
@@ -223,6 +225,8 @@ private:
             return column_items;
         }
         QStandardItemModel* model;
+        ///mgroup pointers in here indicate expanded items in treeview
+        std::vector<int> expanded_mgroups_position_list;
     public:
         static bool index_has_measurement(const QModelIndex& idx)
         {
@@ -281,13 +285,12 @@ private:
         {
         }
         bool expanded=true;
-        ///measurement pointers in here indicate expanded items in treeview
-        std::set<const mgroup_t*> are_mgroups_expanded;
 
-        void saveStates_to_persistentModelIndexList(QTreeView *treeview)
+
+        void saveStates_to_expanded_mgroups_position_list(QTreeView *treeview)
         {
             log_f;
-            are_mgroups_expanded.clear();
+            expanded_mgroups_position_list.clear();
             QModelIndex index = model->index(tool_section_id,0);
             if (treeview->isExpanded(index))
             {
@@ -297,15 +300,29 @@ private:
                     QModelIndex child_index = model->index(r,0,index);
                     if (treeview->isExpanded(child_index))
                     {
-                        are_mgroups_expanded.insert(get_mgroup_from_QIndex(child_index));
-                        logger.debug("child_index").value("is expanded",10,"row: " + std::to_string(child_index.row()) + " column: " + std::to_string(child_index.column()) );
+                        expanded_mgroups_position_list.push_back(r);
+                        logger.debug("child_index").value("is expanded",10,"row: " + std::to_string(child_index.row()) + " column: " + std::to_string(child_index.column()) + " mgroup: " + get_mgroup_from_QIndex(child_index)->to_string_short() );
                     }
                 }
             }
             else
                 expanded=false;
         }
-        void restoreStates_from_persistentModelIndexList(QTreeView *treeview)
+//        void removeIndexes_from_expanded_mgroups_position_list(QList<QModelIndex> Indexes)
+//        {
+//            for (auto& index : Indexes)
+//            {
+//                int position = index.row();
+//                expanded_mgroups_position_list.erase(std::find(expanded_mgroups_position_list.begin(),expanded_mgroups_position_list.end(),position));
+//                //don t forget to reduce all entries > position by 1!
+//                for (auto& pos : expanded_mgroups_position_list)
+//                {
+//                    if (position>pos)
+//                        pos--;
+//                }
+//            }
+//        }
+        void restoreStates_from_expanded_mgroups_position_list(QTreeView *treeview)
         {
             log_f;
             if (!expanded)
@@ -313,17 +330,13 @@ private:
             QModelIndex index = model->index(tool_section_id,0);
 
             treeview->expand(index);
-            logger.debug("model->rowCount(index)").value(model->rowCount(index));
-            for (int r=0;r<model->rowCount(index);r++)
+            for (int r : expanded_mgroups_position_list)
             {
-                QModelIndex child_index = model->index(r,0,index); // this seems not to work
+                QModelIndex child_index = model->index(r,0,index);
                 if (!child_index.isValid())
                     continue;
-                logger.debug("child_index").value("valid",11,"row: " + std::to_string(child_index.row())+ " col: " + std::to_string(child_index.column()) );
-                if (are_mgroups_expanded.find(get_mgroup_from_QIndex(child_index))==are_mgroups_expanded.end())
-                    continue;
                 treeview->expand(child_index);
-                logger.debug("child_index").value("expanded",10,"row: " + std::to_string(child_index.row())+ " col: " + std::to_string(child_index.column()) );
+                logger.debug("child_index").value("expanded",10,"row: " + std::to_string(child_index.row())+ " col: " + std::to_string(child_index.column()) + " mgroup: " + get_mgroup_from_QIndex(child_index)->to_string_short() );
             }
         }
         void show_selection_in_log(const QModelIndexList& indexes)
@@ -336,7 +349,7 @@ private:
                     continue;
                 if (idx.column()!=0)
                     continue;
-                logger.debug("index").value("isValid",10,"col: " + std::to_string(idx.column()) +" row:" + std::to_string(idx.row()));
+//                logger.debug("index").value("isValid",10,"col: " + std::to_string(idx.column()) +" row:" + std::to_string(idx.row()));
                 if ( is_UNgrouped_measurement(idx) )
                 {
                     logger.info("index").value("is_UNgrouped_measurement",10,"measurement: " + get_measurement_from_QIndex(idx)->to_string_short());
@@ -422,7 +435,7 @@ private:
                 if (go_update)
                 {
                     logger.debug("removeRow").value("row: " + std::to_string( idx.row()) + " ; column: " + std::to_string(idx.column()) );
-//                    model->removeRow(idx.row(),idx.parent());
+                    model->removeRow(idx.row(),idx.parent());
                 }
             }
             return go_update;
@@ -463,7 +476,6 @@ private:
             return item;
         }
     }; // tool_section_t
-    void saveState();
     ///restores the states of the items
     void restoreState();
     QWidget *parent;
@@ -476,6 +488,7 @@ private:
 public:
     tool_section_t<mgroups_::dsims_t, measurements_::dsims_t,processor::tool_with_files_measurements_groups<files_::dsims_t,measurements_::dsims_t,mgroups_::dsims_t> > dsims_section;
     tool_section_t<mgroups_::tofsims_t, measurements_::tofsims_t, processor::tool_with_files_measurements_groups<files_::tofsims_t,measurements_::tofsims_t,mgroups_::tofsims_t>> tofsims_section;
+//    bool use_pbp_calc=true;
     QMenu* contextMenu;
     QAction* delete_selection_action;
     QAction* ungroup_selection_action;
@@ -489,6 +502,7 @@ public:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>()) override;
 
     void resizeColumns();public slots:
+    void saveState();
     void update();
 signals:
     void update_measurements_treeview();

@@ -315,13 +315,13 @@ void MainWindow::on_mgroups_treeview_clicked(const QModelIndex &index)
     measurements_::sims_t* M = nullptr;
 //    index.row();
 //    index.siblingAtColumn(0);
-    logger.debug("dsims").enter();
-    ui->mgroups_treeview->dsims_section.show_selection_in_log({index.siblingAtColumn(0)});
-    logger.debug("tofsims").enter();
-    ui->mgroups_treeview->tofsims_section.show_selection_in_log({index.siblingAtColumn(0)});
+//    logger.debug("index").value("row: "+ std::to_string(index.row()) + " col: "+ std::to_string(index.column()));
+//    logger.debug("dsims").enter();
+//    ui->mgroups_treeview->dsims_section.show_selection_in_log({index.siblingAtColumn(0)});
+//    logger.debug("tofsims").enter();
+//    ui->mgroups_treeview->tofsims_section.show_selection_in_log({index.siblingAtColumn(0)});
 
-//    ui->mgroups_treeview->expand(index);
-
+//    ui->mgroups_treeview->saveState();
 
     M = ui->mgroups_treeview->dsims_section.get_measurement_from_QIndex(index.siblingAtColumn(0));
     if (M!=nullptr)
@@ -396,8 +396,16 @@ void MainWindow::on_calc_button_clicked()
         calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
         // SF + RSF
         calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
-//        calc.SFs.from_RSF_median_ref().SFs.from_implant_max();
-        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max();
+        if (ui->check_pbp->isChecked())
+        {
+            logger.info("calculation Method").signal("pbp");
+            calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
+        }
+        else
+        {
+            logger.info("calculation Method").signal("median");
+            calc.SFs.from_RSF_median_ref().SFs.from_implant_max(); //median
+        }
         // C
         calc.concentrations.from_SF();
 
@@ -450,8 +458,16 @@ void MainWindow::on_calc_button_clicked()
         calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
         // SF + RSF
         calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
-//        calc.SFs.from_RSF_median_ref().SFs.from_implant_max(); //median
-        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
+        if (ui->check_pbp->isChecked())
+        {
+            logger.info("calculation Method").signal("pbp");
+            calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
+        }
+        else
+        {
+            logger.info("calculation Method").signal("median");
+            calc.SFs.from_RSF_median_ref().SFs.from_implant_max(); //median
+        }
         // C
         calc.concentrations.from_SF();
 
@@ -503,5 +519,10 @@ void MainWindow::on_export_button_clicked()
         logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
         MG.export_origin_ascii(export_path);
     }
+
+}
+
+void MainWindow::on_check_pbp_stateChanged(int arg1)
+{
 
 }

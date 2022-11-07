@@ -148,6 +148,16 @@
                <enum>QLayout::SetDefaultConstraint</enum>
               </property>
               <item>
+               <widget class="QCheckBox" name="check_pbp">
+                <property name="text">
+                 <string>pbp</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="calc_button">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
