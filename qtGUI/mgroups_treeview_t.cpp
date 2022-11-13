@@ -32,30 +32,60 @@ std::map<mgroups_treeview_t::columns,std::string> mgroups_treeview_t::column_nam
     {col_sizes,"<size>"},
     {col_olcdb,"olcdb"},
     {col_group_id,"group id"},
-    {col_settings,"settings"}
+    {col_settings,"settings"},
+    {col_export,"export location"}
 };
 
 
 
 void mgroups_treeview_t::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
 {
+    if (updating)
+        return;
     log_f;
     logger.debug("this").enter();
     if (topLeft == bottomRight)
     {
         std::string name = model->itemFromIndex(topLeft)->text().toStdString();
-
-        if (dsims_section.is_mgroup(topLeft))
+        if (topLeft.column()==col_method)
         {
-            auto* MG = dsims_section.get_mgroup_from_QIndex(topLeft);
-            MG->name =name;
-            logger.debug("MG tofsims name").signal(MG->name);
+            if (dsims_section.is_mgroup(topLeft))
+            {
+                auto* MG = dsims_section.get_mgroup_from_QIndex(topLeft);
+                MG->set_name(name);
+                MG->set_export_location(MG->export_location());
+                logger.debug("MG dsims name").signal(MG->name());
+            }
+            else if (tofsims_section.is_mgroup(topLeft))
+            {
+                auto* MG = tofsims_section.get_mgroup_from_QIndex(topLeft);
+                MG->set_name(name);
+                MG->set_export_location(MG->export_location());
+                logger.debug("MG tofsims name").signal(MG->name());
+            }
+            update();
         }
-        else if (tofsims_section.is_mgroup(topLeft))
+        else if (topLeft.column()==col_export)
         {
-            auto* MG = tofsims_section.get_mgroup_from_QIndex(topLeft);
-            MG->name =name;
-            logger.debug("MG tofsims name").signal(MG->name);
+            std::string new_export_location = tools::file::check_directory_string(name);
+            if (dsims_section.is_mgroup(topLeft.siblingAtColumn(0)))
+            {
+                dsims_section.get_mgroup_from_QIndex(topLeft.siblingAtColumn(0))->set_export_location(new_export_location);
+            }
+            else if (dsims_section.is_grouped_measurement(topLeft.siblingAtColumn(0)))
+            {
+                dsims_section.get_measurement_from_QIndex(topLeft.siblingAtColumn(0))->export_location = new_export_location;
+            }
+            else if (tofsims_section.is_mgroup(topLeft.siblingAtColumn(0)))
+            {
+                tofsims_section.get_mgroup_from_QIndex(topLeft.siblingAtColumn(0))->set_export_location(new_export_location);
+            }
+            else if (tofsims_section.is_grouped_measurement(topLeft.siblingAtColumn(0)))
+            {
+                tofsims_section.get_measurement_from_QIndex(topLeft.siblingAtColumn(0))->export_location = new_export_location;
+            }
+            logger.info("new_export_location").value(new_export_location);
+            update();
         }
     }
 }
@@ -250,6 +280,7 @@ void mgroups_treeview_t::update()
 {
     log_f;
     logger.debug("this").enter();
+    updating=true;
     saveState();
 //    model->removeRows(0,2);
     logger.debug("this").signal("dsims_section.tool_section_item(col_method)");
@@ -264,6 +295,7 @@ void mgroups_treeview_t::update()
     model->setItem(tofsims,col_sizes,tofsims_section.tool_section_item(col_sizes));
 
     restoreState();
+    updating=false;
 //    logger.debug("this").signal("resizeColumns");
 //    resizeColumns();
 //    model->setItem(tofsims,0,tofsims_section.tool_section_item());

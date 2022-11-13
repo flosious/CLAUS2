@@ -116,16 +116,83 @@ const quantity::quantity_t& sims_plotwindow_t::axis_t::quantity() const
     return quantity_p;
 }
 
+/*****************************/
+/********  x_axis_t  *********/
+/*****************************/
+
+void sims_plotwindow_t::x_axis_t::update_quantity()
+{
+    switch (option)
+    {
+    case options::sputter_depth:
+    {
+        set_quantity(quantity::sputter_depth_t({1},{"nm"}));
+        return;
+    }
+    case options::sputter_time:
+    {
+        set_quantity(quantity::sputter_time_t({1},{"s"}));
+        return;
+    }
+    case options::sputter_points:
+    {
+        quantity::quantity_t Q("sputter_points",{1},units::SI::one);
+        set_quantity(Q);
+        return;
+    }
+    }
+
+}
+
+sims_plotwindow_t::x_axis_t::x_axis_t(sims_plotwindow_t* sims_plotwindow, QCPAxis *qcpAxis_s, options option) :
+    axis_t(qcpAxis_s,{}), sims_plotwindow(sims_plotwindow)
+{
+    update_quantity();
+}
+
+quantity::quantity_t sims_plotwindow_t::x_axis_t::quantity_from_crater(const crater_t& crater) const
+{
+    switch (option)
+    {
+    case options::sputter_depth:
+    {
+        return crater.sputter_depth;
+    }
+    case options::sputter_time:
+    {
+        return crater.sputter_time;
+    }
+    case options::sputter_points:
+    {
+        return crater.sputter_points();
+    }
+    }
+    return {};
+}
+
+quantity::quantity_t sims_plotwindow_t::x_axis_t::quantity_from_measurement(const measurements_::sims_t &measurement) const
+{
+    return quantity_from_crater(measurement.crater);
+}
+
+void sims_plotwindow_t::x_axis_t::change(options axis_option)
+{
+    option = axis_option;
+    update_quantity();
+}
+
+/*****************************/
+
 /**************************/
 /******   axEs_t     ******/
 /**************************/
-sims_plotwindow_t::axes_t::axes_t(QCPAxisRect *axisRect_s) :
+sims_plotwindow_t::axes_t::axes_t(QCPAxisRect *axisRect_s, sims_plotwindow_t *sims_plotwindow) :
     intensity(axisRect_s->axis(QCPAxis::atLeft),quantity::intensity_t({1},{"c/s"})),
     concentration_abs(axisRect_s->addAxis(QCPAxis::atRight),quantity::concentration_t({1},{"at/ccm"})),
     concentration_rel(axisRect_s->addAxis(QCPAxis::atRight),quantity::concentration_rel_t({1},units::derived::atom_percent,quantity::dimensions::SI::relative)),
 //    sputter_time(quantity::sputter_time_t({1},{"s"}),axisRect_s->axis(QCPAxis::atBottom)),
 //    sputter_depth(quantity::sputter_depth_t({1},{"nm"}),axisRect_s->axis(QCPAxis::atBottom))
-    x(axisRect_s->axis(QCPAxis::atBottom), quantity::sputter_time_t({1},{"s"}))
+    x(sims_plotwindow,axisRect_s->axis(QCPAxis::atBottom))
 {
     set_x_axis_as_sputter_time();
     set_intensity_axis();
@@ -189,15 +256,16 @@ const std::map<int, QColor> sims_plotwindow_t::iterate_colors
 //    axes.set_axes(wideAxisRect);
 //}
 
-sims_plotwindow_t::sims_plotwindow_t(QWidget *parent) : QCustomPlot(parent), class_logger(__FILE__,"sims_plotwindow_t"), axes(axisRect())
+sims_plotwindow_t::sims_plotwindow_t(QWidget *parent) : QCustomPlot(parent), class_logger(__FILE__,"sims_plotwindow_t"), axes(axisRect(),this)
 {
 //    axisRect()->axis(QCPAxis::atLeft, 1);
 //    make_window();
     setInteraction(QCP::iRangeDrag,true);
     setInteraction(QCP::iRangeZoom,true);
     setInteraction(QCP::iSelectPlottables);
-    setSelectionRectMode(QCP::srmZoom);
-
+//    setSelectionRectMode(QCP::srmZoom);
+    axisRect()->setRangeZoomAxes(QList{axes.x.qcpAxis,axes.intensity.qcpAxis,axes.concentration_abs.qcpAxis,axes.concentration_rel.qcpAxis});
+    axisRect()->setRangeDragAxes(QList{axes.x.qcpAxis,axes.intensity.qcpAxis,axes.concentration_abs.qcpAxis,axes.concentration_rel.qcpAxis});
 }
 
 QColor sims_plotwindow_t::get_color_from_graph_id(int graph_id)
@@ -286,6 +354,11 @@ sims_plotwindow_t::axis_t* sims_plotwindow_t::get_y_axis(const quantity::quantit
         y_axis_s = nullptr;
 
     return y_axis_s;
+}
+
+int sims_plotwindow_t::add_graph(const crater_t &crater, quantity::quantity_t Y)
+{
+    return add_graph(axes.x.quantity_from_crater(crater),Y);
 }
 
 int sims_plotwindow_t::add_graph(quantity::quantity_t X,  quantity::quantity_t Y)

@@ -24,6 +24,7 @@ mgroups_::tofsims_t::tofsims_t(measurements_::tofsims_t& tofsims_measurements) :
                 logger(__FILE__,"mgroups_::tofsims_t")
 {
 	measurements_p.push_back(tofsims_measurements);
+//    export_location_p += (settings_p.to_string_short()) + PATH_DELIMITER;
 }
 
 mgroups_::tofsims_t::tofsims_t(std::vector< measurements_::tofsims_t* > tofsims_measurements) :

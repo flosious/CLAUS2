@@ -22,6 +22,7 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, database_t& sql_wra
         sims_t(dsims_file.name,dsims_file.contents,"dsims",sql_wrapper,total_sputter_dephs),
                 settings(dsims_file.name,dsims_file.contents), logger(__FILE__,"measurements_::dsims_t")
 {
+    tool_name = "IMSWf";
 	crater.sputter_beam = dsims_file.contents.Ipr();
 	
 	if (dsims_file.contents.total_sputtering_time().is_set())

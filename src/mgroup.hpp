@@ -56,6 +56,8 @@ public:
     private:
         class_logger_t class_logger;
 	// 	friend class config_t;
+        std::string name_p="";
+        std::string tool_name_p="uknownTool";
 	protected:
 		static bool use_olcdb;
 		static bool use_group;
@@ -81,8 +83,13 @@ public:
             return tools::vec::get_index_position_by_comparing_pointers(measurements,measurement);
         }
         mgroup_t(measurements_::measurement_t& measurement);
+        std::string export_location_p="";
+        virtual std::vector<measurements_::measurement_t*> basic_measurements();
 	public:
-
+        virtual std::string to_string_short() const;
+        ///default (export_location="") will use path of first measurement
+        void set_export_location(std::string export_location);
+        std::string export_location() const;
 		std::string to_string(const std::string del=", ");
 		/*const defitions*/
 		///"51087" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
@@ -90,8 +97,9 @@ public:
 		///measurement group identifier: "5" from filename: 51087_SJZ307#A#B_w17_X1Y5_mQ_13kVCs-_g5q.dp_rpc_asc
         std::string group_id;
         ///given by user, optional
-        std::string name="";
-
+        std::string name() const;
+        void set_name(const std::string& new_name);
+        std::string tool_name() const;
 		/*functions*/
 //        virtual int remove_measurements();
 		/*static functions*/
@@ -272,10 +280,12 @@ public:
 		///sets mat_isos as matrix_isotopes in all samples within all measurements within this group
 		bool set_matrix_isotopes_in_unknown_samples();
 		std::vector<isotope_t> matrix_isotopes_p;
+
 	public:
-		sims_t(measurements_::sims_t& measurement);
-		void export_origin_ascii(std::string path="", const std::string delimiter="\t");
-		std::string to_string_short() const;
+        std::vector<measurements_::measurement_t*> basic_measurements() override;
+        sims_t(measurements_::sims_t& measurement);
+        void export_origin_ascii(std::string path="", const std::string delimiter="\t");
+        std::string to_string_short() const override;
 		calc_t calc();
 		///all different matrices from all samples within this group
 		std::set<sample_t::matrix_t> matrices();

@@ -65,6 +65,7 @@ public:
 		static bool use_olcdb;
 		static bool use_sample;
         database_t* database=nullptr;
+
 	public:
         measurement_t(files_::file_t::name_t& filename, files_::file_t::contents_t& filecontents, std::string method,database_t& database);
         measurement_t(files_::file_t::name_t& filename, std::string method,database_t& database);
@@ -76,11 +77,13 @@ public:
 		bool is_set() const;
         std::string group_id;
 		std::string repetition;
+        std::string tool_name;
 		int olcdb;
 //		sample_t* sample=nullptr;
         sample_t sample;
 		/// dsims, tofsims, xps, profiler, ...
 		std::string method;
+        std::string export_location;
 		bool operator==(const measurement_t& obj) const;
 		bool operator!=(const measurement_t& obj) const;
 		bool operator<(const measurement_t& obj) const;
@@ -122,6 +125,7 @@ public:
     private:
         class_logger_t class_logger;
 	protected:
+//        virtual void set_default_export_location();
 		///some general data filters
 		class filter_t
 		{
@@ -376,6 +380,7 @@ public:
 	public: 
         sims_t(files_::sims_t::name_t& filename, files_::sims_t::contents_t& filecontents, std::string method, database_t& database, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs={});
         virtual ~sims_t() = default;
+
 		bool are_clusters_in_measurement(const std::vector<cluster_t>& clusters_s) const;
 		bool are_clusters_in_measurement(const cluster_t& cluster_s) const;
 		bool are_intensities_of_clusters_set(const std::vector<cluster_t>& clusters_s) const;
@@ -403,7 +408,7 @@ public:
 		//creates instantly a plot
 //		void plot_now(double sleep_sec=1);
 		///origin ready for import
-		void export_origin_ascii(std::string path="/tmp/", const std::string delimiter="\t");
+        void export_origin_ascii(std::string path="", const std::string delimiter="\t");
 
 		bool add(sims_t& measurement);
 		

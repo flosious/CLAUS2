@@ -128,6 +128,7 @@ public:
 			std::string delimiter;
 			std::set<std::string> identifiers;
 //            const std::string& contents_string();
+            void load_file_to_contents_p();
 			std::string filename_with_path;
 			/*ctors*/
             contents_t(std::string& filename_with_path,const std::string& delimiter,const std::set<std::string>& identifiers,std::vector<unsigned int> delete_cols_before_parsing={}, const std::string& contents_string="");

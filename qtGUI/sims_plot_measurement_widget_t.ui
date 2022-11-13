@@ -51,7 +51,7 @@
      <widget class="QWidget" name="verticalLayoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="sims_plot_measurement_tree_t" name="clusters_tree">
+        <widget class="sims_plot_cluster_tree_t" name="clusters_tree">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -60,6 +60,16 @@
          </property>
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check_sputter_depth">
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="text">
+          <string>sputter_depth</string>
          </property>
         </widget>
        </item>
@@ -77,9 +87,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>sims_plot_measurement_tree_t</class>
+   <class>sims_plot_cluster_tree_t</class>
    <extends>QTreeView</extends>
-   <header>sims_plot_measurement_tree_t.hpp</header>
+   <header>sims_plot_cluster_tree_t.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

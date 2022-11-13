@@ -78,6 +78,7 @@ SOURCES += \
     ../src/tools.vec.cpp \
     ../src/tools.web.cpp \
     ../src/unit.cpp \
+    custom_model_items_t.cpp \
     files_treeview_t.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -85,7 +86,7 @@ SOURCES += \
     mgroups_treeview_t.cpp \
     plotwindow_t.cpp \
     qcustomplot.cpp \
-    sims_plot_measurement_tree_t.cpp \
+    sims_plot_cluster_tree_t.cpp \
     sims_plot_measurement_widget_t.cpp \
     sims_plotwindow_t.cpp \
     table_log_t.cpp
@@ -120,13 +121,14 @@ HEADERS += \
     ../src/statistics.hpp \
     ../src/tools.hpp \
     ../src/unit.hpp \
+    custom_model_items_t.hpp \
     files_treeview_t.hpp \
     mainwindow.h \
     measurements_treeview_t.hpp \
     mgroups_treeview_t.hpp \
     plotwindow_t.hpp \
     qcustomplot.h \
-    sims_plot_measurement_tree_t.hpp \
+    sims_plot_cluster_tree_t.hpp \
     sims_plot_measurement_widget_t.hpp \
     sims_plotwindow_t.hpp \
     table_log_t.hpp

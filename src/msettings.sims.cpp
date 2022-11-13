@@ -22,7 +22,7 @@ msettings::sims_t::sims_t() : logger(__FILE__,"msettings::sims_t")
 {
 }
 
-msettings::sims_t::sims_t(files_::sims_t::name_t& filename) : 
+msettings::sims_t::sims_t(files_::sims_t::name_t& filename) :
         sputter_ion(ion_t(filename.sputter_element(),{{1}})), secondary_polarity(filename.secondary_polarity()), sputter_energy(filename.sputter_energy()),
         logger(__FILE__,"msettings::sims_t")
 {
@@ -65,7 +65,7 @@ const std::string msettings::sims_t::to_string(const std::string del) const
 const std::string msettings::sims_t::to_string_short() const
 {
 	if (!sputter_energy.is_scalar() || !sputter_ion.is_set()) 
-		return "";
+        return "";
 	quantity::energy_t SE;
 	std::stringstream ss;
 	if (sputter_energy.data().at(0)>=1000)
@@ -75,7 +75,6 @@ const std::string msettings::sims_t::to_string_short() const
 	
 // 	element_t E = sputter_ion.elements.at(0);
 // 	PSE.isotope()
-	
 	ss << SE.data().at(0) << SE.unit().to_string();
 	
 	for (auto& ele : sputter_ion.elements)

@@ -29,6 +29,7 @@ measurements_::tofsims_t::tofsims_t(files_::tofsims_t& tofsims_file,
 {
     crater.sputter_depth = tofsims_file.contents.sputter_depth();
     crater.sputter_time = tofsims_file.contents.sputter_time();
+    tool_name = "TOFSIMSV";
 }
 
 bool measurements_::tofsims_t::operator!=(const measurements_::tofsims_t& obj) const

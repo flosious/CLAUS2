@@ -195,6 +195,7 @@ public:
             auto& G = mgroups.at(mgroup_idx);
             std::vector<measurement_type> Ms = tools::vec::filter_as_copies_from_indices(this->measurements,measurement_indexes);
             G.measurements_p.insert(G.measurements_p.end(),Ms.begin(),Ms.end());
+            G.set_export_location(G.export_location());
             tools::vec::erase(this->measurements,measurement_indexes);
         }
         void auto_group_measurements(std::vector<unsigned int> measurement_indexes,bool ignore_olcdb=false)
@@ -223,12 +224,17 @@ public:
                     }
                     found_group = true;
                     MG.measurements_p.push_back(M);
+                    MG.set_export_location(MG.export_location());
 //                    logger.debug(M.to_string_short()).value("measurement added to existing group",19,"adding into group: " + MG.to_string_short());
                 }
                 if (!found_group)
                 {
                     mgroup_type new_MG(M);
                     this->mgroups.push_back(new_MG);
+                    new_MG.set_export_location(new_MG.export_location());
+                    logger.info(__func__,"new_MG.export_location").value(new_MG.export_location());
+                    for (auto& M : new_MG.measurements_p)
+                        logger.info(__func__,"M.export_location").value(M.export_location);
                 }
             }
             tools::vec::erase(this->measurements,measurement_indexes);

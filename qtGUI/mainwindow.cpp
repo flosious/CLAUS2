@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->measurements_treeView, SIGNAL(update_mgroups_treeview()), ui->mgroups_treeview, SLOT(update()));
     QObject::connect(ui->mgroups_treeview, SIGNAL(update_measurements_treeview()), ui->measurements_treeView, SLOT(update()));
 
-//    QObject::connect(ui->mgroups_treeview, SIGNAL(set_measurement_in_sims_plot_measurement_tree),ui->sims_plot_measurement_widget,SLOT(set_measurement));
+//    QObject::connect(ui->mgroups_treeview, SIGNAL(set_measurement_in_sims_plot_cluster_tree),ui->sims_plot_measurement_widget,SLOT(set_measurement));
 
 //    ui->mgroups_treeview->header()->setStretchLastSection(false);
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
@@ -173,6 +173,11 @@ void MainWindow::dropEvent(QDropEvent *e)
             logger.debug(log_object).exit();
         }
 
+        /*some testing, can be deleted*/
+//        claus->dsims.mgroups.front().set_export_location(claus->dsims.mgroups.front().export_location() + "/test/");
+//        logger.error("test").value(claus->dsims.mgroups.front().measurements().front()->export_location);
+        /******************************/
+
         ui->measurements_treeView->update();
         ui->files_treeView->update();
         ui->mgroups_treeview->update();
@@ -198,6 +203,16 @@ void MainWindow::dropEvent(QDropEvent *e)
     }
     else
         logger.error("dropped file").value("has no URL");
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *e)
+{
+    if ( (e->modifiers() == Qt::ControlModifier) && (e->key() == Qt::Key_Q))
+    {
+        QApplication::quit();
+    }
+//    else
+//        MainWindow::keyPressEvent(e);
 }
 
 void MainWindow::on_button_files_to_measurements_clicked()
@@ -495,29 +510,25 @@ void MainWindow::on_export_button_clicked()
     /*tof sims*/
     for (auto& MG : claus->tofsims.mgroups)
     {
-        std::string export_path = ui->tofsims_export_directory_textEdit->toPlainText().toStdString();
-        if (export_path=="")
-            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
+//        std::string export_path = ui->tofsims_export_directory_textEdit->toPlainText().toStdString();
 //        if (export_path=="")
-//            export_path = ui->tofsims_export_directory_textEdit->placeholderText().toStdString();
-        export_path = tools::file::check_directory_string(export_path);
-        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
-        MG.export_origin_ascii(export_path);
+//            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
+
+//        export_path = tools::file::check_directory_string(export_path);
+//        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
+        MG.export_origin_ascii();
     }
 
     /*D sims*/
     for (auto& MG : claus->dsims.mgroups)
     {
-        std::string export_path = ui->dsims_export_directory_textEdit->toPlainText().toStdString();
-        if (export_path=="")
-            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
+//        std::string export_path = ui->dsims_export_directory_textEdit->toPlainText().toStdString();
+//        if (export_path=="")
+//            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
 
-    //        if (export_path=="")
-    //            export_path = ui->dsims_export_directory_textEdit->placeholderText().toStdString();
-
-        export_path = tools::file::check_directory_string(export_path);
-        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
-        MG.export_origin_ascii(export_path);
+//        export_path = tools::file::check_directory_string(export_path);
+//        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
+        MG.export_origin_ascii();
     }
 
 }

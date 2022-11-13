@@ -73,7 +73,7 @@ bool files_::file_t::name_t::is_correct_type()
 	for (auto& fti : AND_identifiers_s)
 	{
         if ((filename()+"."+filename_type_ending()).find(fti)==std::string::npos)
-		{
+        {
             //logger::debug(33,"files_::file_t::name_t::is_correct_type()","wrong AND file type: " + filename_with_path );
 			return false;
 		}
@@ -85,8 +85,7 @@ bool files_::file_t::name_t::is_correct_type()
 	for (auto& fti : OR_identifiers_s)
 	{
 		
-		std::string T = filename()+"."+filename_type_ending();
-// 		std::cout << std::endl << T << " FTI " << fti << std::endl;
+        std::string T = filename()+"."+filename_type_ending();
         if (T.find(fti)!=std::string::npos)
 		{
 			return true;

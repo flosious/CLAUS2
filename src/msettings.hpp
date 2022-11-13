@@ -36,14 +36,18 @@ public:
 	{
     private:
         class_logger_t logger;
+    protected:
+
 	public:
 		sims_t();
-		sims_t(files_::sims_t::name_t& filename);
-		const std::string to_string(const std::string del = ", ") const;
-		const std::string to_string_short() const;
+        sims_t(files_::sims_t::name_t& filename);
+
 		std::string secondary_polarity;
 		quantity::energy_t sputter_energy;
 		ion_t sputter_ion;
+
+        const std::string to_string(const std::string del = ", ") const;
+        const std::string to_string_short() const;
 		bool operator==(const sims_t& obj) const;
 		bool operator!=(const sims_t& obj) const;
         bool is_set() const;

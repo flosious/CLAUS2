@@ -109,11 +109,23 @@ measurements_::sims_t::sims_t(files_::sims_t::name_t& filename, files_::sims_t::
     measurement_t(filename,method,sql_wrapper), clusters(filecontents.clusters()), reference_isotopes(sample.matrix().isotopes()),
     class_logger(__FILE__,"measurements_::sims_t")
 {
+//    set_default_export_location();
 	crater.total_sputter_depths << filename.total_sputter_depths();
 	for (auto& tsd : total_sputter_dephs)
 		if (tsd!=nullptr)
 			crater.total_sputter_depths << *tsd;
 }
+
+//void measurements_::sims_t::set_default_export_location()
+//{
+//    export_location = tools::file::extract_directory_from_filename(filename_with_path);
+//    export_location = tools::file::check_directory_string(export_location);
+//    if (olcdb >= 0)
+//        export_location += std::to_string(olcdb);
+//    else
+//        export_location += "unknown olcdb";
+//    tools::file::check_directory_string(export_location);
+//}
 
 std::string measurements_::sims_t::to_string(const std::string del)
 {
@@ -264,9 +276,13 @@ void measurements_::sims_t:: export_origin_ascii(std::string path, const std::st
 	std::string out = tools::mat::format_matrix_to_string(&matrix);
 	if (path!="")
 	{
-		path = tools::file::check_directory_string(path);
-		tools::file::mkpath(path,0750);
+        path = tools::file::check_directory_string(path);
 	}
+    else
+    {
+        path = tools::file::check_directory_string(export_location);
+    }
+    tools::file::mkpath(path,0750);
 	std::stringstream filename;
 	filename << olcdb;
     if (sample.simple_name!="")

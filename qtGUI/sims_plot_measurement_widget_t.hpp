@@ -45,6 +45,8 @@ private slots:
 
     void on_clusters_tree_clicked(const QModelIndex &index);
 
+    void on_check_sputter_depth_stateChanged(int arg1);
+
 private:
     Ui::sims_plot_measurement_widget_t *ui;
     class_logger_t class_logger;

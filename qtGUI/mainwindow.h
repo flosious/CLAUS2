@@ -77,9 +77,11 @@ private slots:
 
     void on_check_pbp_stateChanged(int arg1);
 
+
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
 public:
     Ui::MainWindow *ui;
     MainWindow(QWidget *parent = nullptr);

@@ -32,6 +32,17 @@ files_::file_t::contents_t::contents_t(std::string& filename_with_path,
 {
 }
 
+void files_::file_t::contents_t::load_file_to_contents_p()
+{
+    if (!tools::file::file_exists(filename_with_path))
+    {
+        logger.error(__func__,filename_with_path).signal("does not exist");
+        //logger::error("files_::file_t::contents_t::contents_string()", "!tools::file::file_exists(filename_with_path)", filename_with_path,"skipping file");
+        return;
+    }
+    contents_p = tools::file::load_file_to_string(filename_with_path);
+}
+
 const std::string files_::file_t::contents_t::creation_date_time() const
 {
 	time_t cdt = tools::file::creation_date(filename_with_path);
@@ -78,23 +89,16 @@ std::string files_::file_t::contents_t::matrix()
 
 const std::string& files_::file_t::contents_t::contents_string()
 {
-	if (contents_p.size()==0)
-	{
-		
-		if (!tools::file::file_exists(filename_with_path)) 
-		{
-            logger.error(__func__,filename_with_path).signal("does not exist");
-            //logger::error("files_::file_t::contents_t::contents_string()", "!tools::file::file_exists(filename_with_path)", filename_with_path,"skipping file");
-			return contents_p;
-		}
-		contents_p = tools::file::load_file_to_string(filename_with_path);
-	}
+
 	return contents_p;
 }
 
 bool files_::file_t::contents_t::is_correct_type()
 {
-	if (contents_string()=="") return false;
+    if (contents_string()=="")
+    {
+        load_file_to_contents_p();
+    }
 	for (auto& fci : identifiers)
 	{
         if (contents_string().find(fci)==std::string::npos)

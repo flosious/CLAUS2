@@ -290,6 +290,7 @@ void processor::parse_filenames(const std::vector<std::string>& filenames)
 
 void processor::parse_filename(std::string filename)
 {
+    std::string contents="";
     files_::tofsims_t TF(filename);
     if (TF.name.is_correct_type() && TF.contents.is_correct_type())
     {

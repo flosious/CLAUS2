@@ -21,13 +21,26 @@
 
 mgroups_::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement), logger(__FILE__,"mgroups_::sims_t")
 {	
+
 }
+
+std::vector<measurements_::measurement_t*> mgroups_::sims_t::basic_measurements()
+{
+    auto Ms = measurements();
+    std::vector<measurements_::measurement_t*> Ms_const(Ms.size());
+    for (size_t i=0;i<Ms.size();i++)
+    {
+        Ms_const.at(i)=Ms.at(i);
+    }
+    return Ms_const;
+}
+
 
 const std::vector<const measurements_::sims_t*> mgroups_::sims_t::sims_t::measurements_const()
 {
 	const auto Ms = measurements();
 	std::vector<const measurements_::sims_t*> Ms_const(Ms.size());
-	for (int i=0;i<Ms.size();i++)
+    for (size_t i=0;i<Ms.size();i++)
 	{
 		Ms_const.at(i)=Ms.at(i);
 	}
@@ -318,18 +331,15 @@ std::set<cluster_t> mgroups_::sims_t::clusters()
 std::string mgroups_::sims_t::to_string_short() const
 {
 	std::stringstream out;
-    out << olcdb << "_g"<<group_id << "_" << settings()->to_string_short();
+    out  << olcdb << "_g"<<group_id << "_" << tool_name() << "_" << settings()->to_string_short();
 	return out.str();
 }
 
 void mgroups_::sims_t::export_origin_ascii(std::string path, const std::string delimiter)
 {
-    path = tools::file::check_directory_string(path) + std::to_string(olcdb) + PATH_DELIMITER;
-    tools::file::mkpath(path);
-    logger.debug(__func__,path).signal("created");
 	for (auto& M : measurements())
 	{
-		M->export_origin_ascii(path+to_string_short(),delimiter);
+        M->export_origin_ascii();
 	}
 }
 

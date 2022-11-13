@@ -43,7 +43,7 @@ private:
     enum sections {tofsims, dsims, LAST};
     static std::map<sections,std::string> section_names;
     ///don t forget to adjust column_names; leave LAST as last
-    enum columns {col_method, col_sizes, col_olcdb, col_group_id, col_settings, col_LAST};
+    enum columns {col_method, col_sizes, col_olcdb, col_group_id, col_settings, col_export, col_LAST};
     static std::map<columns,std::string> column_names;
     class_logger_t class_logger;
     template<typename mgroup_t, typename measurement_t, typename tool_with_files_measurements_groups_t>
@@ -55,7 +55,7 @@ private:
         ///save measurement* pointer data in item role (Qt::UserRole+ !1! )
         static QStandardItem* item(measurement_t& measurement, columns col)
         {
-            class_logger_t logger(__FILE__,"mgroups_treeview_t::tool_section_t::group_section_t::item");
+            class_logger_t logger(__FILE__,"mgroups_treeview_t::tool_section_t::measurement_section_t::item");
             QStandardItem *item = new QStandardItem;
             std::stringstream ss;
             QVariant variant_data;
@@ -70,26 +70,36 @@ private:
                 item->setData(variant_data,Qt::UserRole+1);
                 item->setCheckable(true);
                 item->setCheckState(Qt::Unchecked);
+                item->setEditable(false);
                 /******/
                 break;
             case col_sizes:
                 ss.str();
                 ss << "clusters: <" << measurement.clusters.size() <<">";
                 item->setText(QString(ss.str().c_str()));
+                item->setEditable(false);
                 break;
             case col_olcdb:
                 item->setText(QString(std::to_string(measurement.olcdb).c_str()));
+                item->setEditable(false);
                 break;
             case col_group_id:
                 item->setText(QString(measurement.group_id.c_str()));
+                item->setEditable(false);
                 break;
             case col_settings:
                 item->setText(QString(measurement.settings.to_string_short().c_str()));
+                item->setEditable(false);
+                break;
+            case col_export:
+                item->setText(QString(measurement.export_location.c_str()));
+                item->setEditable(true);
+                logger.info(__func__,"col_export").value(measurement.export_location,19,measurement.to_string_short());
                 break;
             default:
                 logger.error(__func__,"col").value(std::to_string(col) + "unknown");
             }
-            item->setEditable(false);
+
 
             return item;
         }
@@ -104,10 +114,7 @@ private:
             {
             case col_method:
                 ss.str("");
-                if (mgroup.name!="")
-                    ss << mgroup.name ;
-                else
-                    ss << mgroup.to_string_short();
+                ss << mgroup.name();
                 item->setText(QString(ss.str().c_str()));
                 item->setEditable(true);
                 //adding all measurements in this group here
@@ -143,6 +150,10 @@ private:
             case col_settings:
                 item->setText(QString(mgroup.settings_p.to_string_short().c_str()));
                 item->setEditable(false);
+                break;
+            case col_export:
+                item->setText(QString(mgroup.export_location().c_str()));
+                item->setEditable(true);
                 break;
             default:
                 logger.error(__func__,"col").value(std::to_string(col) + "unknown");
@@ -300,8 +311,13 @@ private:
                     QModelIndex child_index = model->index(r,0,index);
                     if (treeview->isExpanded(child_index))
                     {
+//                        if (get_mgroup_from_QIndex(child_index)==nullptr)
+//                        {
+//                            logger.error("get_mgroup_from_QIndex(child_index)").value("nullptr",10,"row: " + std::to_string(child_index.row()));
+//                            continue;
+//                        }
+//                        logger.debug("child_index").value("is expanded",10,"row: " + std::to_string(child_index.row()) + " column: " + std::to_string(child_index.column()) + " mgroup: " + get_mgroup_from_QIndex(child_index)->to_string_short() );
                         expanded_mgroups_position_list.push_back(r);
-                        logger.debug("child_index").value("is expanded",10,"row: " + std::to_string(child_index.row()) + " column: " + std::to_string(child_index.column()) + " mgroup: " + get_mgroup_from_QIndex(child_index)->to_string_short() );
                     }
                 }
             }
@@ -385,6 +401,7 @@ private:
                 {
                     if (tool->ungroup(get_mgroup_from_QIndex(idx)))
                         go_update=true;
+                    model->removeRow(idx.row(),idx.parent());
                 }
             }
             return go_update;
@@ -485,6 +502,8 @@ private:
     void set_actions();
     void set_contextMenu();
     void connect_signals_to_slots();
+    ///changing has no influence, is needed by update() and dataChanged()
+    bool updating=false;
 public:
     tool_section_t<mgroups_::dsims_t, measurements_::dsims_t,processor::tool_with_files_measurements_groups<files_::dsims_t,measurements_::dsims_t,mgroups_::dsims_t> > dsims_section;
     tool_section_t<mgroups_::tofsims_t, measurements_::tofsims_t, processor::tool_with_files_measurements_groups<files_::tofsims_t,measurements_::tofsims_t,mgroups_::tofsims_t>> tofsims_section;

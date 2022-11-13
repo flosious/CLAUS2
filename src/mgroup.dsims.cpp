@@ -24,6 +24,7 @@ mgroups_::dsims_t::dsims_t(measurements_::dsims_t& dsims_measurements) :
                 logger(__FILE__,"mgroups_::dsims_t")
 {
 	measurements_p.push_back(dsims_measurements);
+//    export_location_p += (settings_p.to_string_short()) + PATH_DELIMITER;
 }
 
 mgroups_::dsims_t::dsims_t(std::vector< measurements_::dsims_t* > dsims_measurements) :

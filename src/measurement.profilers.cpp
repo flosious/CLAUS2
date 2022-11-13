@@ -43,4 +43,5 @@ crater_t::linescan_t& measurements_::profilers_t::profiler_t::linescan()
 measurements_::profilers_t::dektak6m_t::dektak6m_t(files_::profilers_t::dektak6m_t& file, database_t& sql_wrapper) :
     profiler_t(file.name,file.contents,file.contents.linescan(),"dektak6m",sql_wrapper)
 {
+    tool_name = "Dektak6M";
 }

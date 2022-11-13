@@ -27,24 +27,14 @@ measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, fi
                                                 repetition(filename.repetition()), olcdb(filename.olcdb()),group_id(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
                                                 sample(filename,database), logger(__FILE__,"measurements_::measurement_t")
 {
-//    sample_t s(filename,filecontents,database);
-//	sample = tools::find_in_V(s,samples_list);
-//	if (sample==nullptr)
-//	{
-//		samples_list.push_back(s);
-//		sample = &samples_list.back();
-//	}
-
-//	if (!sample.matrix().is_set())
-//	{
-//		*sample = s;
-//	}
+    export_location = tools::file::check_directory_string(filename.directory()+std::to_string(olcdb));
 }
 
 measurements_::measurement_t::measurement_t(files_::file_t::name_t& filename, std::string method, database_t& database) :
             repetition(filename.repetition()), olcdb(filename.olcdb()), group_id(filename.group()), method(method), filename_with_path(filename.filename_with_path), database(&database),
             sample(filename,database), logger(__FILE__,"measurements_::measurement_t")
 {
+    export_location = tools::file::check_directory_string(filename.directory()+std::to_string(olcdb));
 //	if (sample==nullptr)
 //	{
 //        sample_t s(filename,database);

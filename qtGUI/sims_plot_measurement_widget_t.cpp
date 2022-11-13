@@ -59,3 +59,17 @@ void sims_plot_measurement_widget_t::on_clusters_tree_clicked(const QModelIndex 
     log_f;
     logger.info("clicked").enter();
 }
+
+void sims_plot_measurement_widget_t::on_check_sputter_depth_stateChanged(int arg1)
+{
+    if (Qt::CheckState::Checked == arg1)
+    {
+        //change axis to sputter_depth
+        ui->sims_plotwindow->axes.x.change(sims_plotwindow_t::x_axis_t::options::sputter_depth);
+    }
+    else
+    {
+        //change axis to sputter_time
+        ui->sims_plotwindow->axes.x.change(sims_plotwindow_t::x_axis_t::options::sputter_time);
+    }
+}
