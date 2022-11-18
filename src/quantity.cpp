@@ -822,12 +822,20 @@ int quantity::quantity_t::min_idx() const
 	return statistics::get_min_index_from_Y(data());
 }
 
+bool quantity::quantity_t::is_negative() const
+{
+    for (auto& d : data())
+        if (d<0)
+            return true;
+    return false;
+}
+
 bool quantity::quantity_t::is_nan() const
 {
-	for (auto& d : data())
-		if (isnan(d))
-			return true;
-	return false;
+    for (auto& d : data())
+        if (isnan(d))
+            return true;
+    return false;
 }
 
 bool quantity::quantity_t::is_inf() const

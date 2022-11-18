@@ -17,6 +17,9 @@
 */
 
 
+//#define UNICODE
+//#define _UNICODE
+
 #include "mainwindow.h"
 #include <QApplication>
 #include "../src/processor.hpp"

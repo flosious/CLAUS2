@@ -43,6 +43,7 @@
 // #define line_del "\n"
 // #endif
 
+
 #ifdef __unix__
 #include <unistd.h>
 
@@ -132,7 +133,7 @@ public:
 			filter_t(const std::string prefix_escape_string="\\");
 			std::string escape_special_characters(std::string filter_this);
 		};
-
+        static std::wstring utf8_to_utf16(const std::string& utf8);
 		static std::string to_ascii(std::string mainstring);
 		static std::string remove_NOTchars_from_string(std::string mainstring, std::string NOTchars);
 		/// checks wheter the input contains just empty strings ("") --> true or not --> false

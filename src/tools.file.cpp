@@ -453,6 +453,9 @@ std::vector<std::string> tools::file::get_file_list_from_dir_name(std::string di
 		while ((ent = readdir (dir)) != NULL) {
 			if (strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0)
 			{
+                /*testing*/
+//                ent->d_name;
+                /*********/
 				if (prepend_directory) 	filelist.push_back(dir_name +ent->d_name);
 				else filelist.push_back(ent->d_name);
 			}

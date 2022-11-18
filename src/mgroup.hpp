@@ -111,7 +111,7 @@ public:
 	class sims_t: public mgroup_t
 	{
 	private:
-        class_logger_t logger;
+        class_logger_t class_logger;
 	protected:
 		class calc_t
 		{
@@ -120,7 +120,7 @@ public:
 			class Crel_to_Irel_c
 			{
             private:
-                class_logger_t logger;
+                class_logger_t class_logger;
 			protected:
 				Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc);
 				calc_t& calc;
@@ -144,7 +144,7 @@ public:
 			class SR_c
 			{
 			private:
-                class_logger_t logger;
+                class_logger_t class_logger;
 				sims_t& MG;
 				calc_t& calc;
 				const std::vector<measurements_::sims_t*>& measurements;
@@ -163,7 +163,7 @@ public:
 			class SD_c
 			{
 			private:
-                class_logger_t logger;
+                class_logger_t class_logger;
 				sims_t& MG;
 				calc_t& calc;
 				const std::vector<measurements_::sims_t*>& measurements;
@@ -177,7 +177,7 @@ public:
 			class SF_c
 			{
 			private:
-                class_logger_t logger;
+                class_logger_t class_logger;
 				sims_t& MG;
 				calc_t& calc;
 				const std::vector<measurements_::sims_t*>& measurements;
@@ -197,7 +197,7 @@ public:
 			class RSF_c
 			{
 			private:
-                class_logger_t logger;
+                    class_logger_t class_logger;
 				sims_t& MG;
 				calc_t& calc;
 				const std::vector<measurements_::sims_t*>& measurements;
@@ -220,7 +220,7 @@ public:
 			class concentration_c
 			{
 			private:
-                class_logger_t logger;
+                class_logger_t class_logger;
 				sims_t& MG;
 				calc_t& calc;
 				const std::vector<measurements_::sims_t*>& measurements;
@@ -236,7 +236,7 @@ public:
 			class matrix_c
 			{
 			private:
-                class_logger_t logger;
+                class_logger_t class_logger;
 				sims_t& MG;
 				calc_t& calc;
 				const std::vector<measurements_::sims_t*>& measurements;
@@ -344,7 +344,7 @@ public:
 	{
 // 		friend class processor;
 	private:
-        class_logger_t logger;
+        class_logger_t class_logger;
 	public:
         std::vector<measurements_::dsims_t> measurements_p;
         msettings::dsims_t settings_p;
@@ -369,7 +369,7 @@ public:
 	class tofsims_t: public sims_t
 	{
 	private:
-        class_logger_t logger;
+        class_logger_t class_logger;
 	public:
         std::vector<measurements_::tofsims_t> measurements_p;
         msettings::tofsims_t settings_p;

@@ -76,7 +76,12 @@ void MainWindow::dropEvent(QDropEvent *e)
         for (int i=0; i < urlList.size() ; i++)
         {
 //            dropped_files.push_back(urlList.at(i).toString().toStdString());
-            dropped_files.push_back(urlList.at(i).toString().toStdString());
+//            urlList.at(i).toEncoded().toUShort();
+//            urlList.at(i).toPercentEncoding(urlList.at(i).toString());
+//            urlList.at(i).fromPercentEncoding(urlList.at(i).toEncoded());
+            //works in win10 / NTFS; prints correctly in console
+            dropped_files.push_back(QByteArray::fromPercentEncoding(urlList.at(i).toEncoded()).toStdString());
+//            std::cout << "dropped_file: " <<  urlList.at(i).toString().toUtf8().toStdString() << std::endl;
         }
 
         for (auto& L : dropped_files)
@@ -84,15 +89,15 @@ void MainWindow::dropEvent(QDropEvent *e)
             // file:///tmp/systemd-private-0ecda464d0ec48abbd82c45271cbe11f-systemd-logind.service-yYlCij
             tools::str::remove_substring_from_mainstring(&L,"file:");
             tools::str::remove_substring_from_mainstring(&L,"FILE:");
-            tools::str::replace_chars(&L,"%23","#");
+//            tools::str::replace_chars(&L,"%23","#");
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
 // there is a problem in recognizing the "u" (mikron letter); also olcdb is not parsed correctly (returns -1)
             tools::str::replace_chars(&L,"///","");
             //qt5 automatically replaces the windows style path delimiter with the unix path delimiter, lets change it back
             tools::str::replace_chars(&L,"/","\\"); // unix to windows style
-            std::stringstream mu;
-            mu << static_cast<char>(230);
-            tools::str::replace_chars(&L,"µ",mu.str());
+//            std::stringstream mu;
+//            mu << static_cast<char>(230);
+//            tools::str::replace_chars(&L,"µ",mu.str());
 //            tools::str::replace_umlaute_to_windows_compatible(&L);
 #endif
             logger.debug("dropped_files").value(L,11);
@@ -100,6 +105,7 @@ void MainWindow::dropEvent(QDropEvent *e)
         //collecting and filtering
         filenames_collector_t filenames_collector;
         filenames_collector.add_files_or_folders(dropped_files,ui->scan_dropped_files_recursivly->isChecked());
+        filenames_collector.convert_filenames_with_path_to_utf8();
         ///all filenames are unknown in the beginning
         const auto new_filenames = filenames_collector.filenames();
         logger.debug("new_filenames").value(new_filenames.size(),10,tools::vec::combine_vec_to_string(new_filenames, ", "));
@@ -393,7 +399,7 @@ void MainWindow::on_calc_button_clicked()
         {
             calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
             auto RSFs = mat.RSFs().add_natural_abundances().remove_RSFs_below_gof_treshold(0.2).symmetrical_RSFs();
-//            RSFs.plot_now(0);
+
             for (auto& M:MG.measurements())
             {
                 calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);

@@ -40,6 +40,7 @@ std::map<mgroups_treeview_t::columns,std::string> mgroups_treeview_t::column_nam
 
 void mgroups_treeview_t::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
 {
+//    QTreeView::dataChanged(topLeft,bottomRight,roles);
     if (updating)
         return;
     log_f;

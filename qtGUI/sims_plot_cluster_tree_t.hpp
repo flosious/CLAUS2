@@ -40,6 +40,8 @@ class sims_plot_cluster_tree_t : public QTreeView
 private:
     ///columns; keep LAST in the row at last position for automated iteration
     enum class column_t{root, LAST};
+
+
     ///for the header
     static std::map<column_t,std::string> column_names;
     QWidget *parent = nullptr;

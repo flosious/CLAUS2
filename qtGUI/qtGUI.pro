@@ -3,6 +3,7 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++17
+CONFIG += console
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -78,7 +79,7 @@ SOURCES += \
     ../src/tools.vec.cpp \
     ../src/tools.web.cpp \
     ../src/unit.cpp \
-    custom_model_items_t.cpp \
+    custom_QStandardItems.cpp \
     files_treeview_t.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -121,7 +122,7 @@ HEADERS += \
     ../src/statistics.hpp \
     ../src/tools.hpp \
     ../src/unit.hpp \
-    custom_model_items_t.hpp \
+    custom_QStandardItems.hpp \
     files_treeview_t.hpp \
     mainwindow.h \
     measurements_treeview_t.hpp \

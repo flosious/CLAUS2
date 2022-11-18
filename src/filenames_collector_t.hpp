@@ -1,6 +1,7 @@
 #ifndef FILENAMES_COLLECTOR_T_HPP
 #define FILENAMES_COLLECTOR_T_HPP
 
+#include <QString>
 #include <iostream>
 #include "tools.hpp"
 #include "log.hpp"
@@ -19,6 +20,7 @@ private:
     void add_files(std::vector<std::string> filenames_with_path);
 public:
     filenames_collector_t();
+    void convert_filenames_with_path_to_utf8();
     ///if include_sub_folders, scans recursivly
     void add_file_or_folder(std::string file_or_folder, bool include_sub_folders=true);
     void add_files_or_folders(std::vector< std::string> files_or_folders, bool include_sub_folders=true);

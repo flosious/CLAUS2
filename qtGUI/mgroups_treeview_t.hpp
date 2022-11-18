@@ -62,8 +62,6 @@ private:
             switch (col)
             {
             case col_method:
-//                item = new QStandardItem(QString(measurement.to_string_short().c_str()));
-//                item = new QStandardItem(QString(measurement.filename_with_path.c_str()));
                 item->setText(QString(tools::file::extract_filename(measurement.filename_with_path).c_str()));
                 /* new */
                 variant_data.setValue(&measurement);

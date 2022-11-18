@@ -5,6 +5,28 @@ filenames_collector_t::filenames_collector_t() : logger(__FILE__,"filenames_coll
 
 }
 
+void filenames_collector_t::convert_filenames_with_path_to_utf8()
+{
+    std::set<std::string> converted_filenames_with_path;
+    for (std::string fn : filenames_with_path_p)
+    {
+        QString QS(fn.c_str());
+        QByteArray QB(fn.c_str());
+//        QB = QS.fromLocal8Bit(QB).toUtf8();
+        QB = QS.toUtf8();
+
+//        QB.toPercentEncoding();
+        QString QS_from_QB(QB);
+        std::cout << "QB.toPercentEncoding(): "<< (QB.toPercentEncoding()).toStdString() << std::endl;
+        std::cout << "QB.fromPercentEncoding(QB.toPercentEncoding()): " << QByteArray::fromPercentEncoding(QB.toPercentEncoding()).toStdString() << std::endl;
+        std::cout << "QString(fn.c_str()).toLocal8Bit().toStdString(): " << QString(fn.c_str()).toLocal8Bit().toStdString() << std::endl;
+        //works in win, but wrongly displayed
+//        converted_filenames_with_path.insert(QString(fn.c_str()).toLocal8Bit().toStdString());
+        converted_filenames_with_path.insert(QString(fn.c_str()).toLocal8Bit().toStdString());
+    }
+    filenames_with_path_p = converted_filenames_with_path;
+}
+
 std::vector<std::string> filenames_collector_t::files_and_folders_in_path(std::string path)
 {
     if (!is_folder(path))

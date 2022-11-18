@@ -110,7 +110,8 @@ namespace quantity
 		
 		/*operations*/
 				
-		bool is_nan() const;
+        bool is_negative() const;
+        bool is_nan() const;
 		bool is_inf() const;
 		bool has_data() const;
 		bool is_set() const;

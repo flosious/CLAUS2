@@ -19,7 +19,7 @@
 
 #include "mgroup.hpp"
 
-mgroups_::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement), logger(__FILE__,"mgroups_::sims_t")
+mgroups_::sims_t::sims_t(measurements_::sims_t& measurement) : mgroup_t(measurement), class_logger(__FILE__,"mgroups_::sims_t")
 {	
 
 }
@@ -208,19 +208,14 @@ const std::vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 {
 // 	if (matrix_isotopes_p.size()>0)
 // 		return matrix_isotopes_p;
-	std::set<isotope_t> isos;
-// 	std::cout << "F1" << std::endl;
+    std::set<isotope_t> isos;
 	for (auto& M : measurements())
 	{
-// 		std::cout << "F7" << std::endl;
-        if (!M->sample.matrix().is_set()) continue;
-// 		std::cout << "F4" << std::endl;
-        std::vector<isotope_t> mat_isos=M->sample.matrix().isotopes();
-// 		std::cout << "F5" << std::endl;
+        const auto mat_isos = M->matrix_clusters().isotopes();
+//        if (!M->sample.matrix().is_set()) continue;
+//        std::vector<isotope_t> mat_isos=M->sample.matrix().isotopes();
 		isos.insert(mat_isos.begin(),mat_isos.end());
-// 		std::cout << "F6" << std::endl;
 	}
-// 	std::cout << "F2" << std::endl;
 	std::vector<isotope_t> isos_vec = {isos.begin(),isos.end()};
 	
 	// keep abundance and/or substance_amount if there is only 1 known matrix from all reference samples within this group
@@ -229,7 +224,6 @@ const std::vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
         //logger::info(3,"mgroups_::sims_t::matrix_isotopes()","found just 1 matrix, using its substance_amount for all matrix isotopes in this group",matrices().begin()->to_string());
 		return isos_vec;
 	}
-// 	std::cout << "F3" << std::endl;
 	// delete abundance and substance_amount because there are different ones in the group. calculate later
 	for (auto& I : isos_vec)
 	{

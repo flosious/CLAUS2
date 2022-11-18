@@ -105,7 +105,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::normalize_to_ref_intensity(b
 
 mgroups_::sims_t::calc_t::SR_c::SR_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      class_logger(__FILE__,"mgroups_::sims_t::calc_t::SR_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::SR_c")
 {
 }
 
@@ -212,7 +212,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
 
 mgroups_::sims_t::calc_t::SD_c::SD_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      class_logger(__FILE__,"mgroups_::sims_t::calc_t::SD_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::SD_c")
 {
 }
 
@@ -257,11 +257,9 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_pbp_ref(bool 
     log_f;
 	for (auto& rsf_to_ref : RSFs_to_ref_intensities())
 	{
-        cluster_t* cluster = rsf_to_ref.first;
-        if (overwrite || !cluster->SF.is_set())
+		if (overwrite || !rsf_to_ref.first->SF.is_set())
 		{
-            cluster->SF = quantity::SF_t (cluster->RSF / rsf_to_ref.second);
-            logger.info(cluster->to_string() + ":").value(cluster->SF.to_string_short(),10,cluster->SF.to_string_detailed());
+			rsf_to_ref.first->SF = quantity::SF_t (rsf_to_ref.first->RSF / rsf_to_ref.second); 
 		}
 	}
 	return calc;
@@ -277,15 +275,14 @@ const std::map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::SF_c:
 		auto matrix_clusters = M->matrix_clusters();
 		if (!matrix_clusters.intensity_sum().is_set())
 		{
-            logger.error(M->to_string_short() + "intensity_sum: ").value("not set");
+//            logger.error(M->to_string_short() + "intensity_sum: ").value("not set");
             //logger::error("mgroups_::sims_t::calc_t::RSF_c::RSFs_to_ref_intensities()","!M->reference_intensity().is_set()","continue");
 			continue;
 		}
 		for (auto& C : M->clusters)
 		{
 			if (!C.RSF.is_set()) continue;
-            rsf_to_ref_intensity.insert(std::pair<cluster_t*,quantity::intensity_t> (&C,matrix_clusters.intensity_sum()));
-            logger.info(M->to_string_short() + ":" + C.to_string() + ":ref_intensity").value(matrix_clusters.intensity_sum().to_string_short(),10,matrix_clusters.intensity_sum().to_string_detailed());
+				rsf_to_ref_intensity.insert(std::pair<cluster_t*,quantity::intensity_t> (&C,matrix_clusters.intensity_sum()));
 		}
 	}
 	return rsf_to_ref_intensity;
@@ -336,13 +333,12 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SF_c::from_implant_max(bool
 
 mgroups_::sims_t::calc_t::RSF_c::RSF_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      class_logger(__FILE__,"mgroups_::sims_t::calc_t::RSF_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::RSF_c")
 {
 }
 
 const std::map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::RSF_c::clusters_to_ref_intensities()
 {
-    log_f;
 	std::map<cluster_t*,quantity::intensity_t> clusters_to_ref_intensity;
 	for (auto& M : measurements)
 	{
@@ -356,7 +352,6 @@ const std::map<cluster_t*,quantity::intensity_t> mgroups_::sims_t::calc_t::RSF_c
 		{
 			if (!C.SF.is_set()) continue;
 			clusters_to_ref_intensity.insert(std::pair<cluster_t*,quantity::intensity_t> (&C,matrix_clusters.intensity_sum()));
-            logger.info(M->to_string_short()+":"+C.to_string()+":ref_intensity").value(matrix_clusters.intensity_sum().to_string_short(),10,matrix_clusters.intensity_sum().to_string_detailed());
 		}
 	}
 	return clusters_to_ref_intensity;
@@ -387,28 +382,20 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_mean_ref(bool
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_median_ref(bool overwrite)
 {
-    log_f;
 	for (auto& sf_to_ref : clusters_to_ref_intensities())
 	{
 		if (overwrite || !sf_to_ref.first->RSF.is_set())
-        {
 			sf_to_ref.first->RSF = cluster_t::RSF_t (sf_to_ref.first->SF * sf_to_ref.second.median()).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
-            logger.info(sf_to_ref.first->to_string()+":rsf").value(sf_to_ref.first->RSF.to_string_short(),10,sf_to_ref.first->RSF.to_string_detailed());
-        }
 	}
 	return calc;
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_pbp_ref(bool overwrite)
 {
-    log_f;
 	for (auto& sf_to_ref : clusters_to_ref_intensities())
 	{
 		if (overwrite || !sf_to_ref.first->RSF.is_set())
-        {
 			sf_to_ref.first->RSF = cluster_t::RSF_t (sf_to_ref.first->SF * sf_to_ref.second).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
-            logger.info(sf_to_ref.first->to_string()+":rsf").value(sf_to_ref.first->RSF.to_string_short(),10,sf_to_ref.first->RSF.to_string_detailed());
-        }
 	}
 	return calc;
 }
@@ -455,7 +442,6 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 
 mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrices(const cluster_t& cluster, std::vector<unsigned int> rank, bool overwrite)
 {
-    log_f;
 	if (MG.matrix_clusters().size()!=2)
 	{
         //logger::error("mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
@@ -468,16 +454,16 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 	RSF_vs_C_table.add(dc.get_column_RSFs_from_cluster(cluster));
 	auto RSF_vs_C = RSF_vs_C_table.remove_empty_lines().get_map();
 	const auto P =RSF_vs_C.polynom(rank,{rank.begin(),rank.end()});
-
+	
+	//plot
 	if (!P.successfully_fitted())
-    {
 		return calc;
-    }
-
-
-    logger.debug(cluster.to_string()+":relevant_isotope").value(relevant_isotope.to_string(),10,RSF_vs_C.to_string_detailed());
-    logger.debug(cluster.to_string()+":polynom").value(P.to_string());
-
+//	plot_t plot(false,false);
+//	plot.Y1.add_points(RSF_vs_C,"RSF("+ cluster.to_string() +") vs " + relevant_isotope.to_string()," Ro");
+//// 	plot.Y1.add_curve(RSF_vs_C.polyfit(P,100),P.to_string());
+//	plot.Y1.add_polynom(RSF_vs_C,P,P.to_string());
+//	plot.to_screen("RSF("+ cluster.to_string() +")_vs_C",0);
+	
 	//copy to other measurements
 	for (auto& M : MG.measurements())
 	{
@@ -491,37 +477,25 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
 			continue;
 		if (!relevant_C->concentration.is_set())
 			continue;
-        const auto new_RSF = RSF_vs_C.polyfit(relevant_C->concentration,P);
-        if (!new_RSF.is_set())
-        {
-            logger.error(cluster.to_string()+"interpolated RSF").value("not set!");
-            return calc;
-        }
-        if (new_RSF.is_negative())
-        {
-            logger.error(cluster.to_string()+"interpolated RSF").value("is negative!",10,new_RSF.to_string_detailed());
-            return calc;
-        }
-        c_in_m->RSF = new_RSF; //SR point by point
-        logger.info(M->to_string_short() + ":" + c_in_m->to_string()+":rsf").value(c_in_m->RSF.to_string_short(),10,c_in_m->RSF.to_string_detailed());
+		c_in_m->RSF = RSF_vs_C.polyfit(relevant_C->concentration,P); //SR point by point
+        //logger::debug(5,"mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrices","RSF: "+c_in_m->RSF.to_string()+" of "+ c_in_m->to_string() +" copied");
 	}
 	return calc;
 }
 
 
 /*************************/
-/**   concentration_c   **/
+/**   concentration_c  **/
 /*************************/
 
 mgroups_::sims_t::calc_t::concentration_c::concentration_c(calc_t& calc)
     : MG(calc.MG), calc(calc), measurements(calc.measurements),
-      class_logger(__FILE__,"mgroups_::sims_t::calc_t::concentration_c")
+      logger(__FILE__,"mgroups_::sims_t::calc_t::concentration_c")
 {
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(bool overwrite)
 {
-    log_f;
 	for (auto& M : measurements)
 	{
 		for (auto& C : M->clusters)
@@ -529,9 +503,10 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(boo
 			if (C.concentration.is_set() && !overwrite) continue;
 			//skip cluster belonging to matrix
 			if (M->matrix_clusters().is_cluster_in_matrix(C)) continue;
-
+// 			if (save_calc_esults)
+// 				MG.saved_calc_results.at(M).concentration.from_SF(C);
+// 			else
 			C.concentration = M->calc().concentration.from_SF(C);
-            logger.info(M->to_string_short() + ":" + C.to_string() + ":concentration").value(C.concentration.to_string_short(),10,C.concentration.to_string_detailed());
 		}
 	}
 	return calc;
@@ -544,7 +519,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::concentration_c::from_SF(boo
 
 mgroups_::sims_t::calc_t::Crel_to_Irel_c::Crel_to_Irel_c(const cluster_t& zaehler,const cluster_t& nenner,calc_t& calc) :
                                                                                 zaehler(zaehler), nenner(nenner), calc(calc),
-                                                                                class_logger(__FILE__,"mgroups_::sims_t::calc_t::Crel_to_Irel_c")
+                                                                                logger(__FILE__,"mgroups_::sims_t::calc_t::Crel_to_Irel_c")
 {
 }
 
