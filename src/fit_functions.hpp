@@ -37,6 +37,7 @@
 class fit_functions
 {
 public:
+
 	static const std::map<double,double> data_1D_to_2D(std::vector<double> data_1D);
 	/// like origin -> peak functions -> asym2sig
 	class asym2sig_t
@@ -104,7 +105,7 @@ public:
 		polynom_t(const std::vector<double>& fit_parameters);
 		///rank of polynom: 0 means discard, and non-0 means use
 		const std::vector<unsigned int>& rank() const;
-		const double chisq() const;
+        double chisq() const;
 		///
 		double chisq_relative() const;
 		const std::vector<double>& fit_parameters() const;
@@ -135,13 +136,54 @@ public:
 	public:
 		linear_t(const double slope,const std::map<double,double>& data_XY);
 		double chisq_relative() const;
-		const double cov() const;
+        double cov() const;
 		double slope() const;
 		double chisq() const;
 		bool successfully_fitted() const;
 		double gof() const;
 		std::vector<double> y_data(std::vector<double> x_data);
 	};
+
+    ///fits a data map to a target data map, using x_polynom for x direction and y_polynom for y direction
+    class data_to_data_t
+    {
+    private:
+//        class polynoms
+//        {
+//        private:
+//            polynom_t X_p;
+//            polynom_t Y_p;
+//        public:
+//            polynoms(const polynom_t& X, const polynom_t Y);
+//            const polynom_t& get_X() const;
+//            const polynom_t& get_Y() const;
+//        };
+        void gsl_vector_to_fit_parameters(const gsl_vector * x);
+        gsl_vector fit_parameters_to_gsl_vector() const;
+        class_logger_t class_logger;
+//        std::map<double,double> target_map_p;
+        std::vector<double> target_X;
+        std::vector<double> target_Y;
+        std::vector<double> data_Y;
+        std::vector<double> data_X;
+        polynom_t x_polynom_p;
+        polynom_t y_polynom_p;
+        static int function(const gsl_vector * x, void *data, gsl_vector * f);
+        static void callback(const size_t iter, void *params,
+                             const gsl_multifit_nlinear_workspace *w);
+        ///returns y for given data, but within the x_range of base_map and x_resolution of target_map;
+        ///applying x_polynom and y_polynom
+        std::vector<double> y_data();
+    public:
+        ///polynom_s may include some start parameters
+        data_to_data_t(const std::map<double,double>& target_map,
+                       const polynom_t& x_polynom_s,
+                       const polynom_t& y_polynom_s);
+        const polynom_t& x_polynom();
+        const polynom_t& y_polynom();
+        ///tries to fit data to base_map
+        bool fit(std::map<double,double> data);
+    };
 };
 
 #endif // FIT_FUCTIONS

@@ -127,9 +127,10 @@ measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SR_c::from_implant
 	{
 		M.crater.SR  << from_implant_max(C);
 // 		std::cout << std::endl << M.crater.SR.to_string() << std::endl;
-        logger.info(__func__,M.to_string_short()).value(M.crater.SR.to_string());
+
 	}
 	M.crater.SR = quantity::SR_t(M.crater.SR.mean());
+    logger.info(__func__,M.to_string_short()).value(M.crater.SR.to_string(),10,M.crater.SR.to_string_detailed());
 	return calc;
 }
 

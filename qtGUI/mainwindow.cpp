@@ -95,9 +95,7 @@ void MainWindow::dropEvent(QDropEvent *e)
             tools::str::replace_chars(&L,"///","");
             //qt5 automatically replaces the windows style path delimiter with the unix path delimiter, lets change it back
             tools::str::replace_chars(&L,"/","\\"); // unix to windows style
-//            std::stringstream mu;
-//            mu << static_cast<char>(230);
-//            tools::str::replace_chars(&L,"µ",mu.str());
+            filenames_collector_t::convert_filename_with_path_to_utf8(L);
 //            tools::str::replace_umlaute_to_windows_compatible(&L);
 #endif
             logger.debug("dropped_files").value(L,11);
@@ -105,7 +103,7 @@ void MainWindow::dropEvent(QDropEvent *e)
         //collecting and filtering
         filenames_collector_t filenames_collector;
         filenames_collector.add_files_or_folders(dropped_files,ui->scan_dropped_files_recursivly->isChecked());
-        filenames_collector.convert_filenames_with_path_to_utf8();
+
         ///all filenames are unknown in the beginning
         const auto new_filenames = filenames_collector.filenames();
         logger.debug("new_filenames").value(new_filenames.size(),10,tools::vec::combine_vec_to_string(new_filenames, ", "));
@@ -516,24 +514,12 @@ void MainWindow::on_export_button_clicked()
     /*tof sims*/
     for (auto& MG : claus->tofsims.mgroups)
     {
-//        std::string export_path = ui->tofsims_export_directory_textEdit->toPlainText().toStdString();
-//        if (export_path=="")
-//            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
-
-//        export_path = tools::file::check_directory_string(export_path);
-//        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
         MG.export_origin_ascii();
     }
 
     /*D sims*/
     for (auto& MG : claus->dsims.mgroups)
     {
-//        std::string export_path = ui->dsims_export_directory_textEdit->toPlainText().toStdString();
-//        if (export_path=="")
-//            export_path = tools::file::extract_directory_from_filename(MG.measurements_p.front().filename_with_path);
-
-//        export_path = tools::file::check_directory_string(export_path);
-//        logger.info(MG.to_string_short()).signal("exporting to: " + export_path);
         MG.export_origin_ascii();
     }
 
@@ -542,4 +528,28 @@ void MainWindow::on_export_button_clicked()
 void MainWindow::on_check_pbp_stateChanged(int arg1)
 {
 
+}
+
+void MainWindow::on_test_button_clicked()
+{
+    log_f;
+    logger.debug("this").enter();
+    std::map<double,double> target, data;
+    for (int i=0;i<20;i++)
+    {
+        target.insert(std::pair<double,double> (i,i*i+1));
+        data.insert(std::pair<double,double> (i*1.1,(i*i+1)*2));
+    }
+    std::cout << "target_X\ttarget_Y"   << std::endl;
+    for (auto& t : target)
+        std::cout << t.first << "\t" << t.second << std::endl;
+
+    std::cout << "data_X\tdata_Y"   << std::endl;
+    for (auto& t : data)
+        std::cout << t.first << "\t" << t.second << std::endl;
+
+    fit_functions::polynom_t x_polynom({0,1});
+    fit_functions::polynom_t y_polynom({0,1});
+    fit_functions::data_to_data_t fit_data_map(target,x_polynom,y_polynom);
+    fit_data_map.fit(data);
 }

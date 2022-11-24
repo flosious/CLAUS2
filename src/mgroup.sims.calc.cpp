@@ -170,7 +170,7 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::interpolate_from_known
         //logger::error("mgroups_::sims_t::calc_t::SR_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
 		return calc;
 	}
-	const isotope_t relevant_isotope = MG.matrix_isotopes().front();
+    const isotope_t relevant_isotope = MG.matrix_clusters().front().isotopes.front();
 	data_collectors_t::sims_t dc(MG.measurements());
 	quantity::table_t SR_vs_C_table;
 	SR_vs_C_table.add(dc.get_column_concentrations_from_sample_matrix(relevant_isotope));
@@ -415,31 +415,46 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_pbp_ref(bool 
 
 mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::copy_to_same_matrices(bool overwrite)
 {
+    log_f;
+    logger.debug("this").enter();
 	const auto cs = MG.clusters();
 	 
 	for (auto& C : cs)
 	{
 		//for the specific cluster C
 		auto mat_to_RSF = MG.matrix_to_RSF(C);
-		if (mat_to_RSF.size()==0) 
+        if (mat_to_RSF.size()==0)
+        {
+            logger.debug(C.to_string()).signal("no known RSF for this cluster");
 			continue; // no RSFs at all for this cluster at all
-		for (auto& M : measurements)
+        }
+        for (auto& M : measurements)
 		{
             if (!M->sample.matrix().is_set())
+            {
+                logger.debug(M->to_string_short()+":"+C.to_string()).signal("unknown matrix");
 				continue; // unknown matrix
+            }
             auto mat = mat_to_RSF.find(M->sample.matrix());
 			if (mat==mat_to_RSF.end()) 
+            {
+                logger.debug(M->to_string_short()+":"+C.to_string()).signal("no known RSF found for matrix: " +M->sample.matrix().to_string());
 				continue; // no RSF for this matrix and cluster
+            }
 			if (mat->second.is_vector())
 			{
 				/*	this is unhandled at the moment, but will be important when reference samples with layer of different matrices are used.
 				*	one could use all the mean(RSF point at matrix concentration) ... yeah maybe later...;-)
 				*/
                 //logger::error("mgroups_::sims_t::calc_t::RSF_c::from_others()","RSF is a vector, dont know how to handle, tell florian",M->to_string(),"ignoring");
-				continue;
+                logger.error(M->to_string_short() + ":" + M->sample.matrix().to_string() + ":" + "RSF").value("rsf is a vector");
+                continue;
 			}
 			if (overwrite || !M->cluster(C)->RSF.is_set())
+            {
 				M->cluster(C)->RSF = mat->second;
+                logger.info(M->to_string_short()+":"+C.to_string()+":RSF").value(M->cluster(C)->RSF.to_string());
+            }
 		}
 	}
 	return calc;
@@ -458,19 +473,22 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::RSF_c::interpolate_from_kno
     log_f;
 	if (MG.matrix_clusters().size()!=2)
 	{
-        //logger::error("mgroups_::sims_t::calc_t::RSF_c::interpolate_from_known_sample_matrix()","MG.matrix_isotopes().size()!=2","returning calc");
-		return calc;
+        logger.error(MG.to_string_short() + ":" + cluster.to_string()).signal("amount of matrix clusters != 2");
+        return calc;
 	}
-	const isotope_t relevant_isotope = MG.matrix_isotopes().front();
+    const isotope_t relevant_isotope = MG.matrix_clusters().front().isotopes.front();
+//    const isotope_t relevant_isotope = MG.matrix_isotopes().front();
 	data_collectors_t::sims_t dc(MG.measurements());
 	quantity::table_t RSF_vs_C_table;
 	RSF_vs_C_table.add(dc.get_column_concentrations_from_sample_matrix(relevant_isotope));
 	RSF_vs_C_table.add(dc.get_column_RSFs_from_cluster(cluster));
 	auto RSF_vs_C = RSF_vs_C_table.remove_empty_lines().get_map();
+    logger.debug("RSF_vs_C table").value(RSF_vs_C.to_string());
 	const auto P =RSF_vs_C.polynom(rank,{rank.begin(),rank.end()});
 
 	if (!P.successfully_fitted())
     {
+        logger.error(MG.to_string_short() + ":" + cluster.to_string()).signal("fit NOT successfull",15,P.to_string());
 		return calc;
     }
 

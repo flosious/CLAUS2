@@ -1789,42 +1789,40 @@ std::vector<double> statistics::bspline_smooth(const std::vector<double>& Ydata,
 
 std::vector<double> statistics::interpolate_data_XY(const std::map<double,double>& data_XY, const std::vector<double>& X) 
 {
+    std::vector<double> xv,yv;
+    tools::vec::split_map_to_vecs(data_XY,&xv,&yv);
+    return interpolate_data_XY(xv,yv,X);
+}
 
-    std::vector<double> Y,xv,yv;
+std::vector<double> statistics::interpolate_data_XY(std::vector<double> data_X, std::vector<double> data_Y,const std::vector<double>& new_X)
+{
     double yi;
     double *x,*y;
-    const size_t c=data_XY.size();
-	
-// 	for (auto& d : data_XY)
-// 		std::cout << d.first << "\t" << d.second << std::endl;
-	
-// 	for (auto& x : X)
-// 		std::cout << x << std::endl;
-// 	std::cout << "data_XY.size()=" << data_XY.size() << std::endl;
-// 	std::cout << "X.size()=" << X.size() << std::endl;
-	
-	if (c<10) return {};
+
+    std::vector<double> new_Y(new_X.size());
+    const size_t c=data_X.size();
+
+    if (c<10) return {};
     gsl_interp_accel *acc = gsl_interp_accel_alloc ();
-	
-	//TODO:maybe use gsl_interp_steffen instead of gsl_interp_akima
+
+    //TODO:maybe use gsl_interp_steffen instead of gsl_interp_akima
     gsl_spline *spline_akima = gsl_spline_alloc(gsl_interp_akima, c);
-	tools::vec::split_map_to_vecs(data_XY,&xv,&yv);
 
-    x=&xv[0];
-    y=&yv[0];
+    x=&data_X[0];
+    y=&data_Y[0];
     gsl_spline_init (spline_akima, x, y, c);
-	
-	
-    for (int i=0; i < X.size(); i++) {
 
-        yi = gsl_spline_eval (spline_akima, X.at(i), acc);
-        Y.push_back(yi);
+
+
+    for (int i=0; i < new_X.size(); i++) {
+
+        yi = gsl_spline_eval (spline_akima, new_X.at(i), acc);
+        new_Y.at(i)=yi;
       }
-// 	std::cout << "data_XY.size()=" << data_XY.size() << std::endl;
-// 	std::cout << "X.size()=" << X.size() << std::endl;
+
     gsl_spline_free (spline_akima);
     gsl_interp_accel_free (acc);
-    return Y;
+    return new_Y;
 }
 
 

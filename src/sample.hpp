@@ -39,7 +39,7 @@ class sample_t
 {
 	friend class config_t;
 private:
-//    class_logger_t logger;
+    class_logger_t class_logger;
 public:
 	class matrix_t
 	{
@@ -120,7 +120,7 @@ public:
 	class db_t
 	{
 	private:
-        class_logger_t logger;
+        class_logger_t class_logger;
 		static const int logger_verbosity_offset = 10;
 		const database_t& sql_wrapper;
 		static const std::string tablename;

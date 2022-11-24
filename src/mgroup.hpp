@@ -197,7 +197,7 @@ public:
 			class RSF_c
 			{
 			private:
-                    class_logger_t class_logger;
+                class_logger_t class_logger;
 				sims_t& MG;
 				calc_t& calc;
 				const std::vector<measurements_::sims_t*>& measurements;

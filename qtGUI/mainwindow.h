@@ -78,6 +78,8 @@ private slots:
     void on_check_pbp_stateChanged(int arg1);
 
 
+    void on_test_button_clicked();
+
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;

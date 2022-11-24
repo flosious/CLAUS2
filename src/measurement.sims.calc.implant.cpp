@@ -435,7 +435,8 @@ quantity::SR_t measurements_::sims_t::calc_t::implant_c::SR_from_max()
 			cluster.implant_parameters.sputter_time_at_max = ST_at_max;
 
     logger.info("I_vs_ST().minimum_pos()").value(I_vs_ST().minimum_pos().to_string());
-    logger.info("ST_at_max").value(ST_at_max.to_string());
+    logger.info("ST_at_max").value(ST_at_max.to_string(),10,ST_at_max.to_string_detailed());
+    logger.info("depth_at_concentration_maxium ").value(implant_parameters.depth_at_concentration_maxium.to_string(),10,implant_parameters.depth_at_concentration_maxium.to_string_detailed());
 
 	return implant_parameters.depth_at_concentration_maxium / ST_at_max;
 }

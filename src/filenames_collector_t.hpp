@@ -20,6 +20,7 @@ private:
     void add_files(std::vector<std::string> filenames_with_path);
 public:
     filenames_collector_t();
+    static void convert_filename_with_path_to_utf8(std::string& filename_with_path);
     void convert_filenames_with_path_to_utf8();
     ///if include_sub_folders, scans recursivly
     void add_file_or_folder(std::string file_or_folder, bool include_sub_folders=true);

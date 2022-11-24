@@ -24,7 +24,7 @@ std::string sample_t::implant_s::to_string() const
 const std::string sample_t::db_t::tablename = "implanted_samples";
 
 sample_t::db_t::db_t(const sample_t& sample, const database_t& sql_wrapper)
-    : sample(sample), sql_wrapper(sql_wrapper), logger(__FILE__,"sample_t::db_t")
+    : sample(sample), sql_wrapper(sql_wrapper), class_logger(__FILE__,"sample_t::db_t")
 {
 // 	if (!create_table())
 // 		logger::error("sample_t::db_t::db_t()","could not create sql table","","");
@@ -220,17 +220,17 @@ bool sample_t::db_t::load_from_table()
 			C_max = quantity::concentration_t({tools::str::str_to_double(table_entries_s.at("maximum_concentration").at(line))});
 		if (D.is_set())
         {
-            logger.info(__func__,object_str+"->dose").value(D.to_string_short());
+            class_logger.info(__func__,object_str+"->dose").value(D.to_string_short());
             //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() +" DB: dose("+iso.to_string()+")="+D.to_string());
         }
 		if (SD_max.is_set())
         {
-            logger.info(__func__,object_str+"->SD_max").value(SD_max.to_string_short());
+            class_logger.info(__func__,object_str+"->SD_max").value(SD_max.to_string_short());
             //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: depth_at_maximum_concentration("+iso.to_string()+")="+SD_max.to_string());
         }
 		if (C_max.is_set())
         {
-            logger.info(__func__,object_str+"->C_max").value(C_max.to_string_short());
+            class_logger.info(__func__,object_str+"->C_max").value(C_max.to_string_short());
             //logger::info(3,"sample_t::db_t::load_from_table()",sample.to_name() + " DB: maximum_concentration("+iso.to_string()+")="+C_max.to_string());
         }
 		implant_s I{D,C_max,SD_max};
@@ -372,7 +372,7 @@ sample_t::sample_t(files_::file_t::name_t& fn,files_::file_t::contents_t& f,data
 																chip(fn.chip_x(),fn.chip_y()),
 																simple_name(fn.simple_name()),
 																matrix_p(f.matrix()),
-                                                                sql_wrapper(&sql_wrapper)
+                                                                sql_wrapper(&sql_wrapper), log_c
 //                                                                logger(__FILE__,"sample_t")
 // 																database(*this,sql_wrapper)
 {
@@ -386,7 +386,7 @@ sample_t::sample_t(files_::file_t::name_t& fn, database_t& sql_wrapper) : wafer(
 																lot_split(fn.lot_split()),
 																chip(fn.chip_x(),fn.chip_y()),
 																simple_name(fn.simple_name()),
-                                                                sql_wrapper(&sql_wrapper)
+                                                                sql_wrapper(&sql_wrapper), log_c
 //                                                                logger(__FILE__,"sample_t")
 // 																database(*this,sql_wrapper)
 {

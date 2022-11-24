@@ -485,6 +485,25 @@ namespace quantity
 		static bool sort_by_y(const std::pair<double,double>& P1, const std::pair<double,double>& P2);
 		quantity_t X_p;
 		quantity_t Y_p;
+//        ///fits a data map to a base data map, using x_polynom for x direction and y_polynom for y direction
+//        class fit_map_to_map_t
+//        {
+//        private:
+//            class_logger_t class_logger;
+//            const map_t& base_map_p;
+//            fit_functions::polynom_t& x_polynom;
+//            fit_functions::polynom_t& y_polynom;
+//            //returns y for given data, but within the x_range of base_map and x_resolution of base_map
+//            quantity_t y_data(const map_t& data);
+//            void fit(map_t data);
+//        public:
+//            ///polynom_s may include some start parameters
+//            fit_map_to_map_t(const map_t& base_map,
+//                             map_t data,
+//                             fit_functions::polynom_t& x_polynom_s,
+//                             fit_functions::polynom_t& y_polynom_s
+//                             );
+//        };
 	public:
 		map_t();
 		map_t(const quantity_t& X, const quantity_t& Y);
@@ -561,6 +580,8 @@ namespace quantity
 		int size() const;
 		map_t get_data_by_index(unsigned int start, unsigned int stop) const;
 		const map_t change_resolution(const quantity_t new_X_resolution) const;
+        ///fits given data map to this data by using a polynom; rank and start parameters are given in start_polynom
+        fit_functions::polynom_t fit_data_to_this(const map_t& data, fit_functions::polynom_t start_polynom) const;
 		/*********OPERATORS*********/
 		///appends obj to the map, if quantitys dimension and units allow it
 		map_t& operator<<(map_t obj);

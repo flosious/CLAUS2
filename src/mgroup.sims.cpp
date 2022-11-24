@@ -206,14 +206,13 @@ measurements_::sims_t* mgroups_::sims_t::measurement ( const measurements_::sims
 
 const std::vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
 {
-// 	if (matrix_isotopes_p.size()>0)
-// 		return matrix_isotopes_p;
+    log_f;
     std::set<isotope_t> isos;
 	for (auto& M : measurements())
-	{
-        const auto mat_isos = M->matrix_clusters().isotopes();
-//        if (!M->sample.matrix().is_set()) continue;
-//        std::vector<isotope_t> mat_isos=M->sample.matrix().isotopes();
+    {
+//        const auto mat_isos = M->matrix_clusters().isotopes(); // this is wrong
+        const auto mat_isos = M->sample.matrix().isotopes();
+
 		isos.insert(mat_isos.begin(),mat_isos.end());
 	}
 	std::vector<isotope_t> isos_vec = {isos.begin(),isos.end()};
@@ -237,9 +236,13 @@ const std::vector<isotope_t> mgroups_::sims_t::matrix_isotopes()
     }
 	if (isos.size()==0)
     {
+        logger.warning("istopes").signal("none");
         //logger::warning(1,"no matrix isotopes","");
     }
-	
+    std::stringstream out;
+    for (auto& iso : isos)
+        out << iso.to_string_short() +"; ";
+    logger.debug(to_string() + ":matrix_isotopes").value(out.str());
 	return isos_vec;
 }
 
@@ -279,9 +282,11 @@ const std::vector<cluster_t> mgroups_::sims_t::matrix_clusters()
 
 bool mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()
 {
+    log_f;
 	const std::vector<isotope_t> mat_isos = matrix_isotopes();
 	if (mat_isos.size()==0)
 	{
+        logger.error("this").signal("no matrix isotopes");
         //logger::error("mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()","matrix_isotopes()==0 unknown matrices","please include atleast 1 tabulated reference sample; check database","returning false");
 		return false;
 	}
@@ -289,7 +294,9 @@ bool mgroups_::sims_t::set_matrix_isotopes_in_unknown_samples()
     {
         if (M->sample.matrix().elements.size()==0)
         {
+            sample_t::matrix_t new_matrix(mat_isos);
             M->sample.set_matrix(mat_isos);
+            logger.info(M->to_string_short()+":matrix:"+M->sample.matrix().to_string()).value(new_matrix.to_string());
         }
     }
 	return true;

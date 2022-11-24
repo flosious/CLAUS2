@@ -5,24 +5,29 @@ filenames_collector_t::filenames_collector_t() : logger(__FILE__,"filenames_coll
 
 }
 
+void filenames_collector_t::convert_filename_with_path_to_utf8(std::string& fn)
+{
+    QString QS(fn.c_str());
+    QByteArray QB(fn.c_str());
+//        QB = QS.fromLocal8Bit(QB).toUtf8();
+    QB = QS.toUtf8();
+
+//        QB.toPercentEncoding();
+    QString QS_from_QB(QB);
+    std::cout << "QB.toPercentEncoding(): "<< (QB.toPercentEncoding()).toStdString() << std::endl;
+    std::cout << "QB.fromPercentEncoding(QB.toPercentEncoding()): " << QByteArray::fromPercentEncoding(QB.toPercentEncoding()).toStdString() << std::endl;
+    std::cout << "QString(fn.c_str()).toLocal8Bit().toStdString(): " << QString(fn.c_str()).toLocal8Bit().toStdString() << std::endl;
+    //works in win, but wrongly displayed
+//        converted_filenames_with_path.insert(QString(fn.c_str()).toLocal8Bit().toStdString());
+    fn = QString(fn.c_str()).toLocal8Bit().toStdString();
+}
+
 void filenames_collector_t::convert_filenames_with_path_to_utf8()
 {
     std::set<std::string> converted_filenames_with_path;
     for (std::string fn : filenames_with_path_p)
     {
-        QString QS(fn.c_str());
-        QByteArray QB(fn.c_str());
-//        QB = QS.fromLocal8Bit(QB).toUtf8();
-        QB = QS.toUtf8();
-
-//        QB.toPercentEncoding();
-        QString QS_from_QB(QB);
-        std::cout << "QB.toPercentEncoding(): "<< (QB.toPercentEncoding()).toStdString() << std::endl;
-        std::cout << "QB.fromPercentEncoding(QB.toPercentEncoding()): " << QByteArray::fromPercentEncoding(QB.toPercentEncoding()).toStdString() << std::endl;
-        std::cout << "QString(fn.c_str()).toLocal8Bit().toStdString(): " << QString(fn.c_str()).toLocal8Bit().toStdString() << std::endl;
-        //works in win, but wrongly displayed
-//        converted_filenames_with_path.insert(QString(fn.c_str()).toLocal8Bit().toStdString());
-        converted_filenames_with_path.insert(QString(fn.c_str()).toLocal8Bit().toStdString());
+        convert_filename_with_path_to_utf8(fn);
     }
     filenames_with_path_p = converted_filenames_with_path;
 }
@@ -106,7 +111,11 @@ void filenames_collector_t::add_file_or_folder(std::string file_or_folder, bool 
     }
     case 1:
     {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
+//        convert_filename_with_path_to_utf8(file_or_folder);
+#endif
         add_file(file_or_folder);
+
         break;
     }
     case 2:

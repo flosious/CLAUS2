@@ -193,9 +193,11 @@ public:
 	/****************/
 	///obsolet, use bspline_smooth instead
 	static std::vector<double> interpolate_bspline(std::map<double, double>& data_XY,std::vector<double> X_new={}, int bspline_degree=3);
-	/// akima splines
-	static std::vector<double> interpolate_data_XY(const std::map<double,double>& data_XY,const std::vector<double>& X);
-	
+    /// akima splines
+    static std::vector<double> interpolate_data_XY(const std::map<double,double>& data_XY,const std::vector<double>& X);
+    /// akima splines; returns new_Y, given new_X and the data_x and data_y map
+    static std::vector<double> interpolate_data_XY(std::vector<double> data_X, std::vector<double> data_Y,const std::vector<double>& new_X);
+
 	///B-spline smoothing
 	static std::vector<double> bspline_smooth(const std::vector<double>& Y, std::vector<double> Xdata={}, unsigned int breakpoints = 0, const size_t spline_order = 4);
 	

@@ -1,5 +1,7 @@
 #include "quantity.hpp"
 
+/**************************/
+
 quantity::map_t::map_t() : X_p(), Y_p(), logger(__FILE__,"quantity::map_t")
 {
 }
@@ -254,6 +256,11 @@ const quantity::map_t quantity::map_t::change_resolution(const quantity_t new_X_
 	const auto new_X = X().change_resolution(new_X_resolution);
 	const auto new_Y = Y().interp(X(),new_X);
 	return {new_X,new_Y};
+}
+
+fit_functions::polynom_t quantity::map_t::fit_data_to_this(const map_t& data, fit_functions::polynom_t start_polynom) const
+{
+    //is the given polynom for fitting y direction? where is x direction?
 }
 
 std::vector<int> quantity::map_t::bin_data(const std::vector<double>& bins) const
