@@ -36,7 +36,8 @@ Q_DECLARE_METATYPE(cluster_t*);
 class custom_QStandardItems
 {
 public:
-    enum class columns{col_size,col_method,col_olcdb,col_group_id,col_settings,col_export,col_graph_line_style};
+    enum class columns{col_size,col_method,col_olcdb,col_group_id,col_settings,col_export,col_graph_line_style,
+                      col_SR,col_RSF,col_matrix,col_sample,col_median};
     enum class roles{role_mgroup=2,role_measurement,role_cluster,role_quantity,role_expanded,role_graphId};
     static std::map<columns,std::string> column_names;
 

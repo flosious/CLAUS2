@@ -164,6 +164,8 @@ public:
 				calc_t& from_ref_fit();
 				///from one particular cluster
 				calc_t& from_ref_fit(const cluster_t& cluster);
+                ///NOT TESTED YET normalizes given SR to crater_depth
+                calc_t& normalize_to_crater_depth();
 			};
 			class SD_c
 			{
@@ -174,6 +176,8 @@ public:
 			public:
 				SD_c(calc_t& calc);
 				calc_t& from_SR(bool overwrite=false);
+                ///uses the last sputter_depth point for normalization
+                calc_t& normalize_to_crater_depth();
 			};
 			class SF_c
 			{
@@ -319,7 +323,8 @@ public:
 					///plot 
 //					void to_screen(float seconds=0) const;
 					///checks if there is sufficient implanted area: implanted_area() >= background_area() * rel_treshold ;; implanted_area() >= abs_treshold
-                    bool has_sufficient_implant_area(double abs_treshold = 10,  double rel_treshold=5);
+                    /// 2023-01-04 abs_treshold=10 -> abs_treshold=5
+                    bool has_sufficient_implant_area(double abs_treshold = 2,  double rel_treshold=5);
 				};
 			private:
                 class_logger_t class_logger;
@@ -411,11 +416,13 @@ public:
         void export_origin_ascii(std::string path="", const std::string delimiter="\t");
 
 		bool add(sims_t& measurement);
-		
+        ///all corresponding isotopes set up
+        std::set<isotope_t> isotopes_corresponding_to_all_clusters() const;
 		//changes sputter_time axis and all others accordingly
         bool change_sputter_time_resolution(quantity::sputter_time_t sputter_time_res);
         bool change_sputter_depth_resolution(quantity::sputter_depth_t sputter_depth_res);
-		
+        ///checks for implanted cluster corresponding isotopes
+        bool has_implanted_isotopes() const;
 		crater_t crater;
 		std::vector<cluster_t> clusters;
 		///returns pointer to the matching cluster within this measurement
@@ -440,7 +447,7 @@ public:
 	class dsims_t : public sims_t
 	{
 	private:
-        class_logger_t logger;
+        class_logger_t class_logger;
 		///for references
 		class db_t
 		{

@@ -479,7 +479,7 @@ use_case_t class_logger_t::debug(std::string_view func_name, std::string_view ob
 /******       function_logger_t      ********/
 /**************************************/
 
-function_logger_t::function_logger_t(class_logger_t& class_logger, std::string_view func_name) :
+function_logger_t::function_logger_t(const class_logger_t& class_logger, std::string_view func_name) :
     func_name_p(func_name),class_logger(class_logger)
 {
 }

@@ -158,6 +158,20 @@
                </widget>
               </item>
               <item>
+               <widget class="QCheckBox" name="check_percentile">
+                <property name="text">
+                 <string>10% percentile</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="check_fullAuto">
+                <property name="text">
+                 <string>FullAuto</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="calc_button">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">

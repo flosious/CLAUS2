@@ -29,6 +29,323 @@ const std::map<double, double> fit_functions::data_1D_to_2D(std::vector<double> 
 	return data_XY;
 }
 
+/*************
+ * basics_t*
+ *************/
+fit_functions::basics_t::basics_t() : log_c
+{
+
+}
+
+bool fit_functions::basics_t::fitted() const
+{
+    return fitted_p;
+}
+
+double fit_functions::basics_t::chisq() const
+{
+    return chisq_p;
+}
+double fit_functions::basics_t::chisq0() const
+{
+    return chisq0_p;
+}
+double fit_functions::basics_t::gof() const
+{
+    return gof_p;
+}
+
+std::string fit_functions::basics_t::to_string(std::string prefix) const
+{
+    return "";
+}
+
+/*******************
+** pseudo_voigt_t **
+********************/
+
+fit_functions::pseudo_voigt_t::pseudo_voigt_t(double y0, double A, double m, double xc, double w) :
+    log_c, y0(y0), A(A), m(m), xc(xc), w(w)
+{
+
+}
+
+fit_functions::pseudo_voigt_t::~pseudo_voigt_t()
+{
+}
+
+void fit_functions::pseudo_voigt_t::callback(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w)
+{
+    gsl_vector *f = gsl_multifit_nlinear_residual(w);
+    gsl_vector *x = gsl_multifit_nlinear_position(w);
+    double rcond;
+
+    /* compute reciprocal condition number of J(x) */
+    gsl_multifit_nlinear_rcond(&rcond, w);
+
+    fprintf(stderr, "iter %2zu: A, cond(J) = %8.4f, |f(x)| = %.4f\n",
+            iter,
+            1.0 / rcond,
+            gsl_blas_dnrm2(f));
+}
+
+int fit_functions::pseudo_voigt_t::function(const gsl_vector * x, void *data, gsl_vector * f)
+{
+    pseudo_voigt_t* pseudo_voigt = static_cast<pseudo_voigt_t*>(data);
+
+    pseudo_voigt->vector_to_fit_parameters(statistics::gsl_vec_to_std_vec(x));
+    auto new_Y = pseudo_voigt->y_data(pseudo_voigt->data_X);
+
+    for (size_t i=0;i<new_Y.size();i++)
+    {
+        gsl_vector_set (f, i, new_Y.at(i) - pseudo_voigt->data_Y.at(i));
+    }
+
+  return GSL_SUCCESS;
+}
+
+
+std::vector<double> fit_functions::pseudo_voigt_t::y_data(const std::vector<double>& x) const
+{
+    std::vector<double> y(x.size());
+    for (size_t i=0;i<x.size();i++)
+    {
+       y.at(i) = y0+A*( 2*m/M_PI*w / ( 4 * std::pow(x.at(i)-xc,2) + pow(w,2) ) + (1-m)*sqrt(4*log(2)) / (4*sqrt(M_PI))*exp(-4*log(2)/pow(w,2)*pow((x.at(i)-xc),2)) );
+    }
+    return y;
+}
+
+std::string fit_functions::pseudo_voigt_t::to_string(std::string prefix) const
+{
+    std::stringstream ss;
+    ss << prefix << stop_info() << "; gof=" << gof()<< "; chisq=" << chisq()<< "; chisq0=" << chisq0() << "; y0=" << y0 << "; A=" << A << "; m=" << m << "; xc=" << xc << "; w=" << w;
+    return ss.str();
+}
+
+std::string fit_functions::pseudo_voigt_t::stop_info() const
+{
+    switch (info)
+    {
+    case 1:
+        return "small step size";
+    default:
+        return "info="+std::to_string(info);
+    }
+}
+
+std::vector<double> fit_functions::pseudo_voigt_t::fit_parameters_to_std_vector() const
+{
+    std::vector<double> vec;
+    if (fit_y0) vec.push_back(y0);
+    if (fit_A) vec.push_back(A);
+    if (fit_m) vec.push_back(m);
+    if (fit_xc) vec.push_back(xc);
+    if (fit_w) vec.push_back(w);
+    return vec;
+}
+
+void fit_functions::pseudo_voigt_t::vector_to_fit_parameters(const std::vector<double>& vec)
+{
+    size_t idx=0;
+    if (fit_y0)
+    {
+        y0=vec.at(idx);
+        idx++;
+    }
+    if (fit_A)
+    {
+        A=vec.at(idx);
+        idx++;
+    }
+    if (fit_m)
+    {
+        m=vec.at(idx);
+        idx++;
+    }
+    if (fit_xc)
+    {
+        xc=vec.at(idx);
+        idx++;
+    }
+    if (fit_w)
+    {
+        w=vec.at(idx);
+        idx++;
+    }
+
+}
+
+bool fit_functions::pseudo_voigt_t::fit(const std::map<double, double>& data_XY)
+{
+    tools::vec::split_map_to_vecs(data_XY,&data_X,&data_Y);
+    const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
+    gsl_multifit_nlinear_workspace *w;
+    gsl_multifit_nlinear_fdf fdf;
+    gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
+    // number of data points to fit
+    int N = data_XY.size();
+    const size_t n = N;
+    // number of fit parameters
+    auto x_init_vec = fit_parameters_to_std_vector();
+    size_t p = x_init_vec.size();
+    gsl_vector *f;
+    gsl_matrix *J;
+    gsl_matrix *covar = gsl_matrix_alloc (p, p);
+    double /* t[N], y[N],*/ weights[N];
+// 	struct data d = { n, t, y };
+
+    std::vector<double> x_,y_;
+    tools::vec::split_map_to_vecs(data_XY,&x_,&y_);
+
+    /* starting values */
+
+
+    /******************/
+    gsl_vector_view x = gsl_vector_view_array (&x_init_vec[0], p);
+    gsl_vector_view wts = gsl_vector_view_array(weights, n);
+    gsl_rng * r;
+//    double chisq, chisq0;
+    int status;
+
+    const double xtol = 1E-8;
+    const double gtol = 1E-8;
+    const double ftol = 1E-8;
+
+
+//    fdf_params.trs = gsl_multifit_nlinear_trs_lmaccel;
+//    fdf_params.scale = gsl_multifit_nlinear_scale_marquardt;
+//    fdf_params.solver = gsl_multifit_nlinear_solver_svd;
+//    fdf_params.fdtype = GSL_MULTIFIT_NLINEAR_FWDIFF;
+    fdf_params.h_df = 1; //step size for finite difference jacobian
+//    fdf_params.h_fvv = 1;
+
+    gsl_rng_env_setup();
+    r = gsl_rng_alloc(gsl_rng_default);
+
+    /* define the function to be minimized */
+    fdf.f = function;
+    fdf.df = NULL;   /* set to NULL for finite-difference Jacobian */
+    fdf.fvv = NULL;     /* not using geodesic acceleration */
+    fdf.n = n;
+    fdf.p = p;
+    fdf.params = this;
+    for (size_t i = 0; i < n; i++)
+        weights[i] = 1.0;
+    /* allocate workspace with default parameters */
+    w = gsl_multifit_nlinear_alloc (T, &fdf_params, n, p);
+    /* initialize solver with starting point and weights */
+    gsl_multifit_nlinear_winit (&x.vector, &wts.vector, &fdf, w);
+
+    /* compute initial cost function */
+    f = gsl_multifit_nlinear_residual(w);
+    gsl_blas_ddot(f, f, &chisq0_p);
+    /* solve the system with a maximum of 100 iterations */
+    status = gsl_multifit_nlinear_driver(1000, xtol, gtol, ftol, callback, NULL, &info, w);
+//    status = gsl_multifit_nlinear_driver(1000000, xtol, gtol, ftol, NULL, NULL, &info, w);
+
+    /* compute covariance of best fit parameters */
+    J = gsl_multifit_nlinear_jac(w);
+    gsl_multifit_nlinear_covar (J, 0.0, covar);
+    /* compute final cost */
+    gsl_blas_ddot(f, f, &chisq_p);
+
+    vector_to_fit_parameters(statistics::gsl_vec_to_std_vec((w->x)));
+//    gsl_vector_to_fit_parameters(w->x);
+
+    gof_p = pow(statistics::get_correlation_Y1_Y2(y_,y_data(x_)),50);
+
+    gsl_multifit_nlinear_free (w);
+    gsl_matrix_free (covar);
+    gsl_rng_free (r);
+
+    return true;
+}
+
+bool fit_functions::pseudo_voigt_t::fit_large(const std::map<double, double>& data_XY)
+{
+    tools::vec::split_map_to_vecs(data_XY,&data_X,&data_Y);
+    const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
+    gsl_multifit_nlinear_workspace *w;
+    gsl_multifit_nlinear_fdf fdf;
+    gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
+    // number of data points to fit
+    int N = data_XY.size();
+    const size_t n = N;
+    // number of fit parameters
+    auto x_init_vec = fit_parameters_to_std_vector();
+    size_t p = x_init_vec.size();
+    gsl_vector *f;
+    gsl_matrix *J;
+    gsl_matrix *covar = gsl_matrix_alloc (p, p);
+    double /* t[N], y[N],*/ weights[N];
+// 	struct data d = { n, t, y };
+
+    std::vector<double> x_,y_;
+    tools::vec::split_map_to_vecs(data_XY,&x_,&y_);
+
+    /* starting values */
+
+
+    /******************/
+    gsl_vector_view x = gsl_vector_view_array (&x_init_vec[0], p);
+    gsl_vector_view wts = gsl_vector_view_array(weights, n);
+    gsl_rng * r;
+//    double chisq, chisq0;
+    int status;
+
+    const double xtol = 1E-8;
+    const double gtol = 1E-8;
+    const double ftol = 1E-8;
+
+
+//    fdf_params.trs = gsl_multifit_nlinear_trs_lmaccel;
+//    fdf_params.scale = gsl_multifit_nlinear_scale_marquardt;
+//    fdf_params.solver = gsl_multifit_nlinear_solver_svd;
+//    fdf_params.fdtype = GSL_MULTIFIT_NLINEAR_FWDIFF;
+//    fdf_params.h_df = 1; //step size for finite difference jacobian
+//    fdf_params.h_fvv = 1e-3;
+
+    gsl_rng_env_setup();
+    r = gsl_rng_alloc(gsl_rng_default);
+
+    /* define the function to be minimized */
+    fdf.f = function;
+    fdf.df = NULL;   /* set to NULL for finite-difference Jacobian */
+    fdf.fvv = NULL;     /* not using geodesic acceleration */
+    fdf.n = n;
+    fdf.p = p;
+    fdf.params = this;
+    for (size_t i = 0; i < n; i++)
+        weights[i] = 1.0;
+    /* allocate workspace with default parameters */
+    w = gsl_multifit_nlinear_alloc (T, &fdf_params, n, p);
+    /* initialize solver with starting point and weights */
+    gsl_multifit_nlinear_winit (&x.vector, &wts.vector, &fdf, w);
+
+    /* compute initial cost function */
+    f = gsl_multifit_nlinear_residual(w);
+    gsl_blas_ddot(f, f, &chisq0_p);
+    /* solve the system with a maximum of 100 iterations */
+    status = gsl_multifit_nlinear_driver(1000, xtol, gtol, ftol, callback, NULL, &info, w);
+//    status = gsl_multifit_nlinear_driver(1000000, xtol, gtol, ftol, NULL, NULL, &info, w);
+
+    /* compute covariance of best fit parameters */
+    J = gsl_multifit_nlinear_jac(w);
+    gsl_multifit_nlinear_covar (J, 0.0, covar);
+    /* compute final cost */
+    gsl_blas_ddot(f, f, &chisq_p);
+
+    vector_to_fit_parameters(statistics::gsl_vec_to_std_vec((w->x)));
+//    gsl_vector_to_fit_parameters(w->x);
+
+    gof_p = pow(statistics::get_correlation_Y1_Y2(y_,y_data(x_)),50);
+
+    gsl_multifit_nlinear_free (w);
+    gsl_matrix_free (covar);
+    gsl_rng_free (r);
+
+    return true;
+}
 
 /*************
  * asym2sig_t*
@@ -170,7 +487,7 @@ bool fit_functions::asym2sig_t::fit(std::map<double, double> data_XY, double y0_
 	f = gsl_multifit_nlinear_residual(w);
 	gsl_blas_ddot(f, f, &chisq0_p);
 
-	/* solve the system with a maximum of 100 iterations */
+    /* solve the system with a maximum of 200 iterations */
 	status = gsl_multifit_nlinear_driver(200, xtol, gtol, ftol, NULL, NULL, &info, w);
 
 	/* compute covariance of best fit parameters */
@@ -192,16 +509,6 @@ bool fit_functions::asym2sig_t::fit(std::map<double, double> data_XY, double y0_
 	w2 = FIT(5);
 	w3 = FIT(6);
 	fitted_p = true;
-	
-	/*calc gof_p*/
-// 	gof_p=0;
-// 	for (auto& i:data_XY)
-// 	{
-// 		double Y = fitted_y_data({i.first})[0];
-// 		gof_p = gof_p + abs((i.second-Y)/Y);
-// 	}
-// 	gof_p = gof_p/N;
-// 	gof_p = 1-pow(gof_p,1/2)/N;
 	
 	gof_p = pow(statistics::get_correlation_Y1_Y2(y_,fitted_y_data(x_)),50);
 
@@ -251,7 +558,7 @@ std::string fit_functions::asym2sig_t::to_string(std::string prefix) const
  **POLYNOM***
  ************/
 
-fit_functions::polynom_t::polynom_t(const std::vector<double>& fit_parameters) : fit_parameters_p(fit_parameters), logger(__FILE__,"fit_functions::polynom_t")
+fit_functions::polynom_t::polynom_t(const std::vector<double>& fit_parameters) : fit_parameters_p(fit_parameters), class_logger(__FILE__,"fit_functions::polynom_t")
 {
 	successfully_fitted_p= true;
 	rank_p.resize(fit_parameters.size(),0);
@@ -261,9 +568,16 @@ fit_functions::polynom_t::polynom_t(const std::vector<unsigned int> rank,
 									const std::vector<double>& fit_parameters, 
 									const std::map<double, double>& data_XY) : 
                                     fit_parameters_p(fit_parameters), rank_p(rank),
-                                    logger(__FILE__,"fit_functions::polynom_t")
+                                    class_logger(__FILE__,"fit_functions::polynom_t")
 {
 	successfully_fitted_p = fit(data_XY); //fit the data only once
+}
+
+fit_functions::polynom_t::polynom_t(const std::vector<unsigned int> rank, const std::vector<double>& fit_parameters) :
+    class_logger(__FILE__,"fit_functions::polynom_t"),
+    rank_p(rank), fit_parameters_p(fit_parameters)
+{
+    successfully_fitted_p= true;
 }
 
 fit_functions::polynom_t::polynom_t(const std::vector<unsigned int> rank, 
@@ -329,8 +643,12 @@ const fit_functions::polynom_t fit_functions::polynom_t::derivative(unsigned int
 
 std::vector<double> fit_functions::polynom_t::y_data(const std::vector<double>& x_data) const
 {
-// 	if (!successfully_fitted()) 
+    if (fit_parameters().size()==0)
+        return {};
+// 	if (!successfully_fitted())
 // 		return {};
+//    std::cout << "fit_parameters:" << std::endl;
+//    print(fit_parameters());
 	std::vector<double> Y(x_data.size());
 	for (int i=0;i<x_data.size();i++)
 	{
@@ -563,10 +881,25 @@ bool fit_functions::linear_t::fit(std::map<double, double> data_XY)
 
 
 /****************************/
-/****  data_to_data_t  ******/
+/****  data_to_target_t  ****/
 /****************************/
 
-void fit_functions::data_to_data_t::callback(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w)
+int fit_functions::data_to_target_t::function(const gsl_vector * x, void *data, gsl_vector * f)
+{
+    data_to_target_t* data_to_data = static_cast<data_to_target_t*>(data);
+    data_to_data->gsl_vector_to_fit_parameters(x);
+    auto new_Y = data_to_data->y_data();
+
+    for (size_t i=0;i<new_Y.size();i++)
+    {
+//        gsl_vector_set (f, i, log10(new_Y.at(i)) - log10(data_to_data->target_Y.at(i)));
+        gsl_vector_set (f, i, new_Y.at(i) - data_to_data->target_Y.at(i));
+    }
+
+  return GSL_SUCCESS;
+}
+
+void fit_functions::data_to_target_t::callback(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w)
 {
     gsl_vector *f = gsl_multifit_nlinear_residual(w);
     gsl_vector *x = gsl_multifit_nlinear_position(w);
@@ -581,118 +914,193 @@ void fit_functions::data_to_data_t::callback(const size_t iter, void *params, co
             gsl_blas_dnrm2(f));
 }
 
-std::vector<double> fit_functions::data_to_data_t::y_data()
+std::vector<double> fit_functions::data_to_target_t::y_data()
 {
-    auto shifted_data_X = x_polynom().y_data(data_X); // transform into target_X space
+    if (!fit_x_axis())
+    {
+        std::cout << y_polynom().to_string() << std::endl;
+        return y_polynom().y_data(data_Y);
+    }
+//    std::cout << "data_X\tdata_Y"   << std::endl;
+//    for (int i=0;i<data_X.size();i++)
+//        std::cout << data_X.at(i) << "\t" << data_Y.at(i) << std::endl;
+    auto shifted_data_X = x_polynom().y_data(data_X);
+    // transform into target_X space
     auto shifted_data_Y = y_polynom().y_data(data_Y); // transform into target_Y space
-    std::cout << "shifted_data_X\shifted_data_Y"   << std::endl;
-    for (int i=0;i<shifted_data_X.size();i++)
-        std::cout << shifted_data_X.at(i) << "\t" << shifted_data_Y.at(i) << std::endl;
-    std::cout << "shifted_data_X.size(): " << shifted_data_X.size() << std::endl;
-    std::cout << "shifted_data_Y.size(): " << shifted_data_Y.size() << std::endl;
-    return statistics::interpolate_data_XY(shifted_data_X,shifted_data_Y,target_X); // map to target_X
+//    std::cout << "shifted_data_X\shifted_data_Y"   << std::endl;
+//    for (int i=0;i<shifted_data_X.size();i++)
+//        std::cout << shifted_data_X.at(i) << "\t" << shifted_data_Y.at(i) << std::endl;
+//    std::cout << "shifted_data_X.size(): " << shifted_data_X.size() << std::endl;
+//    std::cout << "shifted_data_Y.size(): " << shifted_data_Y.size() << std::endl;
+//    return shifted_data_Y;
+    return statistics::interpolate_and_extrapolate_data_XY(shifted_data_X,shifted_data_Y,target_X); // map to target_X
 }
 
-fit_functions::data_to_data_t::data_to_data_t(const std::map<double,double>& target_map,
+bool fit_functions::data_to_target_t::fit_x_axis() const
+{
+    for (auto& r : x_polynom().rank())
+       if (r==1) return true;
+    return false;
+}
+
+fit_functions::data_to_target_t::data_to_target_t(const std::map<double,double>& target_map,
                                               const polynom_t& x_polynom_s,
                                               const polynom_t& y_polynom_s) :
     x_polynom_p(x_polynom_s),y_polynom_p(y_polynom_s), log_c
 {
+    log_f;
+//    logger.debug("this").enter();
     tools::vec::split_map_to_vecs(target_map,&target_X,&target_Y);
 }
 
 
-const fit_functions::polynom_t& fit_functions::data_to_data_t::x_polynom()
+const fit_functions::polynom_t& fit_functions::data_to_target_t::x_polynom() const
 {
     return x_polynom_p;
 }
 
-const fit_functions::polynom_t& fit_functions::data_to_data_t::y_polynom()
+const fit_functions::polynom_t& fit_functions::data_to_target_t::y_polynom() const
 {
     return y_polynom_p;
 }
 
-/*************************************/
-/*******   data_to_data_t  ***********/
-/*************************************/
 
+//void fit_functions::data_to_target_t::gsl_vector_to_fit_parameters(const gsl_vector *v, size_t v_start_idx)
+//{
+//    log_f;
+//    size_t v_idx=0;
+//    const auto rank = polynom.rank();
+//    const auto fit_params = polynom.fit_parameters();
+//    for (size_t i=v_start_idx;i<rank.size();i++)
+//    {
+//        if (rank.at(i)==1)
+//            x_y.push_back(fit_params.at(i));
+//    }
+//}
 
-int fit_functions::data_to_data_t::function(const gsl_vector * x, void *data, gsl_vector * f)
+void fit_functions::data_to_target_t::gsl_vector_to_fit_parameters(const gsl_vector *v)
 {
-    data_to_data_t* data_to_data = static_cast<data_to_data_t*>(data);
+    log_f;
+    const std::vector<double> gsl_vec = statistics::get_gsl_vec(v);
+    size_t v_idx=0;
 
-    //fit parameters
-//    double y0 = gsl_vector_get (x, 0);
-//    double m = gsl_vector_get (x, 1);
-//    double A = gsl_vector_get (x, 2);
-//    double xc = gsl_vector_get (x, 3);
-//    double w1 = gsl_vector_get (x, 4);
-//    double w2 = gsl_vector_get (x, 5);
-//    double w3 = gsl_vector_get (x, 6);
-    data_to_data->gsl_vector_to_fit_parameters(x);
-    auto new_Y = data_to_data->y_data();
-    for (size_t i=0;i<new_Y.size();i++)
+
+    auto rank = x_polynom().rank();
+    auto fit_params = x_polynom().fit_parameters();
+    for (size_t i=0;i<rank.size();i++)
     {
-//        gsl_vector_set (f, i, log10(new_Y.at(i)) - log10(data_to_data->target_Y.at(i)));
-        gsl_vector_set (f, i, new_Y.at(i) - data_to_data->target_Y.at(i));
+        if (rank.at(i)==1)
+        {
+            fit_params.at(i) = gsl_vec.at(v_idx);
+            v_idx++;
+        }
     }
+    x_polynom_p = polynom_t(x_polynom().rank(), fit_params);
 
-  return GSL_SUCCESS;
+    rank = y_polynom().rank();
+    fit_params = y_polynom().fit_parameters();
+    for (size_t i=0;i<rank.size();i++)
+    {
+        if (rank.at(i)==1)
+        {
+            fit_params.at(i) = gsl_vec.at(v_idx);
+            v_idx++;
+        }
+    }
+    y_polynom_p = polynom_t(y_polynom().rank(), fit_params);
+
+//    std::vector<double> fit_params_y(Y);
+//    for (size_t i=X; i < Y+X; i++)
+//    {
+//        fit_params_y.at(i-X) = gsl_vector_get(v,i);
+//    }
+//    y_polynom_p = polynom_t(fit_params_y);
 }
 
-void fit_functions::data_to_data_t::gsl_vector_to_fit_parameters(const gsl_vector *x)
+gsl_vector* fit_functions::data_to_target_t::fit_parameters_to_gsl_vector() const
 {
-    const size_t X = x_polynom().fit_parameters().size();
-    const size_t Y = y_polynom().fit_parameters().size();
-
-    std::vector<double> fit_params_x(X);
-    for (size_t i=0; i < X; i++)
-    {
-        fit_params_x.at(i) = gsl_vector_get(x,i);
-    }
-    x_polynom_p = polynom_t(fit_params_x);
-
-    std::vector<double> fit_params_y(Y);
-    for (size_t i=X; i < Y; i++)
-    {
-        fit_params_y.at(i-X) = gsl_vector_get(x,i);
-    }
-    y_polynom_p = polynom_t(fit_params_y);
+    return statistics::get_gsl_vec(fit_parameters_to_std_vector());
 }
 
-gsl_vector fit_functions::data_to_data_t::fit_parameters_to_gsl_vector() const
+const std::vector<double> fit_functions::data_to_target_t::fit_parameters_to_std_vector(const fit_functions::polynom_t& polynom) const
 {
-    gsl_vector x;
+    std::vector<double> x_y;
+
+    const auto rank = polynom.rank();
+    const auto fit_params = polynom.fit_parameters();
+    for (int i=0;i<rank.size();i++)
+    {
+        if (rank.at(i)==1)
+            x_y.push_back(fit_params.at(i));
+    }
+    return x_y;
 }
 
-bool fit_functions::data_to_data_t::fit(std::map<double,double> data)
+std::vector<double> fit_functions::data_to_target_t::fit_parameters_to_std_vector() const
 {
+    std::vector<double> x_y;
+    const auto x_params = fit_parameters_to_std_vector(x_polynom());
+    const auto y_params = fit_parameters_to_std_vector(y_polynom());
+    if (x_params.size()>0)
+        x_y.insert(x_y.end(),x_params.begin(),x_params.end());
+    x_y.insert(x_y.end(),y_params.begin(),y_params.end());
+//    const auto x_rank = x_polynom().rank();
+//    const auto x_fit_params = x_polynom().fit_parameters();
+//    for (int i=0;i<x_rank.size();i++)
+//    {
+//        if (x_rank.at(i)==1)
+//            x_y.push_back(x_fit_params.at(i));
+//    }
+
+//    const auto y_rank = y_polynom().rank();
+//    const auto y_fit_params = y_polynom().fit_parameters();
+//    for (int i=0;i<y_rank.size();i++)
+//    {
+//        if (y_rank.at(i)==1)
+//            x_y.push_back(y_fit_params.at(i));
+//    }
+    return x_y;
+}
+
+bool fit_functions::data_to_target_t::fit(std::map<double,double> data)
+{
+    log_f;
+    size_t i;
     tools::vec::split_map_to_vecs(data,&data_X,&data_Y);
     const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
     gsl_multifit_nlinear_workspace *w;
     gsl_multifit_nlinear_fdf fdf;
     gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
-    const size_t n = data.size();
-    const size_t p = y_polynom().degree() + x_polynom().degree(); //sum of x_polynom + y_polynom parameters
+    const size_t n = data.size(); // reduce data by its [0] and [max] elements
+    size_t p=0;
+    for (auto& r : x_polynom().rank())
+        if (r==1) p++;
+    for (auto& r : y_polynom().rank())
+        if (r==1) p++;
+//    size_t p = y_polynom().degree(); //sum of x_polynom + y_polynom parameters
+//    if (fit_x_axis())
+//        p += x_polynom().degree(); //sum of x_polynom + y_polynom parameters
+    std::cout << "p=" << p << std::endl;
 
     gsl_vector *f;
     gsl_matrix *J;
     gsl_matrix *covar = gsl_matrix_alloc (p, p);
-    double t[n], y[n], weights[n];
+    double /*t[n], y[n],*/ weights[n];
 //      struct data d = { n, t, y };
-    std::vector<double> xy_init = x_polynom().fit_parameters();
-    std::vector<double> y_init = y_polynom().fit_parameters();
-    xy_init.insert(xy_init.end(),y_init.begin(),y_init.end());
+    std::vector<double> xy_init = fit_parameters_to_std_vector();
+
+    for (i = 0; i < n; i++)
+        weights[i] = 1.0;
 //      double x_init[3] = { 1.0, 1.0, 0.0 }; /* starting values */
     gsl_vector_view x = gsl_vector_view_array (&xy_init[0], p);
     gsl_vector_view wts = gsl_vector_view_array(weights, n);
     gsl_rng * r;
     double chisq, chisq0;
     int status, info;
-    size_t i;
-    const double xtol = 1e-8;
-    const double gtol = 1e-8;
-    const double ftol = 0.0;
+
+    const double xtol = 1e-16;
+    const double gtol = 0;
+    const double ftol = 0;
 
     gsl_rng_env_setup();
     r = gsl_rng_alloc(gsl_rng_default);
@@ -715,8 +1123,8 @@ bool fit_functions::data_to_data_t::fit(std::map<double,double> data)
     f = gsl_multifit_nlinear_residual(w);
     gsl_blas_ddot(f, f, &chisq0);
     /* solve the system with a maximum of 100 iterations */
-    status = gsl_multifit_nlinear_driver(100, xtol, gtol, ftol,
-                                         callback, NULL, &info, w);
+//    status = gsl_multifit_nlinear_driver(200, xtol, gtol, ftol, callback, NULL, &info, w);
+    status = gsl_multifit_nlinear_driver(1000000, xtol, gtol, ftol, NULL, NULL, &info, w);
 
     /* compute covariance of best fit parameters */
     J = gsl_multifit_nlinear_jac(w);

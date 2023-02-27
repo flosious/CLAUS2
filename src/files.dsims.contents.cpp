@@ -28,10 +28,17 @@
 /*****  files_::dsims_t::contents_t  ****/
 /***************************************/
 
-files_::dsims_t::contents_t::contents_t(std::string& filename_with_path, const std::string& contents_string)
-    : files_::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"},contents_string), logger(__FILE__,"files_::dsims_t::contents_t")
+//files_::dsims_t::contents_t::contents_t(std::string& filename_with_path, const std::string& contents_string)
+//    : files_::sims_t::contents_t(filename_with_path,"\t",{"*** DATA FILES ***"},contents_string), log_c
+//{
+//}
 
+
+files_::dsims_t::contents_t::contents_t(name_t& sims_filename, const std::string& contents_string)
+    : files_::sims_t::contents_t(sims_filename.filename_with_path,"\t",{"*** DATA FILES ***"},contents_string), log_c
 {
+    if (sims_filename.filename_type_ending()=="dp_rpc_asc")
+        use_Ipr_shift_corretion = false;
 }
 
 void files_::dsims_t::contents_t::to_screen(std::string prefix)
@@ -72,6 +79,7 @@ void files_::dsims_t::contents_t::to_screen(std::string prefix)
 
 std::vector<cluster_t> files_::dsims_t::contents_t::clusters()
 {
+    log_f;
 	if (columns().size()==0)
 		return {};
 	std::vector<cluster_t> collected_clusters;
@@ -87,10 +95,26 @@ std::vector<cluster_t> files_::dsims_t::contents_t::clusters()
 		for (auto& col:columns())
 		{
 			if (col.cluster_name != clustername) continue;
-			if (col.dimension=="Time") sputter_time = quantity::sputter_time_t(col.data,col.unit);
-			if (col.dimension=="Depth") sputter_depth_s = quantity::depth_t(col.data,col.unit);
-			if (col.dimension=="C") concentration_s = quantity::concentration_t(col.data,col.unit);
-			if (col.dimension=="I") intensity_s = quantity::intensity_t(col.data,col.unit);
+            if (col.dimension=="Time")
+            {
+                sputter_time = quantity::sputter_time_t(col.data,col.unit);
+                logger.debug(clustername).quantity(sputter_time.to_string_short());
+            }
+            else if (col.dimension=="Depth")
+            {
+                sputter_depth_s = quantity::depth_t(col.data,col.unit);
+                logger.debug(clustername).quantity(sputter_depth_s.to_string_short());
+            }
+            else if (col.dimension=="C")
+            {
+                concentration_s = quantity::concentration_t(col.data,col.unit);
+                logger.debug(clustername).quantity(concentration_s.to_string_short());
+            }
+            else if (col.dimension=="I")
+            {
+                intensity_s = quantity::intensity_t(col.data,col.unit);
+                logger.debug(clustername).quantity(intensity_s.to_string_short());
+            }
 		}
 		
 		cluster_t cluster(clustername,sputter_time,intensity_s,sputter_depth_s,concentration_s);
@@ -111,7 +135,7 @@ const std::vector<files_::dsims_t::contents_t::column_t> files_::dsims_t::conten
 {
 	if (columns_s.size()>0)
 		return columns_s;
-	if (check_Ipr()) ipr_shift_correction();
+    if (check_Ipr() && use_Ipr_shift_corretion) ipr_shift_correction();
 	if (!parse_units_dimensions_clusternames())
 	{
         //logger::error("files_::dsims_t::contents_t::columns()","could not parse_units_dimensions_clusternames","","return empty");
@@ -271,8 +295,8 @@ bool files_::dsims_t::contents_t::parse_units_dimensions_clusternames()
 
 bool files_::dsims_t::contents_t::check_Ipr() 
 {
-	is_Ipr=false;
-	is_Ipr = tools::mat::find_str_in_mat(cluster_names(),"Ipr");
+    is_Ipr=false;
+    is_Ipr = tools::mat::find_str_in_mat(cluster_names(),"Ipr");
 	return is_Ipr;
 }
 
@@ -325,6 +349,7 @@ void files_::dsims_t::contents_t::remove_corrupted_lines()
  */
 bool files_::dsims_t::contents_t::ipr_shift_correction() 
 {
+    log_f;
 	raw_data_tensor();
 	std::vector<std::vector<std::string>>* mat = &raw_data_tensor_p.at(0);
     if (mat->size()==0) 
@@ -351,7 +376,14 @@ bool files_::dsims_t::contents_t::ipr_shift_correction()
 	std::vector<std::vector<std::string>> Ipr_mat;
 	// cut off Ipr from data mat
 	Ipr_mat.insert(Ipr_mat.begin(),mat->begin()+Ipr_offset_line,mat->end());	
-	// delete first columns within the matrix
+    // delete first columns within the matrix
+    logger.debug("cols_per_element").value(cols_per_element);
+    logger.debug("Ipr_offset_line").value(Ipr_offset_line);
+    logger.debug("Ipr_col_at_EOL").value(Ipr_col_at_EOL);
+    logger.debug("Ipr_col").value(Ipr_col);
+    logger.debug("total_lines").value(total_lines);
+    logger.debug("dimensions().size()").value(dimensions().size());
+    logger.debug("cluster_names().size()").value(cluster_names().size());
 	Ipr_mat=tools::mat::transpose_matrix(Ipr_mat);
 	Ipr_mat.erase(Ipr_mat.begin(),Ipr_mat.begin()+(Ipr_mat.size()-cluster_names().size()*cols_per_element));
 	Ipr_mat=tools::mat::transpose_matrix(Ipr_mat);

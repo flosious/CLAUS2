@@ -539,9 +539,10 @@ bool statistics::std_vec_to_gsl_vec(const std::vector<double>& std_vec, gsl_vect
 }
 
 
-std::vector<double> statistics::gsl_vec_to_std_vec(gsl_vector ** vec) {
-    std::vector<double> Y;
-    for (int i=0;i<(*vec)->size;i++) Y.push_back((*vec)->data[i]);
+std::vector<double> statistics::gsl_vec_to_std_vec(const gsl_vector * vec) {
+    std::vector<double> Y((vec)->size);
+    for (size_t i=0;i<(vec)->size;i++)
+        Y.at(i)=((vec)->data[i]);
 //     gsl_vector_free(vec);
     return Y;
 }
@@ -1625,7 +1626,7 @@ std::vector<double> statistics::interpolate_bspline(std::map<double, double>& da
 	return Y_new;
 }
 
-std::vector<double> statistics::get_gsl_vec(gsl_vector* Y)
+std::vector<double> statistics::get_gsl_vec(const gsl_vector* Y)
 {
 	std::vector<double> Yout(Y->size);
 	
@@ -1814,17 +1815,78 @@ std::vector<double> statistics::interpolate_data_XY(std::vector<double> data_X, 
 
 
 
-    for (int i=0; i < new_X.size(); i++) {
-
+    for (int i=0; i < new_X.size(); i++)
+    {
         yi = gsl_spline_eval (spline_akima, new_X.at(i), acc);
         new_Y.at(i)=yi;
-      }
+    }
 
     gsl_spline_free (spline_akima);
     gsl_interp_accel_free (acc);
     return new_Y;
 }
 
+std::vector<double> statistics::least_common_vector(std::vector<double> X, std::vector<double> Y)
+{
+    //asuming data_X and new_X are already strictly monotonic odered!
+    double Y_max_val = statistics::get_min_from_Y({statistics::get_max_from_Y(X),statistics::get_max_from_Y(Y)});
+    double Y_min_val = statistics::get_max_from_Y({statistics::get_min_from_Y(X),statistics::get_min_from_Y(Y)});
+
+    //STL: https://cplusplus.com/reference/algorithm/lower_bound/
+    auto Y_max_iter = std::lower_bound(Y.begin(),Y.end(),Y_max_val);
+    auto Y_min_iter = std::upper_bound(Y.begin(),Y.end(),Y_min_val);
+    std::vector<double> common_X(Y_min_iter,Y_max_iter);
+
+    return common_X;
+}
+
+std::vector<double> statistics::interpolate_and_extrapolate_data_XY(std::vector<double> data_X, std::vector<double> data_Y,const std::vector<double>& new_X, double extrapolation_value)
+{
+//    std::cout << "data_X" << std::endl;
+//    for (auto& d : data_X)
+//        std::cout << d << std::endl;
+//    std::cout << "new_X" << std::endl;
+//    for (auto& d : new_X)
+//        std::cout << d << std::endl;
+    //asuming data_X and new_X are already strictly monotonic odered!
+    double Y_max_val = statistics::get_min_from_Y({statistics::get_max_from_Y(data_X),statistics::get_max_from_Y(new_X)});
+    double Y_min_val = statistics::get_max_from_Y({statistics::get_min_from_Y(data_X),statistics::get_min_from_Y(new_X)});
+//    std::cout << "Y_max_val: " << Y_max_val << std::endl;
+//    std::cout << "Y_min_val: " << Y_min_val << std::endl;
+    //STL: https://cplusplus.com/reference/algorithm/lower_bound/
+    auto Y_max_iter = std::lower_bound(new_X.begin(),new_X.end(),Y_max_val);
+    auto Y_min_iter = std::upper_bound(new_X.begin(),new_X.end(),Y_min_val);
+//    std::cout << "Y_max_index: " << Y_max_iter-new_X.begin() << std::endl;
+//    std::cout << "Y_min_index: " << Y_min_iter-new_X.begin() << std::endl;
+    std::cout << "Y_max_iter" << *Y_max_iter << std::endl;
+    std::cout << "Y_min_iter" << *Y_min_iter << std::endl;
+//    std::cout << "Y_max_iter" << *Y_max_iter << std::endl;
+    if (Y_max_iter == new_X.begin() || Y_min_iter == new_X.end() || Y_max_iter == Y_min_iter) // no common x axis
+        return std::vector<double>(new_X.size(),extrapolation_value);
+    std::vector<double> common_X(Y_min_iter,Y_max_iter);
+
+    //2nd interpolate common_Y from data_X and data_Y on common_X
+    auto common_Y = interpolate_data_XY(data_X,data_Y,common_X);
+
+    //3rd expand common_X to new_X by filling up common_Y outside of common_X with extrapolation_value
+    int starters = Y_min_iter - new_X.begin();
+//    std::cout << "starters: " << starters << std::endl;
+    int stoppers = data_X.size() - starters - common_X.size();
+//    std::cout << "stoppers: " << stoppers << std::endl;
+    std::vector<double> start_vec(starters,extrapolation_value);
+//    std::cout << "start_vec: " << start_vec.size() << std::endl;
+    std::vector<double> stop_vec(stoppers,extrapolation_value);
+//    std::cout << "stop_vec: " << stop_vec.size() << std::endl;
+    std::vector<double> extrapolated_common_Y;
+    extrapolated_common_Y.reserve(new_X.size());
+    extrapolated_common_Y.insert(extrapolated_common_Y.end(),start_vec.begin(),start_vec.end());
+    extrapolated_common_Y.insert(extrapolated_common_Y.end(),common_Y.begin(),common_Y.end());
+    extrapolated_common_Y.insert(extrapolated_common_Y.end(),stop_vec.begin(),stop_vec.end());
+//    std::cout << "extrapolated_common_Y: " << extrapolated_common_Y.size() << std::endl;
+//    for (auto& d : extrapolated_common_Y)
+//        std::cout << d << std::endl;
+    return extrapolated_common_Y;
+}
 
 double statistics::integrate(std::map<double,double>& data_XY, unsigned int start_idx, unsigned int stop_idx) 
 {

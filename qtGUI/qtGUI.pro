@@ -55,7 +55,9 @@ SOURCES += \
     ../src/mgroup.sims.calc.cpp \
     ../src/mgroup.sims.calc.matrix.cpp \
     ../src/mgroup.sims.cpp \
+    ../src/mgroup.sims.matrices.cpp \
     ../src/mgroup.sims.pbp.cpp \
+    ../src/mgroup.sims.references.cpp \
     ../src/mgroup.tofsims.cpp \
     ../src/msettings.cpp \
     ../src/msettings.dsims.cpp \

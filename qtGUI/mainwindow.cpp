@@ -383,6 +383,22 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 void MainWindow::on_calc_button_clicked()
 {
     log_f;
+    /*fullAuto SIMS*/
+    if (ui->check_fullAuto->isChecked())
+    {
+        for (auto& MG : claus->tofsims.mgroups)
+        {
+            MG.calc().full_auto();
+        }
+        for (auto& MG : claus->dsims.mgroups)
+        {
+            MG.calc().full_auto();
+        }
+        return;
+    }
+
+
+
     /*tof sims*/
     for (auto& MG : claus->tofsims.mgroups)
     {
@@ -413,12 +429,25 @@ void MainWindow::on_calc_button_clicked()
         }
         // SR + SD
         calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
-        // SF + RSF
-        calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+        // RSFs from known samples
+        if (ui->check_percentile->isChecked())
+        {
+            calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_percentile_ref(0.25).RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+        }
+        else
+        {
+            calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+        }
+        // SFs of unknown samples
         if (ui->check_pbp->isChecked())
         {
             logger.info("calculation Method").signal("pbp");
             calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
+        }
+        else if (ui->check_percentile->isChecked())
+        {
+            logger.info("calculation Method").signal("percentile0.1");
+            calc.SFs.from_RSF_percentile_ref(0.1).SFs.from_implant_max(); //median
         }
         else
         {
@@ -475,12 +504,26 @@ void MainWindow::on_calc_button_clicked()
         }
         // SR + SD
         calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SDs.from_SR();
-        // SF + RSF
-        calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+        // RSFs from known samples
+        if (ui->check_percentile->isChecked())
+        {
+            calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_percentile_ref(0.1).RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+//            calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+        }
+        else
+        {
+            calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_median_ref().RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+        }
+        // SFs of unknown samples
         if (ui->check_pbp->isChecked())
         {
             logger.info("calculation Method").signal("pbp");
             calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
+        }
+        else if (ui->check_percentile->isChecked())
+        {
+            logger.info("calculation Method").signal("percentile0.1");
+            calc.SFs.from_RSF_percentile_ref(0.1).SFs.from_implant_max(); //median
         }
         else
         {
@@ -527,7 +570,8 @@ void MainWindow::on_export_button_clicked()
 
 void MainWindow::on_check_pbp_stateChanged(int arg1)
 {
-
+//    if (ui->check_pbp->isChecked() && ui->check_percentile->isChecked())
+//        ui->check_percentile->setChecked(false);
 }
 
 void MainWindow::on_test_button_clicked()
@@ -535,21 +579,42 @@ void MainWindow::on_test_button_clicked()
     log_f;
     logger.debug("this").enter();
     std::map<double,double> target, data;
-    for (int i=0;i<20;i++)
+    std::vector<double> x;
+    for (int i=50;i<150;i++)
     {
-        target.insert(std::pair<double,double> (i,i*i+1));
-        data.insert(std::pair<double,double> (i*1.1,(i*i+1)*2));
+        x.push_back(i);
     }
-    std::cout << "target_X\ttarget_Y"   << std::endl;
-    for (auto& t : target)
-        std::cout << t.first << "\t" << t.second << std::endl;
+    fit_functions::pseudo_voigt_t pseudo_voigt(0,1e4,0.25,48,1);
+    fit_functions::pseudo_voigt_t pseudo_voigt_target(0,1e5,0.25,50,1);
+    std::vector<double> y = pseudo_voigt.y_data(x);
+    data = tools::vec::combine_vecs_to_map(x,y);
+    std::vector<double> target_y = pseudo_voigt_target.y_data(x);
+    target = tools::vec::combine_vecs_to_map(x,target_y);
+    pseudo_voigt.fit_A=true;
+    pseudo_voigt.fit_y0=false;
+    pseudo_voigt.fit_m=false;
+    pseudo_voigt.fit_xc=true;
+    pseudo_voigt.fit_w=false;
 
-    std::cout << "data_X\tdata_Y"   << std::endl;
-    for (auto& t : data)
-        std::cout << t.first << "\t" << t.second << std::endl;
+    std::cout << "pseudo_voigt: " << pseudo_voigt.to_string() << std::endl;
+    pseudo_voigt.fit(target);
+    auto y_fitted = pseudo_voigt.y_data(x);
 
-    fit_functions::polynom_t x_polynom({0,1});
-    fit_functions::polynom_t y_polynom({0,1});
-    fit_functions::data_to_data_t fit_data_map(target,x_polynom,y_polynom);
-    fit_data_map.fit(data);
+    std::cout << "x\t\ty_target\t\ty\t\ty_fitted\t\terror" << std::endl;
+//    for (int i=0;i<x.size();i++)
+//        std::cout << x.at(i) <<"\t\t" << target_y.at(i) <<"\t\t" << y.at(i) << "\t\t" << y_fitted.at(i) << "\t\t" << abs(target_y.at(i)-y_fitted.at(i)) << std::endl;
+
+    std::cout << "pseudo_voigt_target: " << pseudo_voigt_target.to_string() << std::endl;
+    std::cout << "pseudo_voigt fitted: " << pseudo_voigt.to_string() << std::endl;
+}
+
+void MainWindow::on_check_percentile_stateChanged(int arg1)
+{
+//    if (ui->check_pbp->isChecked() && ui->check_percentile->isChecked())
+//        ui->check_pbp->setChecked(false);
+}
+
+void MainWindow::on_check_fullAuto_clicked()
+{
+    //
 }

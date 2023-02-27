@@ -31,13 +31,13 @@ quantity::quantity_t::quantity_t(const quantity_t& quant,const unit_t& unit, std
 
 // quantity::quantity_t::quantity_t(const quantity_t& Q) : name_s()
 
-quantity::quantity_t::quantity_t() : name_s(""), data_s({}),dimension_s(dimensions::SI::relative), logger(__FILE__,"quantity::quantity_t")
+quantity::quantity_t::quantity_t() : name_s(""), data_s({}),dimension_s(dimensions::SI::relative), class_logger(__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit) :
                                     name_s(name), data_s(data), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)),
-                                    logger(__FILE__,"quantity::quantity_t")
+                                    class_logger(__FILE__,"quantity::quantity_t")
 {
 }
 
@@ -58,19 +58,19 @@ quantity::quantity_t::quantity_t(const quantity::quantity_t& quant, const unit_t
 
 quantity::quantity_t::quantity_t(const std::string& name,const unit_t& unit, std::string add_to_history) :
     name_s(name), data_s({}), unit_s(unit), dimension_s(quantity_t::get_dimension_from_unit(unit)), operations_history_s({add_to_history}),
-    logger(__FILE__,"quantity::quantity_t")
+    class_logger(__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit, const dimension_t& dimension, const std::vector<std::string>& operations_history,std::string add_to_history) :
     name_s(name), data_s(data), unit_s(unit), dimension_s(dimension), operations_history_s(tools::vec::add(operations_history,add_to_history)),
-    logger(__FILE__,"quantity::quantity_t")
+    class_logger(__FILE__,"quantity::quantity_t")
 {
 }
 
 quantity::quantity_t::quantity_t(const std::string& name,const std::vector<double>& data,const unit_t& unit, const dimension_t& dimension) :
     name_s(name), data_s(data), unit_s(unit), dimension_s(dimension),
-    logger(__FILE__,"quantity::quantity_t")
+    class_logger(__FILE__,"quantity::quantity_t")
 {
 }
 
@@ -163,6 +163,7 @@ quantity::quantity_t quantity::quantity_t::bspline_smoothing(const quantity_t& X
 
 quantity::quantity_t quantity::quantity_t::interp(const quantity_t& old_X, const quantity_t& new_X) const
 {
+    log_f;
 	if (!is_set())
 		return {};
 	if (data().size()==1)
@@ -199,7 +200,12 @@ quantity::quantity_t quantity::quantity_t::interp(const quantity_t& old_X, const
 	}
 // 	data_s = statistics::interpolate_data_XY(XY_data,new_X.data());
 // 	operations_history_s.push_back("interp");
-	return {*this,statistics::interpolate_data_XY(XY_data,new_X.data()),"interp"};
+    quantity_t new_Y(*this,statistics::interpolate_data_XY(XY_data,new_X.data()),"interp");
+//    logger.error("old_X").quantity(old_X.to_string_detailed());
+//    logger.error("old_Y").quantity(to_string_detailed());
+//    logger.error("new_X").quantity(new_X.to_string_detailed());
+//    logger.error("new_Y").quantity(new_Y.to_string_detailed());
+    return new_Y;
 	
 }
 
@@ -341,15 +347,16 @@ quantity::quantity_t quantity::quantity_t::diff() const
 
 quantity::quantity_t quantity::quantity_t::integrate_pbp(const quantity_t& x_data)
 {
-    logger.debug(__func__,"this").enter();
+    log_f;
+    logger.debug("this").enter();
     if (data().size()==0)
     {
-        logger.error(__func__,to_string()).signal("data().size()==0");
+        logger.error(to_string()).signal("data().size()==0");
         return {};
     }
 	if (data().size()!=x_data.data().size()) 
     {
-        logger.error(__func__,to_string()).if_statement("data().size()",data().size(),"!=","x_data.data().size()",x_data.data().size());
+        logger.error(to_string()).if_statement("data().size()",data().size(),"!=","x_data.data().size()",x_data.data().size());
 		return {};
     }
 // 	if (data.size()==1) // fall back to simple multiplication, but this will ignore correctness of unit and dimension --> do not use!
@@ -375,9 +382,9 @@ quantity::quantity_t quantity::quantity_t::integrate_pbp(const quantity_t& x_dat
 	auto unit_c = unit_s*x_data.unit_s;
 	auto dimension_c = dimension_s*x_data.dimension_s;
     quantity_t integrated (name(),data_c,unit_c,dimension_c,operations_history(),n.str());
-    logger.debug(__func__,"this").value(to_string());
-    logger.debug(__func__,"x_data").value(x_data.to_string());
-    logger.debug(__func__,"integrated").value(integrated.to_string());
+    logger.debug("this").value(to_string());
+    logger.debug("x_data").value(x_data.to_string());
+    logger.debug("integrated").value(integrated.to_string());
     return integrated;
 }
 
@@ -501,18 +508,26 @@ quantity::quantity_t quantity::quantity_t::median() const
 	return {*this,statistics::get_median_from_Y(data()),"median"};
 }
 
+quantity::quantity_t quantity::quantity_t::percentile(double percentile_s) const
+{
+    return quantile(percentile_s);
+}
+
 quantity::quantity_t quantity::quantity_t::quantile(double percentile) const
 {
+    log_f;
 	if (!is_set())
 		return {};
-	if (percentile>1 || percentile<0)
+    if (percentile>=1 || percentile<=0)
 		return {};
 	
-	std::stringstream n;
-	n << "percentile" << percentile;
+    std::stringstream n;
+    n << "percentile" << percentile;
 // 	data_s = {statistics::get_quantile_from_Y(data(),percentile)};
 // 	operations_history_s.push_back(n.str());
-	return {*this,statistics::get_quantile_from_Y(data(),percentile),n.str()};
+    quantity_t Q(*this,statistics::get_quantile_from_Y(data(),percentile),n.str());
+    logger.error("this").value(Q.to_string_detailed());
+    return {Q};
 }
 
 quantity::quantity_t quantity::quantity_t::geo_mean() const

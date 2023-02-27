@@ -20,8 +20,9 @@
 
 measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, database_t& sql_wrapper, std::vector<const quantity::total_sputter_depth_t*> total_sputter_dephs) :
         sims_t(dsims_file.name,dsims_file.contents,"dsims",sql_wrapper,total_sputter_dephs),
-                settings(dsims_file.name,dsims_file.contents), logger(__FILE__,"measurements_::dsims_t")
+                settings(dsims_file.name,dsims_file.contents), log_c
 {
+    log_f;
     tool_name = "IMSWf";
 	crater.sputter_beam = dsims_file.contents.Ipr();
 	
@@ -43,24 +44,32 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, database_t& sql_wra
 	{
 		if (c.sputter_depth.is_set() || c.sputter_time.is_set()) 
 			continue;
-        //logger::error("measurements_::dsims_t::dsims_t","neither sputer_depth or sputter_time is std::set in cluster",c.to_string(),"aboarting");
+        logger.error(c.to_string()).signal("neither sputer_depth or sputter_time is set in cluster");
 		return;
 	}
 	
-	/*regularize data*/
-	if (clusters.begin()->sputter_depth.is_set())
-	{
-		crater.sputter_depth = crater.common_sputter_depth(clusters);
-        //logger::debug(7,"measurements_::dsims_t::dsims_t","crater.sputter_depth()=" + crater.sputter_depth.to_string());
-	}
-	if (!crater.sputter_depth.is_set())
-	{
-		crater.sputter_time = crater.common_sputter_time(clusters);
-        //logger::debug(7,"measurements_::dsims_t::dsims_t","crater.sputter_time=" + crater.sputter_time.to_string());
-	}
-	
+    if (clusters.size()==1)
+    {
+        crater.sputter_depth=clusters.front().sputter_depth;
+        crater.sputter_time=clusters.front().sputter_time;
+    }
+    else
+    {
+        /*regularize data*/
+        if (clusters.begin()->sputter_depth.is_set())
+        {
+            crater.sputter_depth = crater.common_sputter_depth(clusters);
+            //logger::debug(7,"measurements_::dsims_t::dsims_t","crater.sputter_depth()=" + crater.sputter_depth.to_string());
+        }
+        if (!crater.sputter_depth.is_set())
+        {
+            crater.sputter_time = crater.common_sputter_time(clusters);
+            //logger::debug(7,"measurements_::dsims_t::dsims_t","crater.sputter_time=" + crater.sputter_time.to_string());
+        }
+    }
 	if (!crater.sputter_time.is_set() && !crater.sputter_depth.is_set())
 	{
+        logger.error("crater").signal("!crater.sputter_time.is_set() && !crater.sputter_depth().is_set()");
         //logger::error("measurements_::dsims_t::dsims_t","!crater.sputter_time.is_set() && !crater.sputter_depth().is_set()","check all clusters for sputter_time or depth","returning");
 		return;
 	}
@@ -85,7 +94,8 @@ measurements_::dsims_t::dsims_t(files_::dsims_t& dsims_file, database_t& sql_wra
             //logger::warning(2,"measurements_::dsims_t::dsims_t","could not interp crater.sputter_beam.sputter_current","","skipping");
         }
 	}
-	
+    if (clusters.size()==1)
+        return;
 	for (auto& C: clusters)
 	{
 		if (C.sputter_time.is_set() && crater.sputter_time.is_set())

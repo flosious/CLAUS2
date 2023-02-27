@@ -291,22 +291,14 @@ public:
 	    return pp;
 	}
 
-	        template<class In>
-	        static std::string to_string(const std::vector<In>& I)
-		{
-		        std::stringstream out;
-			for (auto& i : I)
-			        out << tools::to_string(i) << ", ";
-			return out.str();
-		}
-// 		template<class In>
-// 		static std::vector<std::string> to_string(In& I)
-// 		{
-// 			std::vector<std::string> O;
-// 			to_string(begin(I),end(I),back_inserter(O));
-// 			return O;
-// 		}
-
+    template<class In>
+    static std::string to_string(const std::vector<In>& I)
+    {
+        std::stringstream out;
+        for (auto& i : I)
+            out << tools::to_string(i) << ", ";
+        return out.str();
+    }
 		/*from https://stackoverflow.com/questions/25371873/convert-vectordouble-to-vectorstring-elegant-way*/
 		template<class IteratorIn, class IteratorOut>
 		static void to_string(IteratorIn first, IteratorIn last, IteratorOut out)
@@ -365,7 +357,22 @@ public:
 
 			return;
 	        }
+        template<typename T>
+        static std::vector<T> common(std::vector<T> X, std::vector<T> Y)
+        {
+            std::set<T> sorted_X(X.begin(),X.end());
+            std::set<T> sorted_Y(Y.begin(),Y.end());
+            std::vector<T> sorted_X_vec(sorted_X.begin(),sorted_X.end());
+            std::vector<T> sorted_Y_vec(sorted_Y.begin(),sorted_Y.end());
 
+            std::vector<T> all_elements(sorted_X_vec.size()+sorted_Y_vec.size());
+            auto stop = set_intersection(sorted_X_vec.begin(),sorted_X_vec.end(),sorted_Y_vec.begin(),sorted_Y_vec.end(),all_elements.begin());
+            std::vector<T> common_elements;
+            common_elements.reserve(stop-all_elements.begin()+1);
+            for (auto it=all_elements.begin();it!=stop;++it)
+                common_elements.push_back(*it);
+            return common_elements;
+        }
 // 		template <typename T> static std::vector<T> add(std::vector<T> *start,/*vector*/<T> *ende);
 	        static void add(std::vector<std::string> *result_vec,std::vector<std::string> adder);
 		static void add(std::vector<double> *result_vec,std::vector<double> adder);

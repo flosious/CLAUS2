@@ -471,3 +471,23 @@ bool measurements_::sims_t::change_sputter_time_resolution(quantity::sputter_tim
     return true;
 }
 
+std::set<isotope_t> measurements_::sims_t::isotopes_corresponding_to_all_clusters() const
+{
+    std::set<isotope_t> isotopes;
+    for (auto& cluster : clusters)
+    {
+        isotopes.insert(cluster.corresponding_isotope(reference_isotopes));
+    }
+    return isotopes;
+}
+
+bool measurements_::sims_t::has_implanted_isotopes() const
+{
+    const auto isotopes_corresponding_to_all_clusters_s = isotopes_corresponding_to_all_clusters();
+    for (auto& iso_to_implant : sample.implants())
+    {
+        if (isotopes_corresponding_to_all_clusters_s.find(iso_to_implant.first)!=isotopes_corresponding_to_all_clusters_s.end())
+            return true;
+    }
+    return false;
+}

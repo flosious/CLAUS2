@@ -39,7 +39,7 @@ namespace quantity
 	class quantity_t
 	{
 	private:
-        class_logger_t logger;
+        class_logger_t class_logger;
 		const std::map<double,double> data_XY_1D();
 		static int get_value_index_position_in_strictly_monotonic_increasing_vector(const double value, const std::vector<double>& monotonic_vec);
 	public:
@@ -232,9 +232,10 @@ namespace quantity
 		///sums up all data in the data.vector
 		quantity_t sum(int start=0, int stop = -1)  const;
 // 		quantity_t pbp_sum()  const;
-		quantity_t quantile(double percentile=0.75)  const;
-		quantity_t median()  const;
-		quantity_t mean()  const;
+        quantity_t percentile(double percentile_s=0.75)  const;
+        quantity_t quantile(double percentile=0.75)  const;
+        quantity_t median()  const;
+        quantity_t mean()  const;
 		quantity_t geo_mean()  const;
 		///statistically sorted; removes data at beginning and end
 		quantity_t trimmed_mean(float alpha=0.25)  const;

@@ -23,7 +23,7 @@
 /****       tofsims_t        *****/
 /*********************************/
 files_::tofsims_t::name_t::name_t(std::string& filename_with_path_s) :
-                                        files_::sims_t::name_t(filename_with_path_s,"_",{".TXT"},{}),
+                                        files_::sims_t::name_t(filename_with_path_s,"_",{".TXT",".txt"},{}),
                                         logger(__FILE__,"files_::tofsims_t::name_t")
 {
 	parse_analysis_energy_element();
@@ -32,11 +32,8 @@ files_::tofsims_t::name_t::name_t(std::string& filename_with_path_s) :
 bool files_::tofsims_t::name_t::parse_analysis_energy_element()
 {
 	std::smatch match;
-	std::regex reg;
-// 	std::cout << "IN" << std::endl;
-// 	std::cout << "not_parseable_filename_parts_p: " << not_parseable_filename_parts_p.size() << std::endl;
-// 	std::cout << to_string() << std::endl;
-	for (std::vector<std::string>::iterator FNp = not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
+    std::regex reg;
+    for (std::vector<std::string>::iterator FNp = not_parseable_filename_parts_p.begin();FNp!=not_parseable_filename_parts_p.end();FNp++)
 	{
 		reg = ("^([0-9]{1,5})(V|eV|kV|keV)(Mn|Mn\\+|Bi|Bi\\+|Bi\\+\\+)$"); 
 		if (regex_search(*FNp,match,reg)) 

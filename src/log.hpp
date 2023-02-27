@@ -266,7 +266,7 @@ protected:
     class_logger_t class_logger;
     std::string func_name_p;
 public:
-    function_logger_t(class_logger_t& class_logger, std::string_view func_name);
+    function_logger_t(const class_logger_t& class_logger, std::string_view func_name);
     use_case_t fatal(std::string_view object_name);
     use_case_t error(std::string_view object_name);
     use_case_t warning(std::string_view object_name);

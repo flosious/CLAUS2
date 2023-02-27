@@ -62,6 +62,14 @@ measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SD_c::from_SR(bool
 	return calc;
 }
 
+measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SD_c::normalize_to_crater_depth()
+{
+    if (!M.crater.sputter_depth.is_set())
+            return calc;
+    M.crater.sputter_depth = M.crater.sputter_depth / M.crater.sputter_depth.back() * M.crater.total_sputter_depth();
+    return calc;
+}
+
 /************************************/
 /**        concentration_c         **/
 /************************************/
@@ -160,6 +168,16 @@ quantity::SR_t measurements_::sims_t::calc_t::SR_c::from_implant_max(cluster_t& 
 	return SR;
 }
 
+measurements_::sims_t::calc_t& measurements_::sims_t::calc_t::SR_c::normalize_to_crater_depth()
+{
+    if (!M.crater.SR.is_set())
+            return calc;
+    auto new_SR = M.crater.SR / M.crater.SR.back() * M.crater.total_sputter_depth()/M.crater.total_sputter_time();
+    if (new_SR.is_set())
+        M.crater.SR = new_SR;
+    return calc;
+}
+
 /*************************/
 /**        SF_c         **/
 /*************************/
@@ -240,22 +258,24 @@ measurements_::sims_t::calc_t & measurements_::sims_t::calc_t::RSF_c::from_SF_me
 
 cluster_t::RSF_t measurements_::sims_t::calc_t::RSF_c::from_SF_mean_ref(const cluster_t& cluster)
 {
-	cluster_t::RSF_t RSF;
-	if (cluster.RSF.reference_clusters().size()==0)
-		RSF = M.matrix_clusters().intensity_sum().mean() * cluster.SF; 
-	else
-		for (const auto& ref_c : cluster.RSF.reference_clusters())
-		{
-			quantity::intensity_t sum;
-			const auto ref_c_in_M = M.cluster(ref_c);
-			if (ref_c_in_M==nullptr || !ref_c_in_M->intensity.is_set()) // reference_cluster does not exist in this measurement, asume its intensity is 0
-			{
-                //logger::warning(3,"measurements_::sims_t::calc_t::RSF_c::from_SF_mean_ref()",cluster.to_string()+"-RSF reference cluster("+ ref_c.to_string() +") not found in M: " + M.to_string_short() ,"asuming intensity is 0",M.to_string_short());
-				continue;
-			}
-			sum += ref_c_in_M->intensity;
-		}
-	return RSF;
+//	cluster_t::RSF_t RSF;
+//	if (cluster.RSF.reference_clusters().size()==0)
+//		RSF = M.matrix_clusters().intensity_sum().mean() * cluster.SF;
+//	else
+//		for (const auto& ref_c : cluster.RSF.reference_clusters())
+//		{
+//			quantity::intensity_t sum;
+//			const auto ref_c_in_M = M.cluster(ref_c);
+//			if (ref_c_in_M==nullptr || !ref_c_in_M->intensity.is_set()) // reference_cluster does not exist in this measurement, asume its intensity is 0
+//			{
+//                //logger::warning(3,"measurements_::sims_t::calc_t::RSF_c::from_SF_mean_ref()",cluster.to_string()+"-RSF reference cluster("+ ref_c.to_string() +") not found in M: " + M.to_string_short() ,"asuming intensity is 0",M.to_string_short());
+//				continue;
+//			}
+//			sum += ref_c_in_M->intensity;
+//		}
+//	return RSF;
+
+    return M.matrix_clusters().intensity_sum().mean() * cluster.SF;
 }
 
 

@@ -63,7 +63,7 @@ public:
 			bool parse_group(std::string filename_part);
 			bool parse_repetitor(std::string filename_part);
 			bool parsed_filename_parts = false;
-		protected:
+        protected:
 			std::vector<std::string> not_parseable_filename_parts_p;
             name_t(std::string& filename_with_path_s, const std::string delimiter_s,const std::set<std::string> OR_identifiers_s,const std::set<std::string> AND_identifiers_s);
 		public:
@@ -210,7 +210,8 @@ public:
 		class contents_t : public sims_t::contents_t
 		{
 		private:
-            class_logger_t logger;
+            bool use_Ipr_shift_corretion=true;
+            class_logger_t class_logger;
 			std::map<std::string,std::string> infos_and_settings_p;
 			///will create a map: keys->values from raw_data_tensor()
 			const std::map<std::string,std::string>& infos_and_settings();
@@ -262,8 +263,9 @@ public:
 			const quantity::quantity_t total_sputtering_time(const std::string find_this="Total sputtering time (s)");
 			const quantity::quantity_t total_acquisition_time(const std::string find_this="Total acquisition time (s)");
 			const crater_t crater();
-			void to_screen(std::string prefix="");
-            contents_t(std::string& filename_with_path, const std::string& contents_string="");
+            void to_screen(std::string prefix="");
+//            contents_t(std::string& filename_with_path, const std::string& contents_string="");
+            contents_t(name_t& dsims_filename, const std::string& contents_string="");
 		};	
         dsims_t(std::string& filename, const std::string& contents_string="");
 		dsims_t(files_::dsims_t::name_t& name_s, files_::dsims_t::contents_t& contents_s);

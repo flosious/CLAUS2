@@ -37,6 +37,7 @@
 #include "fit_functions.hpp"
 #include "calc.hpp"
 #include "data_collector.hpp"
+#include "calc.hpp"
 
 
 /* FORWARD DECLARATIONS*/
@@ -113,8 +114,20 @@ public:
 	private:
         class_logger_t class_logger;
 	protected:
+        class references_t
+        {
+        private:
+            class_logger_t class_logger;
+            sims_t& MG;
+        public:
+            references_t(sims_t& MG_s);
+            std::vector<measurements_::sims_t*> all() const;
+            std::vector<measurements_::sims_t*> implants() const;
+        };
 		class calc_t
 		{
+        private:
+            class_logger_t class_logger;
 		protected:
 			///calculates the ratios of intensities of 2 (matrix)clusters and their corresponding elemental substance_amount
 			class Crel_to_Irel_c
@@ -158,7 +171,9 @@ public:
 				calc_t& copy_to_same_matrices(bool overwrite = false);
 				///uses SR from known matrices like Si and SiGe30 to interpolate to unknown matrices like SiGe24
 				calc_t& interpolate_from_known_sample_matrices(std::vector<unsigned int> rank={1,1}, bool overwrite = false);
-			};
+                ///NOT TESTED YET normalizes given SR to crater_depth
+                calc_t& normalize_to_crater_depth();
+            };
 			///sputter_depth
 			class SD_c
 			{
@@ -190,8 +205,10 @@ public:
 				calc_t& from_ref_fit_(bool overwrite = false);
 				calc_t& from_RSF_mean_ref(bool overwrite = false);
 				calc_t& from_SF_trimmed_mean_ref(bool overwrite = false);
-				calc_t& from_RSF_pbp_ref(bool overwrite = false);
-				calc_t& from_RSF_median_ref(bool overwrite = false);
+                calc_t& from_RSF_pbp_ref(bool overwrite = false);
+                calc_t& from_RSF_median_ref(bool overwrite = false);
+                /// 0 < percentile < 1
+                calc_t& from_RSF_percentile_ref(double percentile_s, bool overwrite = false);
 			};
 			///relative_sensitivity_factor
 			class RSF_c
@@ -207,8 +224,10 @@ public:
 				RSF_c(calc_t& calc);
 				calc_t& from_SF_mean_ref(bool overwrite = false);
 				calc_t& from_SF_trimmed_mean_ref(bool overwrite = false);
-				calc_t& from_SF_pbp_ref(bool overwrite = false);
+                calc_t& from_SF_pbp_ref(bool overwrite = false);
 				calc_t& from_SF_median_ref(bool overwrite = false);
+                /// 0 < percentile < 1
+                calc_t& from_SF_percentile_ref(double percentile_s, bool overwrite = false);
 // 				calc_t& polynom_interpolation_from_matrix(bool overwrite = false, const int max_rank=2);
 				///sets RSF for known matrices
 				calc_t& copy_to_same_matrices(bool overwrite=false);
@@ -274,6 +293,8 @@ public:
 			RSF_c RSFs;
 			matrix_c matrices;
 			concentration_c concentrations;
+            ///fully automatic calculation
+            void full_auto();
 		};
 		///check if all measurements belong in this group
 		void check();
@@ -338,7 +359,8 @@ public:
 		quantity::table_t RSFs();
 		quantity::table_t SRs();
 		quantity::table_t measurement_names();
-	};
+        references_t references();
+    }; //sims_t
 
 	class dsims_t: public sims_t
 	{

@@ -207,6 +207,8 @@ public:
                 bool found_group=false;
                 for (auto& MG : this->mgroups)
                 {
+                    if (MG.name()!=MG.to_string_short())
+                        continue;
                     if (!ignore_olcdb && (M.olcdb != MG.olcdb))
                     {
                         logger.debug(__func__,MG.to_string_short()).if_statement("M.olcdb("+M.to_string_short()+")",M.olcdb,"!=","MG.olcdb",MG.olcdb);

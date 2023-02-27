@@ -73,7 +73,7 @@ public:
 		std::vector<unsigned int> log10_bins() const;
 	};
 	static gsl_vector* get_gsl_vec(const std::vector<double>& Y);
-	static std::vector<double> get_gsl_vec(gsl_vector* Y);
+    static std::vector<double> get_gsl_vec(const gsl_vector* Y);
 	///breaks data equally into number_of_bins and returns a std::vector of the bin position and the number of elements in that bin
 // 	static std::vector<unsigned int> histogram_t(const std::vector<double>& data, unsigned int number_of_bins);
 	/*TEST*/
@@ -145,7 +145,7 @@ public:
     static std::vector<double> gaussian_filter(std::vector<double> Y, int window_size, double alpha);
     static std::vector<std::vector<double>> get_local_minima_XY(std::vector<double> X, std::vector<double> Y);
     static std::vector<double> impulse_filter(std::vector<double> Y, int window_size, float scale_factor);
-    static std::vector<double> gsl_vec_to_std_vec(gsl_vector ** vec);
+    static std::vector<double> gsl_vec_to_std_vec(const gsl_vector * vec);
     static std::vector<double> fit_poly_XY_transposed(std::vector<std::vector<double>> XY, int poly_grad);
     static std::vector<double> get_poly_Y(std::vector<double> parameters, std::vector<double> X);
     static std::vector<double> derive_vec(std::vector<double> X, std::vector<double> Y);
@@ -197,6 +197,9 @@ public:
     static std::vector<double> interpolate_data_XY(const std::map<double,double>& data_XY,const std::vector<double>& X);
     /// akima splines; returns new_Y, given new_X and the data_x and data_y map
     static std::vector<double> interpolate_data_XY(std::vector<double> data_X, std::vector<double> data_Y,const std::vector<double>& new_X);
+    static std::vector<double> interpolate_and_extrapolate_data_XY(std::vector<double> data_X, std::vector<double> data_Y,const std::vector<double>& new_X, double extrapolation_value=0);
+    ///all values with both vectors have in common; X and Y have to be already sorted!
+    static std::vector<double> least_common_vector(std::vector<double> X, std::vector<double> Y);
 
 	///B-spline smoothing
 	static std::vector<double> bspline_smooth(const std::vector<double>& Y, std::vector<double> Xdata={}, unsigned int breakpoints = 0, const size_t spline_order = 4);

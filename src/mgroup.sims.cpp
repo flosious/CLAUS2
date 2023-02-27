@@ -560,3 +560,11 @@ quantity::table_t mgroups_::sims_t::measurement_names()
 	table.add(col);
 	return table;
 }
+
+mgroups_::sims_t::references_t mgroups_::sims_t::references()
+{
+    return mgroups_::sims_t::references_t(*this);
+}
+
+
+

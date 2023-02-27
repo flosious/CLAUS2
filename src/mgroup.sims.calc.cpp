@@ -24,7 +24,7 @@ mgroups_::sims_t::calc_t::~calc_t()
 }
 
 mgroups_::sims_t::calc_t::calc_t(sims_t& MG) :
-    MG(MG), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this), measurements(MG.measurements())
+    MG(MG), SRs(*this), SDs(*this), SFs(*this), RSFs(*this), matrices(*this), concentrations(*this), measurements(MG.measurements()), log_c
 {
 }
 
@@ -132,6 +132,15 @@ mgroups_::sims_t::calc_t & mgroups_::sims_t::calc_t::SR_c::from_implant_max(bool
 		C.SR.from_implant_max();
 	}
 	return calc;
+}
+
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::normalize_to_crater_depth()
+{
+    for (auto& M : measurements)
+    {
+        M->calc().SR.normalize_to_crater_depth();
+    }
+    return calc;
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SR_c::copy_to_same_matrices(bool overwrite)
@@ -251,6 +260,17 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_median_ref(bo
 		}
 	}
 	return calc;
+}
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_percentile_ref(double percentile_s, bool overwrite)
+{
+    for (auto& rsf_to_ref : RSFs_to_ref_intensities())
+    {
+        if (overwrite || !rsf_to_ref.first->SF.is_set())
+        {
+            rsf_to_ref.first->SF = quantity::SF_t (rsf_to_ref.first->RSF / rsf_to_ref.second.percentile(percentile_s)); // this is the median of a sum; not the sum of the medians!
+        }
+    }
+    return calc;
 }
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::SF_c::from_RSF_pbp_ref(bool overwrite)
 {
@@ -388,26 +408,40 @@ mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_mean_ref(bool
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_median_ref(bool overwrite)
 {
     log_f;
-	for (auto& sf_to_ref : clusters_to_ref_intensities())
+    for (auto& cluster_to_ref : clusters_to_ref_intensities())
 	{
-		if (overwrite || !sf_to_ref.first->RSF.is_set())
+        if (overwrite || !cluster_to_ref.first->RSF.is_set())
         {
-			sf_to_ref.first->RSF = cluster_t::RSF_t (sf_to_ref.first->SF * sf_to_ref.second.median()).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
-            logger.info(sf_to_ref.first->to_string()+":rsf").value(sf_to_ref.first->RSF.to_string_short(),10,sf_to_ref.first->RSF.to_string_detailed());
+            cluster_to_ref.first->RSF = cluster_t::RSF_t (cluster_to_ref.first->SF * cluster_to_ref.second.median()).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
+            logger.info(cluster_to_ref.first->to_string()+":rsf").value(cluster_to_ref.first->RSF.to_string_short(),10,cluster_to_ref.first->RSF.to_string_detailed());
         }
 	}
 	return calc;
+}
+mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_percentile_ref(double percentile_s, bool overwrite )
+{
+    log_f;
+    for (auto& cluster_to_ref : clusters_to_ref_intensities())
+    {
+        if (overwrite || !cluster_to_ref.first->RSF.is_set())
+        {
+            cluster_to_ref.first->RSF = cluster_t::RSF_t (cluster_to_ref.first->SF * cluster_to_ref.second.percentile(percentile_s)).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
+//            sf_to_ref.first->RSF = cluster_t::RSF_t (sf_to_ref.first->SF * sf_to_ref.second.median()).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
+            logger.info(cluster_to_ref.first->to_string()+":rsf").value(cluster_to_ref.first->RSF.to_string_short(),10,cluster_to_ref.first->RSF.to_string_detailed());
+        }
+    }
+    return calc;
 }
 
 mgroups_::sims_t::calc_t& mgroups_::sims_t::calc_t::RSF_c::from_SF_pbp_ref(bool overwrite)
 {
     log_f;
-	for (auto& sf_to_ref : clusters_to_ref_intensities())
+    for (auto& cluster_to_ref : clusters_to_ref_intensities())
 	{
-		if (overwrite || !sf_to_ref.first->RSF.is_set())
+        if (overwrite || !cluster_to_ref.first->RSF.is_set())
         {
-			sf_to_ref.first->RSF = cluster_t::RSF_t (sf_to_ref.first->SF * sf_to_ref.second).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
-            logger.info(sf_to_ref.first->to_string()+":rsf").value(sf_to_ref.first->RSF.to_string_short(),10,sf_to_ref.first->RSF.to_string_detailed());
+            cluster_to_ref.first->RSF = cluster_t::RSF_t (cluster_to_ref.first->SF * cluster_to_ref.second).change_unit(units::derived::atoms_per_ccm); // this is the median of a sum; not the sum of the medians!
+            logger.info(cluster_to_ref.first->to_string()+":rsf").value(cluster_to_ref.first->RSF.to_string_short(),10,cluster_to_ref.first->RSF.to_string_detailed());
         }
 	}
 	return calc;
@@ -777,3 +811,92 @@ const std::pair<quantity::quantity_t,quantity::quantity_t> mgroups_::sims_t::cal
 // 	return polynom_result;
 // }
 
+void mgroups_::sims_t::calc_t::full_auto()
+{
+    log_f;
+    if (measurements.size()==0)
+        return;
+    MG.set_reference_isotopes_in_measurements();
+    MG.set_natural_abundances_in_matrix_clusters();
+    auto calc = MG.calc();
+
+    calc.matrices.median_const_from_reference_isotopes();
+
+    //just get SR from (known) reference samples + calc SD
+    const auto references = MG.references().implants();
+    for (auto& ref : references)
+    {
+        //SR
+        ref->calc().SR.from_crater_depths().SR.from_implant_max();
+        //SD
+        ref->calc().SD.from_SR();
+        //SF
+        ref->calc().SF.from_db_dose().SF.from_db_max();
+        //RSF?
+//        ref->calc().RSF.from_SF_percentile_ref(0.25);
+    }
+
+    //calc matrix RSFs + concentrations
+    if (MG.matrix_clusters().size()>1)
+    {
+        ::calc_t::sims_t::matrix_t mat(MG.matrix_isotopes(),MG.measurements_copy());
+        auto RSFs = mat.RSFs().add_natural_abundances().remove_RSFs_below_gof_treshold(0.2).symmetrical_RSFs();
+
+        for (auto& M:MG.measurements())
+        {
+            ::calc_t::sims_t::matrix_t::concentration_c Concentration(RSFs,*M);
+            const auto M_with_Cs = Concentration.concentrations_by_RSFs().concentrations_by_filling_up_all_concentrations_to_1().measurement();
+            ///copy the results - this is really ugly
+            for (auto C : M_with_Cs.clusters)
+            {
+                if (!C.concentration.is_set())
+                    continue;
+                *M->cluster(C) = C;
+            }
+        }
+    }
+
+    // SR + SD
+    calc.SRs.copy_to_same_matrices().SRs.interpolate_from_known_sample_matrices({1,1}).SRs.normalize_to_crater_depth().SDs.from_SR();
+
+    // RSFs from known samples
+    calc.SFs.from_implant_dose().SFs.from_implant_max().RSFs.from_SF_percentile_ref(0.25).RSFs.copy_to_same_matrices().RSFs.interpolate_from_known_sample_matrices();
+
+    // SFs of unknown samples
+    logger.info("calculation Method").signal("pbp");
+    calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
+
+    // i need this now, sorry; think about class_object->const / pbp / others
+//    if (ui->check_pbp->isChecked())
+//    {
+//        logger.info("calculation Method").signal("pbp");
+//        calc.SFs.from_RSF_pbp_ref().SFs.from_implant_max(); //pbp
+//    }
+//    else if (ui->check_percentile->isChecked())
+//    {
+//        logger.info("calculation Method").signal("percentile0.1");
+//        calc.SFs.from_RSF_percentile_ref(0.1).SFs.from_implant_max(); //median
+//    }
+//    else
+//    {
+//        logger.info("calculation Method").signal("median");
+//        calc.SFs.from_RSF_median_ref().SFs.from_implant_max(); //median
+//    }
+    // C
+    calc.concentrations.from_SF();
+
+    /*change numerical sputter_depth resolution*/
+    for (auto& M : MG.measurements())
+    {
+        if (!M->crater.sputter_depth.is_set())
+            continue;
+        auto new_SD_res = M->crater.sputter_depth.change_resolution(M->crater.sputter_depth.min().ceil_().data().front(),0.1,M->crater.sputter_depth.max().floor_().data().front());
+        if (new_SD_res.is_set())
+        {
+            if (M->change_sputter_depth_resolution(new_SD_res))
+                logger.info("new_SD_res").value(new_SD_res.resolution().to_string_short());
+            else
+                logger.info("new_SD_res").value("could not change res to: " + new_SD_res.resolution().to_string_short());
+        }
+    }
+}

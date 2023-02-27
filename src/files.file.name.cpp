@@ -229,25 +229,26 @@ void files_::file_t::name_t::parse_filename_parts()
 {
 	if (parsed_filename_parts) return;
 //	std::vector<std::string> filename_parts = tools::str::get_strings_between_delimiter(filename(),delimiter);
-
+    std::vector<std::string> still_not_parsed_filename_parts_p;
+    still_not_parsed_filename_parts_p.reserve(not_parseable_filename_parts_p.size());
     for (auto filename_part:not_parseable_filename_parts_p)
 	{
 //        std::cout << std::endl << filename_part << std::endl;
 		// parse everything just once (except crater depths)
 		// THE ORDER IS VERY IMPORTANT
 		if (olcdb_p==-1) if(parse_olcdb(filename_part)) continue;
-		if (lot_p=="") if(parse_lot(filename_part)) continue;
-
-		if (wafer_p==-1) if(parse_wafer(filename_part)) continue;
+        if (repetition_p=="") if(parse_repetitor(filename_part)) continue;
+        if (group_p=="") if(parse_group(filename_part)) continue;
+        if (wafer_p==-1) if(parse_wafer(filename_part)) continue;
 		if (chip_x_p==-1)	if(parse_chip(filename_part)) continue;
-		if (monitor_p=="") if(parse_monitor(filename_part)) continue;
-		if (group_p=="") if(parse_group(filename_part)) continue;
-		if (repetition_p=="") if(parse_repetitor(filename_part)) continue;			
+        if (monitor_p=="") if(parse_monitor(filename_part)) continue;
+        if (lot_p=="") if(parse_lot(filename_part)) continue;
+        still_not_parsed_filename_parts_p.push_back(filename_part);
 	}
+    not_parseable_filename_parts_p = still_not_parsed_filename_parts_p;
     if (lot_p=="" && not_parseable_filename_parts_p.size()>0)
     {
         lot_p = not_parseable_filename_parts_p.at(0);
-
     }
 	parsed_filename_parts = true;
 }

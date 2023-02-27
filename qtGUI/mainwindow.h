@@ -79,6 +79,9 @@ private slots:
 
 
     void on_test_button_clicked();
+    void on_check_percentile_stateChanged(int arg1);
+
+    void on_check_fullAuto_clicked();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;
