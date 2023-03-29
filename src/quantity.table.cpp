@@ -434,6 +434,12 @@ quantity::map_t quantity::table_t::get_map(const column_t& col_X, const column_t
 	const auto col_X_in_table = T.get_col(col_X);
 	const auto col_Y_in_table = T.get_col(col_Y);
 
+//    std::cout << col_X_in_table->header().to_string() << std::endl;
+    if (col_X_in_table==nullptr || col_Y_in_table==nullptr)
+    {
+        return {};
+    }
+
 	auto q_X( col_X_in_table->header());
 	auto q_Y( col_Y_in_table->header());
 	
@@ -447,7 +453,7 @@ quantity::map_t quantity::table_t::get_map(const column_t& col_X, const column_t
 
 quantity::map_t quantity::table_t::get_map() const
 {
-	if (columns().size()>1)
+    if (columns().size()>1)
 		return get_map(0,1);
     //logger::debug(7,"quantity::table_t::get_map()","columns().size()<2");
 	return {};
